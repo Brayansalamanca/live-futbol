@@ -6,9 +6,8 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECRET_KEY para desarrollo y producción
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-z$!j#aip6tr)!7=l#1&=_*=jc4s*2@tve06#i&hwg&#p5na7z2')
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+SECRET_KEY = 'django-insecure-z$!j#aip6tr)!7=l#1&=_*=jc4s*2@tve06#i&hwg&#p5na7z2'
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', '*']
 
@@ -33,7 +32,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Agregado para producción
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -61,17 +60,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'djangocrud.wsgi.application'
 
-# Configuración de base de datos para desarrollo y producción
-if os.environ.get('DATABASE_URL'):
-    # Producción (Render con PostgreSQL)
+# CONFIGURACIÓN DE BASE DE DATOS - MYSQL LOCAL / POSTGRESQL EN RENDER
+if os.environ.get('RENDER'):
+    # PRODUCCIÓN (RENDER) - PostgreSQL
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
             conn_max_age=600
         )
     }
+    DEBUG = False
 else:
-    # Desarrollo (MySQL local)
+    # DESARROLLO (LOCAL) - MySQL con XAMPP
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -82,6 +82,7 @@ else:
             'PORT': '3306',
         }
     }
+    DEBUG = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -97,10 +98,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'tasks' / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Para producción
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Configuración de WhiteNoise para archivos estáticos
-if not DEBUG:
+if os.environ.get('RENDER'):
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 LOGIN_REDIRECT_URL = 'home'
@@ -129,11 +129,5 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://*.onrender.com"  # Agregado para Render
+    "https://*.onrender.com"
 ]
-
-# Configuración específica para Render
-if 'RENDER' in os.environ:
-    SECRET_KEY = "+4jvqu7ya#fql6065x%uf+h$7lo=76i*nxve$=r!_yqy8=ghm+"
-    DEBUG = False
-    ALLOWED_HOSTS = ['django2.onrender.com', '.onrender.com', '*']
