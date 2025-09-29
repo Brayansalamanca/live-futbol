@@ -1,0 +1,18 @@
+﻿services:
+  - type: web
+    name: live-futbol-django
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn djangocrud.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: live-futbol-db
+          property: connectionString
+      - key: SECRET_KEY
+        value: "+4jvqu7ya#fql6065x%uf+h=76i*nxve$=r!_yqy8=ghm+"
+      - key: PYTHON_VERSION
+        value: "3.10.8"
+      - key: DJANGO_SETTINGS_MODULE
+        value: "djangocrud.settings_prod"
