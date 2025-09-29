@@ -1,0 +1,545 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <style>
+    .video-section {
+      display: none;
+      background-color: #1e1e1e;
+      padding: 30px;
+      border-radius: 15px;
+      margin-top: 30px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .video-section h2 {
+      color: #ffffff;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    iframe {
+      width: 100%;
+      height: 315px;
+      border: none;
+      margin-bottom: 25px;
+      border-radius: 12px;
+    }
+
+    /* Quiz */
+    .quiz {
+      background: #222;
+      padding: 25px;
+      border-radius: 12px;
+      margin-top: 30px;
+      color: white;
+      font-size: 18px;
+    }
+    .quiz-question {
+      margin-bottom: 25px;
+      padding: 15px;
+      background: #2d2d2d;
+      border-radius: 10px;
+    }
+    .quiz-question h3 {
+      margin-bottom: 15px;
+      font-size: 20px;
+      color: #d01515;
+    }
+    .quiz-option {
+      display: block;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #3a3a3a;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .quiz-option:hover {
+      background: #505050;
+    }
+    .quiz-option input {
+      margin-right: 10px;
+    }
+    .quiz button {
+      margin-top: 15px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .quiz button:hover {
+      background-color: #45a049;
+    }
+    .quiz-result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #333;
+      font-size: 18px;
+      text-align: center;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #ddd;
+      text-align: left;
+      background: #1a1a1a;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .boton-posicion {
+      background-color: #1a1a1a;
+      color: white;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 15px 25px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .boton-posicion:hover {
+      background-color: #2e2e2e;
+    }
+    
+    /* Ajustes mínimos para alinear correctamente preguntas y opciones */
+    .quiz-question {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .quiz-question h3 {
+      width: 100%;
+      margin: 0;
+      text-align: left;
+      font-size: 1.05rem;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 10px;
+    }
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+    }
+    .quiz-option .opt-text {
+      flex: 1 1 auto;
+      text-align: left;
+    }
+    .explanation {
+      text-align: left;
+    }
+    
+    /* Nuevos estilos para celebración y segunda fase */
+    .celebration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      flex-direction: column;
+    }
+    .celebration-content {
+      text-align: center;
+      color: white;
+      animation: zoomIn 0.5s ease;
+    }
+    .celebration h2 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #4caf50;
+      text-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+    }
+    .celebration p {
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+    }
+    .celebration button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .celebration button:hover {
+      background: #45a049;
+      transform: scale(1.05);
+    }
+    
+    /* Animaciones */
+    @keyframes zoomIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes confetti {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(1000px) rotate(360deg); opacity: 0; }
+    }
+    
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #f00;
+      opacity: 0;
+    }
+    
+    /* Estilos para segunda fase */
+    .segunda-fase {
+      display: none;
+      margin-top: 30px;
+      padding: 20px;
+      background: #2d2d2d;
+      border-radius: 10px;
+    }
+    .segunda-fase h3 {
+      color: #4caf50;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
+
+  <h1 style="text-align:center; margin-bottom:30px;">Sección de videos por posición</h1>
+
+  <div style="text-align:center;">
+    <button class="boton-posicion" onclick="toggleSeccion('portero')">Portero</button>
+    <button class="boton-posicion" onclick="toggleSeccion('defensa')">Defensa</button>
+    <button class="boton-posicion" onclick="toggleSeccion('mediocampista')">Mediocampista</button>
+    <button class="boton-posicion" onclick="toggleSeccion('extremo')">Extremo</button>
+    <button class="boton-posicion" onclick="toggleSeccion('delantero')">Delantero</button>
+  </div>
+
+  <!-- PORTERO -->
+  <div id="seccion-portero" class="video-section">
+    <h2>Entrenamiento para Portero</h2>
+    <div class="videos-fase-1">
+      <iframe src="https://www.youtube.com/embed/hha48gskFKo" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/TviVDUBTQVU" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/PY1oJFuM5qU" allowfullscreen></iframe>
+    </div>
+    <div id="quiz-portero" class="quiz"></div>
+    <div id="segunda-fase-portero" class="segunda-fase">
+      <h3>¡Fase Avanzada! Más entrenamiento para Portero</h3>
+      <div class="videos-fase-2"></div>
+      <div id="quiz-fase2-portero" class="quiz"></div>
+    </div>
+  </div>
+
+  <!-- DEFENSA -->
+  <div id="seccion-defensa" class="video-section">
+    <h2>Entrenamiento para Defensa</h2>
+    <div class="videos-fase-1">
+      <iframe src="https://www.youtube.com/embed/WuUlP8Z91WM" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/2b19RSXed0c" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/4emfi2L2A7k" allowfullscreen></iframe>
+    </div>
+    <div id="quiz-defensa" class="quiz"></div>
+    <div id="segunda-fase-defensa" class="segunda-fase">
+      <h3>¡Fase Avanzada! Más entrenamiento para Defensa</h3>
+      <div class="videos-fase-2"></div>
+      <div id="quiz-fase2-defensa" class="quiz"></div>
+    </div>
+  </div>
+
+  <!-- MEDIOCAMPISTA -->
+  <div id="seccion-mediocampista" class="video-section">
+    <h2>Entrenamiento para Mediocampista</h2>
+    <div class="videos-fase-1">
+      <iframe src="https://www.youtube.com/embed/C7Icku--MhU" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/4Seb9DY7xmE" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/FS1LrWzSSmQ" allowfullscreen></iframe>
+    </div>
+    <div id="quiz-mediocampista" class="quiz"></div>
+    <div id="segunda-fase-mediocampista" class="segunda-fase">
+      <h3>¡Fase Avanzada! Más entrenamiento para Mediocampista</h3>
+      <div class="videos-fase-2"></div>
+      <div id="quiz-fase2-mediocampista" class="quiz"></div>
+    </div>
+  </div>
+
+  <!-- EXTREMO -->
+  <div id="seccion-extremo" class="video-section">
+    <h2>Entrenamiento para Extremo</h2>
+    <div class="videos-fase-1">
+      <iframe src="https://www.youtube.com/embed/O_pN6wxhN0U" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/pcdaXSUnSeg" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/7GDPstpwjIU" allowfullscreen></iframe>
+    </div>
+    <div id="quiz-extremo" class="quiz"></div>
+    <div id="segunda-fase-extremo" class="segunda-fase">
+      <h3>¡Fase Avanzada! Más entrenamiento para Extremo</h3>
+      <div class="videos-fase-2"></div>
+      <div id="quiz-fase2-extremo" class="quiz"></div>
+    </div>
+  </div>
+
+  <!-- DELANTERO -->
+  <div id="seccion-delantero" class="video-section">
+    <h2>Entrenamiento para Delantero</h2>
+    <div class="videos-fase-1">
+      <iframe src="https://www.youtube.com/embed/ZPZ0B1xK4tQ" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/Kj2_9ekfa28" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/4Seb9DY7xmE" allowfullscreen></iframe>
+    </div>
+    <div id="quiz-delantero" class="quiz"></div>
+    <div id="segunda-fase-delantero" class="segunda-fase">
+      <h3>¡Fase Avanzada! Más entrenamiento para Delantero</h3>
+      <div class="videos-fase-2"></div>
+      <div id="quiz-fase2-delantero" class="quiz"></div>
+    </div>
+  </div>
+
+  <!-- Celebración -->
+  <div id="celebration" class="celebration">
+    <div class="celebration-content">
+      <h2>¡Felicidades!</h2>
+      <p>Has completado la primera fase. Prepárate para el siguiente nivel.</p>
+      <button onclick="iniciarSegundaFase()">Continuar a la Fase Avanzada</button>
+    </div>
+  </div>
+
+  <script>
+    const quizzes = {
+      portero: [
+        { pregunta: "¿Qué ejercicio ayuda a mejorar los reflejos?", opciones: ["Saltos laterales rápidos", "Correr largas distancias", "Ejercicios de pesas"], correcta: 0, explicacion: "Los saltos laterales entrenan la reacción rápida para atajadas." },
+        { pregunta: "¿Qué debe usar principalmente el portero para atrapar el balón?", opciones: ["Las manos", "Las rodillas", "Los hombros"], correcta: 0, explicacion: "El uso de las manos con buena técnica asegura el balón." },
+        { pregunta: "¿Qué aspecto es vital para organizar la defensa?", opciones: ["La comunicación", "Correr más que los delanteros", "Entrenar tiros libres"], correcta: 0, explicacion: "El portero debe hablar y ordenar a sus defensores." },
+        { pregunta: "¿Qué valor caracteriza a un buen portero?", opciones: ["Liderazgo y concentración", "Marcar goles", "Velocidad máxima"], correcta: 0, explicacion: "Un portero debe mantener liderazgo y concentración siempre." },
+        { pregunta: "¿Qué entrenamiento mejora los saques largos?", opciones: ["Lanzamientos repetidos con precisión", "Ejercicios de flexibilidad", "Maratones"], correcta: 0, explicacion: "La práctica repetida de lanzamientos mejora saque de meta y despejes." },
+        { pregunta: "¿Cuál es la principal función del portero?", opciones: ["Evitar goles y organizar la defensa", "Marcar goles", "Jugar de delantero"], correcta: 0, explicacion: "El portero protege la portería y guía la línea defensiva." }
+      ],
+      defensa: [
+        { pregunta: "¿Qué tipo de marcaje es más usado en defensa?", opciones: ["Hombre a hombre", "En zona", "Al azar"], correcta: 1, explicacion: "El marcaje en zona permite cubrir espacios de manera organizada." },
+        { pregunta: "¿Qué aspecto físico debe dominar un defensa?", opciones: ["Fuerza y anticipación", "Tiros al arco", "Regates"], correcta: 0, explicacion: "El defensa necesita fuerza y anticipación para frenar rivales." },
+        { pregunta: "¿Qué se entrena en cambios de dirección?", opciones: ["Velocidad defensiva", "Definición de gol", "Resistencia"], correcta: 0, explicacion: "Cambiar de dirección rápidamente es esencial en la marca." },
+        { pregunta: "¿Qué valor caracteriza a un defensa?", opciones: ["Disciplina táctica", "Improvisación", "Velocidad pura"], correcta: 0, explicacion: "Un buen defensa mantiene disciplina táctica y orden." },
+        { pregunta: "¿Cuál es el rol principal del defensa?", opciones: ["Interrumpir ataques y dar salida limpia", "Marcar goles", "Correr en medio campo"], correcta: 0, explicacion: "El defensa frena al rival y construye desde atrás." },
+        { pregunta: "¿Qué entrenamiento es clave para defensores?", opciones: ["1v1 defensivo", "Tiros libres", "Penales"], correcta: 0, explicacion: "El trabajo 1v1 defensivo desarrolla técnica para robar balones." }
+      ],
+      mediocampista: [
+        { pregunta: "¿Qué rol cumple el mediocampista?", opciones: ["Conectar defensa y ataque", "Atajar goles", "Correr en la banda"], correcta: 0, explicacion: "El mediocampista une líneas y organiza el juego." },
+        { pregunta: "¿Qué habilidad técnica es clave?", opciones: ["Pases y control", "Remates de cabeza", "Atajadas"], correcta: 0, explicacion: "Los pases y el control definen el ritmo del mediocampo." },
+        { pregunta: "¿Qué aspecto mental se entrena más?", opciones: ["Toma de decisiones", "Velocidad", "Definición"], correcta: 0, explicacion: "Decidir rápido bajo presión es esencial en mediocampo." },
+        { pregunta: "¿Qué valor caracteriza al mediocampista?", opciones: ["Visión de juego", "Definición", "Reflejos"], correcta: 0, explicacion: "El mediocampista debe leer y anticipar las jugadas." },
+        { pregunta: "¿Qué ejercicio se repite en los videos?", opciones: ["Dominio de balón y pases largos", "Saques de esquina", "Penales"], correcta: 0, explicacion: "Los ejercicios de control y pases son claves para esta posición." },
+        { pregunta: "¿Cuál es su principal función?", opciones: ["Organizar y distribuir el juego", "Atajar goles", "Correr en defensa"], correcta: 0, explicacion: "El mediocampista da equilibrio y organiza al equipo." }
+      ],
+      extremo: [
+        { pregunta: "¿Qué característica define a un extremo?", opciones: ["Velocidad y desequilibrio", "Atajar goles", "Fuerza bruta"], correcta: 0, explicacion: "El extremo debe superar rivales con velocidad." },
+        { pregunta: "¿Qué ejercicio mejora su agilidad?", opciones: ["Escalera de coordinación", "Maratón", "Entradas defensivas"], correcta: 0, explicacion: "La escalera desarrolla cambios rápidos de dirección." },
+        { pregunta: "¿Qué técnica ofensiva es básica?", opciones: ["1v1 ofensivo", "Tiros libres", "Defensa zonal"], correcta: 0, explicacion: "El extremo debe ganar duelos individuales en banda." },
+        { pregunta: "¿Qué valor caracteriza al extremo?", opciones: ["Capacidad de abrir la cancha", "Marcar goles siempre", "Atajar"], correcta: 0, explicacion: "El extremo ensancha el campo para generar espacios." },
+        { pregunta: "¿Qué entrenamiento complementa al extremo?", opciones: ["Saltos laterales y sprints curvos", "Penales", "Juego aéreo"], correcta: 0, explicacion: "Estos ejercicios aumentan velocidad y agilidad." },
+        { pregunta: "¿Cuál es la función principal del extremo?", opciones: ["Generar peligro por las bandas", "Atajar goles", "Jugar de central"], correcta: 0, explicacion: "El extremo rompe líneas por el costado." }
+      ],
+      delantero: [
+        { pregunta: "¿Qué característica principal tiene el delantero?", opciones: ["Definición y gol", "Atajar", "Defender"], correcta: 0, explicacion: "El delantero debe convertir las ocasiones en goles." },
+        { pregunta: "¿Qué ejercicio mejora la definición?", opciones: ["Tiros al arco repetidos", "Flexiones", "Sprints largos"], correcta: 0, explicacion: "Repetir tiros con ambos pies mejora precisión y confianza." },
+        { pregunta: "¿Qué aspecto físico debe entrenar?", opciones: ["Explosividad y potencia", "Flexibilidad extrema", "Resistencia lenta"], correcta: 0, explicacion: "La explosividad ayuda a ganar duelos y definir rápido." },
+        { pregunta: "¿Qué valor caracteriza a un delantero?", opciones: ["Persistencia", "Pasividad", "Lentitud"], correcta: 0, explicacion: "El delantero nunca debe rendirse, siempre busca el gol." },
+        { pregunta: "¿Cuál es la principal función del delantero?", opciones: ["Marcar goles y generar peligro", "Defender", "Atajar"], correcta: 0, explicacion: "Su rol es finalizar jugadas y dar ventaja al equipo." },
+        { pregunta: "¿Qué hábito mejora su efectividad?", opciones: ["Entrenar remates bajo presión", "Correr maratones", "Jugar de defensa"], correcta: 0, explicacion: "Practicar bajo presión simula partidos reales." }
+      ]
+    };
+
+    // Videos para la segunda fase
+    const videosFase2 = {
+      portero: [
+        "https://www.youtube.com/embed/abc123",
+        "https://www.youtube.com/embed/def456", 
+        "https://www.youtube.com/embed/ghi789"
+      ],
+      defensa: [
+        "https://www.youtube.com/embed/jkl012",
+        "https://www.youtube.com/embed/mno345",
+        "https://www.youtube.com/embed/pqr678"
+      ],
+      mediocampista: [
+        "https://www.youtube.com/embed/stu901",
+        "https://www.youtube.com/embed/vwx234",
+        "https://www.youtube.com/embed/yzab56"
+      ],
+      extremo: [
+        "https://www.youtube.com/embed/cde789",
+        "https://www.youtube.com/embed/fgh012",
+        "https://www.youtube.com/embed/ijk345"
+      ],
+      delantero: [
+        "https://www.youtube.com/embed/lmn678",
+        "https://www.youtube.com/embed/opq901",
+        "https://www.youtube.com/embed/rst234"
+      ]
+    };
+
+    let posicionActual = '';
+    let preguntasFase1 = [];
+    let preguntasFase2 = [];
+
+    function toggleSeccion(pos) {
+      document.querySelectorAll('.video-section').forEach(sec => sec.style.display = 'none');
+      const s = document.getElementById('seccion-' + pos);
+      if (s) {
+        s.style.display = 'block';
+        posicionActual = pos;
+        // Reiniciar segunda fase
+        document.getElementById('segunda-fase-' + pos).style.display = 'none';
+        document.querySelector('#seccion-' + pos + ' .videos-fase-1').style.display = 'block';
+        renderQuiz(pos, 'quiz-' + pos, 1);
+      }
+    }
+
+    function renderQuiz(tipo, containerId, fase) {
+      const todasPreguntas = quizzes[tipo];
+      let preguntasSeleccionadas = [];
+      
+      if (fase === 1) {
+        // Fase 1: 4 preguntas aleatorias
+        preguntasSeleccionadas = [...todasPreguntas].sort(() => 0.5 - Math.random()).slice(0, 4);
+        preguntasFase1 = preguntasSeleccionadas;
+      } else {
+        // Fase 2: 4 preguntas diferentes (excluyendo las de la fase 1)
+        const preguntasRestantes = todasPreguntas.filter(p => 
+          !preguntasFase1.some(p1 => p1.pregunta === p.pregunta)
+        );
+        preguntasSeleccionadas = [...preguntasRestantes].sort(() => 0.5 - Math.random()).slice(0, 4);
+        preguntasFase2 = preguntasSeleccionadas;
+      }
+
+      let html = "";
+      preguntasSeleccionadas.forEach((q, i) => {
+        html += `<div class="quiz-question">
+          <h3>${q.pregunta}</h3>
+          <div class="quiz-options">
+            ${q.opciones.map((opt, j) => `
+              <label class="quiz-option">
+                <input type="radio" name="q${i}" value="${j}">
+                <span class="opt-text">${opt}</span>
+              </label>`).join("")}
+          </div>
+          <div class="explanation" id="exp-${containerId}-${i}" style="display:none;"></div>
+        </div>`;
+      });
+
+      html += `<button onclick="checkAnswers('${tipo}', '${containerId}', ${fase})">Enviar Respuestas</button>
+               <div id="result-${containerId}" class="quiz-result"></div>`;
+
+      document.getElementById(containerId).innerHTML = html;
+    }
+
+    function checkAnswers(tipo, containerId, fase) {
+      const preguntas = (fase === 1) ? preguntasFase1 : preguntasFase2;
+      let correctas = 0;
+      let todasRespondidas = true;
+
+      preguntas.forEach((q, i) => {
+        const answer = document.querySelector(`input[name="q${i}"]:checked`);
+        const expDiv = document.getElementById(`exp-${containerId}-${i}`);
+        
+        if (!answer) {
+          todasRespondidas = false;
+          return;
+        }
+        
+        if (parseInt(answer.value) === q.correcta) {
+          correctas++;
+          expDiv.style.display = "block";
+          expDiv.innerHTML = `<strong>✔ Correcto:</strong> ${q.explicacion}`;
+          expDiv.style.color = "#4caf50";
+        } else {
+          expDiv.style.display = "block";
+          expDiv.innerHTML = `<strong>✘ Incorrecto:</strong> ${q.explicacion}`;
+          expDiv.style.color = "#f44336";
+        }
+      });
+
+      if (!todasRespondidas) {
+        alert("Por favor, responde todas las preguntas antes de enviar.");
+        return;
+      }
+
+      const resultadoDiv = document.getElementById(`result-${containerId}`);
+      resultadoDiv.innerHTML = `<p>Resultado: ${correctas} de ${preguntas.length}</p>`;
+      
+      // Si es fase 1 y tiene al menos 3 correctas, mostrar celebración
+      if (fase === 1 && correctas >= 3) {
+        mostrarCelebracion();
+      } else if (fase === 1) {
+        resultadoDiv.innerHTML += `<p>Necesitas al menos 3 respuestas correctas para pasar a la siguiente fase. ¡Inténtalo de nuevo!</p>`;
+      }
+      
+      // Si es fase 2 y completa ambas fases
+      if (fase === 2 && correctas >= 3) {
+        resultadoDiv.innerHTML += `<p style="color: #4caf50; font-weight: bold; margin-top: 10px;">¡Felicidades! Has completado ambas fases de entrenamiento.</p>`;
+      } else if (fase === 2) {
+        resultadoDiv.innerHTML += `<p>¡Sigue practicando para dominar completamente esta posición!</p>`;
+      }
+    }
+
+    function mostrarCelebracion() {
+      const celebration = document.getElementById('celebration');
+      celebration.style.display = 'flex';
+      
+      // Crear efecto de confeti
+      crearConfeti();
+    }
+
+    function crearConfeti() {
+      const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50'];
+      const celebration = document.getElementById('celebration');
+      
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animation = `confetti ${Math.random() * 3 + 2}s linear forwards`;
+        confetti.style.width = Math.random() * 10 + 5 + 'px';
+        confetti.style.height = Math.random() * 10 + 5 + 'px';
+        celebration.appendChild(confetti);
+        
+        // Remover después de la animación
+        setTimeout(() => {
+          confetti.remove();
+        }, 5000);
+      }
+    }
+
+    function iniciarSegundaFase() {
+      document.getElementById('celebration').style.display = 'none';
+      
+      // Ocultar videos de fase 1 y mostrar fase 2
+      document.querySelector(`#seccion-${posicionActual} .videos-fase-1`).style.display = 'none';
+      const segundaFase = document.getElementById(`segunda-fase-${posicionActual}`);
+      segundaFase.style.display = 'block';
+      
+      // Cargar nuevos videos para fase 2
+      const videosContainer = segundaFase.querySelector('.videos-fase-2');
+      videosContainer.innerHTML = videosFase2[posicionActual].map(url => 
+        `<iframe src="${url}" allowfullscreen></iframe>`
+      ).join('');
+      
+      // Renderizar quiz de fase 2
+      renderQuiz(posicionActual, `quiz-fase2-${posicionActual}`, 2);
+    }
+  </script>
+{% endblock %}

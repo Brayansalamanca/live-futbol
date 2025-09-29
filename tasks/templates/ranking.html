@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1>🏆 Ranking de Jugadores</h1>
+
+<table id="rankingTable">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Nombre</th>
+      <th>Puntaje</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Se llenará dinámicamente -->
+  </tbody>
+</table>
+
+<div class="center">
+  <h3>Actualizar Puntaje</h3>
+  <input type="text" id="nombreInput" placeholder="Nombre">
+  <input type="number" id="puntajeInput" placeholder="Puntaje">
+  <button onclick="actualizarRanking()">Actualizar</button>
+</div>
+
+<script>
+  let jugadores = [
+    { nombre: "Ana", puntaje: 50 },
+    { nombre: "Brayan", puntaje: 40 },
+    { nombre: "Carlos", puntaje: 30 }
+  ];
+
+  function mostrarRanking() {
+    const tbody = document.getElementById("rankingTable").querySelector("tbody");
+    tbody.innerHTML = "";
+
+    jugadores
+      .sort((a, b) => b.puntaje - a.puntaje) // ordenar por puntaje descendente
+      .forEach((jugador, index) => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${jugador.nombre}</td>
+          <td>${jugador.puntaje}</td>
+        `;
+        tbody.appendChild(fila);
+      });
+  }
+
+  function actualizarRanking() {
+    const nombre = document.getElementById("nombreInput").value.trim();
+    const puntaje = parseInt(document.getElementById("puntajeInput").value);
+
+    if (!nombre || isNaN(puntaje)) return alert("Ingresa un nombre y un puntaje válido.");
+
+    const jugadorExistente = jugadores.find(j => j.nombre.toLowerCase() === nombre.toLowerCase());
+
+    if (jugadorExistente) {
+      jugadorExistente.puntaje = puntaje;
+    } else {
+      jugadores.push({ nombre, puntaje });
+    }
+
+    mostrarRanking();
+
+    document.getElementById("nombreInput").value = "";
+    document.getElementById("puntajeInput").value = "";
+  }
+
+  mostrarRanking();
+</script>
+
+{% endblock %}

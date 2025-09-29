@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div style="max-width: 500px; margin: auto; background: #000000; padding: 2rem; border-radius: 10px; box-shadow: #821717 2px 5px 45px; color: white;">
+    <h2>Recuperar contraseña</h2>
+    <p>Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</p>
+
+    <form method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
+      {% csrf_token %}
+      {{ form.email.label_tag }}
+      {{ form.email }}
+       {{ form.email.errors }}
+       
+      <button type="submit" style="padding: 0.5rem; background-color: #78eb7c; color: white; border: none; border-radius: 5px;">Enviar enlace</button>
+    </form>
+  </div>
+
+{% endblock %}

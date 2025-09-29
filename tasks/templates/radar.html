@@ -1,0 +1,969 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* ========= ESTILOS ESENCIALES PARA EL DETECTOR ========= */
+  :root { 
+    --card: #2c2c2c; 
+    --bg: #202124; 
+    --fg: #fff; 
+    --muted: #aaa; 
+    --accent: #00d9ff; 
+    --danger: #e63946; 
+    --success: #2a9d8f; 
+  }
+  
+  .container { 
+    max-width: 1100px; 
+    margin: 0 auto; 
+    padding: 16px; 
+    display: grid; 
+    gap: 24px; 
+  }
+
+  section.card {
+    background: var(--card); 
+    border: 1px solid #c9c9c9; 
+    border-radius: 16px; 
+    padding: 30px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  }
+  
+  section.card h2 { 
+    margin: 4px 0 16px; 
+    font-size: 22px; 
+    color: #fff; 
+  }
+
+  .grid { display: grid; gap: 16px; }
+  .two { grid-template-columns: 1fr 1fr; }
+
+  /* Controles */
+  .controls { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 12px; 
+    align-items: center; 
+    margin-bottom: 12px; 
+  }
+  
+  select, input, button.detector-btn {
+    background: #111; 
+    color: #fff; 
+    border: 1px solid #444; 
+    border-radius: 10px; 
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  select:focus, input:focus { outline: 2px solid var(--accent); }
+  
+  button.detector-btn { 
+    cursor: pointer; 
+    transition: all .2s ease; 
+  }
+  
+  button.detector-btn:hover { opacity: 0.9; }
+  button.detector-btn.primary { background: var(--accent); color: #001014; border: none; font-weight: 700; }
+  button.detector-btn.delete { background: var(--danger); border: none; color: #fff; font-weight: 600; }
+  button.detector-btn.success { background: var(--success); border: none; color: #fff; font-weight: 600; }
+  button.detector-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .pill {
+    display: inline-flex; 
+    gap: 8px; 
+    align-items: center; 
+    padding: 6px 10px;
+    background: #151515; 
+    border: 1px solid #333; 
+    border-radius: 999px;
+    font-size: 14px; 
+    color: #cfcfcf; 
+    transition: background .2s;
+  }
+  
+  .pill:hover { background: #1f1f1f; }
+  .pill.success { background: rgba(42, 157, 143, 0.2); border-color: var(--success); }
+
+  .readout { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+  .canvas-wrap { 
+    display: flex; 
+    gap: 12px; 
+    flex-wrap: wrap; 
+    align-items: flex-start; 
+    justify-content: center; 
+    position: relative; 
+  }
+  
+  video, canvas {
+    border: 2px solid #fff; 
+    border-radius: 12px; 
+    max-width: 100%; 
+    height: auto; 
+    background: #000;
+  }
+  
+  video { position: absolute; top: 0; left: 0; opacity: 0; }
+  canvas { position: relative; z-index: 1; }
+
+  /* KPI */
+  .kpi {
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; 
+    margin-top: 12px;
+  }
+  
+  .kpi .card-mini {
+    background: #151515; 
+    border: 1px solid #333; 
+    border-radius: 12px; 
+    padding: 10px; 
+    text-align: center;
+  }
+  
+  .kpi .label { font-size: 13px; color: #bbb; margin-bottom: 4px; }
+  .kpi .val { font-size: 28px; font-weight: 800; color: #fff; }
+
+  /* Sesiones */
+  #statsList { 
+    background: #111; 
+    border: 1px solid #333; 
+    border-radius: 12px; 
+    padding: 12px; 
+    margin-top: 12px; 
+    max-height: 300px; 
+    overflow-y: auto; 
+  }
+  
+  .entry { 
+    border-top: 1px solid #2a2a2a; 
+    padding: 8px 0; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    font-size: 14px; 
+  }
+  
+  .entry:first-child { border-top: none; }
+  .entry .name { font-weight: 600; color: var(--accent); }
+  .entry .stats { display: flex; gap: 12px; }
+  .entry .stat { background: #222; padding: 4px 8px; border-radius: 6px; color: #fff; }
+
+  .hint { color: #b9b9b9; font-size: 13px; margin-top: 4px; }
+  
+  .status { 
+    padding: 6px 10px; 
+    border-radius: 6px; 
+    font-size: 13px; 
+    margin-top: 8px; 
+    display: inline-block; 
+  }
+  
+  .status.success { background: rgba(42, 157, 143, 0.2); color: var(--success); }
+  .status.error { background: rgba(230, 57, 70, 0.2); color: var(--danger); }
+  .status.info { background: rgba(0, 217, 255, 0.2); color: var(--accent); }
+  .status.warning { background: rgba(255, 165, 0, 0.2); color: orange; }
+
+  .calibration-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid #333; }
+  .calibration-section h3 { margin: 0 0 12px 0; font-size: 18px; color: #fff; }
+
+  .distance-guide {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 10;
+  }
+
+  .calibration-steps {
+    margin-top: 15px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 10px;
+    border: 1px solid #333;
+  }
+
+  .calibration-step {
+    margin: 10px 0;
+    padding: 10px;
+    border-left: 3px solid var(--accent);
+    background: #252525;
+    color: #fff;
+  }
+
+  .progress-bar {
+    height: 10px;
+    background: #333;
+    border-radius: 5px;
+    margin: 10px 0;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  @media (max-width: 960px) { 
+    .two { grid-template-columns: 1fr; } 
+  }
+</style>
+</head>
+<body>
+  <h1>Detector de Ejercicios</h1>
+
+  <div class="container">
+    <!-- 1) Cámara -->
+    <section class="card">
+      <p style="font-size: 20px;">Contadores por ejercicio </p>
+      <div class="controls">
+        <label class="pill">
+          🏋️ Modo:
+          <select id="mode">
+            <option value="pushups">Planchas (Pecho)</option>
+            <option value="squats">Sentadillas (Pierna)</option>
+            <option value="plank">Plancha estática (Fuerza)</option>
+          </select>
+        </label>
+        <button id="startCam" class="detector-btn primary">Iniciar cámara</button>
+        <button id="stopCam" class="detector-btn" disabled>Detener</button>
+        <button id="startCalibration" class="detector-btn success" disabled>Iniciar Calibración</button>
+      </div>
+      
+      <div class="canvas-wrap">
+        <div class="distance-guide">
+          📍 Distancia recomendada: 2-3 metros de la cámara
+        </div>
+        <video id="video" autoplay playsinline width="640" height="480"></video>
+        <canvas id="output" width="640" height="480"></canvas>
+      </div>
+      
+      <div id="calibrationStatus" class="status info">Inicia la calibración para comenzar</div>
+      <div id="positionStatus" class="status warning">Esperando calibración...</div>
+      
+      <div class="calibration-steps" id="calibrationSteps" style="display: none;">
+        <h3>Calibración: <span id="currentStepName">Preparándose</span></h3>
+        <div class="progress-bar">
+          <div class="progress-fill" id="calibrationProgress"></div>
+        </div>
+        <div id="stepInstructions" class="calibration-step">
+          Por favor, sigue las instrucciones que aparecerán aquí.
+        </div>
+      </div>
+      
+      <div class="kpi">
+        <div class="card-mini"><div class="label">Pecho (reps)</div><div id="pechoCount" class="val">0</div></div>
+        <div class="card-mini"><div class="label">Pierna (reps)</div><div id="piernaCount" class="val">0</div></div>
+        <div class="card-mini"><div class="label">Fuerza (seg)</div><div id="fuerzaCount" class="val">0</div></div>
+      </div>
+      <div class="readout">
+        <span class="pill">Reps actuales: <b id="repCount">0</b></span>
+        <span class="pill">Estado: <b id="phase">-</b></span>
+        <span id="inPositionPill" class="pill" style="display:none">✅ En posición</span>
+      </div>
+    </section>
+
+    <!-- 2) Radar -->
+    <section class="card">
+      <h2>2) Diagrama de Radar (Pierna, Pecho, Fuerza)</h2>
+      <div class="grid two">
+        <div>
+          <canvas id="radarChart" width="520" height="420"></canvas>
+          <h1>El radar muestra tu progreso con una escala realista. </h1>
+        </div>
+        <div>
+          <h1>Sesiones guardadas</h1>
+          <div class="controls">
+            <input id="sessionName" placeholder="Nombre de sesión (opcional)" />
+            <button id="saveSession" class="detector-btn success">Guardar sesión</button>
+            <button id="resetSession" class="detector-btn delete">Reiniciar sesión</button>
+          </div>
+          <div id="statsList"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<!-- Librerías (orden importa) -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+/* ========= Referencias UI ========= */
+const videoEl  = document.getElementById('video');
+const canvasEl = document.getElementById('output');
+const ctx      = canvasEl.getContext('2d');
+
+const modeSel  = document.getElementById('mode');
+const repEl    = document.getElementById('repCount');
+const phaseEl  = document.getElementById('phase');
+const pechoEl  = document.getElementById('pechoCount');
+const piernaEl = document.getElementById('piernaCount');
+const fuerzaEl = document.getElementById('fuerzaCount');
+const positionStatus = document.getElementById('positionStatus');
+const calibrationStatus = document.getElementById('calibrationStatus');
+const inPositionPill = document.getElementById('inPositionPill');
+const startCamBtn = document.getElementById('startCam');
+const stopCamBtn = document.getElementById('stopCam');
+const startCalibrationBtn = document.getElementById('startCalibration');
+const calibrationSteps = document.getElementById('calibrationSteps');
+const currentStepName = document.getElementById('currentStepName');
+const stepInstructions = document.getElementById('stepInstructions');
+const calibrationProgress = document.getElementById('calibrationProgress');
+const sessionName = document.getElementById('sessionName');
+const saveSessionBtn = document.getElementById('saveSession');
+const resetSessionBtn = document.getElementById('resetSession');
+const statsList = document.getElementById('statsList');
+
+/* ========= Estado ========= */
+let camera = null;
+let pose   = null;
+let running = false;
+let savedSessions = JSON.parse(localStorage.getItem('sessions')) || [];
+
+let currentMode = 'pushups';
+let phase = '-';
+let repCount = 0;
+let pecho = 0, pierna = 0, fuerza = 0;
+let inPosition = false;
+let plankStart = null;
+
+// Variables para calibración avanzada
+let isCalibrated = false;
+let isCalibrating = false;
+let currentCalibrationStep = 0;
+let calibrationData = {
+  pushups: { upAngle: 0, downAngle: 0, shoulderHeight: 0, hipHeight: 0 },
+  squats: { upAngle: 0, downAngle: 0, standingHeight: 0, squatHeight: 0 },
+  plank: { shoulderHeight: 0, hipHeight: 0, ankleHeight: 0 }
+};
+let poseLandmarks = null;
+let calibrationTimers = {};
+
+// Pasos de calibración para cada ejercicio
+const calibrationStepsConfig = {
+  pushups: [
+    { name: "Posición inicial", instruction: "Párate frente a la cámara con los brazos a los lados", duration: 3000 },
+    { name: "Posición de plancha alta", instruction: "Colócate en posición de plancha con brazos extendidos", duration: 5000 },
+    { name: "Posición de plancha baja", instruction: "Baja hasta que tu pecho casi toque el suelo", duration: 5000 }
+  ],
+  squats: [
+    { name: "Posición de pie", instruction: "Párate derecho frente a la cámara", duration: 3000 },
+    { name: "Levanta pierna izquierda", instruction: "Levanta tu pierna izquierda frente a ti", duration: 4000 },
+    { name: "Levanta pierna derecha", instruction: "Levanta tu pierna derecha frente a ti", duration: 4000 },
+    { name: "Posición de sentadilla", instruction: "Haz una sentadilla completa hasta donde puedas", duration: 5000 }
+  ],
+  plank: [
+    { name: "Posición de pie", instruction: "Párate derecho frente a la cámara", duration: 3000 },
+    { name: "Posición de plancha", instruction: "Colócate en posición de plancha con cuerpo recto", duration: 6000 }
+  ]
+};
+
+/* ========= Ajustes video para iOS/Safari ========= */
+videoEl.playsInline = true;
+videoEl.muted = true;
+
+/* ========= Radar ========= */
+const radarCtx = document.getElementById('radarChart').getContext('2d');
+const radar = new Chart(radarCtx, {
+  type: 'radar',
+  data: {
+    labels: ['Pierna','Pecho','Fuerza'],
+    datasets: [{
+      label: 'Sesión actual',
+      data: [0, 0, 0],
+      fill: true,
+      backgroundColor: 'rgba(0, 217, 255, 0.25)',
+      borderColor: 'rgba(0, 217, 255, 1)',
+      pointBackgroundColor: 'rgba(0, 217, 255, 1)',
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: 'rgba(0, 217, 255, 1)'
+    }]
+  },
+  options: { 
+    scales: { 
+      r: { 
+        min: 0,
+        max: 30,
+        ticks: {
+          stepSize: 5,
+          callback: function(value) {
+            return value + (value === 30 ? '+' : '');
+          }
+        },
+        angleLines: {
+          display: true,
+          color: 'rgba(255, 255, 255, 0.1)'
+        },
+        grid: {
+          color: 'rgba(255, 255, 255, 0.1)'
+        },
+        pointLabels: {
+          font: {
+            size: 14,
+            weight: 'bold'
+          },
+          color: '#eee'
+        }
+      } 
+    }, 
+    plugins: { 
+      legend: { 
+        display: false 
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return context.dataset.label + ': ' + context.formattedValue;
+          }
+        }
+      }
+    },
+    animation: {
+      duration: 500,
+      easing: 'easeOutQuart'
+    },
+    maintainAspectRatio: true
+  }
+});
+
+function syncRadar(){
+  const limitedPierna = Math.min(pierna, 30);
+  const limitedPecho = Math.min(pecho, 30);
+  const limitedFuerza = Math.min(fuerza, 30);
+  
+  radar.data.datasets[0].data = [limitedPierna, limitedPecho, limitedFuerza];
+  radar.update();
+}
+
+/* ========= Utilidades ========= */
+function angle3(a, b, c){
+  const abx = a.x - b.x, aby = a.y - b.y;
+  const cbx = c.x - b.x, cby = c.y - b.y;
+  const dot = abx * cbx + aby * cby;
+  const magAB = Math.sqrt(abx * abx + aby * aby);
+  const magCB = Math.sqrt(cbx * cbx + cby * cby);
+  if(!magAB || !magCB) return 0;
+  let cos = Math.max(-1, Math.min(1, dot / (magAB * magCB)));
+  return Math.acos(cos) * 180 / Math.PI;
+}
+
+const L = (lms, i) => lms?.[i] ? {x: lms[i].x, y: lms[i].y} : null;
+
+
+function startCalibration() {
+  if (!poseLandmarks) {
+    calibrationStatus.textContent = "No se detecta pose. Asegúrate de estar visible en cámara.";
+    calibrationStatus.className = "status error";
+    return;
+  }
+  
+  isCalibrating = true;
+  currentCalibrationStep = 0;
+  calibrationSteps.style.display = 'block';
+  startCalibrationBtn.disabled = true;
+  
+  nextCalibrationStep();
+}
+
+function nextCalibrationStep() {
+  const steps = calibrationStepsConfig[currentMode];
+  if (currentCalibrationStep >= steps.length) {
+    finishCalibration();
+    return;
+  }
+  
+  const step = steps[currentCalibrationStep];
+  currentStepName.textContent = step.name;
+  stepInstructions.textContent = step.instruction;
+  calibrationProgress.style.width = '0%';
+  
+  // Iniciar temporizador para este paso
+  let timeElapsed = 0;
+  const updateInterval = 100;
+  const totalTime = step.duration;
+  
+  clearInterval(calibrationTimers.step);
+  calibrationTimers.step = setInterval(() => {
+    timeElapsed += updateInterval;
+    const progress = (timeElapsed / totalTime) * 100;
+    calibrationProgress.style.width = `${progress}%`;
+    
+    if (timeElapsed >= totalTime) {
+      clearInterval(calibrationTimers.step);
+      captureCalibrationStep();
+      currentCalibrationStep++;
+      setTimeout(nextCalibrationStep, 1000);
+    }
+  }, updateInterval);
+}
+
+function captureCalibrationStep() {
+  if (!poseLandmarks) return;
+  
+  const lm = poseLandmarks;
+  const step = currentCalibrationStep;
+  
+  if (currentMode === 'pushups') {
+    const shoulderL = L(lm, 11), shoulderR = L(lm, 12);
+    const elbowL = L(lm, 13), elbowR = L(lm, 14);
+    const wristL = L(lm, 15), wristR = L(lm, 16);
+    const hipL = L(lm, 23), hipR = L(lm, 24);
+    
+    if (shoulderL && shoulderR && elbowL && elbowR && wristL && wristR && hipL && hipR) {
+      if (step === 1) { // Posición de plancha alta
+        calibrationData.pushups.upAngle = (angle3(shoulderL, elbowL, wristL) + angle3(shoulderR, elbowR, wristR)) / 2;
+        calibrationData.pushups.shoulderHeight = (shoulderL.y + shoulderR.y) / 2;
+        calibrationData.pushups.hipHeight = (hipL.y + hipR.y) / 2;
+      } else if (step === 2) { // Posición de plancha baja
+        calibrationData.pushups.downAngle = (angle3(shoulderL, elbowL, wristL) + angle3(shoulderR, elbowR, wristR)) / 2;
+      }
+    }
+  } else if (currentMode === 'squats') {
+    const hipL = L(lm, 23), hipR = L(lm, 24);
+    const kneeL = L(lm, 25), kneeR = L(lm, 26);
+    const ankleL = L(lm, 27), ankleR = L(lm, 28);
+    
+    if (hipL && hipR && kneeL && kneeR && ankleL && ankleR) {
+      if (step === 0) { // Posición de pie
+        calibrationData.squats.standingHeight = (hipL.y + hipR.y) / 2;
+        calibrationData.squats.upAngle = (angle3(hipL, kneeL, ankleL) + angle3(hipR, kneeR, ankleR)) / 2;
+      } else if (step === 3) { // Posición de sentadilla
+        calibrationData.squats.squatHeight = (hipL.y + hipR.y) / 2;
+        calibrationData.squats.downAngle = (angle3(hipL, kneeL, ankleL) + angle3(hipR, kneeR, ankleR)) / 2;
+      }
+    }
+  } else if (currentMode === 'plank') {
+    const shoulderL = L(lm, 11), shoulderR = L(lm, 12);
+    const hipL = L(lm, 23), hipR = L(lm, 24);
+    const ankleL = L(lm, 27), ankleR = L(lm, 28);
+    
+    if (shoulderL && shoulderR && hipL && hipR && ankleL && ankleR) {
+      if (step === 1) { // Posición de plancha
+        calibrationData.plank.shoulderHeight = (shoulderL.y + shoulderR.y) / 2;
+        calibrationData.plank.hipHeight = (hipL.y + hipR.y) / 2;
+        calibrationData.plank.ankleHeight = (ankleL.y + ankleR.y) / 2;
+      }
+    }
+  }
+}
+
+function finishCalibration() {
+  isCalibrating = false;
+  isCalibrated = true;
+  calibrationSteps.style.display = 'none';
+  calibrationStatus.textContent = "Calibración completada. ¡Puedes comenzar!";
+  calibrationStatus.className = "status success";
+  startCalibrationBtn.disabled = false;
+  
+  console.log("Datos de calibración:", calibrationData);
+}
+
+/* ========= Detección de posición ========= */
+function isInCorrectPosition(lm, mode) {
+  if (!lm) return false;
+  
+  if (mode === 'pushups') {
+    const shoulderL = L(lm, 11), shoulderR = L(lm, 12);
+    const hipL = L(lm, 23), hipR = L(lm, 24);
+    
+    if (!shoulderL || !shoulderR || !hipL || !hipR) return false;
+    
+    // Para planchas, verificar que los hombros están más arriba que las caderas
+    return (shoulderL.y + shoulderR.y) / 2 < (hipL.y + hipR.y) / 2;
+  }
+  else if (mode === 'squats') {
+    // Para sentadillas, siempre considerar que está en posición
+    // La detección se basa en el movimiento, no en una posición estática
+    return true;
+  }
+  else if (mode === 'plank') {
+    const shoulderL = L(lm, 11), shoulderR = L(lm, 12);
+    const hipL = L(lm, 23), hipR = L(lm, 24);
+    const ankleL = L(lm, 27), ankleR = L(lm, 28);
+    
+    if (!shoulderL || !shoulderR || !hipL || !hipR || !ankleL || !ankleR) return false;
+    
+    // Para plancha, verificar que el cuerpo está horizontal
+    const shoulderMid = { x: (shoulderL.x + shoulderR.x) / 2, y: (shoulderL.y + shoulderR.y) / 2 };
+    const ankleMid = { x: (ankleL.x + ankleR.x) / 2, y: (ankleL.y + ankleR.y) / 2 };
+    
+    return Math.abs(shoulderMid.y - ankleMid.y) < 0.2;
+  }
+  
+  return false;
+}
+
+/* ========= Detecciones ========= */
+function detectPushups(lm) {
+  const shoulderL = L(lm, 11), shoulderR = L(lm, 12);
+  const elbowL = L(lm, 13), elbowR = L(lm, 14);
+  const wristL = L(lm, 15), wristR = L(lm, 16);
+  
+  if (!shoulderL || !shoulderR || !elbowL || !elbowR || !wristL || !wristR) return;
+
+  const aL = angle3(shoulderL, elbowL, wristL);
+  const aR = angle3(shoulderR, elbowR, wristR);
+  const a = (aL + aR) / 2;
+
+  // Usar ángulos calibrados o valores por defecto
+  const downAngle = calibrationData.pushups.downAngle || 90;
+  const upAngle = calibrationData.pushups.upAngle || 160;
+
+  if (phase === 'up' && a < downAngle) { 
+    phase = 'down'; 
+  }
+  else if (phase === 'down' && a > upAngle) {
+    phase = 'up';
+    repCount++; 
+    pecho++;
+    repEl.textContent = repCount; 
+    pechoEl.textContent = pecho; 
+    syncRadar();
+  }
+  phaseEl.textContent = phase;
+}
+
+function detectSquats(lm) {
+  const hipL = L(lm, 23), hipR = L(lm, 24);
+  const kneeL = L(lm, 25), kneeR = L(lm, 26);
+  const ankleL = L(lm, 27), ankleR = L(lm, 28);
+  
+  if (!hipL && !hipR && !kneeL && !kneeR && !ankleL && !ankleR) return;
+
+  const aL = angle3(hipL, kneeL, ankleL);
+  const aR = angle3(hipR, kneeR, ankleR);
+  const a = (aL + aR) / 2;
+
+  // Usar ángulos calibrados o valores por defecto
+  const downAngle = calibrationData.squats.downAngle || 100;
+  const upAngle = calibrationData.squats.upAngle || 170;
+
+  // Detectar movimiento basado en altura de cadera si está calibrado
+  let usingHeightDetection = false;
+  if (calibrationData.squats.standingHeight && calibrationData.squats.squatHeight) {
+    const hipMidY = (hipL.y + hipR.y) / 2;
+    const standingThreshold = calibrationData.squats.standingHeight + 0.05;
+    const squatThreshold = calibrationData.squats.squatHeight - 0.05;
+    
+    if (phase === 'up' && hipMidY > squatThreshold) {
+      phase = 'down';
+      usingHeightDetection = true;
+    }
+    else if (phase === 'down' && hipMidY < standingThreshold) {
+      phase = 'up';
+      repCount++; 
+      pierna++;
+      repEl.textContent = repCount; 
+      piernaEl.textContent = pierna; 
+      syncRadar();
+      usingHeightDetection = true;
+    }
+  }
+
+  // Si no estamos usando detección por altura, usar ángulos
+  if (!usingHeightDetection) {
+    if (phase === 'up' && a < downAngle) { 
+      phase = 'down'; 
+    }
+    else if (phase === 'down' && a > upAngle) {
+      phase = 'up';
+      repCount++; 
+      pierna++;
+      repEl.textContent = repCount; 
+      piernaEl.textContent = pierna; 
+      syncRadar();
+    }
+  }
+  
+  phaseEl.textContent = phase;
+}
+
+function detectPlank(lm) {
+  const shoulderL = L(lm, 11), shoulderR = L(lm, 12);
+  const hipL = L(lm, 23), hipR = L(lm, 24);
+  const kneeL = L(lm, 25), kneeR = L(lm, 26);
+  const ankleL = L(lm, 27), ankleR = L(lm, 28);
+  
+  if (!shoulderL && !shoulderR && !hipL && !hipR && !kneeL && !kneeR && !ankleL && !ankleR) return;
+
+  // Calcular puntos medios
+  const shoulderMid = { x: (shoulderL.x + shoulderR.x) / 2, y: (shoulderL.y + shoulderR.y) / 2 };
+  const hipMid = { x: (hipL.x + hipR.x) / 2, y: (hipL.y + hipR.y) / 2 };
+  const kneeMid = { x: (kneeL.x + kneeR.x) / 2, y: (kneeL.y + kneeR.y) / 2 };
+  const ankleMid = { x: (ankleL.x + ankleR.x) / 2, y: (ankleL.y + ankleR.y) / 2 };
+  
+  // Calcular ángulos
+  const shoulderHipAngle = angle3(
+    {x: shoulderMid.x, y: shoulderMid.y - 0.1},
+    shoulderMid,
+    hipMid
+  );
+  
+  const hipKneeAngle = angle3(
+    {x: hipMid.x, y: hipMid.y - 0.1},
+    hipMid,
+    kneeMid
+  );
+  
+  const kneeAnkleAngle = angle3(
+    {x: kneeMid.x, y: kneeMid.y - 0.1},
+    kneeMid,
+    ankleMid
+  );
+  
+  // Verificar si está en posición correcta de plancha
+  const isHorizontal = Math.abs(shoulderMid.y - ankleMid.y) < 0.15;
+  const jointsExtended = shoulderHipAngle > 160 && hipKneeAngle > 160 && kneeAnkleAngle > 160;
+  const correctPosition = isHorizontal && jointsExtended;
+  
+  if (correctPosition) {
+    if (!plankStart) { 
+      plankStart = performance.now(); 
+      phase = 'manteniendo'; 
+    }
+    const secs = Math.floor((performance.now() - plankStart) / 1000);
+    fuerza = secs;
+    fuerzaEl.textContent = fuerza; 
+    syncRadar();
+  } else {
+    if (plankStart) {
+      plankStart = null;
+      phase = 'descanso';
+    }
+  }
+  phaseEl.textContent = phase;
+}
+
+/* ========= Render de resultados ========= */
+function onResults(results) {
+  ctx.save();
+  ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+  ctx.drawImage(results.image, 0, 0, canvasEl.width, canvasEl.height);
+
+  const lm = results.poseLandmarks;
+  poseLandmarks = lm;
+
+  // Detectar si está en posición
+  if (lm) {
+    inPosition = isInCorrectPosition(lm, currentMode);
+    
+    // Actualizar UI según posición
+    if (inPosition) {
+      positionStatus.textContent = "¡Buena posición! Comienza tu ejercicio";
+      positionStatus.className = "status success";
+      inPositionPill.style.display = "inline-flex";
+    } else {
+      positionStatus.textContent = "Ajusta tu posición para comenzar";
+      positionStatus.className = "status warning";
+      inPositionPill.style.display = "none";
+    }
+  }
+
+  // Dibujo del esqueleto
+  if (lm) {
+    window.drawConnectors(ctx, lm, window.POSE_CONNECTIONS, {
+      color: inPosition ? '#00ff00' : '#ff3159', 
+      lineWidth: 3
+    });
+    window.drawLandmarks(ctx, lm, {
+      color: inPosition ? '#00ff00' : '#ff3159', 
+      lineWidth: 2,
+      radius: 4
+    });
+  }
+
+  // Lógica de ejercicio (solo si está en posición correcta y calibrado)
+  if (lm && inPosition && isCalibrated && !isCalibrating) {
+    if (currentMode === 'pushups') detectPushups(lm);
+    else if (currentMode === 'squats') detectSquats(lm);
+    else if (currentMode === 'plank') detectPlank(lm);
+  }
+
+  ctx.restore();
+}
+
+/* ========= Init/Stop cámara ========= */
+function ensurePose() {
+  if (pose) return;
+  pose = new Pose({
+    locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
+  });
+  pose.setOptions({
+    modelComplexity: 1,
+    smoothLandmarks: true,
+    minDetectionConfidence: 0.7,
+    minTrackingConfidence: 0.7
+  });
+  pose.onResults(onResults);
+}
+
+async function startCamera() {
+  if (running) return;
+  ensurePose();
+  try {
+    camera = new Camera(videoEl, {
+      onFrame: async () => { 
+        if (pose) {
+          await pose.send({image: videoEl}); 
+        }
+      },
+      width: 640, 
+      height: 480
+    });
+    await camera.start();
+    running = true;
+    startCamBtn.disabled = true;
+    stopCamBtn.disabled = false;
+    startCalibrationBtn.disabled = false;
+    calibrationStatus.textContent = "Haz clic en 'Iniciar Calibración' para comenzar";
+    calibrationStatus.className = "status info";
+  } catch(err) {
+    console.error(err);
+    alert('No se pudo iniciar la cámara: ' + (err.message || err));
+  }
+}
+
+function stopCamera() {
+  if (camera) { 
+    camera.stop(); 
+    camera = null; 
+  }
+  running = false;
+  startCamBtn.disabled = false;
+  stopCamBtn.disabled = true;
+  startCalibrationBtn.disabled = true;
+  ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+  positionStatus.textContent = "Cámara detenida";
+  positionStatus.className = "status info";
+  inPositionPill.style.display = "none";
+  calibrationStatus.textContent = "Cámara detenida";
+  calibrationStatus.className = "status info";
+  calibrationSteps.style.display = 'none';
+  
+  // Reiniciar contadores
+  isCalibrating = false;
+  plankStart = null;
+}
+
+/* ========= Gestión de sesiones ========= */
+function saveSession() {
+  const name = sessionName.value || `Sesión ${new Date().toLocaleString()}`;
+  const session = {
+    name,
+    date: new Date().toISOString(),
+    stats: {
+      pecho,
+      pierna,
+      fuerza
+    }
+  };
+  
+  savedSessions.unshift(session);
+  localStorage.setItem('sessions', JSON.stringify(savedSessions));
+  updateStatsList();
+  sessionName.value = "";
+  
+  // Mostrar confirmación
+  const confirmation = document.createElement('div');
+  confirmation.textContent = 'Sesión guardada correctamente';
+  confirmation.className = 'status success';
+  statsList.parentNode.insertBefore(confirmation, statsList.nextSibling);
+  
+  setTimeout(() => {
+    confirmation.remove();
+  }, 3000);
+}
+
+function resetSession() {
+  if (confirm('¿Estás seguro de que quieres reiniciar la sesión? Se perderán todos los datos no guardados.')) {
+    pecho = 0;
+    pierna = 0;
+    fuerza = 0;
+    repCount = 0;
+    phase = '-';
+    
+    pechoEl.textContent = '0';
+    piernaEl.textContent = '0';
+    fuerzaEl.textContent = '0';
+    repEl.textContent = '0';
+    phaseEl.textContent = '-';
+    
+    syncRadar();
+  }
+}
+
+function updateStatsList() {
+  statsList.innerHTML = '';
+  
+  if (savedSessions.length === 0) {
+    statsList.innerHTML = '<div class="entry">No hay sesiones guardadas</div>';
+    return;
+  }
+  
+  savedSessions.slice(0, 5).forEach(session => {
+    const entry = document.createElement('div');
+    entry.className = 'entry';
+    
+    const date = new Date(session.date).toLocaleDateString();
+    
+    entry.innerHTML = `
+      <div class="name">${session.name}</div>
+      <div class="stats">
+        <span class="stat">P: ${session.stats.pecho}</span>
+        <span class="stat">S: ${session.stats.pierna}</span>
+        <span class="stat">F: ${session.stats.fuerza}s</span>
+      </div>
+    `;
+    
+    statsList.appendChild(entry);
+  });
+}
+
+/* ========= Listeners UI ========= */
+document.addEventListener('DOMContentLoaded', function() {
+  startCamBtn.addEventListener('click', startCamera);
+  stopCamBtn.addEventListener('click', stopCamera);
+  startCalibrationBtn.addEventListener('click', startCalibration);
+  
+  modeSel.addEventListener('change', (e) => {
+    currentMode = e.target.value;
+    repCount = 0; 
+    phase = '-';
+    repEl.textContent = '0'; 
+    phaseEl.textContent = '-';
+    inPosition = false;
+    isCalibrated = false;
+    positionStatus.textContent = "Debes calibrar la nueva posición";
+    positionStatus.className = "status warning";
+    inPositionPill.style.display = "none";
+    calibrationStatus.textContent = "Haz clic en 'Iniciar Calibración' para comenzar";
+    calibrationStatus.className = "status info";
+    calibrationSteps.style.display = 'none';
+    
+    // Reiniciar contadores
+    plankStart = null;
+  });
+  
+  saveSessionBtn.addEventListener('click', saveSession);
+  resetSessionBtn.addEventListener('click', resetSession);
+  
+  // Cargar datos guardados
+  updateStatsList();
+});
+</script>
+
+</body>
+</html>
+{% endblock %}

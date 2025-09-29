@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>live futbol</title>
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <script src="{% static 'js/chart.umd.min.js' %}"></script>
+    
+    <!-- ✅ ONE SIGNAL - CÓDIGO FALTANTE -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "43623638-2360-4a76-927d-9953b3364482",
+                allowLocalhostAsSecureOrigin: true,
+            });
+        });
+    </script>
+    <!-- ✅ FIN CÓDIGO ONE SIGNAL -->
+</head>
+<body>
+    <nav>
+        <button class="menu-toggle" aria-label="Menú">☰</button>
+        <ul id="nav-menu">
+            <li class="img"><img src="{% static 'logo.png' %}" alt="Logo"></li>
+            {% if user.is_authenticated %}
+                <li><a href="/formulario">formulario</a></li>
+               <li><a href="/radar">estadisticas por video</a></li>
+                <li><a href="/videos">zona de estudio </a></li>
+                <li><a href="/voz">rutina por voz</a></li>
+                
+        
+                <li><a href="/logout" style="background-color: red;">Logout</a></li>
+            {% else %}
+                <li><a href="/">Home</a></li>
+                <li><a href="/signup">registrarse</a></li>
+                <li><a href="/signin">iniciar sesion</a></li>
+                <li><a href="/soporte">soporte</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    
+    <main style="margin-top: 80px;">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButton = document.querySelector('.menu-toggle');
+            const navMenu = document.getElementById('nav-menu');
+            
+            toggleButton.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+                this.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+            });
+            
+            navMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        navMenu.classList.remove('active');
+                        toggleButton.textContent = '☰';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

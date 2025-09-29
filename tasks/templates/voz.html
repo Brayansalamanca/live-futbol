@@ -1,0 +1,469 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* ========= ESTILOS MEJORADOS ========= */
+  .voice-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    color: rgb(0, 0, 0);
+  }
+
+  .main-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    background: linear-gradient( #e50914);
+    
+  }
+
+  .commands-card {
+    background: #1a1a1a;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 600px;
+    border: 1px solid #333;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .commands-card h3 {
+    color: #4ecdc4;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+  }
+
+  .commands-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .commands-list li {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .commands-list li:last-child {
+    border-bottom: none;
+  }
+
+  .command-keyword {
+    color: #ff6b6b;
+    font-weight: bold;
+    min-width: 100px;
+  }
+
+  .command-desc {
+    color: #ccc;
+  }
+
+  .controls-section {
+    text-align: center;
+    margin: 2rem 0;
+  }
+
+  .btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0 10px;
+  }
+
+  .btn-start {
+    background: #4ecdc4;
+    color: white;
+  }
+
+  .btn-start:hover {
+    background: #45b7af;
+    transform: translateY(-2px);
+  }
+
+  .btn-pause {
+    background: #ff6b6b;
+    color: white;
+  }
+
+  .btn-pause:hover {
+    background: #e55a5a;
+    transform: translateY(-2px);
+  }
+
+  .btn-send {
+    background: #45b7af;
+    color: white;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+  }
+
+  .btn-send:hover {
+    background: #3da199;
+    transform: translateY(-2px);
+  }
+
+  .table-container {
+    background: #1a1a1a;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 1px solid #333;
+    overflow: hidden;
+  }
+
+  .routine-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #222;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .routine-table th {
+    background: #333;
+    padding: 1rem;
+    text-align: left;
+    color: #4ecdc4;
+    font-weight: 600;
+    border-bottom: 2px solid #444;
+  }
+
+  .routine-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #333;
+    color: #ccc;
+  }
+
+  .routine-table tr:hover {
+    background: #2a2a2a;
+  }
+
+  .day-cell {
+    font-weight: 600;
+    color: #ff6b6b !important;
+    width: 120px;
+  }
+
+  .status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+
+  .status-active {
+    background: #4ecdc4;
+    animation: pulse 2s infinite;
+  }
+
+  .status-inactive {
+    background: #666;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+
+  .recognition-status {
+    text-align: center;
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 10px;
+    background: #2a2a2a;
+  }
+
+  .status-text {
+    font-weight: 600;
+  }
+
+  .status-active .status-text {
+    color: #4ecdc4;
+  }
+
+  .status-inactive .status-text {
+    color: #ff6b6b;
+  }
+
+  .email-section {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 2rem;
+    background: #1a1a1a;
+    border-radius: 15px;
+    border: 1px solid #333;
+  }
+
+  .email-section h3 {
+    color: #4ecdc4;
+    margin-bottom: 1rem;
+  }
+
+  .current-email {
+    color: #ff6b6b;
+    font-weight: 600;
+  }
+</style>
+
+<div class="voice-container">
+  <h1 class="main-title">🎤 Generador de Rutinas por Voz</h1>
+
+  <!-- Tarjeta de Comandos -->
+  <div class="commands-card">
+    <h3>📣 Comandos de Voz Disponibles</h3>
+    <ul class="commands-list">
+      <li>
+        <span class="command-keyword">Día + Tipo</span>
+        <span class="command-desc">Ej: "lunes goleador" o "goleador lunes"</span>
+      </li>
+      <li>
+        <span class="command-keyword">goleador</span>
+        <span class="command-desc">Entrenamiento de definición y potencia</span>
+      </li>
+      <li>
+        <span class="command-keyword">creador</span>
+        <span class="command-desc">Ejercicios de visión y pases</span>
+      </li>
+      <li>
+        <span class="command-keyword">defensor</span>
+        <span class="command-desc">Fuerza y marcaje</span>
+      </li>
+      <li>
+        <span class="command-keyword">extremo</span>
+        <span class="command-desc">Velocidad y desborde</span>
+      </li>
+      <li>
+        <span class="command-keyword">progreso</span>
+        <span class="command-desc">Ejercicios de desarrollo</span>
+      </li>
+      <li>
+        <span class="command-keyword">constante</span>
+        <span class="command-desc">Mantenimiento y consistencia</span>
+      </li>
+      <li>
+        <span class="command-keyword">descanso</span>
+        <span class="command-desc">Día de recuperación</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Controles de Voz -->
+  <div class="controls-section">
+    <button class="btn btn-start" onclick="iniciarReconocimiento()">
+      🎤 Iniciar Reconocimiento
+    </button>
+    <button class="btn btn-pause" onclick="pausarReconocimiento()">
+      ⏸️ Pausar
+    </button>
+  </div>
+
+  <!-- Estado del Reconocimiento -->
+  <div id="recognitionStatus" class="recognition-status status-inactive">
+    <span class="status-indicator"></span>
+    <span class="status-text">Reconocimiento inactivo</span>
+  </div>
+
+  <!-- Tabla de Rutina -->
+  <div class="table-container">
+    <table class="routine-table">
+      <thead>
+        <tr>
+          <th>Día</th>
+          <th>Rutina</th>
+        </tr>
+      </thead>
+      <tbody id="tablaRutina">
+        <tr><td class="day-cell">Lunes</td><td id="lunes">Descanso</td></tr>
+        <tr><td class="day-cell">Martes</td><td id="martes">Descanso</td></tr>
+        <tr><td class="day-cell">Miércoles</td><td id="miercoles">Descanso</td></tr>
+        <tr><td class="day-cell">Jueves</td><td id="jueves">Descanso</td></tr>
+        <tr><td class="day-cell">Viernes</td><td id="viernes">Descanso</td></tr>
+        <tr><td class="day-cell">Sábado</td><td id="sabado">Descanso</td></tr>
+        <tr><td class="day-cell">Domingo</td><td id="domingo">Descanso</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sección de Envío por Correo -->
+  <div class="email-section">
+    <h3>📧 Enviar Rutina por Correo</h3>
+    <p>Tu rutina será enviada a: <span class="current-email">{{ user.email }}</span></p>
+    <button class="btn btn-send" onclick="enviarRutinaPorCorreo()">
+      ✉️ Enviar Rutina al Correo
+    </button>
+  </div>
+</div>
+
+<script>
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+
+// Estado global de la rutina
+let rutinaSemanal = {
+  lunes: "Descanso",
+  martes: "Descanso", 
+  miercoles: "Descanso",
+  jueves: "Descanso",
+  viernes: "Descanso",
+  sabado: "Descanso",
+  domingo: "Descanso"
+};
+
+if (!SpeechRecognition) {
+  alert("Tu navegador no soporta reconocimiento de voz.");
+} else {
+  const reconocimiento = new SpeechRecognition();
+  reconocimiento.lang = "es-ES";
+  reconocimiento.interimResults = false;
+  reconocimiento.maxAlternatives = 1;
+  reconocimiento.continuous = true;
+
+  // Gramática para mejorar precisión
+  const grammar = '#JSGF V1.0; grammar comandos; public <comando> = lunes | martes | miércoles | jueves | viernes | sábado | domingo | goleador | creador | defensor | extremo | progreso | constante | descanso ;';
+  const speechRecognitionList = new SpeechGrammarList();
+  speechRecognitionList.addFromString(grammar, 1);
+  reconocimiento.grammars = speechRecognitionList;
+
+  const rutinas = {
+    "goleador": "🔥 Saltos pliométricos, ⚡ Sprints zigzag, ⚽ Tiros al arco, 💪 Abdominales",
+    "creador": "⚽ Pases y dominio, 🧘 Superman/crunch, 🎮 Estímulos visuales, 📺 Análisis jugadas", 
+    "defensor": "💪 Flexiones con palmada, 🏋️ Remo, 🚀 Cambios de dirección, ⚽ 1v1 defensivo",
+    "extremo": "🏃 Sprints curva, 🧠 Escalera agilidad, 💥 Burpees, ⚽ 1v1 ofensivo",
+    "progreso": "🏃 Jumping jacks, ⚽ Pases pared, 🧘 Estiramiento postentreno",
+    "constante": "💪 Sentadillas y planchas, 🚴 Caminata, 🧘 Foam roller, 📝 Diario de metas",
+    "descanso": "🛌 Descanso activo - Recuperación muscular"
+  };
+
+  const diasSemana = ["lunes", "martes", "miercoles", "miércoles", "jueves", "viernes", "sabado", "sábado", "domingo"];
+
+  function normalizarTexto(texto) {
+    return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  }
+
+  function actualizarEstadoReconocimiento(activo) {
+    const statusElement = document.getElementById('recognitionStatus');
+    const indicator = statusElement.querySelector('.status-indicator');
+    const text = statusElement.querySelector('.status-text');
+    
+    if (activo) {
+      statusElement.className = 'recognition-status status-active';
+      indicator.className = 'status-indicator status-active';
+      text.textContent = 'Escuchando... Habla ahora';
+    } else {
+      statusElement.className = 'recognition-status status-inactive';
+      indicator.className = 'status-indicator status-inactive';
+      text.textContent = 'Reconocimiento inactivo';
+    }
+  }
+
+  function actualizarTabla(dia, tipoJugador) {
+    const id = normalizarTexto(dia);
+    const rutina = rutinas[tipoJugador] || "Descanso";
+    const celda = document.getElementById(id);
+    
+    if (celda) {
+      celda.innerText = rutina;
+      // Actualizar estado global
+      rutinaSemanal[id] = rutina;
+    }
+  }
+
+  reconocimiento.onstart = function() {
+    actualizarEstadoReconocimiento(true);
+  };
+
+  reconocimiento.onend = function() {
+    actualizarEstadoReconocimiento(false);
+  };
+
+  reconocimiento.onresult = function(event) {
+    const result = event.results[event.results.length - 1][0];
+    if (result.confidence < 0.75) return;
+
+    const texto = result.transcript.toLowerCase().trim();
+    const palabras = texto.split(/\s+/);
+
+    for (let i = 0; i < palabras.length; i++) {
+      const palabra = palabras[i];
+      const siguiente = palabras[i + 1] || "";
+
+      let dia = null;
+      let tipo = null;
+
+      if (diasSemana.includes(palabra)) {
+        dia = palabra;
+        if (rutinas[siguiente]) {
+          tipo = siguiente;
+        }
+      } else if (rutinas[palabra]) {
+        tipo = palabra;
+        if (diasSemana.includes(siguiente)) {
+          dia = siguiente;
+        }
+      }
+
+      if (dia) {
+        actualizarTabla(dia, tipo);
+      }
+    }
+  };
+
+  reconocimiento.onerror = function(event) {
+    console.error('Error en reconocimiento de voz:', event.error);
+    actualizarEstadoReconocimiento(false);
+  };
+
+  // Funciones globales
+  window.iniciarReconocimiento = () => {
+    try {
+      reconocimiento.start();
+      actualizarEstadoReconocimiento(true);
+    } catch (error) {
+      console.error('Error al iniciar reconocimiento:', error);
+    }
+  };
+
+  window.pausarReconocimiento = () => {
+    reconocimiento.stop();
+    actualizarEstadoReconocimiento(false);
+  };
+
+  window.enviarRutinaPorCorreo = async () => {
+    try {
+      const response = await fetch('/enviar-rutina-correo/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+          rutina: rutinaSemanal
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('✅ Rutina enviada correctamente a tu correo');
+      } else {
+        alert('❌ Error al enviar la rutina: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('❌ Error de conexión al enviar la rutina');
+    }
+  };
+}
+</script>
+{% endblock %}

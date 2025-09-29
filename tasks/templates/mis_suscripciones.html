@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 800px; margin: auto; background: #1a1a1a; padding: 2rem; border-radius: 12px; color: white;">
+    <h2>📋 Mis Equipos Suscritos</h2>
+    
+    {% if suscripciones %}
+        <div style="display: grid; gap: 1rem;">
+            {% for sub in suscripciones %}
+            <div style="background: #2a2a2a; padding: 1rem; border-radius: 6px;">
+                <h4>{{ sub.titulo }}</h4>
+                <p>{{ sub.descripcion }}</p>
+                <small>Suscrito el: {{ sub.fechaCreacion|date:"d/m/Y" }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No tienes suscripciones activas.</p>
+    {% endif %}
+    
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'gestionar_suscripciones' %}" style="padding: 0.7rem; background: #007bff; border: none; border-radius: 6px; color: white; text-decoration: none;">
+            🔍 Buscar más equipos
+        </a>
+    </div>
+</div>
+{% endblock %}

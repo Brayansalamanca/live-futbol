@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .form-container {
+    max-width: 400px;
+    margin: auto;
+    background: #000;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: #332e2e 2px 5px 45px;
+    color: white;
+  }
+
+  .form-container h1 {
+    text-align: center;
+    color: #ca9999;
+    margin-bottom: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+
+  .form-group input {
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+  }
+
+  .form-container button {
+    padding: 0.7rem;
+    background-color: #b0e6b2;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+  }
+
+  .form-container button:hover {
+    background-color: #8ac28d;
+  }
+
+  .secondary-btn {
+    background-color: #a17878;
+    margin-top: 0.5rem;
+  }
+
+  .terms {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .terms input {
+    margin-right: 0.5rem;
+  }
+</style>
+
+<div class="form-container">
+  <h1>Crear cuenta</h1>
+
+  {% if error %}
+    <p style="color: red; text-align: center;">{{ error }}</p>
+  {% endif %}
+
+  <form action="{% url 'signup' %}" method="POST">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="id_username">Nombre de usuario</label>
+      {{ form.username }}
+      {{ form.username.errors }}
+    </div>
+
+    <div class="form-group">
+      <label for="id_email">Correo electrónico</label>
+      {{ form.email }}
+      {{ form.email.errors }}
+    </div>
+
+    <div class="form-group">
+      <label for="id_password1">Contraseña</label>
+      {{ form.password1 }}
+      {{ form.password1.errors }}
+    </div>
+
+    <div class="form-group">
+      <label for="id_password2">Confirmar contraseña</label>
+      {{ form.password2 }}
+      {{ form.password2.errors }}
+    </div>
+
+    <div class="terms">
+      <input type="checkbox" name="acepta" id="acepta" required>
+      <label for="acepta">Acepto los <a href="/condiciones" style="color:#b0e6b2;">términos y condiciones</a></label>
+    </div>
+
+    <button type="submit">Registrarse</button>
+  </form>
+
+  <div style="margin-top: 1rem; text-align: center;">
+    <a href="{% url 'signin' %}">
+      <button type="button" class="secondary-btn">¿Ya tienes cuenta? Inicia sesión</button>
+    </a>
+  </div>
+</div>
+{% endblock %}

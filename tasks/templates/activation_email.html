@@ -1,0 +1,10 @@
+Hola {{ user.username }},
+
+Gracias por registrarte. Por favor activa tu cuenta haciendo clic en el siguiente enlace:
+
+http://{{ domain }}{% url 'activate' uid=uid token=token %}
+
+Si tú no creaste esta cuenta, puedes ignorar este mensaje.
+
+Saludos,
+El equipo de LiveFutbol

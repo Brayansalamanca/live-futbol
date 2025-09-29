@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: auto; padding: 2rem; color: white;">
+    <h2>📅 Partidos Próximos de tus Equipos</h2>
+    
+    {% if partidos %}
+        <div style="display: grid; gap: 1.5rem; margin-top: 2rem;">
+            {% for partido in partidos %}
+            <div style="background: #1a1a1a; border-radius: 12px; padding: 1.5rem; border-left: 4px solid #28a745;">
+                <h4 style="color: #28a745;">{{ partido.equipo_suscrito }}</h4>
+                <div style="display: flex; align-items: center; justify-content: space-around; margin: 1.5rem 0;">
+                    <div style="text-align: center;">
+                        {% if partido.logo_local %}
+                        <img src="{{ partido.logo_local }}" width="50">
+                        {% endif %}
+                        <div><strong>{{ partido.local }}</strong></div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div>VS</div>
+                        <div>{{ partido.fecha|date:"d/m H:i" }}</div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        {% if partido.logo_visitante %}
+                        <img src="{{ partido.logo_visitante }}" width="50">
+                        {% endif %}
+                        <div><strong>{{ partido.visitante }}</strong></div>
+                    </div>
+                </div>
+                <div style="text-align: center; color: #ccc;">
+                    🏟️ {{ partido.estadio }} | {{ partido.liga }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem;">
+            <h3>No tienes partidos próximos</h3>
+            <a href="{% url 'gestionar_suscripciones' %}" 
+               style="background: #28a745; padding: 0.7rem 1.5rem; border-radius: 6px; color: white; text-decoration: none;">
+                🔍 Buscar equipos
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

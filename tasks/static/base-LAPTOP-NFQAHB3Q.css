@@ -1,0 +1,236 @@
+nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgb(112, 189, 189); 
+    z-index: 0px ;
+}
+body {
+    background-color: rgb(25, 26, 26);
+    color: azure;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    text-decoration: none;
+    
+    
+
+}
+
+h1 {
+    background-color: aquamarine;
+    border: 5px double #0cb9be;
+    text-align: center;
+    padding: 15px;
+    margin: 20px auto;
+    max-width: 80%;
+    color: #1c48d8;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    
+
+}
+
+
+
+h1:hover{
+    color: white;
+    transform: scale(1.1);
+    transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+
+}
+.a:hover{
+      color: rgb(11, 70, 122);
+    transform: scale(1.1);
+    transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+}
+p:hover{
+    color: white;
+    transform: scale(1.1);
+    transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+
+}
+
+p {
+    background-color: #3db3c2;
+    border: 3px double #000;
+    color: black;
+    text-align: center;
+    padding: 15px;
+    margin: 20px auto;
+    max-width: 80%;
+
+}
+
+.a {
+   background-color: #eaeaea;
+    line-height: 40px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 40px;
+    text-align: center;
+    padding: 10px;
+    margin: 10px auto;
+    max-width: 80%;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 30px auto 0;
+    justify-content: space-between;
+    width: 90%;
+    max-width: 800px;
+
+}
+
+nav ul li {
+    flex: 1;
+    margin: 0 5px;
+}
+
+nav ul li a {
+    display: block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: rgb(121, 35, 35);
+    background-color: #0cb9be;
+    border-radius: 5px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+nav ul li a:hover {
+    background-color: #226775;
+    color: white;
+    transform: scale(1.1);
+    transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+
+img {
+    background-color: #3dacc2;
+    border-radius: 50%;
+    border: 3px dotted #3dacc2;
+    padding: 1px;
+    height: 70px;
+    width: 70px;
+    padding: 0%;
+    position: relative;
+    left: -180px; 
+
+
+}
+
+button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    width: 200px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: darkred;
+}
+ul, ol{
+    list-style: none;
+    padding: 0%;
+    margin: 0%;
+}
+
+    .video {
+      width: 40%;
+      max-width: 100%;
+      background-color: #1e16b3;
+      text-align: center;
+      height: 300px;
+    }
+
+    .estadisticas, .jugadores {
+      font-size: 20px;
+      width: 100%;
+      background-color: aqua;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+     .video :hover{
+        color: white;
+    transform: scale(1.1);
+    transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+
+     }
+      .jugadores:hover {
+        color: white;
+    transform: scale(1.1);
+    transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+      }
+      .estadisticas:hover{
+        color: white;
+    transform: scale(1.1);
+    transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease; 
+      }
+
+
+    table {
+    
+      width: 80%;
+      border-spacing: 20px;
+      max-width: 100%;
+      position: relative;
+      left: 180px; 
+      border-style: double;
+    }
+    /* static/css/styles.css */
+.task-link {
+    color: #2c3e50;
+    text-decoration: none;
+    font-size: 1.1em;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+.task-link:hover {
+    color: #3498db;
+    transform: scale(1.1);
+    transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease; 
+
+}
+
+.task-link.important {
+    color: #e74c3c;
+    font-weight: bold;
+    transform: scale(1.1);
+    transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease; 
+}
+
+.task-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.task-item {
+    background-color: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.task-description {
+    color: #7f8c8d;
+    margin: 5px 0;
+}
+
+.task-user {
+    font-size: 0.9em;
+    color: #95a5a6;
+    font-style: italic;
+}

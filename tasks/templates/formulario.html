@@ -1,0 +1,489 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <style>
+    .contenedor {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      color: #ffffff;
+      border: 1px solid #333;
+    }
+    
+    .titulo {
+      text-align: center;
+      color: #ffffff;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .subtitulo {
+      text-align: center;
+      color: #cccccc;
+      font-size: 1.2rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.5;
+    }
+    
+    .pregunta {
+      margin-bottom: 2rem;
+      background: linear-gradient(145deg, #252525, #2a2a2a);
+      border-radius: 15px;
+      padding: 1.5rem;
+      border-left: 4px solid #ff4444;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease;
+    }
+    
+    .pregunta:hover {
+      transform: translateY(-2px);
+    }
+    
+    .pregunta label {
+      display: block;
+      margin-bottom: 1rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #ff6b6b;
+    }
+    
+    select {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 2px solid #444;
+      background: #333;
+      color: #fff;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #ff4444;
+      box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.2);
+    }
+    
+    button {
+      padding: 1.2rem 3rem;
+      background: linear-gradient(135deg, #ff4444, #cc0000);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: block;
+      margin: 2rem auto;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4);
+    }
+    
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(255, 68, 68, 0.6);
+      background: linear-gradient(135deg, #ff5555, #dd0000);
+    }
+    
+    /* RESULTADO */
+    .resultado-container {
+      display: none;
+      animation: fadeIn 0.8s ease;
+    }
+    
+    .mensaje-resultado {
+      text-align: center;
+      background: linear-gradient(135deg, #ff4444, #cc0000);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      margin-bottom: 2rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4);
+    }
+    
+    .rutina-card {
+      background: linear-gradient(145deg, #252525, #2a2a2a);
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    .rutina-portero { border-left-color: #4fc3f7; }
+    .rutina-defensa { border-left-color: #81c784; }
+    .rutina-mediocampista { border-left-color: #fff176; }
+    .rutina-extremo { border-left-color: #ff8a65; }
+    .rutina-delantero { border-left-color: #f06292; }
+    
+    .rutina-titulo {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 700;
+    }
+    
+    .rutina-portero .rutina-titulo { color: #4fc3f7; }
+    .rutina-defensa .rutina-titulo { color: #81c784; }
+    .rutina-mediocampista .rutina-titulo { color: #fff176; }
+    .rutina-extremo .rutina-titulo { color: #ff8a65; }
+    .rutina-delantero .rutina-titulo { color: #f06292; }
+    
+    .dias-rutina {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .dia-card {
+      background: #333;
+      padding: 1.2rem;
+      border-radius: 10px;
+      border-left: 3px solid;
+      transition: transform 0.2s ease;
+    }
+    
+    .dia-card:hover {
+      transform: translateY(-2px);
+      background: #3a3a3a;
+    }
+    
+    .rutina-portero .dia-card { border-left-color: #4fc3f7; }
+    .rutina-defensa .dia-card { border-left-color: #81c784; }
+    .rutina-mediocampista .dia-card { border-left-color: #fff176; }
+    .rutina-extremo .dia-card { border-left-color: #ff8a65; }
+    .rutina-delantero .dia-card { border-left-color: #f06292; }
+    
+    .dia-nombre {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    
+    .dia-ejercicios {
+      color: #ccc;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    
+    .volver-btn {
+      background: #666;
+      margin-top: 1rem;
+    }
+    
+    .volver-btn:hover {
+      background: #777;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+  <div class="contenedor">
+    <h1 class="titulo">Formulario: Posición de Juego</h1>
+    <p class="subtitulo">
+      Responde honestamente para descubrir tu posición ideal y recibir tu rutina semanal de entrenamiento personalizada.
+    </p>
+
+    <!-- Formulario -->
+    <form id="formularioJugador">
+      <div class="pregunta">
+        <label>1. ¿Qué disfrutas más en un partido?</label>
+        <select id="p1" required>
+          <option value="">-- Selecciona --</option>
+          <option value="portero">Atajar y proteger el arco</option>
+          <option value="defensa">Quitar el balón y marcar al rival</option>
+          <option value="mediocampista">Controlar y distribuir el balón</option>
+          <option value="extremo">Correr y desbordar</option>
+          <option value="delantero">Definir y marcar goles</option>
+        </select>
+      </div>
+
+      <div class="pregunta">
+        <label>2. ¿Cuál es tu mayor fortaleza física?</label>
+        <select id="p2" required>
+          <option value="">-- Selecciona --</option>
+          <option value="portero">Reflejos y agilidad</option>
+          <option value="defensa">Fuerza y resistencia</option>
+          <option value="mediocampista">Visión y aguante</option>
+          <option value="extremo">Velocidad y explosividad</option>
+          <option value="delantero">Potencia y definición</option>
+        </select>
+      </div>
+
+      <div class="pregunta">
+        <label>3. ¿Qué rol prefieres en tu equipo?</label>
+        <select id="p3" required>
+          <option value="">-- Selecciona --</option>
+          <option value="portero">Líder defensivo y organizador</option>
+          <option value="defensa">Muro defensivo y recuperador</option>
+          <option value="mediocampista">Cerebro y creador de juego</option>
+          <option value="extremo">Desequilibrante y asistente</option>
+          <option value="delantero">Goleador y finalizador</option>
+        </select>
+      </div>
+
+      <div class="pregunta">
+        <label>4. ¿En qué eres mejor actualmente?</label>
+        <select id="p4" required>
+          <option value="">-- Selecciona --</option>
+          <option value="portero">Atajadas y posicionamiento</option>
+          <option value="defensa">Entradas limpias y anticipación</option>
+          <option value="mediocampista">Pases largos y control</option>
+          <option value="extremo">Regates y centros</option>
+          <option value="delantero">Remate y movimientos</option>
+        </select>
+      </div>
+
+      <div class="pregunta">
+        <label>5. ¿Qué entrenamiento disfrutas más?</label>
+        <select id="p5" required>
+          <option value="">-- Selecciona --</option>
+          <option value="portero">Reflejos y estiramientos</option>
+          <option value="defensa">Fuerza y choques</option>
+          <option value="mediocampista">Resistencia y pases</option>
+          <option value="extremo">Agilidad y sprints</option>
+          <option value="delantero">Tiros y definición</option>
+        </select>
+      </div>
+
+      <div class="pregunta">
+        <label>6. ¿Qué sueñas lograr en un partido?</label>
+        <select id="p6" required>
+          <option value="">-- Selecciona --</option>
+          <option value="portero">Atajar un penal decisivo</option>
+          <option value="defensa">Anular al mejor delantero rival</option>
+          <option value="mediocampista">Dar la asistencia del gol</option>
+          <option value="extremo">Asistir y desbordar constantemente</option>
+          <option value="delantero">Hacer un hat-trick</option>
+        </select>
+      </div>
+
+      <button type="submit">🎯 Descubrir mi posición</button>
+    </form>
+
+    <!-- Resultado -->
+    <div id="resultado" class="resultado-container">
+      <div class="mensaje-resultado" id="mensaje"></div>
+
+      <div id="portero" class="rutina-card rutina-portero">
+        <h2 class="rutina-titulo">🏅 PORTERO - Rutina Semanal</h2>
+        <div class="dias-rutina">
+          <div class="dia-card">
+            <div class="dia-nombre">📅 LUNES - Reflejos</div>
+            <div class="dia-ejercicios">Atajadas en corto, Estiramientos, Ejercicios de reacción</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 MARTES - Fuerza Superior</div>
+            <div class="dia-ejercicios">Press banca, Fondos, Lanzamientos de balón medicinal</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 MIÉRCOLES - Técnica</div>
+            <div class="dia-ejercicios">Salidas aéreas, Bloqueos, Posicionamiento en el área</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 JUEVES - Juego de Pies</div>
+            <div class="dia-ejercicios">Distribución con pies, Saques de meta, Control bajo presión</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 VIERNES - Partido</div>
+            <div class="dia-ejercicios">Simulación de partido, Situaciones reales, Comunicación</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 SÁBADO - Análisis</div>
+            <div class="dia-ejercicios">Revisión de videos, Táctica, Mentalización</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 DOMINGO - Descanso Activo</div>
+            <div class="dia-ejercicios">Caminata, Estiramientos suaves, Hidratación</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="defensa" class="rutina-card rutina-defensa">
+        <h2 class="rutina-titulo">🛡️ DEFENSA - Rutina Semanal</h2>
+        <div class="dias-rutina">
+          <div class="dia-card">
+            <div class="dia-nombre">📅 LUNES - Fuerza</div>
+            <div class="dia-ejercicios">Sentadillas, Peso muerto, Core, Flexiones</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 MARTES - Velocidad</div>
+            <div class="dia-ejercicios">Sprints 20m, Cambios de dirección, Reacción</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 MIÉRCOLES - Técnica Defensiva</div>
+            <div class="dia-ejercicios">Entradas limpias, Carga corporal, Anticipación</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 JUEVES - Juego Aéreo</div>
+            <div class="dia-ejercicios">Saltos verticales, Cabeceo defensivo/oftensivo</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 VIERNES - Partido Reducido</div>
+            <div class="dia-ejercicios">2v2, 3v3, Transiciones, Pressing</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 SÁBADO - Resistencia</div>
+            <div class="dia-ejercicios">Fartlek, Circuitos, Recuperación activa</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 DOMINGO - Descanso Activo</div>
+            <div class="dia-ejercicios">Yoga, Estiramientos, Movilidad</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="mediocampista" class="rutina-card rutina-mediocampista">
+        <h2 class="rutina-titulo">🎯 MEDIOCAMPISTA - Rutina Semanal</h2>
+        <div class="dias-rutina">
+          <div class="dia-card">
+            <div class="dia-nombre">📅 LUNES - Resistencia</div>
+            <div class="dia-ejercicios">Trote 5km, Fartlek, Cambios de ritmo</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 MARTES - Visión</div>
+            <div class="dia-ejercicios">Pases largos, Ejercicios periféricos, Toma de decisiones</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 MIÉRCOLES - Control</div>
+            <div class="dia-ejercicios">Control orientado, Recepción, Protección de balón</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 JUEVES - Distribución</div>
+            <div class="dia-ejercicios">Pases entre líneas, Cambio de juego, Asistencias</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 VIERNES - Partido Creativo</div>
+            <div class="dia-ejercicios">Juego posicional, Creación, Transiciones</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 SÁBADO - Táctica</div>
+            <div class="dia-ejercicios">Análisis táctico, Posicionamiento, Estrategias</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 DOMINGO - Descanso Activo</div>
+            <div class="dia-ejercicios">Paseo, Estiramientos, Hidratación</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="extremo" class="rutina-card rutina-extremo">
+        <h2 class="rutina-titulo">⚡ EXTREMO - Rutina Semanal</h2>
+        <div class="dias-rutina">
+          <div class="dia-card">
+            <div class="dia-nombre">📅 LUNES - Velocidad</div>
+            <div class="dia-ejercicios">Sprints 30m, Aceleración, Frenadas bruscas</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 MARTES - Agilidad</div>
+            <div class="dia-ejercicios">Escalera de coordinación, Conos, Cambios de dirección</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 MIÉRCOLES - Regates</div>
+            <div class="dia-ejercicios">1v1, Fintas, Protección de balón en velocidad</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 JUEVES - Centros</div>
+            <div class="dia-ejercicios">Centros en carrera, Pases filtrados, Asistencias</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 VIERNES - Definición</div>
+            <div class="dia-ejercicios">Remate desde banda, Tiros cruzados, Finalización</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 SÁBADO - Partido</div>
+            <div class="dia-ejercicios">Simulación de partido, Desbordes, Apoyos</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 DOMINGO - Descanso Activo</div>
+            <div class="dia-ejercicios">Bicicleta, Estiramientos, Recuperación</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="delantero" class="rutina-card rutina-delantero">
+        <h2 class="rutina-titulo">🔥 DELANTERO - Rutina Semanal</h2>
+        <div class="dias-rutina">
+          <div class="dia-card">
+            <div class="dia-nombre">📅 LUNES - Definición</div>
+            <div class="dia-ejercicios">Tiros a portería, Vaselina, Remate de primera</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 MARTES - Potencia</div>
+            <div class="dia-ejercicios">Saltos, Burpees, Sentadillas con salto, Fuerza explosiva</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 MIÉRCOLES - Movimientos</div>
+            <div class="dia-ejercicios">Desmarques, Giros, Control en movimiento</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 JUEVES - Juego Aéreo</div>
+            <div class="dia-ejercicios">Saltos, Cabeceo de precisión, Timing</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 VIERNES - Finalización</div>
+            <div class="dia-ejercicios">Tiros bajo presión, Definición en espacios reducidos</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 SÁBADO - Partido</div>
+            <div class="dia-ejercicios">Situaciones reales, Pressing, Transiciones ofensivas</div>
+          </div>
+          <div class="dia-card">
+            <div class="dia-nombre">📅 DOMINGO - Descanso Activo</div>
+            <div class="dia-ejercicios">Natación, Estiramientos, Alimentación</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="volver-btn" onclick="volverAlFormulario()">🔄 Realizar otro test</button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("formularioJugador").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      // Recolectar respuestas
+      const respuestas = [p1.value, p2.value, p3.value, p4.value, p5.value, p6.value];
+      const conteo = {};
+      respuestas.forEach(r => conteo[r] = (conteo[r] || 0) + 1);
+
+      // Elegir posición con más votos
+      let tipo = Object.keys(conteo).reduce((a, b) => conteo[a] > conteo[b] ? a : b);
+
+      // Mostrar resultado
+      document.getElementById("formularioJugador").style.display = "none";
+      document.getElementById("resultado").style.display = "block";
+      
+      const nombresPosiciones = {
+        'portero': 'PORTERO 🥅',
+        'defensa': 'DEFENSA 🛡️', 
+        'mediocampista': 'MEDIOCAMPISTA 🎯',
+        'extremo': 'EXTREMO ⚡',
+        'delantero': 'DELANTERO 🔥'
+      };
+      
+      document.getElementById("mensaje").innerText = `¡FELICIDADES! Tu posición ideal es: ${nombresPosiciones[tipo]}`;
+
+      document.querySelectorAll(".rutina-card").forEach(sec => sec.style.display = "none");
+      document.getElementById(tipo).style.display = "block";
+    });
+
+    function volverAlFormulario() {
+      document.getElementById("resultado").style.display = "none";
+      document.getElementById("formularioJugador").style.display = "block";
+      document.getElementById("formularioJugador").reset();
+    }
+  </script>
+{% endblock %}
