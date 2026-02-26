@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 500px; margin:auto; background:#000; padding:2rem; border-radius:10px; color:white; text-align:center;">
+  <h2>¡Cuenta activada!</h2>
+  <p>Tu correo ha sido confirmado. Ya puedes iniciar sesión en <b>Live Fútbol</b>.</p>
+  <a href="{% url 'signin' %}" style="color:#78eb7c; font-weight:bold;">Iniciar sesión</a>
+</div>
+{% endblock %}

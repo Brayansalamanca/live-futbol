@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h1>soporte</h1>
+  <br>
+  <br>
+ 
+ 
+    
+    
+   <p style="text-align: center; justify-content: center;">
+    <strong>correo de asistencia </strong>
+    <br>
+    <br>
+   ✉️  saebra581@gmail.com ✉️
+  </p>
+
+  <br>
+  <p><strong>fallas comunes</strong></p>
+<p class="errores">
+1. Contraseña incorrecta: al intentar iniciar sesión con la contraseña mal escrita, el sistema mostrará un mensaje de error. Se debe usar la opción "Recuperar contraseña".<br><br>
+2. Usuario no registrado: si se intenta ingresar con un correo que no está en el sistema, aparecerá un aviso indicando que la cuenta no existe. Se debe registrar antes de iniciar sesión.<br><br>
+3. Correo sin verificar: el usuario puede crear la cuenta pero no completar la activación por correo electrónico. Se debe revisar la bandeja de entrada y dar clic en el enlace de verificación.<br><br>
+4. Sistema en mantenimiento: puede aparecer un mensaje indicando que la plataforma está en mantenimiento. En este caso no es posible iniciar sesión ni usar la página hasta que el servicio esté disponible.<br><br>
+5. Tiempo de sesión agotado: si la sesión expira por inactividad, será necesario iniciar sesión de nuevo.<br><br>
+6. Datos incompletos en formularios: si se deja un campo obligatorio vacío, el sistema no permitirá continuar.<br><br>
+7. Navegador no compatible: en algunos casos el usuario puede ver un mensaje indicando que el navegador es obsoleto. Se recomienda actualizar o usar otro navegador.
+</p>
+
+<style>
+  .errores {
+    text-align: justify;
+    font-size: 19px;
+    line-height: 1.6;
+    
+   
+  }
+</style>
+
+
+ <br>
+ <br>
+ {% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div style="max-width: 500px; margin: auto; padding: 2rem; background-color: #fff3f3; border: 1px solid #ff0000; border-radius: 10px; text-align: center;">
+    <h2 style="color: #d40000;">❌ Enlace de activación inválido</h2>
+    <p>El enlace ya ha sido usado o ha expirado.</p>
+    <a href="{% url 'signup' %}">
+      <button style="margin-top: 1rem; padding: 0.5rem 1rem; background-color: #ff0000; color: white; border: none; border-radius: 5px;">
+        Volver al registro
+      </button>
+    </a>
+  </div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <style>
+    .jugador {
+      display: none;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      background-color: rgb(136, 136, 136);
+      text-align: left;
+      color: #000;
+    }
+    div { max-width: 600px; margin: auto; }
+  </style>
+
+  <h1>Rutina semanal por posición</h1>
+
+  <!-- Portero -->
+  <div id="portero" class="jugador">
+    <h2>Portero</h2>
+    <ul>
+      <li><strong>Lunes:</strong> Reflejos con balones de reacción + flexibilidad</li>
+      <li><strong>Martes:</strong> Fuerza de brazos y tronco (pesas ligeras)</li>
+      <li><strong>Miércoles:</strong> Entrenamiento de atajadas en corto</li>
+      <li><strong>Jueves:</strong> Salidas aéreas + trabajo de coordinación</li>
+      <li><strong>Viernes:</strong> Partido reducido con énfasis en seguridad</li>
+      <li><strong>Sábado:</strong> Revisión de jugadas + tiros a portería</li>
+      <li><strong>Domingo:</strong> Descanso activo</li>
+    </ul>
+  </div>
+
+  <!-- Defensa -->
+  <div id="defensa" class="jugador">
+    <h2>Defensa</h2>
+    <ul>
+      <li><strong>Lunes:</strong> Sentadillas y fuerza de tren inferior</li>
+      <li><strong>Martes:</strong> Sprints cortos con cambios de dirección</li>
+      <li><strong>Miércoles:</strong> Trabajo de marcaje 1v1</li>
+      <li><strong>Jueves:</strong> Saltos y despejes de cabeza</li>
+      <li><strong>Viernes:</strong> Juegos reducidos enfocados en defensa</li>
+      <li><strong>Sábado:</strong> Partido reducido con coberturas</li>
+      <li><strong>Domingo:</strong> Descanso activo</li>
+    </ul>
+  </div>
+
+  <!-- Mediocampista -->
+  <div id="mediocampista" class="jugador">
+    <h2>Mediocampista</h2>
+    <ul>
+      <li><strong>Lunes:</strong> 20 min trote + pases a un toque</li>
+      <li><strong>Martes:</strong> Ejercicios de visión periférica</li>
+      <li><strong>Miércoles:</strong> Control y distribución del balón</li>
+      <li><strong>Jueves:</strong> Resistencia aeróbica 30 min</li>
+      <li><strong>Viernes:</strong> Análisis de jugadas</li>
+      <li><strong>Sábado:</strong> Partido reducido con énfasis en creación</li>
+      <li><strong>Domingo:</strong> Descanso activo</li>
+    </ul>
+  </div>
+
+  <!-- Extremo -->
+  <div id="extremo" class="jugador">
+    <h2>Extremo</h2>
+    <ul>
+      <li><strong>Lunes:</strong> Sprints en curva + cambios de ritmo</li>
+      <li><strong>Martes:</strong> Agilidad con escalera de coordinación</li>
+      <li><strong>Miércoles:</strong> Desbordes 1v1</li>
+      <li><strong>Jueves:</strong> Entrenamiento de centros</li>
+      <li><strong>Viernes:</strong> Velocidad con balón</li>
+      <li><strong>Sábado:</strong> Partido reducido enfocado en desborde</li>
+      <li><strong>Domingo:</strong> Descanso activo</li>
+    </ul>
+  </div>
+
+  <!-- Delantero -->
+  <div id="delantero" class="jugador">
+    <h2>Delantero</h2>
+    <ul>
+      <li><strong>Lunes:</strong> 30 tiros al arco (ambos perfiles)</li>
+      <li><strong>Martes:</strong> Potencia con saltos y burpees</li>
+      <li><strong>Miércoles:</strong> Definición en espacios reducidos</li>
+      <li><strong>Jueves:</strong> Movimientos de desmarque</li>
+      <li><strong>Viernes:</strong> Posicionamiento ofensivo</li>
+      <li><strong>Sábado:</strong> Partido reducido enfocado en goles</li>
+      <li><strong>Domingo:</strong> Descanso activo</li>
+    </ul>
+  </div>
+
+  <script>
+    const tipo = localStorage.getItem("tipoJugador");
+    const mensaje = localStorage.getItem("mensajeJugador");
+
+    if (tipo) {
+      document.addEventListener("DOMContentLoaded", () => {
+        const secciones = document.querySelectorAll('.jugador');
+        secciones.forEach(sec => sec.style.display = 'none');
+        const elegido = document.getElementById(tipo);
+        if (elegido) elegido.style.display = 'block';
+
+        const msgEl = document.createElement("div");
+        msgEl.innerHTML = `<h2 style="color:red">${mensaje}</h2>`;
+        document.body.insertBefore(msgEl, document.querySelector("h1"));
+      });
+    }
+  </script>
+{% endblock %}

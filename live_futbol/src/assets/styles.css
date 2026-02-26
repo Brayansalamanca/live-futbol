@@ -1,0 +1,245 @@
+/* NAVBAR */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color:rgba(204, 202, 202, 0.926);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  z-index: 999;
+  box-shadow: #01010141 2px 5px 45px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 70px;
+
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  padding: 10px 15px;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+nav ul li a {
+  background-color: #000000;
+  color: rgb(255, 255, 255);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 20px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+nav ul li a:hover {
+  background-color: #adc9ce;
+  transform: scale(1.3);
+}
+
+
+body {
+ background-color: rgb(199, 198, 198);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #000000;
+  margin: 0;
+  padding-top: 1rem; /* espacio para el nav fijo */
+  text-align: center;
+}
+
+/* ENCABEZADO */
+h1 {
+  background-color: #000000d1;
+  color: #ffffff;
+  padding: 15px 30px;
+  border-radius: 10px;
+  margin: 20px auto;
+  max-width: 90%;
+  font-size: 2rem;
+  box-shadow: #00000042 2px 5px 45px;
+}
+
+
+
+h2, h3 {
+  margin-top: 20px;
+}
+
+.a {
+  font-size: 32px;
+  margin: 20px auto;
+  color: #c74040;
+  font-weight: bold;
+}
+
+/* PÁRRAFOS */
+p {
+  background-color: #000000a1;
+  color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 90%;
+  margin: 20px auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: 0.3s ease;
+  font-size: 15px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+p:hover {
+  background-color: #00000099;
+   max-width: 80%;
+    height: 70%;
+     transform: scale(1.03);
+}
+
+
+button {
+  background-color: #e74c3c;
+  color: white;
+  padding: 6px 14px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  
+  margin-top: 25px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+  background-color: #c0392b;
+  transform: scale(1.1);
+}
+
+
+.seccion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.video {
+  background-color: #00000096;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1 1 300px;
+  height: 300px;
+}
+
+.estadisticas, .jugadores {
+  background-color: #000000bf;
+  color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1 1 300px;
+  transition: 0.3s ease;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.estadisticas:hover,
+.jugadores:hover,
+.video:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* IMAGEN */
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem auto 0 auto;
+}
+
+img {
+  height: 4rem;
+  width: 4rem;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  box-shadow: #0000009d 2px 5px 45px;
+}
+
+/* TABLA */
+table {
+  width: 90%;
+  margin: 30px auto;
+  border-collapse: separate;
+  border-spacing: 20px;
+  z-index: 999;
+  box-shadow: #00000097 2px 5px 45px;
+  background-color: #2b2626;
+  color: #ffffff;
+}
+
+/* TAREAS Y ENLACES */
+.task-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  margin: 5px 0;
+  transition: 0.3s ease;
+}
+
+.task-link:hover {
+  transform: scale(1.05);
+}
+
+.task-item {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  padding: 15px;
+  margin: 10px auto;
+  border-radius: 10px;
+  max-width: 90%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+ul, li {
+  list-style: none;
+}
+
+/* CLASES ADICIONALES */
+.d {
+  max-width: 400px;
+  margin: auto;
+  background: #000000;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: #007BFF 2px 5px 45px;
+}
+
+.c {
+  height: 10px;
+  width: 30px;
+  z-index: 999;
+  box-shadow: #007BFF 2px 5px 45px;
+}
+
+.v {
+  z-index: 999;
+  box-shadow: #a17878 2px 5px 45px;
+}
+
+.v:hover {
+  transition: 1.1s;
+}
+.terminos{
+ margin-top: 5%;
+ display: flex;
+ text-align: center;
+}

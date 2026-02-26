@@ -1,0 +1,6 @@
+Hola {{ user.username }},
+<br><br>
+Gracias por registrarte en <b>Live Fútbol</b>.  
+Haz clic en el siguiente enlace para activar tu cuenta:  
+<br><br>
+<a href="http://{{ domain }}{% url 'activar' uidb64=uid token=token %}">Confirmar mi cuenta</a>
