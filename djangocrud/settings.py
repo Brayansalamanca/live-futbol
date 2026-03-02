@@ -2,18 +2,16 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# 1. Cargar variables de entorno (Asegúrate de tener instalado: pip install python-dotenv)
+# 1. Cargar variables de entorno
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2. Seguridad: Prioriza el .env
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-z$!j#aip6tr)!7=l#1&=_*=jc4s*2@tve06#i&hwg&#p5na7z2')
+# 2. Seguridad
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-z$!j#aip6tr)!7=l#1&=_*=jc4s*2@tve06#i&hwg&p5na7z2')
 
-# 3. DEBUG dinámico
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
-if os.environ.get('RENDER'):
-    DEBUG = False
+# 3. DEBUG (Lo activamos temporalmente para que veas el error real si falla)
+DEBUG = True 
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', '*']
 
@@ -48,7 +46,7 @@ ROOT_URLCONF = 'djangocrud.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'tasks' / 'templates'],
+        'DIRS': [BASE_DIR / 'tasks' / 'templates'], #
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -63,15 +61,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'djangocrud.wsgi.application'
 
-# 4. CONFIGURACIÓN EXCLUSIVA MONGODB (DJONGO)
-# No necesitas pymysql ni dj_database_url aquí
+# 4. CONFIGURACIÓN MONGODB (AJUSTADA)
+# Usamos la URL directa para evitar fallos de lectura en Render
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': 'livefutbol_db',
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
-            'host': os.getenv('MONGO_URL', 'mongodb+srv://brayan:3143401305@cluster0.uuxqot8.mongodb.net/livefutbol_db?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true'),
+            'host': 'mongodb+srv://brayan:3143401305@cluster0.uuxqot8.mongodb.net/livefutbol_db?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true',
         }
     }
 }
@@ -83,7 +81,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internacionalización
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -118,7 +115,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
-    "http://127.0.0.1:3000"
+    "http://127.0.0.1:3000",
+    "https://live-futbol-8693.onrender.com" # Cambia esto por tu URL de Render
 ]
 
 CSRF_TRUSTED_ORIGINS = [
