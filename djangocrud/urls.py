@@ -34,4 +34,8 @@ urlpatterns = [
     path('recuperar/enviado/', auth_views.PasswordResetDoneView.as_view(template_name='enlace_enviado.html'), name='password_reset_done'),
     path('recuperar/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='restablecer_password.html'), name='password_reset_confirm'),
     path('recuperar/completo/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
+    path('inventario/', views.inventario_ropa, name='inventario'),
+    path('api/guardar-prenda/', views.api_guardar_prenda, name='api_guardar_prenda'),
+    path('api/obtener-prendas/', views.api_obtener_prendas, name='api_obtener_prendas'),
+    path('api/apartar-prenda/<int:prenda_id>/', views.api_apartar_prenda, name='api_apartar_prenda'),
 ]

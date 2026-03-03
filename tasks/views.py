@@ -19,6 +19,7 @@ import json
 from .models import Task
 from .forms import TaskForm, CustomUserCreationForm
 from .tokens import account_activation_token
+from .models import Task, PrendaRopa, RegistroEntrega, ObjetoPerdido, BajaBalon
 
 # ============================
 # 🏠 VISTAS PÚBLICAS
@@ -219,3 +220,55 @@ def enviar_rutina_correo(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
+# ============================
+# 📦 SISTEMA DE INVENTARIO Y REGISTROS (MongoDB)
+# ============================
+
+@login_required
+def inventario_ropa(request):
+    """Renderiza la página de inventario de ropa"""
+    return render(request, 'inventario_ropa.html')
+
+@login_required
+def api_guardar_prenda(request):
+    """Guarda una prenda nueva en MongoDB Atlas"""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            prenda = PrendaRopa.objects.create(
+                objeto=data.get('objeto'),
+                talla=data.get('talla'),
+                condicion=data.get('condicion'),
+                detalle_defecto=data.get('detalle_defecto', ''),
+                imagen=data.get('imagen'), # Recibe el Base64 de la foto
+                estado='Disponible'
+            )
+            return JsonResponse({"status": "success", "id": prenda.id})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
+
+@login_required
+def api_obtener_prendas(request):
+    """Trae todas las prendas registradas para que todos los usuarios las vean"""
+    prendas = list(PrendaRopa.objects.all().values().order_by('-fecha_registro'))
+    return JsonResponse(prendas, safe=False)
+
+@login_required
+def api_eliminar_prenda(request, prenda_id):
+    """Elimina una prenda por ID"""
+    if request.method == "POST":
+        prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
+        prenda.delete()
+        return JsonResponse({"status": "success"})
+
+@login_required
+def api_apartar_prenda(request, prenda_id):
+    """Marca una prenda como apartada por un usuario"""
+    if request.method == "POST":
+        data = json.loads(request.body)
+        prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
+        prenda.estado = "Apartado"
+        prenda.nombre_apartado = data.get('nombre', request.user.username)
+        prenda.save()
+        return JsonResponse({"status": "success"})
