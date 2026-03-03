@@ -3,7 +3,6 @@
 
 {% block content %}
 <style>
-    /* Mantenemos tus estilos originales exactamente igual */
     .contenedor-registro {
         max-width: 95%;
         margin: 20px auto;
@@ -67,14 +66,15 @@
     th { background-color: #2c3e50; color: white; padding: 15px; }
     td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
 
-    .btn-entregado { background-color: #27ae60; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
+    .btn-entregado { background-color: #27ae60; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin: 2px; }
+    .btn-editar { background-color: #2980b9; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin: 2px; }
 </style>
 
 <div class="contenedor-registro">
     <h1>⚽ Registro de Entrega (Balones y Equipos)</h1>
 
     <h3>1. Selecciona el objeto</h3>
-    <div style="margin-bottom: 20px;">
+    <div id="objetosContenedor" style="margin-bottom: 20px;">
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'balon futbol' )">⚽ Balón Fútbol</button>
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'balon básquetbol')">🏀 Balón básquetbol</button>
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'balon volley')">🏐 Balón Volley</button>
@@ -103,7 +103,7 @@
     </div>
     
     <button onclick="registrarEnNube()" style="background-color: #5f17e4; padding: 15px 40px; font-weight: bold; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px;">
-        🚀 Registrar Entrega Global
+        🚀 Registrar / Actualizar Entrega
     </button>
 
     <div class="seccion-busqueda">
@@ -132,6 +132,7 @@
     let objetoActual = "";
     let gradoActual = "";
     let letraActual = "";
+    let editandoID = null;
 
     async function cargarDatos() {
         try {
@@ -151,13 +152,20 @@
             return;
         }
 
-        // CORRECCIÓN: Los nombres de las llaves deben coincidir con tu views.py
         const datos = {
             recibido_por: nombreInput,
             curso: cursoCompleto,
             balon: objetoActual,
             lugar: lugarInput
         };
+
+        // Si estamos editando, primero eliminamos el anterior para "actualizar"
+        if (editandoID) {
+            await fetch(`/api/eliminar-entrega/${editandoID}/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": "{{ csrf_token }}" }
+            });
+        }
 
         const res = await fetch("{% url 'api_guardar_entrega' %}", {
             method: "POST",
@@ -169,11 +177,8 @@
         });
 
         if (res.ok) {
-            alert("✅ Registro exitoso");
-            document.getElementById("textoVoz").value = "";
-            document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
-            objetoActual = ""; gradoActual = ""; letraActual = "";
-            document.getElementById("letrasContenedor").innerHTML = "";
+            alert(editandoID ? "✅ Registro actualizado" : "✅ Registro exitoso");
+            resetearFormulario();
             cargarDatos();
         }
     }
@@ -183,11 +188,10 @@
         const filtro = document.getElementById("buscador").value.toLowerCase();
 
         registros.forEach((r) => {
-            // EXPLICACIÓN: Intentamos leer 'nombre' (como está en la DB) 
-            // o 'recibido_por' (por si acaso). Si ambos fallan, ponemos 'N/A'.
             const nombreMostrar = r.nombre || r.recibido_por || "Sin nombre";
             const objetoMostrar = r.objeto || r.balon || "Sin objeto";
             const cursoMostrar = r.curso || "N/A";
+            const idReal = r._id || r.id;
             
             const info = (nombreMostrar + cursoMostrar).toLowerCase();
             
@@ -199,12 +203,46 @@
                     <td>${r.lugar || 'Cancha'}</td>
                     <td>${r.fecha ? new Date(r.fecha).toLocaleString() : 'Recién guardado'}</td>
                     <td>
-                        <button class="btn-entregado" onclick="marcarEntregado('${r._id || r.id}')">Finalizar</button>
+                        <button class="btn-editar" onclick="prepararEdicion('${idReal}', '${nombreMostrar}', '${objetoMostrar}', '${cursoMostrar}', '${r.lugar}')">Editar</button>
+                        <button class="btn-entregado" onclick="marcarEntregado('${idReal}')">Finalizar</button>
                     </td>
                 </tr>`;
             }
         });
         document.getElementById("tabla").innerHTML = html;
+    }
+
+    function prepararEdicion(id, nombre, objeto, curso, lugar) {
+        editandoID = id;
+        document.getElementById("textoVoz").value = nombre;
+        document.getElementById("lugarSelect").value = lugar;
+        
+        // Seleccionar Objeto visualmente
+        objetoActual = objeto;
+        document.querySelectorAll(".btn-objeto").forEach(b => {
+            b.classList.toggle("activo", b.innerText.toLowerCase().includes(objeto.toLowerCase()));
+        });
+
+        // Extraer grado y letra del curso (ej: "10A")
+        const grado = parseInt(curso);
+        const letra = curso.replace(grado, "");
+        
+        gradoActual = grado;
+        letraActual = letra;
+
+        // Activar botones de curso
+        cargarBotonesCursos();
+        generarLetras(grado);
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        alert("📝 Modo Edición: Modifica los campos y dale a 'Registrar' para guardar los cambios.");
+    }
+
+    function resetearFormulario() {
+        document.getElementById("textoVoz").value = "";
+        document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
+        objetoActual = ""; gradoActual = ""; letraActual = ""; editandoID = null;
+        document.getElementById("letrasContenedor").innerHTML = "";
     }
 
     async function marcarEntregado(id) {
@@ -241,7 +279,8 @@
         let limite = (grado === 9) ? 4 : (grado >= 10) ? 3 : 5;
         let html = "";
         for(let i=0; i<limite; i++) {
-            html += `<button class="btn-curso" onclick="seleccionarLetra(this, '${letras[i]}')">${letras[i]}</button>`;
+            const activa = (letraActual === letras[i]) ? "activo" : "";
+            html += `<button class="btn-curso ${activa}" onclick="seleccionarLetra(this, '${letras[i]}')">${letras[i]}</button>`;
         }
         document.getElementById("letrasContenedor").innerHTML = html;
     }
@@ -249,7 +288,8 @@
     function cargarBotonesCursos() {
         let html = "";
         for(let i=3; i<=11; i++) {
-            html += `<button class="btn-curso" onclick="seleccionarGrado(this, ${i})">${i}°</button>`;
+            const activa = (gradoActual === i) ? "activo" : "";
+            html += `<button class="btn-curso ${activa}" onclick="seleccionarGrado(this, ${i})">${i}°</button>`;
         }
         document.getElementById("gradosContenedor").innerHTML = html;
     }
