@@ -2,6 +2,64 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* Estilos para que el contenido se vea más grande y centrado */
+    h1 {
+        font-size: 3rem; /* Título más grande */
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    #rankingTable {
+        width: 80%; /* Tabla más ancha */
+        margin: 30px auto;
+        font-size: 1.5rem; /* Letra más grande para los datos */
+        border-collapse: collapse;
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    #rankingTable th, #rankingTable td {
+        padding: 20px; /* Celdas con más espacio */
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Si añades imágenes, esto las hará verse grandes y nítidas */
+    .foto-jugador {
+        width: 60px; 
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .center {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 1.2rem;
+    }
+
+    input {
+        padding: 15px;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        border: none;
+        margin: 5px;
+    }
+
+    button {
+        padding: 15px 30px;
+        font-size: 1.1rem;
+        background-color: #5f17e4;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+</style>
 
 <h1>🏆 Ranking de Jugadores</h1>
 
@@ -14,8 +72,7 @@
     </tr>
   </thead>
   <tbody>
-    <!-- Se llenará dinámicamente -->
-  </tbody>
+    </tbody>
 </table>
 
 <div class="center">
@@ -37,13 +94,13 @@
     tbody.innerHTML = "";
 
     jugadores
-      .sort((a, b) => b.puntaje - a.puntaje) // ordenar por puntaje descendente
+      .sort((a, b) => b.puntaje - a.puntaje)
       .forEach((jugador, index) => {
         const fila = document.createElement("tr");
         fila.innerHTML = `
           <td>${index + 1}</td>
-          <td>${jugador.nombre}</td>
-          <td>${jugador.puntaje}</td>
+          <td><strong>${jugador.nombre}</strong></td>
+          <td>${jugador.puntaje} pts</td>
         `;
         tbody.appendChild(fila);
       });
