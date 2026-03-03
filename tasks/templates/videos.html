@@ -3,7 +3,7 @@
 
 {% block content %}
 <style>
-    /* Mantenemos tus estilos originales */
+    /* Mantenemos tus estilos originales exactamente igual */
     .contenedor-registro {
         max-width: 95%;
         margin: 20px auto;
@@ -133,29 +133,30 @@
     let gradoActual = "";
     let letraActual = "";
 
-    // Cargar datos desde MongoDB al abrir la página
     async function cargarDatos() {
-        const res = await fetch("{% url 'api_obtener_entregas' %}");
-        registros = await res.json();
-        dibujar();
+        try {
+            const res = await fetch("{% url 'api_obtener_entregas' %}");
+            registros = await res.json();
+            dibujar();
+        } catch (e) { console.error("Error cargando datos:", e); }
     }
 
-    // Guardar en MongoDB Atlas
     async function registrarEnNube() {
-        const nombre = document.getElementById("textoVoz").value.trim();
-        const lugar = document.getElementById("lugarSelect").value;
-        const cursoCompleto = gradoActual + letraActual;
+        const nombreInput = document.getElementById("textoVoz").value.trim();
+        const lugarInput = document.getElementById("lugarSelect").value;
+        const cursoCompleto = gradoActual + (letraActual || "");
 
-        if (!nombre || !objetoActual || !cursoCompleto) {
-            alert("⚠️ Por favor completa: Nombre, Curso y Objeto");
+        if (!nombreInput || !objetoActual || !gradoActual) {
+            alert("⚠️ Por favor completa: Nombre, Grado y Objeto");
             return;
         }
 
+        // CORRECCIÓN: Los nombres de las llaves deben coincidir con tu views.py
         const datos = {
-            nombre: nombre,
+            recibido_por: nombreInput,
             curso: cursoCompleto,
-            objeto: objetoActual,
-            lugar: lugar
+            balon: objetoActual,
+            lugar: lugarInput
         };
 
         const res = await fetch("{% url 'api_guardar_entrega' %}", {
@@ -168,31 +169,37 @@
         });
 
         if (res.ok) {
-            alert("✅ Guardado en la nube para todos");
-            // Limpiar campos
+            alert("✅ Registro exitoso");
             document.getElementById("textoVoz").value = "";
             document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
             objetoActual = ""; gradoActual = ""; letraActual = "";
-            cargarDatos(); // Recargar tabla
+            document.getElementById("letrasContenedor").innerHTML = "";
+            cargarDatos();
         }
     }
 
-    // Dibujar la tabla con los datos de la nube
     function dibujar() {
         let html = "";
         const filtro = document.getElementById("buscador").value.toLowerCase();
 
         registros.forEach((r) => {
-            const info = (r.nombre + r.curso).toLowerCase();
+            // EXPLICACIÓN: Intentamos leer 'nombre' (como está en la DB) 
+            // o 'recibido_por' (por si acaso). Si ambos fallan, ponemos 'N/A'.
+            const nombreMostrar = r.nombre || r.recibido_por || "Sin nombre";
+            const objetoMostrar = r.objeto || r.balon || "Sin objeto";
+            const cursoMostrar = r.curso || "N/A";
+            
+            const info = (nombreMostrar + cursoMostrar).toLowerCase();
+            
             if (info.includes(filtro)) {
                 html += `
                 <tr>
-                    <td><strong>${r.nombre}</strong><br><small>${r.curso}</small></td>
-                    <td>${r.objeto}</td>
-                    <td>${r.lugar}</td>
-                    <td>${new Date(r.fecha).toLocaleString()}</td>
+                    <td><strong>${nombreMostrar}</strong><br><small>${cursoMostrar}</small></td>
+                    <td>${objetoMostrar}</td>
+                    <td>${r.lugar || 'Cancha'}</td>
+                    <td>${r.fecha ? new Date(r.fecha).toLocaleString() : 'Recién guardado'}</td>
                     <td>
-                        <button class="btn-entregado" onclick="marcarEntregado('${r.id}')">Finalizar</button>
+                        <button class="btn-entregado" onclick="marcarEntregado('${r._id || r.id}')">Finalizar</button>
                     </td>
                 </tr>`;
             }
@@ -200,7 +207,6 @@
         document.getElementById("tabla").innerHTML = html;
     }
 
-    // Función para borrar (cuando devuelven el balón)
     async function marcarEntregado(id) {
         if(confirm("¿El objeto fue devuelto correctamente?")) {
             const res = await fetch(`/api/eliminar-entrega/${id}/`, {
@@ -211,7 +217,6 @@
         }
     }
 
-    // Lógica de UI (Botones)
     function seleccionarObjeto(btn, obj) {
         objetoActual = obj;
         document.querySelectorAll(".btn-objeto").forEach(b => b.classList.remove("activo"));

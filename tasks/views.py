@@ -175,10 +175,11 @@ def videos(request):
 def api_guardar_entrega(request):
     if request.method == "POST":
         data = json.loads(request.body)
+        # Sincronizamos los nombres del JSON con el modelo
         RegistroEntrega.objects.create(
-            nombre=data.get('recibido_por'),
+            nombre=data.get('recibido_por'), # El JS envía 'recibido_por'
             curso=data.get('curso', 'N/A'),
-            objeto=data.get('balon'),
+            objeto=data.get('balon'),       # El JS envía 'balon'
             lugar=data.get('lugar', 'Cancha')
         )
         return JsonResponse({"status": "success"})
