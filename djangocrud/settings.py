@@ -2,18 +2,21 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# 1. Cargar variables de entorno
+# 1. Cargar variables de entorno (Localmente usa un archivo .env)
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 2. Seguridad
+# En producción, nunca dejes la clave por defecto. Render la leerá del entorno.
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-z$!j#aip6tr)!7=l#1&=_*=jc4s*2@tve06#i&hwg&p5na7z2')
 
-# 3. DEBUG (Lo activamos temporalmente para que veas el error real si falla)
-DEBUG = True 
+# 3. DEBUG
+# Se desactiva automáticamente en Render (donde la variable RENDER existe)
+DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', '*']
+# Permitir localhost y la URL de Render
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [
@@ -31,9 +34,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Para servir archivos estáticos en la nube
+    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -46,7 +49,7 @@ ROOT_URLCONF = 'djangocrud.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'tasks' / 'templates'], #
+        'DIRS': [BASE_DIR / 'tasks' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -61,15 +64,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'djangocrud.wsgi.application'
 
-# 4. CONFIGURACIÓN MONGODB (AJUSTADA)
-# Usamos la URL directa para evitar fallos de lectura en Render
+# 4. CONFIGURACIÓN MONGODB
+# Prioriza la URL de conexión de las variables de entorno para mayor seguridad
+MONGO_URL = os.getenv('MONGO_URL', 'mongodb+srv://brayan:3143401305@cluster0.uuxqot8.mongodb.net/livefutbol_db?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true')
+
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': 'livefutbol_db',
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
-            'host': 'mongodb+srv://brayan:3143401305@cluster0.uuxqot8.mongodb.net/livefutbol_db?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true',
+            'host': MONGO_URL,
         }
     }
 }
@@ -81,48 +86,48 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Configuración Regional
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Archivos Estáticos
+# 5. Archivos Estáticos (CSS, JS, Imágenes)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'tasks' / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-if os.environ.get('RENDER'):
+# Optimización para Render
+if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
     WHITENOISE_MANIFEST_STRICT = False
 
 # Redirecciones
 LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'login'
+LOGOUT_REDIRECT_URL = 'signin' # Ajustado a tu nombre de URL
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 5. Configuración de Correo (Gmail)
+# 6. Configuración de Correo (Gmail)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'saebra581@gmail.com'
+# Usa variable de entorno para la contraseña
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD', 'bfaslgsipjnpmnpd')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-# 6. Seguridad CORS y CSRF
+# 7. Seguridad CORS y CSRF (Actualizado)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://live-futbol-8693.onrender.com" # Cambia esto por tu URL de Render
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://*.onrender.com"
+    "https://*.onrender.com" # Esto permite que Render acepte tus formularios
 ]

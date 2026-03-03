@@ -3,7 +3,7 @@
 
 {% block content %}
 <style>
-    /* Estilos específicos para esta página (Mantenidos) */
+    /* Mantenemos tus estilos originales */
     .contenedor-registro {
         max-width: 95%;
         margin: 20px auto;
@@ -11,6 +11,7 @@
         background-color: rgba(255, 255, 255, 0.1);
         border-radius: 15px;
         backdrop-filter: blur(5px);
+        color: white;
     }
 
     .btn-objeto, .btn-curso {
@@ -49,17 +50,8 @@
         font-size: 16px;
         outline: none;
         display: block;
-    }
-
-    #lugarSelect, #textoVoz, #buscador {
         background-color: #ffffff;
         color: #333;
-    }
-
-    .seccion-busqueda {
-        margin-top: 50px;
-        padding: 20px;
-        border-top: 2px dashed #ffffff;
     }
 
     table {
@@ -67,48 +59,21 @@
         max-width: 1000px;
         border-radius: 15px;
         overflow: hidden;
-        border-spacing: 0;
         margin-top: 20px;
+        background: white;
+        color: black;
     }
 
-    th {
-        background-color: #2c3e50;
-        color: white;
-        padding: 15px;
-    }
+    th { background-color: #2c3e50; color: white; padding: 15px; }
+    td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
 
-    td {
-        background-color: rgba(255, 255, 255, 0.9);
-        color: #0c0c0c;
-        padding: 12px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .btn-tabla {
-        margin: 2px;
-        padding: 5px 10px;
-        font-size: 14px;
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .btn-entregado { background-color: #27ae60; }
-    .btn-entregado:hover { background-color: #1e8449; }
-
-    table input, table select {
-        padding: 5px;
-        border-radius: 5px;
-        border: 1px solid #5dade2;
-    }
+    .btn-entregado { background-color: #27ae60; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
 </style>
 
 <div class="contenedor-registro">
-    <h1>Registro de Entrega</h1>
+    <h1>⚽ Registro de Entrega (Balones y Equipos)</h1>
 
-    <h3>Selecciona el objeto</h3>
+    <h3>1. Selecciona el objeto</h3>
     <div style="margin-bottom: 20px;">
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'balon futbol' )">⚽ Balón Fútbol</button>
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'balon básquetbol')">🏀 Balón básquetbol</button>
@@ -119,36 +84,33 @@
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'ping pong')">🏓 Ping Pong</button>
     </div>
 
-    <h3>Lugar donde se alquila</h3>
+    <h3>2. Lugar de uso</h3>
     <select id="lugarSelect">
-        <option>Sin lugar</option>
         <option>Cancha Sintética</option>
         <option>Cancha Externa</option>
         <option>Cancha de Baloncesto</option>
         <option>Cancha de Volley</option>
+        <option>Sin lugar</option>
     </select>
 
-    <h3>Nombre de la persona</h3>
-    <input id="textoVoz" placeholder="Escribe el nombre aquí...">
+    <h3>3. Nombre de la persona</h3>
+    <input id="textoVoz" placeholder="Escribe el nombre del estudiante...">
 
     <div id="seccionCurso" style="margin: 20px 0; border: 1px solid rgba(255,255,255,0.3); padding: 15px; border-radius: 10px;">
-        <h3 style="color: white;">Selecciona el Curso</h3>
-        <div id="gradosContenedor">
-            </div>
-        <div id="letrasContenedor" style="margin-top: 10px;">
-            </div>
+        <h3>4. Selecciona el Curso</h3>
+        <div id="gradosContenedor"></div>
+        <div id="letrasContenedor" style="margin-top: 10px;"></div>
     </div>
     
-    <button onclick="registrarManual()" style="background-color: #5f17e4; padding: 12px 30px; font-weight: bold; color: white; border: none; border-radius: 10px; cursor: pointer;">
-        🚀 Registrar Entrega
+    <button onclick="registrarEnNube()" style="background-color: #5f17e4; padding: 15px 40px; font-weight: bold; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px;">
+        🚀 Registrar Entrega Global
     </button>
 
     <div class="seccion-busqueda">
-        <h2 style="background-color: #e74c3c; color: white; padding: 5px;">🔍 Buscar Registro</h2>
-        <input style="background-color: red; color: white; text-align: center;" id="buscador" placeholder="Buscar por nombre o curso" onkeyup="dibujar()">
+        <h2>🔍 Buscar Registro en Tiempo Real</h2>
+        <input id="buscador" placeholder="Buscar por nombre o curso..." onkeyup="dibujar()">
     </div>
 
-    <h2>Registros Actuales</h2>
     <div style="overflow-x: auto;">
         <table>
             <thead>
@@ -156,7 +118,6 @@
                     <th>Nombre / Curso</th>
                     <th>Objeto</th>
                     <th>Lugar</th>
-                    <th>Marca</th>
                     <th>Fecha / Hora</th>
                     <th>Acciones</th>
                 </tr>
@@ -167,46 +128,101 @@
 </div>
 
 <script>
-    let registros = JSON.parse(localStorage.getItem("registros")) || [];
-    let inventario = {
-        "balon futbol":{cantidad:5,marcas:["yellow","green","6","externa"]},
-        "balon básquetbol":{cantidad:5,marcas:["yellow","green","6","externa"]},
-        "balon volley":{cantidad:4,marcas:["1","2","3","4"]},
-        "cuerda":{cantidad:9,marcas:["colorful","colorless"]},
-        "ajedrez":{cantidad:1,marcas:["one"]},
-        "jenga":{cantidad:1,marcas:["1"]},
-        "ping pong":{cantidad:2,marcas:["blue","normal"]}
-    };
-
+    let registros = [];
     let objetoActual = "";
     let gradoActual = "";
     let letraActual = "";
-    let editandoIndex = null;
 
-    // Generar botones de grados 3 a 11
-    function cargarBotonesCursos() {
-        let html = "";
-        for(let i=3; i<=11; i++) {
-            html += `<button class="btn-curso" onclick="seleccionarGrado(this, ${i})">${i}°</button>`;
+    // Cargar datos desde MongoDB al abrir la página
+    async function cargarDatos() {
+        const res = await fetch("{% url 'api_obtener_entregas' %}");
+        registros = await res.json();
+        dibujar();
+    }
+
+    // Guardar en MongoDB Atlas
+    async function registrarEnNube() {
+        const nombre = document.getElementById("textoVoz").value.trim();
+        const lugar = document.getElementById("lugarSelect").value;
+        const cursoCompleto = gradoActual + letraActual;
+
+        if (!nombre || !objetoActual || !cursoCompleto) {
+            alert("⚠️ Por favor completa: Nombre, Curso y Objeto");
+            return;
         }
-        document.getElementById("gradosContenedor").innerHTML = html;
+
+        const datos = {
+            nombre: nombre,
+            curso: cursoCompleto,
+            objeto: objetoActual,
+            lugar: lugar
+        };
+
+        const res = await fetch("{% url 'api_guardar_entrega' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify(datos)
+        });
+
+        if (res.ok) {
+            alert("✅ Guardado en la nube para todos");
+            // Limpiar campos
+            document.getElementById("textoVoz").value = "";
+            document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
+            objetoActual = ""; gradoActual = ""; letraActual = "";
+            cargarDatos(); // Recargar tabla
+        }
+    }
+
+    // Dibujar la tabla con los datos de la nube
+    function dibujar() {
+        let html = "";
+        const filtro = document.getElementById("buscador").value.toLowerCase();
+
+        registros.forEach((r) => {
+            const info = (r.nombre + r.curso).toLowerCase();
+            if (info.includes(filtro)) {
+                html += `
+                <tr>
+                    <td><strong>${r.nombre}</strong><br><small>${r.curso}</small></td>
+                    <td>${r.objeto}</td>
+                    <td>${r.lugar}</td>
+                    <td>${new Date(r.fecha).toLocaleString()}</td>
+                    <td>
+                        <button class="btn-entregado" onclick="marcarEntregado('${r.id}')">Finalizar</button>
+                    </td>
+                </tr>`;
+            }
+        });
+        document.getElementById("tabla").innerHTML = html;
+    }
+
+    // Función para borrar (cuando devuelven el balón)
+    async function marcarEntregado(id) {
+        if(confirm("¿El objeto fue devuelto correctamente?")) {
+            const res = await fetch(`/api/eliminar-entrega/${id}/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": "{{ csrf_token }}" }
+            });
+            if (res.ok) cargarDatos();
+        }
+    }
+
+    // Lógica de UI (Botones)
+    function seleccionarObjeto(btn, obj) {
+        objetoActual = obj;
+        document.querySelectorAll(".btn-objeto").forEach(b => b.classList.remove("activo"));
+        btn.classList.add("activo");
     }
 
     function seleccionarGrado(btn, grado) {
         gradoActual = grado;
         document.querySelectorAll("#gradosContenedor .btn-curso").forEach(b => b.classList.remove("activo"));
         btn.classList.add("activo");
-
-        // Generar letras según grado
-        let letras = ['A', 'B', 'C', 'D', 'E'];
-        let limite = (grado === 9) ? 4 : (grado >= 10) ? 3 : 5;
-        
-        let htmlLetras = "";
-        for(let i=0; i<limite; i++) {
-            htmlLetras += `<button class="btn-curso" onclick="seleccionarLetra(this, '${letras[i]}')">${letras[i]}</button>`;
-        }
-        document.getElementById("letrasContenedor").innerHTML = htmlLetras;
-        letraActual = "";
+        generarLetras(grado);
     }
 
     function seleccionarLetra(btn, letra) {
@@ -215,137 +231,27 @@
         btn.classList.add("activo");
     }
 
-    function seleccionarObjeto(btn,obj){
-        objetoActual=obj;
-        document.querySelectorAll(".btn-objeto").forEach(b=>b.classList.remove("activo"));
-        btn.classList.add("activo");
-    }
-
-    function registrarManual(){
-        let nombre = document.getElementById("textoVoz").value.trim();
-        let lugar = document.getElementById("lugarSelect").value;
-        let cursoCompleto = gradoActual + letraActual;
-
-        if(nombre=="" || objetoActual=="" || lugar=="" || cursoCompleto==""){
-            alert("⚠️ Por favor completa todos los campos (Nombre, Curso y Objeto)");
-            return;
-        }
-
-        registros.push({
-            nombre: nombre,
-            curso: cursoCompleto,
-            objeto: objetoActual,
-            lugar: lugar,
-            marca: "",
-            fecha: new Date().toLocaleString("es-ES")
-        });
-
-        localStorage.setItem("registros", JSON.stringify(registros));
-        // Reset
-        document.getElementById("textoVoz").value = "";
-        document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
-        document.getElementById("letrasContenedor").innerHTML = "";
-        objetoActual = ""; gradoActual = ""; letraActual = "";
-        dibujar();
-    }
-
-    function dibujar(){
+    function generarLetras(grado) {
+        let letras = ['A', 'B', 'C', 'D', 'E'];
+        let limite = (grado === 9) ? 4 : (grado >= 10) ? 3 : 5;
         let html = "";
-        let filtro = document.getElementById("buscador").value.toLowerCase();
-
-        registros.forEach((r, index) => {
-            let infoFiltro = (r.nombre + (r.curso || "")).toLowerCase();
-            if(infoFiltro.includes(filtro)){
-                if(editandoIndex === index){
-                    let opcionesObjetos = Object.keys(inventario).map(obj => 
-                        `<option ${r.objeto==obj?"selected":""}>${obj}</option>`).join("");
-                    let lugaresOpciones = ["Cancha Sintética","Cancha Externa","Cancha de Baloncesto","Cancha de Volley","Sin lugar"]
-                        .map(l => `<option ${r.lugar==l?"selected":""}>${l}</option>`).join("");
-
-                    html += `
-                    <tr>
-                        <td>
-                            <input id="editNombre" value="${r.nombre}" style="width:70px">
-                            <input id="editCurso" value="${r.curso || ''}" style="width:40px">
-                        </td>
-                        <td><select id="editObjeto">${opcionesObjetos}</select></td>
-                        <td><select id="editLugar">${lugaresOpciones}</select></td>
-                        <td>${r.marca}</td>
-                        <td>${r.fecha}</td>
-                        <td>
-                            <button class="btn-tabla" onclick="guardarEdicion(${index})">✅</button>
-                            <button class="btn-tabla" onclick="editandoIndex=null; dibujar();">❌</button>
-                        </td>
-                    </tr>`;
-                } else {
-                    let marcas = inventario[r.objeto]?.marcas || [];
-                    let opciones = marcas.map(m => `<option ${r.marca==m?"selected":""}>${m}</option>`).join("");
-
-                    html += `
-                    <tr>
-                        <td><strong>${r.nombre}</strong> <br> <small>Curso: ${r.curso || 'S/C'}</small></td>
-                        <td>${r.objeto}</td>
-                        <td>${r.lugar}</td>
-                        <td>
-                            <select onchange="cambiarMarca(${index},this.value)">
-                                <option value="">Marca</option>
-                                ${opciones}
-                            </select>
-                        </td>
-                        <td style="font-size: 0.8em;">${r.fecha}</td>
-                        <td>
-                            <button class="btn-tabla btn-entregado" onclick="entregado(${index})">Entregado</button>
-                            <button class="btn-tabla" onclick="editar(${index})">📝</button>
-                        </td>
-                    </tr>`;
-                }
-            }
-        });
-        document.getElementById("tabla").innerHTML = html;
-    }
-
-    function cambiarMarca(index,marca){
-        registros[index].marca=marca;
-        localStorage.setItem("registros",JSON.stringify(registros));
-    }
-
-    function entregado(index){
-        if(confirm("¿Confirmas que el objeto fue devuelto?")) {
-            registros.splice(index,1);
-            localStorage.setItem("registros",JSON.stringify(registros));
-            dibujar();
+        for(let i=0; i<limite; i++) {
+            html += `<button class="btn-curso" onclick="seleccionarLetra(this, '${letras[i]}')">${letras[i]}</button>`;
         }
+        document.getElementById("letrasContenedor").innerHTML = html;
     }
 
-    function editar(index){
-        editandoIndex = index;
-        dibujar();
-    }
-
-    function guardarEdicion(index){
-        let nuevoNombre = document.getElementById("editNombre").value.trim();
-        let nuevoCurso = document.getElementById("editCurso").value.trim();
-        let nuevoObjeto = document.getElementById("editObjeto").value;
-        let nuevoLugar = document.getElementById("editLugar").value;
-
-        if(nuevoNombre === ""){
-            alert("El nombre no puede estar vacío");
-            return;
+    function cargarBotonesCursos() {
+        let html = "";
+        for(let i=3; i<=11; i++) {
+            html += `<button class="btn-curso" onclick="seleccionarGrado(this, ${i})">${i}°</button>`;
         }
-
-        registros[index].nombre = nuevoNombre;
-        registros[index].curso = nuevoCurso;
-        registros[index].objeto = nuevoObjeto;
-        registros[index].lugar = nuevoLugar;
-
-        editandoIndex = null;
-        localStorage.setItem("registros", JSON.stringify(registros));
-        dibujar();
+        document.getElementById("gradosContenedor").innerHTML = html;
     }
 
-    window.onload = function() {
+    document.addEventListener("DOMContentLoaded", () => {
         cargarBotonesCursos();
-        dibujar();
-    };
+        cargarDatos();
+    });
 </script>
 {% endblock %}

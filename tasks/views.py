@@ -16,10 +16,10 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse
 import json
 
-from .models import Task
+# Importación de modelos y formularios
+from .models import Task, RegistroEntrega, ObjetoPerdido, PrendaRopa, BajaBalon
 from .forms import TaskForm, CustomUserCreationForm
 from .tokens import account_activation_token
-from .models import Task, PrendaRopa, RegistroEntrega, ObjetoPerdido, BajaBalon
 
 # ============================
 # 🏠 VISTAS PÚBLICAS
@@ -77,11 +77,7 @@ def signup(request):
 
             return render(request, 'confirmacion_enviada.html')
         except Exception as e:
-            print(f"DEBUG SIGNUP ERROR: {e}")
-            return render(request, 'signup.html', {
-                'form': form,
-                'error': 'Error de base de datos. Intente con otro nombre de usuario.'
-            })
+            return render(request, 'signup.html', {'form': form, 'error': 'Error en el registro.'})
     return render(request, 'signup.html', {'form': form, 'error': 'Datos inválidos.'})
 
 def activar(request, uidb64, token):
@@ -112,7 +108,7 @@ def signin(request):
     else:
         return render(request, 'signin.html', {
             'form': AuthenticationForm(),
-            'error': 'Usuario o contraseña incorrectos o cuenta no activada'
+            'error': 'Usuario o contraseña incorrectos'
         })
 
 def signout(request):
@@ -120,26 +116,185 @@ def signout(request):
     return redirect('home')
 
 # ============================
-# 📝 VISTAS DE TAREAS
+# 📦 INVENTARIO ROPA (radar.html)
+# ============================
+
+@login_required
+def radar(request):
+    return render(request, 'radar.html')
+
+@login_required
+def api_guardar_prenda(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        prenda = PrendaRopa.objects.create(
+            objeto=data.get('objeto'),
+            talla=data.get('talla'),
+            condicion=data.get('condicion'),
+            detalle_defecto=data.get('detalle_defecto', ''),
+            imagen=data.get('imagen'),
+            estado='Disponible'
+        )
+        return JsonResponse({"status": "success", "id": prenda.id})
+
+@login_required
+def api_obtener_prendas(request):
+    prendas = list(PrendaRopa.objects.all().values().order_by('-fecha_registro'))
+    return JsonResponse(prendas, safe=False)
+
+@login_required
+def api_apartar_prenda(request, prenda_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
+        if data.get('accion') == 'liberar':
+            prenda.estado = "Disponible"
+            prenda.nombre_apartado = ""
+        else:
+            prenda.estado = "Apartado"
+            prenda.nombre_apartado = data.get('nombre', request.user.username)
+        prenda.save()
+        return JsonResponse({"status": "success"})
+
+@login_required
+def api_eliminar_prenda(request, prenda_id):
+    if request.method == "POST":
+        prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
+        prenda.delete()
+        return JsonResponse({"status": "success"})
+
+# ============================
+# ⚽ ENTREGAS BALONES (videos.html)
+# ============================
+
+@login_required
+def videos(request):
+    return render(request, 'videos.html')
+
+@login_required
+def api_guardar_entrega(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        RegistroEntrega.objects.create(
+            nombre=data.get('recibido_por'),
+            curso=data.get('curso', 'N/A'),
+            objeto=data.get('balon'),
+            lugar=data.get('lugar', 'Cancha')
+        )
+        return JsonResponse({"status": "success"})
+
+@login_required
+def api_obtener_entregas(request):
+    entregas = list(RegistroEntrega.objects.all().values().order_by('-fecha'))
+    return JsonResponse(entregas, safe=False)
+
+@login_required
+def api_eliminar_entrega(request, entrega_id):
+    if request.method == "POST":
+        entrega = get_object_or_404(RegistroEntrega, pk=entrega_id)
+        entrega.delete()
+        return JsonResponse({"status": "success"})
+
+# ============================
+# 🔍 OBJETOS PERDIDOS (voz.html)
+# ============================
+
+@login_required
+def voz(request):
+    return render(request, 'voz.html')
+
+@login_required
+def api_guardar_objeto(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        ObjetoPerdido.objects.create(
+            nombre_reporta=data.get('nombre'),
+            curso=data.get('curso'),
+            tipo_objeto=data.get('tipo'),
+            color=data.get('color'),
+            descripcion=data.get('dif')
+        )
+        return JsonResponse({"status": "success"})
+
+@login_required
+def api_obtener_objetos(request):
+    objetos = list(ObjetoPerdido.objects.all().values().order_by('-fecha'))
+    return JsonResponse(objetos, safe=False)
+
+@login_required
+def api_eliminar_objeto(request, obj_id):
+    if request.method == "POST":
+        objeto = get_object_or_404(ObjetoPerdido, pk=obj_id)
+        objeto.delete()
+        return JsonResponse({"status": "success"})
+
+# ============================
+# 📉 BAJAS BALONES (voz.html)
+# ============================
+
+@login_required
+def api_guardar_baja(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        BajaBalon.objects.create(
+            tipo_balon=data.get('tipo'),
+            causa=data.get('causa'),
+            marca=data.get('marca'),
+            responsable=data.get('responsable', 'Anonimo'),
+            foto=data.get('foto')
+        )
+        return JsonResponse({"status": "success"})
+
+@login_required
+def api_obtener_bajas(request):
+    bajas = list(BajaBalon.objects.all().values().order_by('-fecha'))
+    return JsonResponse(bajas, safe=False)
+
+@login_required
+def api_eliminar_baja(request, baja_id):
+    if request.method == "POST":
+        baja = get_object_or_404(BajaBalon, pk=baja_id)
+        baja.delete()
+        return JsonResponse({"status": "success"})
+
+# ============================
+# 📧 EXTRAS (Correos)
+# ============================
+
+@login_required
+def enviar_rutina_correo(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            rutina = data.get('rutina', {})
+            contenido_html = f"<h2>Rutina de {request.user.username}</h2><p>{rutina}</p>"
+            email = EmailMessage('🏋️ Tu Rutina', contenido_html, to=[request.user.email])
+            email.content_subtype = "html"
+            email.send()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+# ============================
+# ✅ GESTIÓN DE TAREAS
 # ============================
 
 @login_required
 def tasks(request):
-    tasks = Task.objects.filter(user=request.user, diaCompletado__isnull=True)
-    return render(request, 'tasks.html', {'tasks': tasks})
+    tasks_list = Task.objects.filter(user=request.user, diaCompletado__isnull=True)
+    return render(request, 'tasks.html', {'tasks': tasks_list})
 
 @login_required
 def create_task(request):
     if request.method == 'GET':
         return render(request, 'create_task.html', {'form': TaskForm()})
-    
     form = TaskForm(request.POST)
     if form.is_valid():
         new_task = form.save(commit=False)
         new_task.user = request.user
         new_task.save()
         return redirect('tasks')
-    return render(request, 'create_task.html', {'form': form, 'error': 'Valores inválidos'})
+    return render(request, 'create_task.html', {'form': form, 'error': 'Datos inválidos'})
 
 @login_required
 def lista(request, task_id):
@@ -147,12 +302,11 @@ def lista(request, task_id):
     if request.method == 'GET':
         form = TaskForm(instance=task)
         return render(request, 'lista.html', {'task': task, 'form': form})
-    
     form = TaskForm(request.POST, instance=task)
     if form.is_valid():
         form.save()
         return redirect('tasks')
-    return render(request, 'lista.html', {'task': task, 'form': form, 'error': "Error al actualizar"})
+    return render(request, 'lista.html', {'task': task, 'form': form})
 
 @login_required
 def completar(request, task_id):
@@ -168,107 +322,3 @@ def eliminar_tarea(request, task_id):
     if request.method == 'POST':
         task.delete()
     return redirect('tasks')
-
-# ============================
-# 🎯 VISTAS ADICIONALES
-# ============================
-
-@login_required
-def radar(request):
-    return render(request, 'radar.html')
-
-@login_required
-def videos(request):
-    return render(request, 'videos.html')
-
-@login_required
-def voz(request):
-    return render(request, 'voz.html')
-
-@login_required
-def enviar_rutina_correo(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            rutina = data.get('rutina', {})
-            
-            contenido_html = f"""
-            <h2>🏋️ Tu Rutina Semanal Personalizada</h2>
-            <p>Hola {request.user.username}, aquí tienes tu rutina:</p>
-            <table border="1" style="border-collapse: collapse; width: 100%;">
-                <tr><th>Día</th><th>Rutina</th></tr>
-                <tr><td><strong>Lunes</strong></td><td>{rutina.get('lunes', 'Descanso')}</td></tr>
-                <tr><td><strong>Martes</strong></td><td>{rutina.get('martes', 'Descanso')}</td></tr>
-                <tr><td><strong>Miércoles</strong></td><td>{rutina.get('miercoles', 'Descanso')}</td></tr>
-                <tr><td><strong>Jueves</strong></td><td>{rutina.get('jueves', 'Descanso')}</td></tr>
-                <tr><td><strong>Viernes</strong></td><td>{rutina.get('viernes', 'Descanso')}</td></tr>
-                <tr><td><strong>Sábado</strong></td><td>{rutina.get('sabado', 'Descanso')}</td></tr>
-                <tr><td><strong>Domingo</strong></td><td>{rutina.get('domingo', 'Descanso')}</td></tr>
-            </table>
-            """
-            
-            email = EmailMessage(
-                subject='🏋️ Tu Rutina Semanal - Live Fútbol',
-                body=contenido_html,
-                from_email='noreply@livefutbol.com',
-                to=[request.user.email]
-            )
-            email.content_subtype = "html"
-            email.send()
-            
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-    return JsonResponse({'success': False, 'error': 'Método no permitido'})
-# ============================
-# 📦 SISTEMA DE INVENTARIO Y REGISTROS (MongoDB)
-# ============================
-
-@login_required
-def inventario_ropa(request):
-    """Renderiza la página de inventario de ropa"""
-    return render(request, 'inventario_ropa.html')
-
-@login_required
-def api_guardar_prenda(request):
-    """Guarda una prenda nueva en MongoDB Atlas"""
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            prenda = PrendaRopa.objects.create(
-                objeto=data.get('objeto'),
-                talla=data.get('talla'),
-                condicion=data.get('condicion'),
-                detalle_defecto=data.get('detalle_defecto', ''),
-                imagen=data.get('imagen'), # Recibe el Base64 de la foto
-                estado='Disponible'
-            )
-            return JsonResponse({"status": "success", "id": prenda.id})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
-    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
-
-@login_required
-def api_obtener_prendas(request):
-    """Trae todas las prendas registradas para que todos los usuarios las vean"""
-    prendas = list(PrendaRopa.objects.all().values().order_by('-fecha_registro'))
-    return JsonResponse(prendas, safe=False)
-
-@login_required
-def api_eliminar_prenda(request, prenda_id):
-    """Elimina una prenda por ID"""
-    if request.method == "POST":
-        prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
-        prenda.delete()
-        return JsonResponse({"status": "success"})
-
-@login_required
-def api_apartar_prenda(request, prenda_id):
-    """Marca una prenda como apartada por un usuario"""
-    if request.method == "POST":
-        data = json.loads(request.body)
-        prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
-        prenda.estado = "Apartado"
-        prenda.nombre_apartado = data.get('nombre', request.user.username)
-        prenda.save()
-        return JsonResponse({"status": "success"})

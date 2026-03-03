@@ -4,7 +4,7 @@
 {% block content %}
 <div style="padding-top: 110px; max-width: 1100px; margin: 0 auto; padding-left: 20px; padding-right: 20px; text-align: center;">
 
-    <h1 style="background-color: #5f17e4; color: white; padding: 20px; border-radius: 15px; margin-bottom: 30px;">Inventario de Ropa</h1>
+    <h1 style="background-color: #5f17e4; color: white; padding: 20px; border-radius: 15px; margin-bottom: 30px;">Inventario de Ropa (Nube)</h1>
 
     <div style="background-color: #ffffff; padding: 30px; border-radius: 20px; color: #000; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: left;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
@@ -49,7 +49,7 @@
         </div>
 
         <button onclick="agregar()" style="background-color: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px;">
-            REGISTRAR PRODUCTO
+            🚀 REGISTRAR PRODUCTO EN LA NUBE
         </button>
     </div>
 
@@ -94,7 +94,6 @@
 </div>
 
 <style>
-    /* ID y Clase específica para que la imagen sea GRANDE y no circular */
     .img-producto-inventario { 
         width: 120px !important; 
         height: 120px !important; 
@@ -103,45 +102,57 @@
         margin: 10px auto !important;
         border: 3px solid #5f17e4 !important;
         display: block !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        cursor: pointer;
     }
     td { padding: 10px !important; border-bottom: 1px solid #eee !important; text-align: center !important; vertical-align: middle !important; }
-    button { padding: 8px 12px; border-radius: 6px; border: none; color: white; cursor: pointer; font-weight: bold; margin: 2px; }
+    .btn-accion { padding: 8px 12px; border-radius: 6px; border: none; color: white; cursor: pointer; font-weight: bold; margin: 2px; }
 </style>
 
 <script>
-let inventario = JSON.parse(localStorage.getItem("inventario")) || [];
+let inventarioGlobal = [];
 let zoomNivel = 1;
-let editandoIndex = null;
 
-function guardar() { localStorage.setItem("inventario", JSON.stringify(inventario)); }
+async function cargarInventario() {
+    const res = await fetch("{% url 'api_obtener_prendas' %}");
+    inventarioGlobal = await res.json();
+    dibujar();
+}
 
 function toggleDefecto() {
     const estado = document.getElementById("estado_fisico").value;
     document.getElementById("campo_defecto").style.display = (estado === "Defecto") ? "block" : "none";
 }
 
-function agregar() {
+async function agregar() {
     const objeto = document.getElementById("objeto").value;
     const talla = document.getElementById("talla").value.trim();
-    const estado_fisico = document.getElementById("estado_fisico").value;
+    const condicion = document.getElementById("estado_fisico").value;
     const defecto = document.getElementById("descripcion_defecto").value;
     const file = document.getElementById("imagen_file").files[0];
 
-    if (!objeto || !talla || !file) { alert("Faltan datos"); return; }
+    if (!objeto || !talla || !file) { alert("⚠️ Completa los campos y sube una foto"); return; }
 
     const reader = new FileReader();
-    reader.onload = e => {
-        inventario.push({
-            objeto, talla, estado: "Disponible", nombre: "", 
-            imagen: e.target.result, 
-            condicion: estado_fisico, 
-            detalle_defecto: estado_fisico === "Defecto" ? defecto : ""
+    reader.onload = async e => {
+        const datos = {
+            objeto: objeto,
+            talla: talla,
+            condicion: condicion,
+            detalle_defecto: condicion === "Defecto" ? defecto : "",
+            imagen: e.target.result // Base64
+        };
+
+        const res = await fetch("{% url 'api_guardar_prenda' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            body: JSON.stringify(datos)
         });
-        guardar(); dibujar();
-        document.getElementById("talla").value = "";
-        document.getElementById("imagen_file").value = "";
-    }
+
+        if (res.ok) {
+            alert("✅ Prenda registrada!");
+            location.reload();
+        }
+    };
     reader.readAsDataURL(file);
 }
 
@@ -149,92 +160,70 @@ function dibujar() {
     let disp = "", apart = "";
     let filtro = document.getElementById("busqueda").value.toLowerCase();
 
-    inventario.forEach((p, i) => {
+    inventarioGlobal.forEach((p) => {
         if (!p.objeto.toLowerCase().includes(filtro) && !p.talla.toLowerCase().includes(filtro)) return;
 
-        let contenido = (editandoIndex === i) ? filaEdicion(p, i) : filaNormal(p, i);
-        
-        if (p.estado === "Disponible") disp += contenido;
-        else apart += contenido;
+        let esApartado = p.estado !== "Disponible";
+        let htmlFila = `
+        <tr>
+            <td><img class="img-producto-inventario" src="${p.imagen}" onclick="verImagen('${p.imagen}')"></td>
+            <td style="font-weight:bold;">${p.objeto}</td>
+            <td>${p.talla}</td>
+            <td>
+                <b style="color:${p.condicion === 'Óptimo' ? '#28a745' : '#e74c3c'}">${p.condicion}</b>
+                ${esApartado ? `<br><small>Por: ${p.nombre_apartado}</small>` : ""}
+                ${p.detalle_defecto ? `<br><small style="color:red">${p.detalle_defecto}</small>` : ""}
+            </td>
+            <td>
+                ${!esApartado ? 
+                    `<button class="btn-accion" onclick="apartar('${p.id}')" style="background:#5f17e4;">Apartar</button>` : 
+                    `<button class="btn-accion" onclick="liberar('${p.id}')" style="background:#28a745;">Liberar</button>`}
+                <button class="btn-accion" onclick="eliminar('${p.id}')" style="background:#e74c3c;">Eliminar</button>
+            </td>
+        </tr>`;
+
+        if (!esApartado) disp += htmlFila;
+        else apart += htmlFila;
     });
 
-    document.getElementById("tablaDisponibles").innerHTML = disp;
-    document.getElementById("tablaApartados").innerHTML = apart;
+    document.getElementById("tablaDisponibles").innerHTML = disp || "<tr><td colspan='5'>No hay prendas disponibles</td></tr>";
+    document.getElementById("tablaApartados").innerHTML = apart || "<tr><td colspan='5'>No hay prendas apartadas</td></tr>";
 }
 
-function filaNormal(p, i) {
-    const esApartado = p.estado !== "Disponible";
-    return `
-    <tr>
-        <td><img id="img_inv_${i}" class="img-producto-inventario" src="${p.imagen}" onclick="verImagen('${p.imagen}')"></td>
-        <td style="font-weight:bold;">${p.objeto}</td>
-        <td>${p.talla}</td>
-        <td>
-            <b style="color:${p.condicion === 'Óptimo' ? '#28a745' : '#e74c3c'}">${p.condicion}</b>
-            ${esApartado ? `<br><small>Por: ${p.nombre}</small>` : ""}
-            ${p.detalle_defecto ? `<br><small>${p.detalle_defecto}</small>` : ""}
-        </td>
-        <td>
-            ${!esApartado ? `<button onclick="apartar(${i})" style="background:#5f17e4;">Apartar</button>` : `<button onclick="liberar(${i})" style="background:#28a745;">Liberar</button>`}
-            <button onclick="editar(${i})" style="background:#ffc107; color:black;">Editar</button>
-            <button onclick="eliminar(${i})" style="background:#e74c3c;">X</button>
-        </td>
-    </tr>`;
-}
-
-function filaEdicion(p, i) {
-    return `
-    <tr>
-        <td><input type="file" id="editFile${i}" style="width:90px; font-size:10px;"></td>
-        <td><input id="editObj${i}" value="${p.objeto}" style="width:80px; color:black;"></td>
-        <td><input id="editTalla${i}" value="${p.talla}" style="width:40px; color:black;"></td>
-        <td>
-            <select id="editCond${i}" style="color:black;">
-                <option value="Óptimo" ${p.condicion==='Óptimo'?'selected':''}>Óptimo</option>
-                <option value="Defecto" ${p.condicion==='Defecto'?'selected':''}>Defecto</option>
-            </select>
-            <input id="editDetalle${i}" value="${p.detalle_defecto}" placeholder="Defecto..." style="width:80px; color:black; display:block; margin:2px auto;">
-            ${p.estado==='Apartado' ? `<input id="editNombre${i}" value="${p.nombre}" style="width:80px; color:black;" placeholder="Nombre">` : ''}
-        </td>
-        <td>
-            <button onclick="guardarEdicion(${i})" style="background:#28a745;">✔</button>
-            <button onclick="cancelarEdicion()" style="background:#777;">✖</button>
-        </td>
-    </tr>`;
-}
-
-function editar(i) { editandoIndex = i; dibujar(); }
-function cancelarEdicion() { editandoIndex = null; dibujar(); }
-
-function guardarEdicion(i) {
-    inventario[i].objeto = document.getElementById("editObj"+i).value;
-    inventario[i].talla = document.getElementById("editTalla"+i).value;
-    inventario[i].condicion = document.getElementById("editCond"+i).value;
-    inventario[i].detalle_defecto = document.getElementById("editDetalle"+i).value;
-    if(inventario[i].estado === 'Apartado') {
-        inventario[i].nombre = document.getElementById("editNombre"+i).value;
-    }
-
-    const nuevaImg = document.getElementById("editFile"+i).files[0];
-    if (nuevaImg) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            inventario[i].imagen = e.target.result;
-            editandoIndex = null; guardar(); dibujar();
-        }
-        reader.readAsDataURL(nuevaImg);
-    } else {
-        editandoIndex = null; guardar(); dibujar();
+async function apartar(id) {
+    let n = prompt("Nombre de quien aparta:");
+    if(n) {
+        const res = await fetch(`/api/apartar-prenda/${id}/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            body: JSON.stringify({ nombre: n, accion: "apartar" })
+        });
+        if(res.ok) cargarInventario();
     }
 }
 
-function apartar(i) {
-    let n = prompt("Nombre:");
-    if(n) { inventario[i].estado="Apartado"; inventario[i].nombre=n; guardar(); dibujar(); }
+async function liberar(id) {
+    if(confirm("¿Liberar prenda?")) {
+        const res = await fetch(`/api/apartar-prenda/${id}/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            body: JSON.stringify({ accion: "liberar" })
+        });
+        if(res.ok) cargarInventario();
+    }
 }
-function liberar(i) { inventario[i].estado="Disponible"; inventario[i].nombre=""; guardar(); dibujar(); }
-function eliminar(i) { if(confirm("¿Eliminar?")) { inventario.splice(i,1); guardar(); dibujar(); } }
 
+async function eliminar(id) {
+    if(confirm("¿Eliminar del inventario permanente?")) {
+        const res = await fetch(`/api/eliminar-prenda/${id}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        });
+        if(res.ok) cargarInventario();
+    }
+}
+
+// Funciones del Visor (sin cambios en lógica visual)
 function verImagen(s) {
     const v = document.getElementById("visor_inv");
     const img = document.getElementById("img_visor_inv");
@@ -243,6 +232,6 @@ function verImagen(s) {
 function cerrarVisor() { document.getElementById("visor_inv").style.display = "none"; }
 function zoomClick(e) { e.stopPropagation(); zoomNivel = zoomNivel === 1 ? 2 : 1; document.getElementById("img_visor_inv").style.transform = `scale(${zoomNivel})`; }
 
-dibujar();
+document.addEventListener("DOMContentLoaded", cargarInventario);
 </script>
 {% endblock %}

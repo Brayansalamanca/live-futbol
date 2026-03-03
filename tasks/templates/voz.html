@@ -5,7 +5,7 @@
 <div style="padding-top: 6rem; max-width: 1000px; margin: 0 auto; text-align: center; padding-bottom: 50px;">
 
     <div style="background-color: #ffffff; border-radius: 15px; padding: 30px; margin-bottom: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); color: #000;">
-        <h2 style="background-color: #28a745; color: white; margin-top: 0; padding: 12px; border-radius: 10px; font-size: 24px;">🔍 CENTRO DE OBJETOS PERDIDOS</h2>
+        <h2 style="background-color: #28a745; color: white; margin-top: 0; padding: 12px; border-radius: 10px; font-size: 24px;">🔍 CENTRO DE OBJETOS PERDIDOS (NUBE)</h2>
         
         <form id="formObjetos" style="text-align: left; margin-bottom: 30px;">
             <div style="display: flex; flex-wrap: wrap; gap: 15px;">
@@ -30,10 +30,12 @@
                     <textarea id="obj_dif" placeholder="Marcas únicas, stickers, rotos..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; min-height: 60px; color: #000;"></textarea>
                 </div>
             </div>
-            <button type="button" onclick="guardarObjeto()" style="background-color: #28a745; color: white; width: 100%; margin-top: 15px; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">PUBLICAR REPORTE</button>
+            <button type="button" onclick="guardarObjetoNube()" style="background-color: #28a745; color: white; width: 100%; margin-top: 15px; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                🚀 PUBLICAR REPORTE GLOBAL
+            </button>
         </form>
 
-        <h3 style="color: #5f17e4; border-bottom: 2px solid #5f17e4; padding-bottom: 5px; text-align: left;">Reportes Activos</h3>
+        <h3 style="color: #5f17e4; border-bottom: 2px solid #5f17e4; padding-bottom: 5px; text-align: left;">Reportes Activos en la Institución</h3>
         <div id="contenedorObjetos" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 20px;"></div>
     </div>
 
@@ -63,18 +65,16 @@
                     <input type="text" id="balon_marca" placeholder="Ej: Golty, Molten..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; color: #000;">
                 </div>
                 <div style="flex: 1 1 45%;">
-                    <label style="font-weight: bold; color: #444;">Foto del Balón</label>
+                    <label style="font-weight: bold; color: #444;">Foto de la Novedad</label>
                     <input type="file" id="balon_foto" style="width: 100%; color: #000;">
                 </div>
-                <div style="width: 100%;">
-                    <label style="font-weight: bold; color: #444;">Responsable del Reporte</label>
-                    <input type="text" id="textoVoz" placeholder="Nombre de quien reporta la novedad" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; color: #000;">
-                </div>
             </div>
-            <button type="button" onclick="guardarBalon()" style="background-color: #ffc107; color: #000; width: 100%; margin-top: 15px; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">REGISTRAR BAJA</button>
+            <button type="button" onclick="guardarBajaBalonNube()" style="background-color: #ffc107; color: #000; width: 100%; margin-top: 15px; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                ⚠️ REGISTRAR BAJA EN EL SISTEMA
+            </button>
         </form>
 
-        <h3 style="color: #333; border-bottom: 2px solid #ffc107; padding-bottom: 5px; text-align: left;">Historial de Balones</h3>
+        <h3 style="color: #333; border-bottom: 2px solid #ffc107; padding-bottom: 5px; text-align: left;">Historial de Bajas</h3>
         <div style="overflow-x: auto; margin-top: 20px;">
             <table style="width: 100%; border-collapse: collapse; background: white; min-width: 600px;">
                 <thead>
@@ -83,7 +83,6 @@
                         <th style="padding: 12px; border: 1px solid #ddd;">Balón</th>
                         <th style="padding: 12px; border: 1px solid #ddd;">Marca</th>
                         <th style="padding: 12px; border: 1px solid #ddd;">Causa</th>
-                        <th style="padding: 12px; border: 1px solid #ddd;">Responsable</th>
                         <th style="padding: 12px; border: 1px solid #ddd;">Acción</th>
                     </tr>
                 </thead>
@@ -93,133 +92,122 @@
     </div>
 </div>
 
-<div id="visor_balones" onclick="cerrarVisor()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; cursor: pointer;">
-    <img id="img_grande_balon" onclick="zoomClick(event)" style="max-width: 90%; max-height: 90%; transition: transform 0.3s; cursor: zoom-in; box-shadow: 0 0 20px rgba(0,0,0,0.5); border-radius: 8px; border: 2px solid white;">
-</div>
-
 <script>
-    let zoomNivel = 1;
+    // --- LÓGICA DE CARGA INICIAL ---
+    document.addEventListener("DOMContentLoaded", () => {
+        cargarObjetos();
+        cargarBajas();
+    });
 
-    // --- LÓGICA OBJETOS PERDIDOS ---
-    function guardarObjeto() {
-        const obj = {
-            id: Date.now(),
+    // --- OBJETOS PERDIDOS ---
+    async function cargarObjetos() {
+        const res = await fetch("{% url 'api_obtener_objetos' %}");
+        const datos = await res.json();
+        const cont = document.getElementById('contenedorObjetos');
+        cont.innerHTML = datos.map(item => `
+            <div style="background: #fff; border: 1px solid #eee; border-left: 6px solid #28a745; padding: 15px; border-radius: 10px; text-align: left; position: relative;">
+                <b style="color: #28a745;">${item.tipo.toUpperCase()}</b>
+                <p style="margin: 8px 0; font-size: 14px; color: #555;">
+                    <b>Reporta:</b> ${item.nombre}<br>
+                    <b>Curso:</b> ${item.curso}<br>
+                    <b>Color:</b> ${item.color}<br>
+                    <i>"${item.dif}"</i>
+                </p>
+                <button onclick="eliminarObjetoNube('${item.id}')" style="position: absolute; top: 8px; right: 8px; background: #ff4d4d; color: white; border: none; border-radius: 5px; cursor: pointer; padding: 2px 6px; font-size: 11px;">X</button>
+            </div>
+        `).join('') || '<p style="color: #999;">Sin reportes activos.</p>';
+    }
+
+    async function guardarObjetoNube() {
+        const datos = {
             nombre: document.getElementById('obj_nombre').value,
             curso: document.getElementById('obj_curso').value,
             tipo: document.getElementById('obj_tipo').value,
             color: document.getElementById('obj_color').value,
             dif: document.getElementById('obj_dif').value
         };
-        if (!obj.nombre || !obj.tipo) return alert("Completa los campos.");
-        let db = JSON.parse(localStorage.getItem('objetos_perdidos')) || [];
-        db.push(obj);
-        localStorage.setItem('objetos_perdidos', JSON.stringify(db));
-        dibujarObjetos();
-        document.getElementById('formObjetos').reset();
-    }
 
-    function dibujarObjetos() {
-        let db = JSON.parse(localStorage.getItem('objetos_perdidos')) || [];
-        const cont = document.getElementById('contenedorObjetos');
-        cont.innerHTML = db.map(item => `
-            <div style="background: #fff; border: 1px solid #eee; border-left: 6px solid #28a745; padding: 15px; border-radius: 10px; text-align: left; position: relative;">
-                <b style="color: #28a745;">${item.tipo.toUpperCase()}</b>
-                <p style="margin: 8px 0; font-size: 14px; color: #555;">
-                    <b>Reporta:</b> ${item.nombre}<br>
-                    <b>Color:</b> ${item.color}<br>
-                    <i>"${item.dif}"</i>
-                </p>
-                <button onclick="eliminarObjeto(${item.id})" style="position: absolute; top: 8px; right: 8px; background: #ff4d4d; color: white; border: none; border-radius: 5px; cursor: pointer; padding: 2px 6px; font-size: 11px;">X</button>
-            </div>
-        `).join('') || '<p style="color: #999; grid-column: 1/-1;">Sin reportes.</p>';
-    }
+        if (!datos.nombre || !datos.tipo) return alert("⚠️ Nombre y Tipo son obligatorios");
 
-    function eliminarObjeto(id) {
-        let db = JSON.parse(localStorage.getItem('objetos_perdidos')) || [];
-        localStorage.setItem('objetos_perdidos', JSON.stringify(db.filter(x => x.id !== id)));
-        dibujarObjetos();
-    }
+        const res = await fetch("{% url 'api_guardar_objeto' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            body: JSON.stringify(datos)
+        });
 
-    // --- LÓGICA BALONES ---
-    function guardarBalon() {
-        const file = document.getElementById('balon_foto').files[0];
-        const reader = new FileReader();
-
-        const registrar = (imgSrc = "") => {
-            const balon = {
-                id: Date.now(),
-                tipo: document.getElementById('balon_tipo').value,
-                causa: document.getElementById('balon_causa').value,
-                marca: document.getElementById('balon_marca').value,
-                responsable: document.getElementById('textoVoz').value,
-                foto: imgSrc
-            };
-            let db = JSON.parse(localStorage.getItem('balones_bajas')) || [];
-            db.push(balon);
-            localStorage.setItem('balones_bajas', JSON.stringify(db));
-            dibujarBalones();
-            document.getElementById('formBalones').reset();
-        };
-
-        if (file) {
-            reader.onload = (e) => registrar(e.target.result);
-            reader.readAsDataURL(file);
-        } else {
-            registrar("https://via.placeholder.com/150?text=Sin+Foto");
+        if (res.ok) {
+            document.getElementById('formObjetos').reset();
+            cargarObjetos();
         }
     }
 
-    function dibujarBalones() {
-        let db = JSON.parse(localStorage.getItem('balones_bajas')) || [];
+    // --- BAJAS DE BALONES ---
+    async function cargarBajas() {
+        const res = await fetch("{% url 'api_obtener_bajas' %}");
+        const datos = await res.json();
         const tbody = document.getElementById('tablaBalonesBody');
-        tbody.innerHTML = db.map(b => `
+        tbody.innerHTML = datos.map(b => `
             <tr>
                 <td style="padding: 10px; border: 1px solid #ddd;">
-                    <img src="${b.foto}" onclick="verImagen('${b.foto}')" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid #ffc107;">
+                    <img src="${b.foto || 'https://via.placeholder.com/70'}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
                 </td>
                 <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">${b.tipo}</td>
                 <td style="padding: 10px; border: 1px solid #ddd;">${b.marca}</td>
-                <td style="padding: 10px; border: 1px solid #ddd;"><span style="background: #fff3cd; color: #856404; padding: 4px 10px; border-radius: 15px; font-size: 12px;">${b.causa}</span></td>
-                <td style="padding: 10px; border: 1px solid #ddd;">${b.responsable}</td>
                 <td style="padding: 10px; border: 1px solid #ddd;">
-                    <button onclick="eliminarBalon(${b.id})" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">X</button>
+                    <span style="background: #fff3cd; color: #856404; padding: 4px 10px; border-radius: 15px; font-size: 12px;">${b.causa}</span>
+                </td>
+                <td style="padding: 10px; border: 1px solid #ddd;">
+                    <button onclick="eliminarBajaNube('${b.id}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">Eliminar</button>
                 </td>
             </tr>
-        `).join('') || '<tr><td colspan="6" style="padding: 20px; color: #999;">Sin registros.</td></tr>';
+        `).join('') || '<tr><td colspan="5">No hay bajas registradas.</td></tr>';
     }
 
-    function eliminarBalon(id) {
-        if(confirm("¿Eliminar registro?")) {
-            let db = JSON.parse(localStorage.getItem('balones_bajas')) || [];
-            localStorage.setItem('balones_bajas', JSON.stringify(db.filter(x => x.id !== id)));
-            dibujarBalones();
+    async function guardarBajaBalonNube() {
+        const file = document.getElementById('balon_foto').files[0];
+        const reader = new FileReader();
+
+        const enviar = async (imgBase64 = "") => {
+            const datos = {
+                tipo: document.getElementById('balon_tipo').value,
+                causa: document.getElementById('balon_causa').value,
+                marca: document.getElementById('balon_marca').value,
+                foto: imgBase64
+            };
+
+            const res = await fetch("{% url 'api_guardar_baja' %}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+                body: JSON.stringify(datos)
+            });
+
+            if (res.ok) {
+                document.getElementById('formBalones').reset();
+                cargarBajas();
+            }
+        };
+
+        if (file) {
+            reader.onload = (e) => enviar(e.target.result);
+            reader.readAsDataURL(file);
+        } else {
+            enviar("");
         }
     }
 
-    // --- FUNCIONES DEL VISOR ---
-    function verImagen(src) {
-        const visor = document.getElementById("visor_balones");
-        const imgGrande = document.getElementById("img_grande_balon");
-        imgGrande.src = src;
-        zoomNivel = 1;
-        imgGrande.style.transform = "scale(1)";
-        visor.style.display = "flex";
+    // --- FUNCIONES DE ELIMINACIÓN ---
+    async function eliminarObjetoNube(id) {
+        if (confirm("¿Confirmas que el objeto fue recuperado o el reporte es inválido?")) {
+            await fetch(`/api/eliminar-objeto/${id}/`, { method: "POST", headers: { "X-CSRFToken": "{{ csrf_token }}" } });
+            cargarObjetos();
+        }
     }
 
-    function zoomClick(e) {
-        e.stopPropagation(); // Evita que se cierre el visor al hacer clic para zoom
-        zoomNivel = zoomNivel === 1 ? 2 : 1;
-        document.getElementById("img_grande_balon").style.transform = "scale(" + zoomNivel + ")";
-        document.getElementById("img_grande_balon").style.cursor = zoomNivel === 1 ? "zoom-in" : "zoom-out";
+    async function eliminarBajaNube(id) {
+        if (confirm("¿Eliminar este registro de baja?")) {
+            await fetch(`/api/eliminar-baja/${id}/`, { method: "POST", headers: { "X-CSRFToken": "{{ csrf_token }}" } });
+            cargarBajas();
+        }
     }
-
-    function cerrarVisor() {
-        document.getElementById("visor_balones").style.display = "none";
-    }
-
-    window.onload = () => {
-        dibujarObjetos();
-        dibujarBalones();
-    };
 </script>
 {% endblock %}
