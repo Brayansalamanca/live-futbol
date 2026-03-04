@@ -134,14 +134,12 @@
     let letraActual = "";
     let editandoID = null;
 
-    // 1. FUNCIÓN DE CARGA AUTOMÁTICA (TIEMPO REAL)
+    // 1. CARGA EN TIEMPO REAL (Mantenemos los 2 segundos, pero optimizado)
     async function cargarDatos() {
         try {
-            const res = await fetch("{% url 'api_obtener_entregas' %}");
+            const res = await fetch("{% url 'api_obtener_entregas' %}?t=" + new Date().getTime());
             const nuevosRegistros = await res.json();
             
-            // Solo redibujamos la tabla si los datos en la base de datos han cambiado
-            // Esto evita que la pantalla "parpadee" cada 2 segundos
             if (JSON.stringify(nuevosRegistros) !== JSON.stringify(registros)) {
                 registros = nuevosRegistros;
                 dibujar();
@@ -151,10 +149,9 @@
         }
     }
 
-    // CONFIGURACIÓN DEL RELOJ: Se ejecuta cada 2000ms (2 segundos)
-    // Esto hace que todas las computadoras vean los cambios sin refrescar.
     setInterval(cargarDatos, 2000); 
 
+    // 2. REGISTRO Y EDICIÓN (CORREGIDO PARA EVITAR CAÍDAS)
     async function registrarEnNube() {
         const nombreInput = document.getElementById("textoVoz").value.trim();
         const lugarInput = document.getElementById("lugarSelect").value;
@@ -165,33 +162,49 @@
             return;
         }
 
-        const datos = {
-            recibido_por: nombreInput,
-            curso: cursoCompleto,
-            balon: objetoActual,
-            lugar: lugarInput
-        };
+        // --- CAMBIO CLAVE: LÓGICA SECUENCIAL ---
+        try {
+            // Si hay un ID para editar, PRIMERO borramos y ESPERAMOS la respuesta
+            if (editandoID) {
+                console.log("Eliminando registro previo para actualizar...");
+                const resEliminar = await fetch(`/api/eliminar-entrega/${editandoID}/`, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": "{{ csrf_token }}" }
+                });
+                
+                if (!resEliminar.ok) {
+                    throw new Error("No se pudo eliminar el registro anterior");
+                }
+            }
 
-        // Si estamos editando, eliminamos el registro viejo antes de guardar el nuevo
-        if (editandoID) {
-            await fetch(`/api/eliminar-entrega/${editandoID}/`, {
+            // Una vez confirmado el borrado (o si es nuevo), procedemos a guardar
+            const datos = {
+                recibido_por: nombreInput,
+                curso: cursoCompleto,
+                balon: objetoActual,
+                lugar: lugarInput
+            };
+
+            const resGuardar = await fetch("{% url 'api_guardar_entrega' %}", {
                 method: "POST",
-                headers: { "X-CSRFToken": "{{ csrf_token }}" }
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify(datos)
             });
-        }
 
-        const res = await fetch("{% url 'api_guardar_entrega' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify(datos)
-        });
+            if (resGuardar.ok) {
+                console.log("¡Registro guardado con éxito!");
+                resetearFormulario();
+                await cargarDatos(); // Refrescar lista de inmediato
+            } else {
+                alert("❌ Error al guardar el nuevo registro.");
+            }
 
-        if (res.ok) {
-            resetearFormulario();
-            cargarDatos(); // Forzamos actualización inmediata tras guardar
+        } catch (error) {
+            console.error("Error en el proceso:", error);
+            alert("⚠️ Ocurrió un error al procesar la edición. Intenta de nuevo.");
         }
     }
 
@@ -234,6 +247,7 @@
             b.classList.toggle("activo", b.innerText.toLowerCase().includes(objeto.toLowerCase()));
         });
 
+        // Extraer número y letra del curso
         const grado = parseInt(curso);
         const letra = curso.replace(grado, "");
         
