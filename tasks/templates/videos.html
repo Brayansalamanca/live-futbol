@@ -134,24 +134,27 @@
     let letraActual = "";
     let editandoID = null;
 
-    // 1. CARGA EN TIEMPO REAL (Mantenemos los 2 segundos, pero optimizado)
+    // 1. SINCRONIZACIÓN EN TIEMPO REAL (Polling 2s)
     async function cargarDatos() {
         try {
+            // Añadimos un timestamp (?t=...) para evitar que el navegador guarde copias viejas en caché
             const res = await fetch("{% url 'api_obtener_entregas' %}?t=" + new Date().getTime());
             const nuevosRegistros = await res.json();
             
+            // Solo redibujar si hay cambios reales para evitar parpadeos
             if (JSON.stringify(nuevosRegistros) !== JSON.stringify(registros)) {
                 registros = nuevosRegistros;
                 dibujar();
             }
         } catch (e) { 
-            console.error("Error en la sincronización:", e); 
+            console.error("Error de sincronización:", e); 
         }
     }
 
+    // Activar el reloj de 2 segundos
     setInterval(cargarDatos, 2000); 
 
-    // 2. REGISTRO Y EDICIÓN (CORREGIDO PARA EVITAR CAÍDAS)
+    // 2. REGISTRO Y EDICIÓN (Lógica Segura)
     async function registrarEnNube() {
         const nombreInput = document.getElementById("textoVoz").value.trim();
         const lugarInput = document.getElementById("lugarSelect").value;
@@ -162,22 +165,23 @@
             return;
         }
 
-        // --- CAMBIO CLAVE: LÓGICA SECUENCIAL ---
         try {
-            // Si hay un ID para editar, PRIMERO borramos y ESPERAMOS la respuesta
+            // SI ESTAMOS EDITANDO: Primero borramos el viejo y esperamos confirmación
             if (editandoID) {
-                console.log("Eliminando registro previo para actualizar...");
+                console.log("Editando: Borrando registro ID " + editandoID);
                 const resEliminar = await fetch(`/api/eliminar-entrega/${editandoID}/`, {
                     method: "POST",
                     headers: { "X-CSRFToken": "{{ csrf_token }}" }
                 });
                 
                 if (!resEliminar.ok) {
-                    throw new Error("No se pudo eliminar el registro anterior");
+                    throw new Error("No se pudo limpiar el registro anterior");
                 }
+                // Pequeña pausa de seguridad para el servidor
+                await new Promise(r => setTimeout(r, 300));
             }
 
-            // Una vez confirmado el borrado (o si es nuevo), procedemos a guardar
+            // AHORA: Guardamos el nuevo (o el editado)
             const datos = {
                 recibido_por: nombreInput,
                 curso: cursoCompleto,
@@ -195,11 +199,11 @@
             });
 
             if (resGuardar.ok) {
-                console.log("¡Registro guardado con éxito!");
                 resetearFormulario();
-                await cargarDatos(); // Refrescar lista de inmediato
+                await cargarDatos(); // Actualizar tabla de inmediato
+                console.log("¡Proceso completado con éxito!");
             } else {
-                alert("❌ Error al guardar el nuevo registro.");
+                alert("❌ Error al guardar en el servidor.");
             }
 
         } catch (error) {
@@ -208,6 +212,7 @@
         }
     }
 
+    // 3. DIBUJAR TABLA
     function dibujar() {
         let html = "";
         const filtro = document.getElementById("buscador").value.toLowerCase();
@@ -216,7 +221,7 @@
             const nombreMostrar = r.nombre || r.recibido_por || "Sin nombre";
             const objetoMostrar = r.objeto || r.balon || "Sin objeto";
             const cursoMostrar = r.curso || "N/A";
-            const idReal = r._id || r.id;
+            const idReal = r.id; // Usamos el ID de Django
             
             const info = (nombreMostrar + cursoMostrar).toLowerCase();
             
@@ -226,7 +231,7 @@
                     <td><strong>${nombreMostrar}</strong><br><small>${cursoMostrar}</small></td>
                     <td>${objetoMostrar}</td>
                     <td>${r.lugar || 'Cancha'}</td>
-                    <td>${r.fecha ? new Date(r.fecha).toLocaleString() : 'Pendiente'}</td>
+                    <td>${r.fecha ? new Date(r.fecha).toLocaleString() : 'Recién registrado'}</td>
                     <td>
                         <button class="btn-editar" onclick="prepararEdicion('${idReal}', '${nombreMostrar}', '${objetoMostrar}', '${cursoMostrar}', '${r.lugar}')">Editar</button>
                         <button class="btn-entregado" onclick="marcarEntregado('${idReal}')">Finalizar</button>
@@ -234,32 +239,37 @@
                 </tr>`;
             }
         });
-        document.getElementById("tabla").innerHTML = html;
+        document.getElementById("tabla").innerHTML = html || "<tr><td colspan='5'>No hay préstamos activos.</td></tr>";
     }
 
+    // 4. PREPARAR EDICIÓN (Cargar datos al formulario)
     function prepararEdicion(id, nombre, objeto, curso, lugar) {
         editandoID = id;
         document.getElementById("textoVoz").value = nombre;
         document.getElementById("lugarSelect").value = lugar;
         
+        // Activar botón de objeto
         objetoActual = objeto;
         document.querySelectorAll(".btn-objeto").forEach(b => {
-            b.classList.toggle("activo", b.innerText.toLowerCase().includes(objeto.toLowerCase()));
+            const esActivo = b.innerText.toLowerCase().includes(objeto.toLowerCase());
+            b.classList.toggle("activo", esActivo);
         });
 
-        // Extraer número y letra del curso
+        // Extraer grado y letra
         const grado = parseInt(curso);
         const letra = curso.replace(grado, "");
         
         gradoActual = grado;
-        letraActual = letra;
+        let letraActual = letra;
 
         cargarBotonesCursos();
         generarLetras(grado);
 
+        // Subir al inicio para que el usuario vea que se cargó la info
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // 5. OTRAS FUNCIONES (Selección y limpieza)
     function resetearFormulario() {
         document.getElementById("textoVoz").value = "";
         document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
@@ -268,7 +278,7 @@
     }
 
     async function marcarEntregado(id) {
-        if(confirm("¿El objeto fue devuelto correctamente?")) {
+        if(confirm("¿Confirmas la devolución del objeto?")) {
             const res = await fetch(`/api/eliminar-entrega/${id}/`, {
                 method: "POST",
                 headers: { "X-CSRFToken": "{{ csrf_token }}" }
