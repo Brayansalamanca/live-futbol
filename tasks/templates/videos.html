@@ -66,8 +66,7 @@
     th { background-color: #2c3e50; color: white; padding: 15px; }
     td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
 
-    .btn-entregado { background-color: #27ae60; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin: 2px; }
-    .btn-editar { background-color: #2980b9; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin: 2px; }
+    .btn-entregado { background-color: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 </style>
 
 <div class="contenedor-registro">
@@ -103,7 +102,7 @@
     </div>
     
     <button onclick="registrarEnNube()" style="background-color: #5f17e4; padding: 15px 40px; font-weight: bold; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px;">
-        🚀 Registrar / Actualizar Entrega
+        🚀 Registrar Entrega
     </button>
 
     <div class="seccion-busqueda">
@@ -132,29 +131,26 @@
     let objetoActual = "";
     let gradoActual = "";
     let letraActual = "";
-    let editandoID = null;
 
-    // 1. SINCRONIZACIÓN EN TIEMPO REAL (Polling 2s)
+    // --- 1. SINCRONIZACIÓN AUTOMÁTICA (CADA 2 SEGUNDOS) ---
     async function cargarDatos() {
         try {
-            // Añadimos un timestamp (?t=...) para evitar que el navegador guarde copias viejas en caché
-            const res = await fetch("{% url 'api_obtener_entregas' %}?t=" + new Date().getTime());
+            const res = await fetch("{% url 'api_obtener_entregas' %}?cache_bust=" + Date.now());
             const nuevosRegistros = await res.json();
             
-            // Solo redibujar si hay cambios reales para evitar parpadeos
+            // Solo actualiza el HTML si los datos realmente cambiaron
             if (JSON.stringify(nuevosRegistros) !== JSON.stringify(registros)) {
                 registros = nuevosRegistros;
                 dibujar();
             }
         } catch (e) { 
-            console.error("Error de sincronización:", e); 
+            console.error("Error cargando datos:", e); 
         }
     }
 
-    // Activar el reloj de 2 segundos
     setInterval(cargarDatos, 2000); 
 
-    // 2. REGISTRO Y EDICIÓN (Lógica Segura)
+    // --- 2. REGISTRAR NUEVA ENTREGA ---
     async function registrarEnNube() {
         const nombreInput = document.getElementById("textoVoz").value.trim();
         const lugarInput = document.getElementById("lugarSelect").value;
@@ -165,31 +161,15 @@
             return;
         }
 
+        const datos = {
+            recibido_por: nombreInput,
+            curso: cursoCompleto,
+            balon: objetoActual,
+            lugar: lugarInput
+        };
+
         try {
-            // SI ESTAMOS EDITANDO: Primero borramos el viejo y esperamos confirmación
-            if (editandoID) {
-                console.log("Editando: Borrando registro ID " + editandoID);
-                const resEliminar = await fetch(`/api/eliminar-entrega/${editandoID}/`, {
-                    method: "POST",
-                    headers: { "X-CSRFToken": "{{ csrf_token }}" }
-                });
-                
-                if (!resEliminar.ok) {
-                    throw new Error("No se pudo limpiar el registro anterior");
-                }
-                // Pequeña pausa de seguridad para el servidor
-                await new Promise(r => setTimeout(r, 300));
-            }
-
-            // AHORA: Guardamos el nuevo (o el editado)
-            const datos = {
-                recibido_por: nombreInput,
-                curso: cursoCompleto,
-                balon: objetoActual,
-                lugar: lugarInput
-            };
-
-            const resGuardar = await fetch("{% url 'api_guardar_entrega' %}", {
+            const res = await fetch("{% url 'api_guardar_entrega' %}", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -198,43 +178,35 @@
                 body: JSON.stringify(datos)
             });
 
-            if (resGuardar.ok) {
+            if (res.ok) {
                 resetearFormulario();
-                await cargarDatos(); // Actualizar tabla de inmediato
-                console.log("¡Proceso completado con éxito!");
-            } else {
-                alert("❌ Error al guardar en el servidor.");
+                cargarDatos(); // Actualizar inmediatamente
             }
-
         } catch (error) {
-            console.error("Error en el proceso:", error);
-            alert("⚠️ Ocurrió un error al procesar la edición. Intenta de nuevo.");
+            alert("Error al conectar con el servidor.");
         }
     }
 
-    // 3. DIBUJAR TABLA
+    // --- 3. DIBUJAR LA TABLA ---
     function dibujar() {
         let html = "";
         const filtro = document.getElementById("buscador").value.toLowerCase();
 
         registros.forEach((r) => {
-            const nombreMostrar = r.nombre || r.recibido_por || "Sin nombre";
-            const objetoMostrar = r.objeto || r.balon || "Sin objeto";
-            const cursoMostrar = r.curso || "N/A";
-            const idReal = r.id; // Usamos el ID de Django
+            const nombre = r.nombre || r.recibido_por || "---";
+            const objeto = r.objeto || r.balon || "---";
+            const curso = r.curso || "N/A";
+            const id = r.id; 
             
-            const info = (nombreMostrar + cursoMostrar).toLowerCase();
-            
-            if (info.includes(filtro)) {
+            if ((nombre + curso).toLowerCase().includes(filtro)) {
                 html += `
                 <tr>
-                    <td><strong>${nombreMostrar}</strong><br><small>${cursoMostrar}</small></td>
-                    <td>${objetoMostrar}</td>
+                    <td><strong>${nombre}</strong><br><small>${curso}</small></td>
+                    <td>${objeto}</td>
                     <td>${r.lugar || 'Cancha'}</td>
-                    <td>${r.fecha ? new Date(r.fecha).toLocaleString() : 'Recién registrado'}</td>
+                    <td>${r.fecha ? new Date(r.fecha).toLocaleTimeString() : 'Ahora'}</td>
                     <td>
-                        <button class="btn-editar" onclick="prepararEdicion('${idReal}', '${nombreMostrar}', '${objetoMostrar}', '${cursoMostrar}', '${r.lugar}')">Editar</button>
-                        <button class="btn-entregado" onclick="marcarEntregado('${idReal}')">Finalizar</button>
+                        <button class="btn-entregado" onclick="marcarEntregado('${id}')">✅ Finalizar</button>
                     </td>
                 </tr>`;
             }
@@ -242,51 +214,22 @@
         document.getElementById("tabla").innerHTML = html || "<tr><td colspan='5'>No hay préstamos activos.</td></tr>";
     }
 
-    // 4. PREPARAR EDICIÓN (Cargar datos al formulario)
-    function prepararEdicion(id, nombre, objeto, curso, lugar) {
-        editandoID = id;
-        document.getElementById("textoVoz").value = nombre;
-        document.getElementById("lugarSelect").value = lugar;
-        
-        // Activar botón de objeto
-        objetoActual = objeto;
-        document.querySelectorAll(".btn-objeto").forEach(b => {
-            const esActivo = b.innerText.toLowerCase().includes(objeto.toLowerCase());
-            b.classList.toggle("activo", esActivo);
-        });
-
-        // Extraer grado y letra
-        const grado = parseInt(curso);
-        const letra = curso.replace(grado, "");
-        
-        gradoActual = grado;
-        let letraActual = letra;
-
-        cargarBotonesCursos();
-        generarLetras(grado);
-
-        // Subir al inicio para que el usuario vea que se cargó la info
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // 5. OTRAS FUNCIONES (Selección y limpieza)
-    function resetearFormulario() {
-        document.getElementById("textoVoz").value = "";
-        document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
-        objetoActual = ""; gradoActual = ""; letraActual = ""; editandoID = null;
-        document.getElementById("letrasContenedor").innerHTML = "";
-    }
-
+    // --- 4. FINALIZAR (ELIMINAR) ---
     async function marcarEntregado(id) {
-        if(confirm("¿Confirmas la devolución del objeto?")) {
-            const res = await fetch(`/api/eliminar-entrega/${id}/`, {
-                method: "POST",
-                headers: { "X-CSRFToken": "{{ csrf_token }}" }
-            });
-            if (res.ok) cargarDatos();
+        if(confirm("¿El objeto fue devuelto?")) {
+            try {
+                const res = await fetch(`/api/eliminar-entrega/${id}/`, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": "{{ csrf_token }}" }
+                });
+                if (res.ok) cargarDatos();
+            } catch (e) {
+                alert("No se pudo procesar la entrega.");
+            }
         }
     }
 
+    // --- FUNCIONES DE INTERFAZ ---
     function seleccionarObjeto(btn, obj) {
         objetoActual = obj;
         document.querySelectorAll(".btn-objeto").forEach(b => b.classList.remove("activo"));
@@ -311,8 +254,7 @@
         let limite = (grado === 9) ? 4 : (grado >= 10) ? 3 : 5;
         let html = "";
         for(let i=0; i<limite; i++) {
-            const activa = (letraActual === letras[i]) ? "activo" : "";
-            html += `<button class="btn-curso ${activa}" onclick="seleccionarLetra(this, '${letras[i]}')">${letras[i]}</button>`;
+            html += `<button class="btn-curso" onclick="seleccionarLetra(this, '${letras[i]}')">${letras[i]}</button>`;
         }
         document.getElementById("letrasContenedor").innerHTML = html;
     }
@@ -320,10 +262,16 @@
     function cargarBotonesCursos() {
         let html = "";
         for(let i=3; i<=11; i++) {
-            const activa = (gradoActual === i) ? "activo" : "";
-            html += `<button class="btn-curso ${activa}" onclick="seleccionarGrado(this, ${i})">${i}°</button>`;
+            html += `<button class="btn-curso" onclick="seleccionarGrado(this, ${i})">${i}°</button>`;
         }
         document.getElementById("gradosContenedor").innerHTML = html;
+    }
+
+    function resetearFormulario() {
+        document.getElementById("textoVoz").value = "";
+        document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
+        objetoActual = ""; gradoActual = ""; letraActual = "";
+        document.getElementById("letrasContenedor").innerHTML = "";
     }
 
     document.addEventListener("DOMContentLoaded", () => {
