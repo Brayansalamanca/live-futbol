@@ -134,13 +134,26 @@
     let letraActual = "";
     let editandoID = null;
 
+    // 1. FUNCIÓN DE CARGA AUTOMÁTICA (TIEMPO REAL)
     async function cargarDatos() {
         try {
             const res = await fetch("{% url 'api_obtener_entregas' %}");
-            registros = await res.json();
-            dibujar();
-        } catch (e) { console.error("Error cargando datos:", e); }
+            const nuevosRegistros = await res.json();
+            
+            // Solo redibujamos la tabla si los datos en la base de datos han cambiado
+            // Esto evita que la pantalla "parpadee" cada 2 segundos
+            if (JSON.stringify(nuevosRegistros) !== JSON.stringify(registros)) {
+                registros = nuevosRegistros;
+                dibujar();
+            }
+        } catch (e) { 
+            console.error("Error en la sincronización:", e); 
+        }
     }
+
+    // CONFIGURACIÓN DEL RELOJ: Se ejecuta cada 2000ms (2 segundos)
+    // Esto hace que todas las computadoras vean los cambios sin refrescar.
+    setInterval(cargarDatos, 2000); 
 
     async function registrarEnNube() {
         const nombreInput = document.getElementById("textoVoz").value.trim();
@@ -159,7 +172,7 @@
             lugar: lugarInput
         };
 
-        // Si estamos editando, primero eliminamos el anterior para "actualizar"
+        // Si estamos editando, eliminamos el registro viejo antes de guardar el nuevo
         if (editandoID) {
             await fetch(`/api/eliminar-entrega/${editandoID}/`, {
                 method: "POST",
@@ -177,9 +190,8 @@
         });
 
         if (res.ok) {
-            alert(editandoID ? "✅ Registro actualizado" : "✅ Registro exitoso");
             resetearFormulario();
-            cargarDatos();
+            cargarDatos(); // Forzamos actualización inmediata tras guardar
         }
     }
 
@@ -201,7 +213,7 @@
                     <td><strong>${nombreMostrar}</strong><br><small>${cursoMostrar}</small></td>
                     <td>${objetoMostrar}</td>
                     <td>${r.lugar || 'Cancha'}</td>
-                    <td>${r.fecha ? new Date(r.fecha).toLocaleString() : 'Recién guardado'}</td>
+                    <td>${r.fecha ? new Date(r.fecha).toLocaleString() : 'Pendiente'}</td>
                     <td>
                         <button class="btn-editar" onclick="prepararEdicion('${idReal}', '${nombreMostrar}', '${objetoMostrar}', '${cursoMostrar}', '${r.lugar}')">Editar</button>
                         <button class="btn-entregado" onclick="marcarEntregado('${idReal}')">Finalizar</button>
@@ -217,25 +229,21 @@
         document.getElementById("textoVoz").value = nombre;
         document.getElementById("lugarSelect").value = lugar;
         
-        // Seleccionar Objeto visualmente
         objetoActual = objeto;
         document.querySelectorAll(".btn-objeto").forEach(b => {
             b.classList.toggle("activo", b.innerText.toLowerCase().includes(objeto.toLowerCase()));
         });
 
-        // Extraer grado y letra del curso (ej: "10A")
         const grado = parseInt(curso);
         const letra = curso.replace(grado, "");
         
         gradoActual = grado;
         letraActual = letra;
 
-        // Activar botones de curso
         cargarBotonesCursos();
         generarLetras(grado);
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        alert("📝 Modo Edición: Modifica los campos y dale a 'Registrar' para guardar los cambios.");
     }
 
     function resetearFormulario() {
