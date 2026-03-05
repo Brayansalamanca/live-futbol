@@ -246,23 +246,27 @@
         btn.classList.add("activo");
     }
 
-    function generarLetras(grado) {
+   function generarLetras(grado) {
         let letras = ['A', 'B', 'C', 'D', 'E'];
         let limite;
 
-        // AQUÍ ESTÁ EL CAMBIO: 9, 10 y 11 ahora muestran hasta la D (4 letras)
+        // Si el grado es 9, 10 u 11, mostramos hasta la D (4 letras)
         if (grado >= 9) {
-            limite = 4; // A, B, C, D
+            limite = 4; // Esto habilita A, B, C y D
         } else {
-            limite = 5; // A, B, C, D, E (Para primaria y bachillerato bajo)
+            limite = 5; // Para los grados menores (3° a 8°) muestra hasta la E
         }
 
         let html = "";
-        for(let i=0; i<limite; i++) {
+        for(let i = 0; i < limite; i++) {
             html += `<button class="btn-curso" onclick="seleccionarLetra(this, '${letras[i]}')">${letras[i]}</button>`;
         }
+        
+        // Insertamos los nuevos botones en el contenedor
         document.getElementById("letrasContenedor").innerHTML = html;
-        letraActual = ""; // Reset letra al cambiar grado
+        
+        // Resetear la letra seleccionada para evitar errores de registro
+        letraActual = ""; 
     }
 
     function cargarBotonesCursos() {
