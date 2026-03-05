@@ -335,3 +335,14 @@ def eliminar_tarea(request, task_id):
     if request.method == 'POST':
         task.delete()
     return redirect('tasks')
+@login_required
+def api_eliminar_baja(request, baja_id):
+    if request.method == "POST":
+        try:
+            # get_object_or_404 buscará en tu modelo BajaBalon
+            baja = get_object_or_404(BajaBalon, pk=baja_id)
+            baja.delete()
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
