@@ -11,230 +11,184 @@
         border-radius: 15px;
         backdrop-filter: blur(5px);
         color: white;
-        padding-top: 80px; /* Espacio para la navbar */
+        padding-top: 80px;
     }
 
     .btn-objeto, .btn-curso {
-        padding: 10px 18px;
-        margin: 5px;
-        border: 2px solid transparent;
-        border-radius: 10px;
-        background: #ffffff;
-        color: #0c0c0c;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .btn-objeto:hover, .btn-curso:hover {
-        background: #5dade2;
-        color: white;
-        transform: translateY(-3px);
+        padding: 10px 18px; margin: 5px; border: 2px solid transparent;
+        border-radius: 10px; background: #ffffff; color: #0c0c0c;
+        font-weight: bold; cursor: pointer; transition: all 0.3s ease;
     }
 
     .btn-objeto.activo, .btn-curso.activo {
-        background: #5f17e4;
-        color: white;
-        border-color: #ffffff;
-        box-shadow: 0 0 15px rgba(95, 23, 228, 0.5);
+        background: #5f17e4; color: white; border-color: #ffffff;
     }
 
-    #lugarSelect, #textoVoz, #buscador {
-        width: 100%;
-        max-width: 400px;
-        padding: 12px;
-        margin: 10px 0;
-        border-radius: 10px;
-        border: 2px solid #5dade2;
-        font-size: 16px;
-        outline: none;
-        background-color: #ffffff;
-        color: #333;
+    input, select {
+        width: 100%; max-width: 400px; padding: 12px; margin: 10px 0;
+        border-radius: 10px; border: 2px solid #5dade2; outline: none;
     }
 
-    table {
-        width: 100%;
-        border-radius: 15px;
-        overflow: hidden;
-        margin-top: 20px;
-        background: white;
-        color: black;
-        border-collapse: collapse;
+    /* Tabla Formal */
+    .tabla-admin {
+        width: 100%; background: white; color: black; border-collapse: collapse;
+        margin-top: 20px; border-radius: 10px; overflow: hidden; font-size: 14px;
     }
-
-    th { background-color: #2c3e50; color: white; padding: 15px; }
-    td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
-
-    .btn-entregado { 
-        background-color: #27ae60; 
-        color: white; 
-        border: none; 
-        padding: 8px 15px; 
-        border-radius: 5px; 
-        cursor: pointer; 
-        font-weight: bold; 
-    }
+    .tabla-admin th { background: #2c3e50; color: white; padding: 12px; }
+    .tabla-admin td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    .input-edit { width: 90%; padding: 5px; border: 1px solid #5f17e4; border-radius: 4px; }
 </style>
 
 <div class="contenedor-registro">
-    <h1>⚽ Registro de Entrega (Balones y Equipos)</h1>
+    <h1>⚽ Registro de Entrega Profesional</h1>
 
     <h3>1. Selecciona el objeto</h3>
-    <div id="objetosContenedor" style="margin-bottom: 20px;">
+    <div id="objetosContenedor">
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Fútbol')">⚽ Fútbol</button>
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Básquet')">🏀 Básquet</button>
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Volley')">🏐 Volley</button>
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'Cuerda')">🥨 Cuerda</button>
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Ajedrez')">♟️ Ajedrez</button>
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Jenga')">🧱 Jenga</button>
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Ping Pong')">🏓 Ping Pong</button>
     </div>
 
-    <h3>2. Lugar de uso</h3>
-    <select id="lugarSelect">
-        <option>Cancha Sintética</option>
-        <option>Cancha Externa</option>
-        <option>Cancha de Baloncesto</option>
-        <option>Cancha de Volley</option>
-        <option>Coliseo / Salón</option>
-    </select>
-
-    <h3>3. Nombre de la persona</h3>
-    <input id="textoVoz" placeholder="Escribe el nombre del estudiante...">
-
-    <div id="seccionCurso" style="margin: 20px 0; border: 1px solid rgba(255,255,255,0.3); padding: 15px; border-radius: 10px;">
-        <h3>4. Selecciona el Curso</h3>
-        <div id="gradosContenedor"></div>
-        <div id="letrasContenedor" style="margin-top: 10px; min-height: 50px;"></div>
+    <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+        <div>
+            <h3>2. Datos de Entrega</h3>
+            <input id="textoVoz" placeholder="Nombre del estudiante...">
+            <input id="marcaBalon" placeholder="Marca (Golty, Molten, etc.)...">
+            <select id="lugarSelect">
+                <option>Cancha Sintética</option>
+                <option>Cancha Externa</option>
+                <option>Coliseo</option>
+            </select>
+        </div>
+        
+        <div id="seccionCurso" style="flex: 1; border: 1px solid rgba(255,255,255,0.3); padding: 15px; border-radius: 10px;">
+            <h3>3. Grado y Letra</h3>
+            <div id="gradosContenedor"></div>
+            <div id="letrasContenedor" style="margin-top: 10px;"></div>
+        </div>
     </div>
     
-    <button onclick="registrarEnNube()" style="background-color: #5f17e4; padding: 15px 40px; font-weight: bold; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; width: 100%; max-width: 400px;">
-        🚀 Registrar Entrega
+    <button onclick="registrarEnNube()" style="background: #5f17e4; padding: 15px 40px; color: white; border: none; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 20px; font-weight: bold;">
+        🚀 REGISTRAR ENTREGA
     </button>
 
-    <hr style="margin: 40px 0; opacity: 0.2;">
+    <hr style="margin: 50px 0; opacity: 0.2;">
 
-    <div class="seccion-busqueda">
-        <h2>🔍 Préstamos Activos</h2>
-        <input id="buscador" placeholder="Buscar por nombre o curso..." onkeyup="dibujar()">
-    </div>
-
+    <h2 style="color: #5dade2;">🛠️ Panel de Administración y Control</h2>
+    <input id="buscador" placeholder="🔍 Filtrar registros..." onkeyup="dibujar()" style="max-width: 100%;">
+    
     <div style="overflow-x: auto;">
-        <table>
+        <table class="tabla-admin">
             <thead>
                 <tr>
-                    <th>Nombre / Curso</th>
+                    <th>Estudiante</th>
+                    <th>Grado</th>
                     <th>Objeto</th>
+                    <th>Marca</th>
                     <th>Lugar</th>
-                    <th>Fecha / Hora</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="tabla"></tbody>
+            <tbody id="tablaCuerpo"></tbody>
         </table>
     </div>
 </div>
 
 <script>
     let registros = [];
-    let objetoActual = "";
-    let gradoActual = "";
-    let letraActual = "";
+    let objetoActual = "", gradoActual = "", letraActual = "";
+    
+    // LISTA DE VETADOS
+    const VETADOS = ["pepito perez", "estudiante problema"];
 
-    // CARGAR DATOS (Sincronización 2s)
     async function cargarDatos() {
-    try {
-        // Añadimos un pequeño retraso aleatorio para que los 2 PCs 
-        // no le peguen al servidor exactamente al mismo tiempo
-        const res = await fetch("{% url 'api_obtener_entregas' %}");
-        if (!res.ok) return;
-
-        const nuevosRegistros = await res.json();
-        
-        // Solo procesamos el HTML si el número de registros cambió
-        // Esto ahorra muchísima memoria en el navegador
-        if (nuevosRegistros.length !== registros.length) {
-            registros = nuevosRegistros;
-            dibujar();
-        }
-    } catch (e) { 
-        console.warn("Servidor ocupado, reintentando..."); 
+        try {
+            const res = await fetch("{% url 'api_obtener_entregas' %}");
+            const data = await res.json();
+            if (JSON.stringify(data) !== JSON.stringify(registros)) {
+                registros = data;
+                dibujar();
+            }
+        } catch (e) { console.error(e); }
     }
-}
 
-    // REGISTRAR
     async function registrarEnNube() {
-        const nombreInput = document.getElementById("textoVoz").value.trim();
-        const lugarInput = document.getElementById("lugarSelect").value;
-        const cursoCompleto = gradoActual + (letraActual || "");
+        const nombre = document.getElementById("textoVoz").value.trim();
+        const marca = document.getElementById("marcaBalon").value.trim();
+        const lugar = document.getElementById("lugarSelect").value;
+        const curso = gradoActual + (letraActual || "");
 
-        if (!nombreInput || !objetoActual || !gradoActual) {
-            alert("⚠️ Completa: Nombre, Grado y Objeto");
-            return;
+        if (!nombre || !objetoActual || !gradoActual) {
+            alert("⚠️ Faltan datos críticos."); return;
+        }
+
+        if (VETADOS.includes(nombre.toLowerCase())) {
+            alert("❌ BLOQUEADO: Estudiante vetado."); return;
         }
 
         const datos = {
-            recibido_por: nombreInput,
-            curso: cursoCompleto,
+            recibido_por: nombre,
+            curso: curso,
             balon: objetoActual,
-            lugar: lugarInput
+            lugar: lugar,
+            marca: marca // Asegúrate que tu modelo en Django tenga este campo
         };
 
-        try {
-            const res = await fetch("{% url 'api_guardar_entrega' %}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-                body: JSON.stringify(datos)
-            });
+        const res = await fetch("{% url 'api_guardar_entrega' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            body: JSON.stringify(datos)
+        });
 
-            if (res.ok) {
-                resetearFormulario();
-                cargarDatos();
-            }
-        } catch (error) { alert("Error de conexión."); }
+        if (res.ok) { resetearFormulario(); cargarDatos(); }
     }
 
-    // DIBUJAR TABLA
     function dibujar() {
         let html = "";
         const filtro = document.getElementById("buscador").value.toLowerCase();
 
-        registros.forEach((r) => {
-            const nombre = r.nombre || r.recibido_por || "---";
-            const objeto = r.objeto || r.balon || "---";
-            const curso = r.curso || "N/A";
-            
-            if ((nombre + curso).toLowerCase().includes(filtro)) {
+        registros.forEach((r, index) => {
+            const txt = (r.recibido_por + r.curso + r.balon).toLowerCase();
+            if (txt.includes(filtro)) {
                 html += `
-                <tr>
-                    <td><strong>${nombre}</strong><br><small>${curso}</small></td>
-                    <td>${objeto}</td>
-                    <td>${r.lugar || 'Cancha'}</td>
-                    <td>${r.fecha ? new Date(r.fecha).toLocaleTimeString() : '---'}</td>
+                <tr id="fila-${r.id}">
+                    <td><input class="input-edit" id="edit-nom-${r.id}" value="${r.recibido_por || r.nombre}"></td>
+                    <td><input class="input-edit" id="edit-cur-${r.id}" value="${r.curso}"></td>
+                    <td><input class="input-edit" id="edit-obj-${r.id}" value="${r.balon || r.objeto}"></td>
+                    <td><input class="input-edit" id="edit-mar-${r.id}" value="${r.marca || 'N/A'}"></td>
+                    <td><input class="input-edit" id="edit-lug-${r.id}" value="${r.lugar}"></td>
                     <td>
-                        <button class="btn-entregado" onclick="marcarEntregado('${r.id}')">✅ Finalizar</button>
+                        <button onclick="guardarCambios('${r.id}')" style="background:#27ae60; color:white; border:none; padding:5px; border-radius:4px; cursor:pointer;">💾</button>
+                        <button onclick="marcarEntregado('${r.id}')" style="background:#e74c3c; color:white; border:none; padding:5px; border-radius:4px; cursor:pointer;">🗑️</button>
                     </td>
                 </tr>`;
             }
         });
-        document.getElementById("tabla").innerHTML = html || "<tr><td colspan='5'>No hay préstamos activos.</td></tr>";
+        document.getElementById("tablaCuerpo").innerHTML = html || "<tr><td colspan='6'>Sin registros</td></tr>";
     }
 
-    // ELIMINAR / FINALIZAR
-    async function marcarEntregado(id) {
-        if(confirm("¿Confirmas la devolución del objeto?")) {
-            try {
-                const res = await fetch(`/api/eliminar-entrega/${id}/`, {
-                    method: "POST",
-                    headers: { "X-CSRFToken": "{{ csrf_token }}" }
-                });
-                if (res.ok) cargarDatos();
-            } catch (e) { alert("Error al finalizar."); }
-        }
+    async function guardarCambios(id) {
+        const datos = {
+            id: id,
+            recibido_por: document.getElementById(`edit-nom-${id}`).value,
+            curso: document.getElementById(`edit-cur-${id}`).value,
+            balon: document.getElementById(`edit-obj-${id}`).value,
+            marca: document.getElementById(`edit-mar-${id}`).value,
+            lugar: document.getElementById(`edit-lug-${id}`).value,
+        };
+
+        // Aquí llamarías a una nueva API que crearemos para actualizar
+        const res = await fetch(`/api/actualizar-entrega/${id}/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            body: JSON.stringify(datos)
+        });
+
+        if (res.ok) alert("✅ Registro actualizado");
     }
 
-    // --- LÓGICA DE CURSOS CORREGIDA ---
+    // --- Funciones de Interfaz ---
     function seleccionarObjeto(btn, obj) {
         objetoActual = obj;
         document.querySelectorAll(".btn-objeto").forEach(b => b.classList.remove("activo"));
@@ -254,50 +208,32 @@
         btn.classList.add("activo");
     }
 
-   function generarLetras(grado) {
-        let letras = ['A', 'B', 'C', 'D', 'E'];
-        let limite;
-
-        // Si el grado es 9, 10 u 11, mostramos hasta la D (4 letras)
-        if (grado >= 9) {
-            limite = 4; // Esto habilita A, B, C y D
-        } else {
-            limite = 5; // Para los grados menores (3° a 8°) muestra hasta la E
-        }
-
+    function generarLetras(grado) {
+        let letras = ['A', 'B', 'C', 'D'];
         let html = "";
-        for(let i = 0; i < limite; i++) {
-            html += `<button class="btn-curso" onclick="seleccionarLetra(this, '${letras[i]}')">${letras[i]}</button>`;
-        }
-        
-        // Insertamos los nuevos botones en el contenedor
+        letras.forEach(l => {
+            html += `<button class="btn-curso" onclick="seleccionarLetra(this, '${l}')">${l}</button>`;
+        });
         document.getElementById("letrasContenedor").innerHTML = html;
-        
-        // Resetear la letra seleccionada para evitar errores de registro
-        letraActual = ""; 
     }
 
     function cargarBotonesCursos() {
         let html = "";
-        for(let i=3; i<=11; i++) {
-            html += `<button class="btn-curso" onclick="seleccionarGrado(this, ${i})">${i}°</button>`;
-        }
+        for(let i=3; i<=11; i++) html += `<button class="btn-curso" onclick="seleccionarGrado(this, ${i})">${i}°</button>`;
         document.getElementById("gradosContenedor").innerHTML = html;
     }
 
     function resetearFormulario() {
         document.getElementById("textoVoz").value = "";
+        document.getElementById("marcaBalon").value = "";
         document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
         objetoActual = ""; gradoActual = ""; letraActual = "";
-        document.getElementById("letrasContenedor").innerHTML = "";
     }
 
-    // INICIO
     document.addEventListener("DOMContentLoaded", () => {
         cargarBotonesCursos();
         cargarDatos();
-
-setInterval(cargarDatos, 8000); 
+        setInterval(cargarDatos, 8000);
     });
 </script>
 {% endblock %}
