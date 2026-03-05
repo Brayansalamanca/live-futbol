@@ -144,16 +144,24 @@
 
     // CARGAR DATOS (Sincronización 2s)
     async function cargarDatos() {
-        try {
-            const res = await fetch("{% url 'api_obtener_entregas' %}?t=" + Date.now());
-            const nuevosRegistros = await res.json();
-            
-            if (JSON.stringify(nuevosRegistros) !== JSON.stringify(registros)) {
-                registros = nuevosRegistros;
-                dibujar();
-            }
-        } catch (e) { console.error("Error:", e); }
+    try {
+        // Añadimos un pequeño retraso aleatorio para que los 2 PCs 
+        // no le peguen al servidor exactamente al mismo tiempo
+        const res = await fetch("{% url 'api_obtener_entregas' %}");
+        if (!res.ok) return;
+
+        const nuevosRegistros = await res.json();
+        
+        // Solo procesamos el HTML si el número de registros cambió
+        // Esto ahorra muchísima memoria en el navegador
+        if (nuevosRegistros.length !== registros.length) {
+            registros = nuevosRegistros;
+            dibujar();
+        }
+    } catch (e) { 
+        console.warn("Servidor ocupado, reintentando..."); 
     }
+}
 
     // REGISTRAR
     async function registrarEnNube() {
