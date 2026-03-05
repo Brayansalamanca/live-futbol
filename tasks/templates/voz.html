@@ -2,86 +2,91 @@
 {% load static %}
 
 {% block content %}
-<div style="padding-top: 6rem; max-width: 1100px; margin: 0 auto; text-align: center; padding-bottom: 50px; font-family: 'Segoe UI', Roboto, sans-serif; box-sizing: border-box; background-color: #f4f7f6;">
+<div style="background-color: #001a33; min-height: 100vh; padding-top: 7rem; padding-bottom: 50px; font-family: 'Segoe UI', Roboto, sans-serif; color: #ffffff; box-sizing: border-box;">
+    <div style="max-width: 1100px; margin: 0 auto; padding: 0 20px; box-sizing: border-box;">
 
-    <div style="background-color: #1a1a1a; color: #ffc107; padding: 20px; border-radius: 15px 15px 0 0; margin-bottom: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        <h2 style="margin: 0; font-size: 24px; letter-spacing: 1px; text-transform: uppercase;">
-            ⚽ REPORTE DE NOVEDADES Y BAJAS
-        </h2>
-    </div>
-
-    {% if perms.tasks.add_bajabalon %}
-    <div style="background-color: #ffffff; padding: 35px; border-radius: 0 0 15px 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 40px; border: 1px solid #ddd; border-top: none;">
-        <form id="formBalones" style="text-align: left;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                
-                <div style="display: flex; flex-direction: column;">
-                    <label style="font-weight: 700; color: #1a1a1a; margin-bottom: 8px; font-size: 14px;">👤 RESPONSABLE DEL SUCESO</label>
-                    <input type="text" id="balon_usuario" placeholder="Nombre de quien reporta..." style="width: 100%; height: 50px; padding: 0 15px; border-radius: 8px; border: 2px solid #e0e0e0; font-size: 15px; transition: border-color 0.3s;" onfocus="this.style.borderColor='#ffc107'" onblur="this.style.borderColor='#e0e0e0'">
-                </div>
-
-                <div style="display: flex; flex-direction: column;">
-                    <label style="font-weight: 700; color: #1a1a1a; margin-bottom: 8px; font-size: 14px;">📍 UBICACIÓN / LUGAR</label>
-                    <input type="text" id="balon_lugar" placeholder="Ej: Cancha Sintética" style="width: 100%; height: 50px; padding: 0 15px; border-radius: 8px; border: 2px solid #e0e0e0; font-size: 15px;" onfocus="this.style.borderColor='#ffc107'" onblur="this.style.borderColor='#e0e0e0'">
-                </div>
-
-                <div style="display: flex; flex-direction: column;">
-                    <label style="font-weight: 700; color: #1a1a1a; margin-bottom: 8px; font-size: 14px;">⚽ TIPO Y MARCA</label>
-                    <div style="display: flex; gap: 8px;">
-                        <select id="balon_tipo" style="flex: 1; height: 50px; padding: 0 10px; border-radius: 8px; border: 2px solid #e0e0e0; background: white; font-size: 14px; font-weight: 500;">
-                            <option>Fútbol</option>
-                            <option>Futsal</option>
-                            <option>Voleibol</option>
-                            <option>Baloncesto</option>
-                        </select>
-                        <input type="text" id="balon_marca" placeholder="Marca" style="flex: 1; height: 50px; padding: 0 15px; border-radius: 8px; border: 2px solid #e0e0e0; font-size: 15px;" onfocus="this.style.borderColor='#ffc107'" onblur="this.style.borderColor='#e0e0e0'">
-                    </div>
-                </div>
-
-                <div style="display: flex; flex-direction: column;">
-                    <label style="font-weight: 700; color: #1a1a1a; margin-bottom: 8px; font-size: 14px;">⚠️ NOVEDAD / CAUSA</label>
-                    <select id="balon_causa" style="width: 100%; height: 50px; padding: 0 10px; border-radius: 8px; border: 2px solid #e0e0e0; background: white; font-size: 15px; font-weight: 500;">
-                        <option value="Perdido">Perdido / Extraviado</option>
-                        <option value="Pinchado">Pinchado / Estallado</option>
-                        <option value="Descosido">Descosido / Deformado</option>
-                        <option value="Hurto">Reporte de Robo</option>
-                    </select>
-                </div>
-            </div>
-            
-            <button type="button" onclick="guardarBajaBalonNube()" id="btnGuardar" style="background-color: #1a1a1a; color: #ffc107; width: 100%; margin-top: 30px; height: 55px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 17px; text-transform: uppercase; transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onmouseover="this.style.backgroundColor='#333'; this.style.transform='scale(1.01)';" onmouseout="this.style.backgroundColor='#1a1a1a'; this.style.transform='scale(1)';">
-                🚀 PUBLICAR REPORTE EN TIEMPO REAL
-            </button>
-        </form>
-    </div>
-    {% endif %}
-
-    <div style="background-color: #ffffff; border-radius: 15px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #ddd;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #1a1a1a; padding-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-            <div style="text-align: left;">
-                <h3 style="margin: 0; font-size: 20px; color: #1a1a1a; font-weight: 800;">HISTORIAL DE NOVEDADES</h3>
-            </div>
-            <button onclick="exportarExcel()" style="background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; transition: background 0.3s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
-                📊 DESCARGAR EXCEL
-            </button>
+        <div style="background-color: #004080; border-radius: 12px 12px 0 0; padding: 20px; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+            <h1 style="color: #ffffff; margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 10px;">
+                ⚽ Control de <span style="font-weight: 800;">Bajas y Novedades</span>
+            </h1>
+            <p style="color: #ccd9f0; margin: 5px 0 0 0; font-size: 13px;">Inventario Live Futbol Pro - Sincronizado</p>
         </div>
 
-        <div style="overflow-x: auto; border-radius: 10px; border: 1px solid #1a1a1a;">
-            <table id="tablaBalones" style="width: 100%; border-collapse: collapse; min-width: 800px; text-align: left;">
-                <thead>
-                    <tr style="background-color: #1a1a1a; color: #ffc107;">
-                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Fecha/Hora</th>
-                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Responsable</th>
-                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Balón</th>
-                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Lugar</th>
-                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Estado</th>
-                        {% if perms.tasks.delete_bajabalon %}
-                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Acción</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody id="tablaBalonesBody" style="background-color: white;"></tbody>
-            </table>
+        {% if perms.tasks.add_bajabalon %}
+        <div style="background-color: #002b5c; border: 1px solid #004080; border-radius: 0 0 12px 12px; padding: 30px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); box-sizing: border-box;">
+            <form id="formBalones">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
+                    
+                    <div style="text-align: left;">
+                        <label style="color: #ffffff; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block;">Responsable del Suceso</label>
+                        <input type="text" id="balon_usuario" placeholder="Nombre completo" 
+                            style="width: 100%; background: #001a33; border: 1px solid #0059b3; border-radius: 6px; height: 48px; padding: 0 15px; color: #ffffff; outline: none; transition: 0.3s; font-size: 14px;"
+                            onfocus="this.style.borderColor='#00ccff'; this.style.boxShadow='0 0 8px rgba(0,204,255,0.3)';" 
+                            onblur="this.style.borderColor='#0059b3';">
+                    </div>
+
+                    <div style="text-align: left;">
+                        <label style="color: #ffffff; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block;">Ubicación / Lugar</label>
+                        <input type="text" id="balon_lugar" placeholder="¿Dónde sucedió?" 
+                            style="width: 100%; background: #001a33; border: 1px solid #0059b3; border-radius: 6px; height: 48px; padding: 0 15px; color: #ffffff; outline: none; font-size: 14px;"
+                            onfocus="this.style.borderColor='#00ccff';" onblur="this.style.borderColor='#0059b3';">
+                    </div>
+
+                    <div style="text-align: left;">
+                        <label style="color: #ffffff; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block;">Material Deportivo</label>
+                        <div style="display: flex; gap: 8px;">
+                            <select id="balon_tipo" style="flex: 1; background: #001a33; border: 1px solid #0059b3; border-radius: 6px; height: 48px; color: #ffffff; padding: 0 10px; font-size: 14px; cursor: pointer;">
+                                <option>Fútbol</option><option>Futsal</option><option>Voleibol</option><option>Básquet</option>
+                            </select>
+                            <input type="text" id="balon_marca" placeholder="Marca" style="flex: 1; background: #001a33; border: 1px solid #0059b3; border-radius: 6px; height: 48px; color: #ffffff; padding: 0 12px; font-size: 14px;">
+                        </div>
+                    </div>
+
+                    <div style="text-align: left;">
+                        <label style="color: #ffffff; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block;">Novedad / Motivo</label>
+                        <select id="balon_causa" style="width: 100%; background: #001a33; border: 1px solid #0059b3; border-radius: 6px; height: 48px; color: #ffffff; padding: 0 15px; font-size: 14px; cursor: pointer;">
+                            <option value="Perdido">Perdido / Extraviado</option>
+                            <option value="Pinchado">Pinchado / Estallado</option>
+                            <option value="Descosido">Descosido / Deformado</option>
+                            <option value="Hurto">Reporte de Robo</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="button" onclick="guardarBajaBalonNube()" id="btnGuardar" 
+                    style="width: 100%; margin-top: 30px; background: #004080; color: #ffffff; border: none; height: 50px; border-radius: 8px; font-weight: 700; text-transform: uppercase; cursor: pointer; letter-spacing: 1px; transition: 0.3s; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onmouseover="this.style.backgroundColor='#0059b3'; this.style.transform='scale(1.01)';" onmouseout="this.style.backgroundColor='#004080'; this.style.transform='scale(1)';">
+                    Publicar Novedad Ahora
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div style="background-color: #001a33; border: 1px solid #004080; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #004080; flex-wrap: wrap; gap: 10px;">
+                <h2 style="color: #ffffff; margin: 0; font-size: 18px; text-transform: uppercase; font-weight: 700;">Registro Histórico de Bajas</h2>
+                <button onclick="exportarExcel()" style="background: #28a745; color: #ffffff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; text-transform: uppercase; transition: background 0.3s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                    📥 Descargar Informe
+                </button>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table id="tablaBalones" style="width: 100%; border-collapse: collapse; text-align: left; background-color: #001a33; color: #ffffff;">
+                    <thead>
+                        <tr style="background-color: #004080; color: #ffffff; text-transform: uppercase; font-size: 11px; font-weight: 700;">
+                            <th style="padding: 15px; border-bottom: 1px solid #0059b3;">Fecha</th>
+                            <th style="padding: 15px; border-bottom: 1px solid #0059b3;">Responsable</th>
+                            <th style="padding: 15px; border-bottom: 1px solid #0059b3;">Balón</th>
+                            <th style="padding: 15px; border-bottom: 1px solid #0059b3;">Ubicación</th>
+                            <th style="padding: 15px; border-bottom: 1px solid #0059b3;">Estado</th>
+                            {% if perms.tasks.delete_bajabalon %}
+                            <th style="padding: 15px; border-bottom: 1px solid #0059b3;">Acción</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody id="tablaBalonesBody" style="font-size: 14px;">
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -89,43 +94,41 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script>
     let registros = [];
-    // Agregamos comillas para evitar errores de JS
+    // Agregamos comillas para evitar errores de JS y aseguramos valor booleano
     const puedeBorrar = "{% if perms.tasks.delete_bajabalon %}true{% else %}false{% endif %}" === "true";
 
     async function sincronizar() {
         try {
-            // Añadimos cache-buster para asegurar tiempo real
+            // Cache-buster para tiempo real
             const res = await fetch("{% url 'api_obtener_bajas' %}?t=" + new Date().getTime());
             if (!res.ok) return;
             const data = await res.json();
             
-            // Solo actualizamos el DOM si los datos realmente cambiaron
+            // Comparamos datos para evitar parpadeos
             if (JSON.stringify(data) !== JSON.stringify(registros)) {
                 registros = data;
                 const tbody = document.getElementById('tablaBalonesBody');
                 if (!tbody) return;
 
                 tbody.innerHTML = registros.length ? registros.map(b => `
-                    <tr style="border-bottom: 1px solid #ddd; transition: background 0.2s;">
-                        <td style="padding: 15px; color: #555; font-size: 13px;">${new Date(b.fecha).toLocaleString()}</td>
-                        <td style="padding: 15px; font-weight: 700; color: #1a1a1a;">${b.usuario}</td>
-                        <td style="padding: 15px;"><b>${b.tipo}</b><br><span style="color:#666; font-size:12px;">${b.marca}</span></td>
-                        <td style="padding: 15px; font-style: italic;">${b.lugar || 'N/A'}</td>
+                    <tr style="border-bottom: 1px solid #004080; transition: 0.2s; background: transparent;" onmouseover="this.style.background='#002b5c'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 15px; color: #ccd9f0; font-size: 13px;">${new Date(b.fecha).toLocaleDateString()}</td>
+                        <td style="padding: 15px; color: #ffffff; font-weight: 600;">${b.usuario}</td>
+                        <td style="padding: 15px;">${b.tipo} <br> <span style="color:#a0b4d4; font-size:11px;">${b.marca}</span></td>
+                        <td style="padding: 15px; font-style: italic; color: #ccd9f0;">${b.lugar || 'N/A'}</td>
                         <td style="padding: 15px;">
-                            <span style="background: ${b.causa === 'Perdido' ? '#1a1a1a' : '#ffc107'}; color: ${b.causa === 'Perdido' ? '#ffc107' : '#1a1a1a'}; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; border: 1px solid #1a1a1a;">
+                            <span style="border: 1px solid ${b.causa === 'Perdido' ? '#ff4444' : '#00ccff'}; color: ${b.causa === 'Perdido' ? '#ff4444' : '#00ccff'}; padding: 5px 12px; border-radius: 4px; font-size: 10px; font-weight: bold; background: rgba(0,0,0,0.1);">
                                 ${b.causa.toUpperCase()}
                             </span>
                         </td>
                         ${puedeBorrar ? `
                         <td style="padding: 15px;">
-                            <button onclick="eliminarBajaNube('${b.id}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 700;">ELIMINAR</button>
+                            <button onclick="eliminarBajaNube('${b.id}')" style="background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; transition: 0.2s;" onmouseover="this.style.background='#ff4444'; this.style.color='white'">ELIMINAR</button>
                         </td>` : ''}
                     </tr>
-                `).join('') : '<tr><td colspan="6" style="padding:40px; text-align:center; color:#999;">No hay reportes de bajas.</td></tr>';
+                `).join('') : '<tr><td colspan="6" style="padding:50px; text-align:center; color:#ccd9f0;">No hay registros de bajas activos.</td></tr>';
             }
-        } catch (e) { 
-            console.error("Error en sincronización:", e); 
-        }
+        } catch (e) { console.error("Error en sincronización:", e); }
     }
 
     // Polling de 2 segundos exactos
@@ -144,7 +147,7 @@
         };
 
         if (!datos.usuario || !datos.lugar || !datos.marca) {
-            return alert("⚠️ Por favor completa todos los campos.");
+            return alert("⚠️ Por favor completa todos los campos requeridos.");
         }
 
         if(btn) { btn.disabled = true; btn.innerText = "⏳ PUBLICANDO..."; }
@@ -158,19 +161,19 @@
 
             if (res.ok) {
                 document.getElementById('formBalones').reset();
-                await sincronizar();
+                await sincronizar(); // Actualización inmediata
             } else {
-                alert("❌ Error al guardar. Intenta de nuevo.");
+                alert("❌ Error al guardar el reporte.");
             }
         } catch (e) {
             alert("❌ Error de conexión.");
         } finally {
-            if(btn) { btn.disabled = false; btn.innerText = "🚀 PUBLICAR REPORTE EN TIEMPO REAL"; }
+            if(btn) { btn.disabled = false; btn.innerText = "Publicar Novedad Ahora"; }
         }
     }
 
     async function eliminarBajaNube(id) {
-        if (confirm("¿Estás seguro de eliminar este registro?")) {
+        if (confirm("¿Borrar permanentemente este registro del historial?")) {
             try {
                 const res = await fetch(`/api/eliminar-baja/${id}/`, { 
                     method: "POST", 
@@ -193,7 +196,7 @@
             filas.forEach(tr => { if(tr.lastElementChild) tr.lastElementChild.remove(); });
         }
         const libro = XLSX.utils.table_to_book(copiaTabla, { sheet: "Novedades" });
-        XLSX.writeFile(libro, "Reporte_Bajas_Balones.xlsx");
+        XLSX.writeFile(libro, "Reporte_Bajas_Balones_Blue.xlsx");
     }
 </script>
 {% endblock %}
