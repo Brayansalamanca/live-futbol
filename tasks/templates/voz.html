@@ -176,7 +176,8 @@ function exportarExcel() {
     XLSX.writeFile(wb, "Reporte_Bajas_LiveFutbol.xlsx");
 }
 
-setInterval(sincronizar, 2000);
+
+setInterval(cargarDatos, 8000);
 window.onload = sincronizar;
 </script>
 {% endblock %}
