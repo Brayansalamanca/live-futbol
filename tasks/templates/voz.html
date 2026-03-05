@@ -2,183 +2,198 @@
 {% load static %}
 
 {% block content %}
-<div style="padding-top: 6rem; max-width: 1000px; margin: 0 auto; text-align: center; padding-bottom: 50px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<div style="padding-top: 6rem; max-width: 1100px; margin: 0 auto; text-align: center; padding-bottom: 50px; font-family: 'Segoe UI', Roboto, sans-serif; box-sizing: border-box; background-color: #f4f7f6;">
 
-    <div style="background-color: #ffffff; border-radius: 20px; padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); color: #333; border-top: 8px solid #ffc107;">
-        <h2 style="color: #000; margin-top: 0; padding-bottom: 15px; font-size: 28px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-            ⚽ REPORTE DE BALONES (BAJAS / PÉRDIDAS)
+    <div style="background-color: #1a1a1a; color: #ffc107; padding: 20px; border-radius: 15px 15px 0 0; margin-bottom: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <h2 style="margin: 0; font-size: 24px; letter-spacing: 1px; text-transform: uppercase;">
+            ⚽ REPORTE DE NOVEDADES Y BAJAS
         </h2>
-        <p style="color: #666; margin-bottom: 25px;">Registra cualquier novedad con el material deportivo para mantener el inventario actualizado.</p>
-        
-        <form id="formBalones" style="text-align: left; background: #f9f9f9; padding: 25px; border-radius: 12px;">
-            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+    </div>
+
+    {% if perms.tasks.add_bajabalon %}
+    <div style="background-color: #ffffff; padding: 35px; border-radius: 0 0 15px 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 40px; border: 1px solid #ddd; border-top: none;">
+        <form id="formBalones" style="text-align: left;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
                 
-                <div style="flex: 1 1 300px;">
-                    <label style="font-weight: bold; color: #444; display: block; margin-bottom: 8px;">👤 Responsable del Suceso</label>
-                    <input type="text" id="balon_usuario" placeholder="Nombre completo de quien perdió/dañó" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
+                <div style="display: flex; flex-direction: column;">
+                    <label style="font-weight: 700; color: #1a1a1a; margin-bottom: 8px; font-size: 14px;">👤 RESPONSABLE DEL SUCESO</label>
+                    <input type="text" id="balon_usuario" placeholder="Nombre de quien reporta..." style="width: 100%; height: 50px; padding: 0 15px; border-radius: 8px; border: 2px solid #e0e0e0; font-size: 15px; transition: border-color 0.3s;" onfocus="this.style.borderColor='#ffc107'" onblur="this.style.borderColor='#e0e0e0'">
                 </div>
 
-                <div style="flex: 1 1 200px;">
-                    <label style="font-weight: bold; color: #444; display: block; margin-bottom: 8px;">📅 Fecha y Hora</label>
-                    <input type="datetime-local" id="balon_fecha" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
+                <div style="display: flex; flex-direction: column;">
+                    <label style="font-weight: 700; color: #1a1a1a; margin-bottom: 8px; font-size: 14px;">📍 UBICACIÓN / LUGAR</label>
+                    <input type="text" id="balon_lugar" placeholder="Ej: Cancha Sintética" style="width: 100%; height: 50px; padding: 0 15px; border-radius: 8px; border: 2px solid #e0e0e0; font-size: 15px;" onfocus="this.style.borderColor='#ffc107'" onblur="this.style.borderColor='#e0e0e0'">
                 </div>
 
-                <div style="flex: 1 1 300px;">
-                    <label style="font-weight: bold; color: #444; display: block; margin-bottom: 8px;">📍 Ubicación / Lugar</label>
-                    <input type="text" id="balon_lugar" placeholder="Ej: Cancha 1, Patio central, Tras la malla..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
-                </div>
-
-                <div style="flex: 1 1 300px;">
-                    <label style="font-weight: bold; color: #444; display: block; margin-bottom: 8px;">⚽ Tipo y Marca del Balón</label>
-                    <div style="display: flex; gap: 10px;">
-                        <select id="balon_tipo" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ccc;">
+                <div style="display: flex; flex-direction: column;">
+                    <label style="font-weight: 700; color: #1a1a1a; margin-bottom: 8px; font-size: 14px;">⚽ TIPO Y MARCA</label>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="balon_tipo" style="flex: 1; height: 50px; padding: 0 10px; border-radius: 8px; border: 2px solid #e0e0e0; background: white; font-size: 14px; font-weight: 500;">
                             <option>Fútbol</option>
                             <option>Futsal</option>
                             <option>Voleibol</option>
                             <option>Baloncesto</option>
                         </select>
-                        <input type="text" id="balon_marca" placeholder="Marca (Golty, etc.)" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ccc;">
+                        <input type="text" id="balon_marca" placeholder="Marca" style="flex: 1; height: 50px; padding: 0 15px; border-radius: 8px; border: 2px solid #e0e0e0; font-size: 15px;" onfocus="this.style.borderColor='#ffc107'" onblur="this.style.borderColor='#e0e0e0'">
                     </div>
                 </div>
 
-                <div style="flex: 1 1 300px;">
-                    <label style="font-weight: bold; color: #444; display: block; margin-bottom: 8px;">⚠️ Novedad / Causa</label>
-                    <select id="balon_causa" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc;">
+                <div style="display: flex; flex-direction: column;">
+                    <label style="font-weight: 700; color: #1a1a1a; margin-bottom: 8px; font-size: 14px;">⚠️ NOVEDAD / CAUSA</label>
+                    <select id="balon_causa" style="width: 100%; height: 50px; padding: 0 10px; border-radius: 8px; border: 2px solid #e0e0e0; background: white; font-size: 15px; font-weight: 500;">
                         <option value="Perdido">Perdido / Extraviado</option>
                         <option value="Pinchado">Pinchado / Estallado</option>
                         <option value="Descosido">Descosido / Deformado</option>
                         <option value="Hurto">Reporte de Robo</option>
                     </select>
                 </div>
-
             </div>
             
-            <button type="button" onclick="guardarBajaBalonNube()" style="background-color: #000; color: #ffc107; width: 100%; margin-top: 25px; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s;">
-                🚀 PUBLICAR REPORTE OFICIAL
+            <button type="button" onclick="guardarBajaBalonNube()" id="btnGuardar" style="background-color: #1a1a1a; color: #ffc107; width: 100%; margin-top: 30px; height: 55px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 17px; text-transform: uppercase; transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onmouseover="this.style.backgroundColor='#333'; this.style.transform='scale(1.01)';" onmouseout="this.style.backgroundColor='#1a1a1a'; this.style.transform='scale(1)';">
+                🚀 PUBLICAR REPORTE EN TIEMPO REAL
             </button>
         </form>
+    </div>
+    {% endif %}
 
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 50px; border-bottom: 3px solid #eee; padding-bottom: 10px;">
+    <div style="background-color: #ffffff; border-radius: 15px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #ddd;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #1a1a1a; padding-bottom: 15px; flex-wrap: wrap; gap: 15px;">
             <div style="text-align: left;">
-                <h3 style="margin: 0; color: #222;">Historial de Novedades</h3>
-                <p style="margin: 0; font-size: 13px; color: #888;">Registro histórico de balones fuera de servicio.</p>
+                <h3 style="margin: 0; font-size: 20px; color: #1a1a1a; font-weight: 800;">HISTORIAL DE NOVEDADES</h3>
             </div>
-            <button onclick="exportarExcel()" style="background-color: #1d6f42; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-                📥 Descargar Informe Excel
+            <button onclick="exportarExcel()" style="background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; transition: background 0.3s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                📊 DESCARGAR EXCEL
             </button>
         </div>
 
-        <div style="overflow-x: auto; margin-top: 20px;">
-            <table id="tablaBalones" style="width: 100%; border-collapse: collapse; background: white; min-width: 800px; text-align: left; border-radius: 10px; overflow: hidden;">
+        <div style="overflow-x: auto; border-radius: 10px; border: 1px solid #1a1a1a;">
+            <table id="tablaBalones" style="width: 100%; border-collapse: collapse; min-width: 800px; text-align: left;">
                 <thead>
-                    <tr style="background-color: #333; color: #fff;">
-                        <th style="padding: 15px; border-bottom: 1px solid #ddd;">Fecha/Hora</th>
-                        <th style="padding: 15px; border-bottom: 1px solid #ddd;">Responsable</th>
-                        <th style="padding: 15px; border-bottom: 1px solid #ddd;">Balón</th>
-                        <th style="padding: 15px; border-bottom: 1px solid #ddd;">Ubicación</th>
-                        <th style="padding: 15px; border-bottom: 1px solid #ddd;">Estado</th>
-                        <th style="padding: 15px; border-bottom: 1px solid #ddd;">Acción</th>
+                    <tr style="background-color: #1a1a1a; color: #ffc107;">
+                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Fecha/Hora</th>
+                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Responsable</th>
+                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Balón</th>
+                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Lugar</th>
+                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Estado</th>
+                        {% if perms.tasks.delete_bajabalon %}
+                        <th style="padding: 15px; font-size: 13px; text-transform: uppercase;">Acción</th>
+                        {% endif %}
                     </tr>
                 </thead>
-                <tbody id="tablaBalonesBody">
-                    </tbody>
+                <tbody id="tablaBalonesBody" style="background-color: white;"></tbody>
             </table>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        cargarBajas();
-        // Autocompletar con fecha y hora actual
-        const ahora = new Date();
-        ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
-        document.getElementById('balon_fecha').value = ahora.toISOString().slice(0,16);
-    });
+    let registros = [];
+    // Agregamos comillas para evitar errores de JS
+    const puedeBorrar = "{% if perms.tasks.delete_bajabalon %}true{% else %}false{% endif %}" === "true";
 
-    async function cargarBajas() {
+    async function sincronizar() {
         try {
-            const res = await fetch("{% url 'api_obtener_bajas' %}");
-            const datos = await res.json();
-            const tbody = document.getElementById('tablaBalonesBody');
+            // Añadimos cache-buster para asegurar tiempo real
+            const res = await fetch("{% url 'api_obtener_bajas' %}?t=" + new Date().getTime());
+            if (!res.ok) return;
+            const data = await res.json();
             
-            tbody.innerHTML = datos.length ? datos.map(b => `
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 12px; font-size: 0.9em;">${new Date(b.fecha).toLocaleString()}</td>
-                    <td style="padding: 12px; font-weight: 500;">${b.usuario}</td>
-                    <td style="padding: 12px;"><b>${b.tipo}</b><br><small style="color:#777">${b.marca}</small></td>
-                    <td style="padding: 12px; color: #555;">${b.lugar}</td>
-                    <td style="padding: 12px;">
-                        <span style="background: ${b.causa === 'Perdido' ? '#f8d7da' : '#fff3cd'}; color: ${b.causa === 'Perdido' ? '#721c24' : '#856404'}; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; border: 1px solid currentColor;">
-                            ${b.causa.toUpperCase()}
-                        </span>
-                    </td>
-                    <td style="padding: 12px;">
-                        <button onclick="eliminarBajaNube('${b.id}')" style="background: none; border: 1px solid #dc3545; color: #dc3545; padding: 5px 10px; border-radius: 5px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#dc3545'; this.style.color='white'" onmouseout="this.style.background='none'; this.style.color='#dc3545'">Borrar</button>
-                    </td>
-                </tr>
-            `).join('') : '<tr><td colspan="6" style="padding:40px; color:#999;">No hay registros disponibles.</td></tr>';
-        } catch (e) {
-            console.error("Error cargando datos:", e);
+            // Solo actualizamos el DOM si los datos realmente cambiaron
+            if (JSON.stringify(data) !== JSON.stringify(registros)) {
+                registros = data;
+                const tbody = document.getElementById('tablaBalonesBody');
+                if (!tbody) return;
+
+                tbody.innerHTML = registros.length ? registros.map(b => `
+                    <tr style="border-bottom: 1px solid #ddd; transition: background 0.2s;">
+                        <td style="padding: 15px; color: #555; font-size: 13px;">${new Date(b.fecha).toLocaleString()}</td>
+                        <td style="padding: 15px; font-weight: 700; color: #1a1a1a;">${b.usuario}</td>
+                        <td style="padding: 15px;"><b>${b.tipo}</b><br><span style="color:#666; font-size:12px;">${b.marca}</span></td>
+                        <td style="padding: 15px; font-style: italic;">${b.lugar || 'N/A'}</td>
+                        <td style="padding: 15px;">
+                            <span style="background: ${b.causa === 'Perdido' ? '#1a1a1a' : '#ffc107'}; color: ${b.causa === 'Perdido' ? '#ffc107' : '#1a1a1a'}; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; border: 1px solid #1a1a1a;">
+                                ${b.causa.toUpperCase()}
+                            </span>
+                        </td>
+                        ${puedeBorrar ? `
+                        <td style="padding: 15px;">
+                            <button onclick="eliminarBajaNube('${b.id}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 700;">ELIMINAR</button>
+                        </td>` : ''}
+                    </tr>
+                `).join('') : '<tr><td colspan="6" style="padding:40px; text-align:center; color:#999;">No hay reportes de bajas.</td></tr>';
+            }
+        } catch (e) { 
+            console.error("Error en sincronización:", e); 
         }
     }
 
+    // Polling de 2 segundos exactos
+    setInterval(sincronizar, 2000);
+    window.onload = sincronizar;
+
     async function guardarBajaBalonNube() {
-        const btn = event.target;
+        const btn = document.getElementById('btnGuardar');
         const datos = {
-            usuario: document.getElementById('balon_usuario').value,
-            fecha: document.getElementById('balon_fecha').value,
-            lugar: document.getElementById('balon_lugar').value,
+            usuario: document.getElementById('balon_usuario').value.trim(),
+            fecha: new Date().toISOString(),
+            lugar: document.getElementById('balon_lugar').value.trim(),
             tipo: document.getElementById('balon_tipo').value,
             causa: document.getElementById('balon_causa').value,
-            marca: document.getElementById('balon_marca').value
+            marca: document.getElementById('balon_marca').value.trim()
         };
 
         if (!datos.usuario || !datos.lugar || !datos.marca) {
-            return alert("⚠️ Por favor completa los campos: Responsable, Lugar y Marca.");
+            return alert("⚠️ Por favor completa todos los campos.");
         }
 
-        btn.disabled = true;
-        btn.innerText = "⏳ GUARDANDO...";
+        if(btn) { btn.disabled = true; btn.innerText = "⏳ PUBLICANDO..."; }
 
-        const res = await fetch("{% url 'api_guardar_baja' %}", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-            body: JSON.stringify(datos)
-        });
+        try {
+            const res = await fetch("{% url 'api_guardar_baja' %}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+                body: JSON.stringify(datos)
+            });
 
-        if (res.ok) {
-            document.getElementById('formBalones').reset();
-            // Resetear fecha a ahora tras limpiar form
-            document.getElementById('balon_fecha').value = new Date().toISOString().slice(0,16);
-            cargarBajas();
+            if (res.ok) {
+                document.getElementById('formBalones').reset();
+                await sincronizar();
+            } else {
+                alert("❌ Error al guardar. Intenta de nuevo.");
+            }
+        } catch (e) {
+            alert("❌ Error de conexión.");
+        } finally {
+            if(btn) { btn.disabled = false; btn.innerText = "🚀 PUBLICAR REPORTE EN TIEMPO REAL"; }
         }
-        
-        btn.disabled = false;
-        btn.innerText = "🚀 PUBLICAR REPORTE OFICIAL";
     }
 
     async function eliminarBajaNube(id) {
-        if (confirm("¿Estás seguro de eliminar este registro del historial?")) {
-            await fetch(`/api/eliminar-baja/${id}/`, { 
-                method: "POST", 
-                headers: { "X-CSRFToken": "{{ csrf_token }}" } 
-            });
-            cargarBajas();
+        if (confirm("¿Estás seguro de eliminar este registro?")) {
+            try {
+                const res = await fetch(`/api/eliminar-baja/${id}/`, { 
+                    method: "POST", 
+                    headers: { "X-CSRFToken": "{{ csrf_token }}" } 
+                });
+                if (res.ok) await sincronizar();
+            } catch (e) {
+                console.error("Error al eliminar:", e);
+            }
         }
     }
 
     function exportarExcel() {
         const tabla = document.getElementById('tablaBalones');
+        if (!tabla) return;
         const copiaTabla = tabla.cloneNode(true);
-        // Quitar columna de acciones antes de exportar
-        const filas = copiaTabla.querySelectorAll('tr');
-        filas.forEach(fila => fila.lastElementChild.remove());
-
-        const libro = XLSX.utils.table_to_book(copiaTabla, { sheet: "Reporte de Bajas" });
-        XLSX.writeFile(libro, `Informe_Balones_${new Date().toLocaleDateString()}.xlsx`);
+        // Quitar columna de acciones para el Excel
+        if (puedeBorrar) {
+            const filas = copiaTabla.querySelectorAll('tr');
+            filas.forEach(tr => { if(tr.lastElementChild) tr.lastElementChild.remove(); });
+        }
+        const libro = XLSX.utils.table_to_book(copiaTabla, { sheet: "Novedades" });
+        XLSX.writeFile(libro, "Reporte_Bajas_Balones.xlsx");
     }
 </script>
 {% endblock %}
