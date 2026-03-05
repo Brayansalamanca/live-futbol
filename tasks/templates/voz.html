@@ -6,53 +6,40 @@
     <div style="max-width: 1100px; margin: 0 auto; padding: 0 20px;">
 
         <div style="background-color: #004080; border-radius: 15px 15px 0 0; padding: 20px; border-bottom: 2px solid #0059b3;">
-            <h1 style="margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">
-                🚨 Reporte de <span style="font-weight: 800;">Bajas con Evidencia</span>
-            </h1>
+            <h1 style="margin: 0; font-size: 24px; text-transform: uppercase;">🚨 Registro de Bajas con Foto</h1>
         </div>
 
         {% if perms.tasks.add_bajabalon %}
-        <div style="background-color: #002b5c; border: 1px solid #004080; border-radius: 0 0 15px 15px; padding: 30px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div style="background-color: #002b5c; border: 1px solid #004080; border-radius: 0 0 15px 15px; padding: 30px; margin-bottom: 40px;">
             <form id="formBalones">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
-                    
                     <div>
-                        <label style="display: block; margin-bottom: 8px; font-weight: bold; font-size: 13px;">👤 RESPONSABLE</label>
-                        <input type="text" id="usuario" placeholder="Nombre completo" style="width: 100%; height: 45px; background: #001a33; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">👤 Responsable</label>
+                        <input type="text" id="usuario" style="width: 100%; height: 45px; background: #001a33; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 15px;">
                     </div>
-
                     <div>
-                        <label style="display: block; margin-bottom: 8px; font-weight: bold; font-size: 13px;">⚽ TIPO DE BALÓN</label>
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">⚽ Balón</label>
                         <select id="tipo" style="width: 100%; height: 45px; background: #001a33; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 10px;">
-                            <option>Fútbol</option>
-                            <option>Futsal</option>
-                            <option>Voleibol</option>
-                            <option>Baloncesto</option>
+                            <option>Fútbol</option><option>Futsal</option><option>Voleibol</option><option>Baloncesto</option>
                         </select>
                     </div>
-
                     <div>
-                        <label style="display: block; margin-bottom: 8px; font-weight: bold; font-size: 13px;">📅 FECHA/HORA SUCESO</label>
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">📅 Fecha</label>
                         <input type="datetime-local" id="fecha_suceso" style="width: 100%; height: 45px; background: #001a33; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 10px; color-scheme: dark;">
                     </div>
-
                     <div>
-                        <label style="display: block; margin-bottom: 8px; font-weight: bold; font-size: 13px;">📸 EVIDENCIA (FOTO)</label>
-                        <input type="file" id="imagen_file" accept="image/*" style="width: 100%; color: white; font-size: 12px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">📸 Foto Evidencia</label>
+                        <input type="file" id="imagen_file" accept="image/*" style="width: 100%; color: white;">
                     </div>
                 </div>
-
                 <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <input type="text" id="lugar" placeholder="📍 Ubicación (Ej: Cancha 2)" style="width: 100%; height: 45px; background: #001a33; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 15px;">
+                    <input type="text" id="lugar" placeholder="📍 Lugar" style="width: 100%; height: 45px; background: #001a33; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 15px;">
                     <select id="causa" style="width: 100%; height: 45px; background: #001a33; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 10px;">
-                        <option value="Perdido">❌ Perdido / Extraviado</option>
-                        <option value="Pinchado">💥 Pinchado / Dañado</option>
-                        <option value="Hurto">🚨 Robo</option>
+                        <option value="Perdido">Perdido</option><option value="Pinchado">Pinchado</option><option value="Robo">Robo</option>
                     </select>
                 </div>
-
-                <button type="button" onclick="guardarConImagen()" id="btnGuardar" style="width: 100%; margin-top: 25px; background: #ffffff; color: #001a33; border: none; height: 50px; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s;">
-                    🚀 Registrar Novedad en la Nube
+                <button type="button" onclick="guardarConImagen()" id="btnGuardar" style="width: 100%; margin-top: 25px; background: #ffffff; color: #001a33; border: none; height: 50px; border-radius: 10px; font-weight: 800; cursor: pointer;">
+                    🚀 SUBIR REPORTE A LA NUBE
                 </button>
             </form>
         </div>
@@ -60,19 +47,19 @@
 
         <div style="background-color: #002b5c; border: 1px solid #004080; border-radius: 15px; overflow: hidden;">
             <div style="padding: 15px; background: #004080; display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="margin:0; font-size: 16px; text-transform: uppercase;">Evidencia Registrada</h2>
-                <button onclick="exportarExcel()" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;">Excel</button>
+                <h2 style="margin:0; font-size: 16px; text-transform: uppercase;">Historial de Novedades</h2>
+                <button onclick="exportarExcel()" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;">📥 EXCEL</button>
             </div>
             <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; color: white; text-align: center;">
+                <table id="tablaReporte" style="width: 100%; border-collapse: collapse; color: white; text-align: center;">
                     <thead>
-                        <tr style="background: #001a33; font-size: 12px; text-transform: uppercase;">
+                        <tr style="background: #001a33;">
                             <th style="padding: 15px;">Evidencia</th>
-                            <th>Fecha Suceso</th>
+                            <th>Fecha</th>
                             <th>Responsable</th>
-                            <th>Balón</th>
-                            <th>Motivo</th>
-                            <th>Acciones</th>
+                            <th>Balón / Lugar</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody id="tablaCuerpo"></tbody>
@@ -82,82 +69,64 @@
     </div>
 </div>
 
-<div id="visor_inv" onclick="cerrarVisor()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; justify-content: center; align-items: center;">
-    <img id="img_visor_inv" style="max-width: 90%; max-height: 90%; border: 3px solid white; border-radius: 10px; cursor: zoom-out;">
+<div id="visor_inv" onclick="this.style.display='none'" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; justify-content: center; align-items: center;">
+    <img id="img_visor_inv" style="max-width: 90%; max-height: 90%; border: 2px solid white; border-radius: 5px;">
 </div>
 
 <style>
-    /* Imagen grande por defecto en la tabla */
-    .img-evidencia {
-        width: 180px !important; /* Tamaño aumentado */
-        height: 120px !important;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 2px solid #ffffff;
-        cursor: pointer;
-        transition: 0.3s;
-        margin: 10px;
+    .img-celda {
+        width: 160px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid #fff; cursor: pointer; margin: 10px;
     }
-    .img-evidencia:hover { transform: scale(1.05); border-color: #00ccff; }
     td { border-bottom: 1px solid #004080; padding: 10px; }
-    #btnGuardar:hover { background: #00ccff; color: white; }
 </style>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <script>
-let registrosLocal = [];
-const puedeBorrar = "{% if perms.tasks.delete_bajabalon %}true{% else %}false{% endif %}" === "true";
+let datosGlobales = [];
 
 async function sincronizar() {
     try {
         const res = await fetch("{% url 'api_obtener_bajas' %}?t=" + Date.now());
         const data = await res.json();
-        
-        if (JSON.stringify(data) !== JSON.stringify(registrosLocal)) {
-            registrosLocal = data;
+        if (JSON.stringify(data) !== JSON.stringify(datosGlobales)) {
+            datosGlobales = data;
             const tbody = document.getElementById('tablaCuerpo');
             tbody.innerHTML = data.map(b => `
                 <tr>
                     <td>
-                        <img src="${b.imagen || '/static/img/no-image.png'}" class="img-evidencia" onclick="verImagen('${b.imagen}')">
+                        ${b.imagen ? `<img src="${b.imagen}" class="img-celda" onclick="verImg('${b.imagen}')">` : '<span style="color:#555">Sin foto</span>'}
                     </td>
-                    <td style="font-size: 13px;">${new Date(b.fecha).toLocaleString()}</td>
-                    <td style="font-weight: bold;">${b.usuario}</td>
-                    <td>${b.tipo} <br> <small style="color:#a0b4d4">${b.lugar}</small></td>
+                    <td>${new Date(b.fecha).toLocaleString()}</td>
+                    <td style="font-weight:bold;">${b.usuario}</td>
+                    <td>${b.tipo}<br><small>${b.lugar}</small></td>
+                    <td><b style="color:${b.causa === 'Perdido' ? '#ff4444' : '#00ccff'}">${b.causa}</b></td>
                     <td>
-                        <span style="color: ${b.causa === 'Perdido' ? '#ff4444' : '#00ccff'}; font-weight: bold;">${b.causa.toUpperCase()}</span>
-                    </td>
-                    <td>
-                        ${puedeBorrar ? `<button onclick="eliminar('${b.id}')" style="background:none; border: 1px solid #ff4444; color:#ff4444; padding:5px 10px; border-radius:5px; cursor:pointer;">Borrar</button>` : '-'}
+                        {% if perms.tasks.delete_bajabalon %}
+                        <button onclick="eliminar('${b.id}')" style="background:transparent; color:#ff4444; border:1px solid #ff4444; padding:5px; border-radius:5px; cursor:pointer;">Borrar</button>
+                        {% endif %}
                     </td>
                 </tr>
             `).join('');
         }
-    } catch (e) { console.log(e); }
+    } catch (e) { console.error("Error de sincronización:", e); }
 }
 
 async function guardarConImagen() {
-    const btn = document.getElementById('btnGuardar');
     const file = document.getElementById('imagen_file').files[0];
-    
-    const datosBase = {
-        usuario: document.getElementById('usuario').value,
-        tipo: document.getElementById('tipo').value,
-        fecha: document.getElementById('fecha_suceso').value,
-        lugar: document.getElementById('lugar').value,
-        causa: document.getElementById('causa').value
-    };
-
-    if (!datosBase.usuario || !datosBase.fecha || !file) {
-        alert("⚠️ Por favor completa los datos y sube la foto de evidencia.");
-        return;
-    }
-
-    btn.disabled = true;
-    btn.innerText = "⏳ SUBIENDO REPORTE...";
+    const user = document.getElementById('usuario').value;
+    if (!file || !user) return alert("Sube la foto y pon el responsable");
 
     const reader = new FileReader();
     reader.onload = async (e) => {
-        const payload = { ...datosBase, imagen: e.target.result };
+        const payload = {
+            usuario: user,
+            tipo: document.getElementById('tipo').value,
+            fecha: document.getElementById('fecha_suceso').value,
+            lugar: document.getElementById('lugar').value,
+            causa: document.getElementById('causa').value,
+            imagen: e.target.result // Esto envía el Base64 puro
+        };
 
         const res = await fetch("{% url 'api_guardar_baja' %}", {
             method: "POST",
@@ -165,33 +134,43 @@ async function guardarConImagen() {
             body: JSON.stringify(payload)
         });
 
-        if (res.ok) {
+        if (res.ok) { 
+            alert("Reporte guardado!"); 
             document.getElementById('formBalones').reset();
-            sincronizar();
-            alert("✅ Reporte con foto guardado correctamente.");
+            sincronizar(); 
         }
-        btn.disabled = false;
-        btn.innerText = "🚀 Registrar Novedad en la Nube";
     };
     reader.readAsDataURL(file);
 }
 
+function verImg(src) {
+    document.getElementById('img_visor_inv').src = src;
+    document.getElementById('visor_inv').style.display = 'flex';
+}
+
 async function eliminar(id) {
-    if (confirm("¿Eliminar evidencia permanentemente?")) {
+    if (confirm("¿Eliminar?")) {
         await fetch(`/api/eliminar-baja/${id}/`, { method: "POST", headers: { "X-CSRFToken": "{{ csrf_token }}" } });
         sincronizar();
     }
 }
 
-// Funciones del Visor
-function verImagen(src) {
-    const visor = document.getElementById('visor_inv');
-    document.getElementById('img_visor_inv').src = src;
-    visor.style.display = 'flex';
-}
-function cerrarVisor() { document.getElementById('visor_inv').style.display = 'none'; }
+// CORRECCIÓN DE EXCEL: Ignora la columna de imagen para que no falle el archivo
+function exportarExcel() {
+    const tablaOriginal = document.getElementById('tablaReporte');
+    const copiaTabla = tablaOriginal.cloneNode(true);
+    
+    // Recorremos las filas para quitar la primera columna (Imagen) y la última (Acciones)
+    const filas = copiaTabla.querySelectorAll('tr');
+    filas.forEach(fila => {
+        fila.deleteCell(-1); // Borra Acciones
+        fila.deleteCell(0);  // Borra Imagen
+    });
 
-// Polling de 2 segundos
+    const wb = XLSX.utils.table_to_book(copiaTabla, { sheet: "Reporte de Bajas" });
+    XLSX.writeFile(wb, "Reporte_Bajas_LiveFutbol.xlsx");
+}
+
 setInterval(sincronizar, 2000);
 window.onload = sincronizar;
 </script>
