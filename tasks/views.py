@@ -236,27 +236,39 @@ def api_eliminar_objeto(request, obj_id):
 @login_required
 def api_guardar_baja(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        BajaBalon.objects.create(
-            tipo_balon=data.get('tipo'),
-            causa=data.get('causa'),
-            marca=data.get('marca'),
-            responsable=data.get('responsable', 'Anonimo'),
-            foto=data.get('foto')
-        )
-        return JsonResponse({"status": "success"})
+        try:
+            data = json.loads(request.body)
+            # Ajustamos los nombres para que coincidan con el JS y tu Modelo
+            BajaBalon.objects.create(
+                tipo_balon=data.get('tipo'),
+                causa=data.get('causa'),
+                # Usamos .get('lugar') para la marca o lugar según tu modelo
+                marca=data.get('lugar', 'N/A'), 
+                # El JS envía 'usuario', tu modelo pide 'responsable'
+                responsable=data.get('usuario', request.user.username),
+                # El JS envía 'imagen', tu modelo pide 'foto'
+                foto=data.get('imagen') 
+            )
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 @login_required
 def api_obtener_bajas(request):
-    bajas = list(BajaBalon.objects.all().values().order_by('-fecha'))
-    return JsonResponse(bajas, safe=False)
-
-@login_required
-def api_eliminar_baja(request, baja_id):
-    if request.method == "POST":
-        baja = get_object_or_404(BajaBalon, pk=baja_id)
-        baja.delete()
-        return JsonResponse({"status": "success"})
+    # Obtenemos los datos y nos aseguramos de renombrar las llaves para el JS
+    bajas_qs = BajaBalon.objects.all().order_by('-fecha')
+    data = []
+    for b in bajas_qs:
+        data.append({
+            "id": b.id,
+            "tipo": b.tipo_balon,
+            "causa": b.causa,
+            "lugar": b.marca, # Mapeamos marca a lugar para el frontend
+            "usuario": b.responsable, # Mapeamos responsable a usuario
+            "imagen": b.foto, # Mapeamos foto a imagen
+            "fecha": b.fecha
+        })
+    return JsonResponse(data, safe=False)
 
 # ============================
 # 📧 EXTRAS (Correos)
