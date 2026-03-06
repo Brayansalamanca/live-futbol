@@ -2,46 +2,49 @@
 {% load static %}
 {% block content %}
 <style>
-    /* Efecto Imagen Gigante */
     .modal-img {
         display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.95); justify-content: center; align-items: center; cursor: zoom-out;
+        background: rgba(0,0,0,0.9); justify-content: center; align-items: center; cursor: zoom-out;
     }
-    .modal-img img { max-width: 85%; max-height: 85%; border: 4px solid #00ccff; border-radius: 15px; box-shadow: 0 0 30px #00ccff; }
+    .modal-img img { max-width: 80%; max-height: 80%; border: 3px solid #ff007f; border-radius: 15px; }
     
-    .card-profe {
-        background: rgba(255,255,255,0.03); border: 1px solid #0059b3; padding: 15px; border-radius: 15px;
+    .card-prenda {
+        background: rgba(255,255,255,0.05); border: 1px solid #0059b3; padding: 15px; border-radius: 15px;
         transition: 0.3s; position: relative;
     }
-    .card-profe:hover { border-color: #ff007f; transform: translateY(-5px); }
-    .card-profe img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; cursor: zoom-in; }
+    .card-prenda img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; cursor: zoom-in; }
     
-    .btn-alquilar {
-        width: 100%; background: #00ccff; color: #000; border: none; padding: 10px; 
-        border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;
+    .info-alquiler {
+        background: rgba(255, 0, 127, 0.1); border: 1px dashed #ff007f;
+        padding: 8px; border-radius: 8px; margin-top: 10px; font-size: 12px;
     }
 </style>
 
 <div style="background-color: #000d1a; min-height: 100vh; padding: 40px; color: white;">
     <h1 style="color: #00ccff; text-align: center;">👕 Catálogo de Indumentaria</h1>
-    <p style="text-align: center; color: #88a0b0;">Haz clic en la imagen para ver detalles. Recuerda apartar con 10 días de antelación.</p>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 40px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px;">
         
-        <div class="card-profe">
-            <img src="{% static 'img/camisa_titular.jpg' %}" onclick="verGrande(this.src)" alt="Prenda">
-            <h3 style="margin: 10px 0 5px 0; color: #ff007f;">Uniforme Titular Sub-17</h3>
-            <p style="font-size: 13px; color: #aaa;">Estado: <span style="color: #27ae60;">Disponible</span></p>
+        <div class="card-prenda">
+            <img src="{% static 'camisa.jpg' %}" onclick="verGrande(this.src)">
+            <h3 style="color: #ff007f; margin: 10px 0;">Uniforme Titular</h3>
             
-            <div style="background: rgba(0,204,255,0.1); padding: 10px; border-radius: 8px; margin-top: 10px;">
-                <label style="font-size: 11px; color: #00ccff;">DÍA DE USO:</label>
-                <input type="date" id="fecha_alquiler_1" onchange="validarDias(this, 'msg_1')" style="width: 100%; background: transparent; border: 1px solid #0059b3; color: white; font-size: 12px; color-scheme: dark;">
-                <p id="msg_1" style="color: #ff4d4d; font-size: 10px; display: none; margin-top: 5px;">⚠️ Mínimo 10 días de anticipación.</p>
-            </div>
-
-            <button onclick="procesarAlquiler('Uniforme Titular Sub-17', 'fecha_alquiler_1')" class="btn-alquilar">
-                RESERVAR AHORA
-            </button>
+            {% if user.username == 'rosita' %}
+                <div class="info-alquiler">
+                    <strong style="color: #ff007f;">Estado:</strong> EN PRÉSTAMO<br>
+                    <strong style="color: #ff007f;">Por:</strong> Prof. Alejandro Castro<br>
+                    <strong style="color: #ff007f;">Día de uso:</strong> 15/03/2026
+                </div>
+                <button style="width: 100%; margin-top: 10px; background: #27ae60; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer;">
+                    Marcar como Devuelto
+                </button>
+            {% else %}
+                <p style="font-size: 13px; color: #aaa;">Selecciona tu fecha (10 días de anticipación):</p>
+                <input type="date" id="fecha_1" style="width: 100%; background: #001a33; border: 1px solid #0059b3; color: white; border-radius: 5px; padding: 5px;">
+                <button onclick="solicitar('Uniforme Titular', 'fecha_1')" style="width: 100%; margin-top: 10px; background: #00ccff; color: #000; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                    RESERVAR PRENDA
+                </button>
+            {% endif %}
         </div>
 
     </div>
@@ -57,31 +60,15 @@
         document.getElementById('imageModal').style.display = 'flex';
     }
 
-    function validarDias(input, msgId) {
-        const fechaUso = new Date(input.value);
+    function solicitar(nombre, inputId) {
+        const fecha = new Date(document.getElementById(inputId).value);
         const hoy = new Date();
-        const diff = Math.ceil((fechaUso - hoy) / (1000 * 60 * 60 * 24));
-        
-        const msgError = document.getElementById(msgId);
-        if (diff < 10) {
-            msgError.style.display = 'block';
-            input.style.borderColor = '#ff4d4d';
-            return false;
-        } else {
-            msgError.style.display = 'none';
-            input.style.borderColor = '#0059b3';
-            return true;
-        }
-    }
+        const diff = Math.ceil((fecha - hoy) / (1000 * 60 * 60 * 24));
 
-    function procesarAlquiler(nombre, inputId) {
-        const input = document.getElementById(inputId);
-        if (!input.value) return alert("Por favor selecciona una fecha.");
-        
-        if (validarDias(input, 'msg_1')) {
-            alert(`✅ Solicitud enviada para: ${nombre}\n⚠️ RECUERDA: Debes devolver la prenda al día siguiente del uso.`);
+        if (diff < 10) {
+            alert("❌ Error: Debes apartar con 10 días de anticipación.");
         } else {
-            alert("❌ No se puede alquilar: Se requieren 10 días de anticipación.");
+            alert(`✅ ¡Apartado con éxito!\nPrenda: ${nombre}\n⚠️ Debes devolverla al día siguiente de tu uso.`);
         }
     }
 </script>
