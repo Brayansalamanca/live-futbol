@@ -1,42 +1,141 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
 <style>
-    /* Estilos de Live Futbol */
-    .container-alquiler { background-color: #000d1a; min-height: 100vh; padding: 30px; color: white; }
-    .card-prenda {
-        background: rgba(255, 255, 255, 0.03); border: 1px solid #0059b3; border-radius: 20px;
-        padding: 20px; transition: 0.4s; position: relative; overflow: hidden;
+    /* Estilos generales del contenedor */
+    .container-alquiler { 
+        background-color: #000d1a; 
+        min-height: 100vh; 
+        padding: 40px 20px; 
+        color: white; 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    .card-prenda:hover { border-color: #ff007f; box-shadow: 0 0 20px rgba(255, 0, 127, 0.2); }
-    .card-prenda img { width: 100%; height: 200px; object-fit: cover; border-radius: 15px; cursor: zoom-in; }
-    
-    /* Modal Imagen Gigante */
-    .modal-img {
-        display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.9); justify-content: center; align-items: center; cursor: zoom-out;
-    }
-    .modal-img img { max-width: 90%; max-height: 90%; border: 2px solid #00ccff; border-radius: 10px; }
 
-    /* Inputs y Botones */
-    .input-futbol { width: 100%; background: #001a33; border: 1px solid #0059b3; color: white; padding: 10px; border-radius: 8px; margin-top: 5px; }
-    .btn-apartar { width: 100%; background: #ff007f; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+    /* Grid de prendas */
+    .grid-prendas {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    /* Card de la prenda con estilo Live Futbol */
+    .card-prenda {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid #0059b3;
+        border-radius: 20px;
+        padding: 25px;
+        transition: all 0.4s ease;
+        position: relative;
+    }
+
+    .card-prenda:hover {
+        border-color: #ff007f;
+        box-shadow: 0 0 25px rgba(255, 0, 127, 0.2);
+        transform: translateY(-5px);
+    }
+
+    /* Imagen de la prenda */
+    .card-prenda img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        border-radius: 15px;
+        cursor: zoom-in;
+        border: 1px solid rgba(0, 204, 255, 0.3);
+    }
+
+    /* Formulario dentro de la card */
+    .form-apartado { margin-top: 20px; }
+    
+    .label-futbol {
+        font-size: 11px;
+        color: #00ccff;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: block;
+        margin-bottom: 5px;
+        margin-top: 15px;
+    }
+
+    .input-futbol {
+        width: 100%;
+        background: #001a33;
+        border: 1px solid #0059b3;
+        color: white;
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .input-futbol:focus { border-color: #ff007f; }
+
+    .btn-apartar {
+        width: 100%;
+        background: linear-gradient(45deg, #ff007f, #ff4b2b);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: 0.3s;
+    }
+
+    .btn-apartar:hover { opacity: 0.9; transform: scale(1.02); }
+
+    /* Modal de Imagen Gigante */
+    .modal-img {
+        display: none;
+        position: fixed;
+        z-index: 10000;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95);
+        justify-content: center;
+        align-items: center;
+        cursor: zoom-out;
+    }
+    .modal-img img {
+        max-width: 90%;
+        max-height: 85%;
+        border: 3px solid #ff007f;
+        border-radius: 15px;
+        box-shadow: 0 0 50px rgba(255, 0, 127, 0.5);
+    }
+
+    /* Sección de Pendientes */
+    .seccion-pendientes {
+        margin-top: 60px;
+        background: rgba(255, 75, 43, 0.05);
+        border: 1px solid #ff4b2b;
+        padding: 30px;
+        border-radius: 20px;
+    }
 </style>
 
 <div class="container-alquiler">
-    <h1 style="text-align: center; color: #00ccff; text-transform: uppercase;">👕 Apartado de Indumentaria</h1>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px;">
+    <h1 style="text-align: center; color: #00ccff; text-transform: uppercase; letter-spacing: 2px;">👕 Apartado de Prendas</h1>
+    <p style="text-align: center; color: #88a0b0;">Haz clic en la imagen para ver detalles. Reservas con 10 días de anticipación.</p>
+
+    <div class="grid-prendas">
         
         <div class="card-prenda">
-            <img src="{% static 'prenda_ejemplo.webp' %}" onclick="verGrande(this.src)">
-            <h3 style="color: #ff007f; margin: 15px 0 5px 0;">Uniforme Titular Sub-15</h3>
-            <p style="color: #88a0b0; font-size: 13px;">Estado: <span style="color: #27ae60;">Disponible</span></p>
+            <img src="{% static 'ropa1.jpg' %}" onclick="verGrande(this.src)" alt="Uniforme">
+            <h3 style="color: #ff007f; margin: 15px 0 5px 0;">Uniforme Titular (Azul)</h3>
+            <p style="color: #27ae60; font-size: 12px; font-weight: bold;">● DISPONIBLE</p>
 
-            <form onsubmit="event.preventDefault(); procesarApartado(this);">
-                <label style="font-size: 11px; color: #00ccff;">SELECCIONE PROFESOR:</label>
+            <form class="form-apartado" onsubmit="event.preventDefault(); enviarApartado(this);">
+                {% csrf_token %}
+                <input type="hidden" name="prenda_nombre" value="Uniforme Titular (Azul)">
+
+                <label class="label-futbol">Profesor Responsable:</label>
                 <select name="profesor" class="input-futbol" required>
-                    <option value="">-- Seleccionar --</option>
+                    <option value="">-- Seleccionar Profesor --</option>
                     <option value="Profesor 3">Profesor 3</option>
                     <option value="Profesor 4">Profesor 4</option>
                     <option value="Profesor 5">Profesor 5</option>
@@ -48,21 +147,22 @@
                     <option value="Profesor 11">Profesor 11</option>
                 </select>
 
-                <label style="font-size: 11px; color: #00ccff; display: block; margin-top: 10px;">FECHA DE USO:</label>
-                <input type="date" name="fecha_uso" class="input-futbol" required id="fecha_uso_input">
+                <label class="label-futbol">Día de Uso:</label>
+                <input type="date" name="fecha_uso" class="input-futbol" required>
 
-                <button type="submit" class="btn-apartar">APARTAR PRENDA</button>
+                <button type="submit" class="btn-apartar">Confirmar Reserva</button>
             </form>
         </div>
 
     </div>
 
-    <div style="margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
-        <h2 style="color: #ff7675; text-transform: uppercase;">🚩 Pendientes por Devolución</h2>
-        <div style="background: rgba(255, 118, 117, 0.1); padding: 20px; border-radius: 15px; border: 1px solid #ff7675;">
-            <ul id="lista-pendientes" style="list-style: none; padding: 0;">
-                <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <strong style="color: #ff7675;">Profesor 5:</strong> Tiene "Peto Naranja" (Debió devolver ayer)
+    <div class="seccion-pendientes">
+        <h2 style="color: #ff4b2b; text-transform: uppercase; font-size: 20px;">🚩 Pendientes por Devolución</h2>
+        <div style="margin-top: 15px;">
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
+                    <span><strong style="color: #ff4b2b;">Profesor 8</strong> - Petos Naranja</span>
+                    <span style="color: #aaa; font-size: 12px;">Venció: Ayer</span>
                 </li>
             </ul>
         </div>
@@ -74,31 +174,57 @@
 </div>
 
 <script>
+    // Función para ver imagen gigante
     function verGrande(src) {
         document.getElementById('imgFull').src = src;
         document.getElementById('imageModal').style.display = 'flex';
     }
 
-    function procesarApartado(form) {
-        const fechaUso = new Date(form.fecha_uso.value);
+    // Lógica de validación y envío (Evita Error 500)
+    async function enviarApartado(form) {
+        const fechaSeleccionada = new Date(form.fecha_uso.value);
         const hoy = new Date();
-        const diffDays = Math.ceil((fechaUso - hoy) / (1000 * 60 * 60 * 24));
+        
+        // Calcular diferencia de días
+        const diffTime = fechaSeleccionada - hoy;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+        // 1. Validar 10 días
         if (diffDays < 10) {
-            alert("❌ ERROR: Debes apartar la prenda con al menos 10 días de anticipación.");
+            alert("❌ ERROR: La reserva debe hacerse con al menos 10 días de anticipación.");
             return;
         }
 
-        const confirmacion = confirm(
-            `CONFIRMACIÓN DE APARTADO:\n` +
-            `- Profesor: ${form.profesor.value}\n` +
-            `- Fecha: ${form.fecha_uso.value}\n\n` +
-            `⚠️ NOTA IMPORTANTE: Si la prenda no se devuelve al día siguiente del uso, el sistema notificará automáticamente a la coordinación.`
+        // 2. Confirmación al usuario
+        const confirmar = confirm(
+            `¿Confirmar reserva para ${form.profesor.value}?\n\n` +
+            `⚠️ RECUERDA: La prenda debe devolverse al día siguiente del uso. De lo contrario, se notificará a coordinación.`
         );
 
-        if (confirmacion) {
-            alert("✅ Apartado registrado. Rosita ha sido notificada.");
-            // Aquí llamarías a tu API de guardar-apartado
+        if (confirmar) {
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/api/apartar-prenda/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert("✅ " + result.message);
+                    location.reload();
+                } else {
+                    alert("❌ Error: " + result.message);
+                }
+            } catch (error) {
+                alert("❌ Error crítico de conexión con el servidor.");
+                console.error(error);
+            }
         }
     }
 </script>
