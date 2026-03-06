@@ -24,14 +24,16 @@ urlpatterns = [
     # -----------------------------------------------------------
     # 🌸 MÓDULO EXCLUSIVO DE ROSITA (Ropa e Inventario)
     # -----------------------------------------------------------
-    # Solo Rosita puede entrar a esta URL y usar sus APIs
     path('formulario/', user_passes_test(es_rosita)(views.formulario), name='formulario'),
     path('api/guardar-prenda/', user_passes_test(es_rosita)(views.api_guardar_prenda), name='api_guardar_prenda'),
     path('api/obtener-prendas/', user_passes_test(es_rosita)(views.api_obtener_prendas), name='api_obtener_prendas'),
 
     # -----------------------------------------------------------
-    # ⚽ MÓDULO DE BALONES Y BAJAS (videos.html)
+    # ⚽ MÓDULO DE BALONES (Inventario y Renta)
     # -----------------------------------------------------------
+    # ✅ ESTA ES LA LÍNEA QUE FALTABA:
+    path('radar/', login_required(views.radar), name='radar'), 
+    
     path('videos/', login_required(views.videos), name='videos'),
     path('api/guardar-entrega/', login_required(views.api_guardar_entrega), name='api_guardar_entrega'),
     path('api/obtener-entregas/', login_required(views.api_obtener_entregas), name='api_obtener_entregas'),
