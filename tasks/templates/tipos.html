@@ -1,81 +1,88 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 <style>
-    .paz-salvo-card {
-        display: none;
-        padding: 30px;
-        border-radius: 15px;
-        margin-bottom: 20px;
-        background-color: #f8f9fa;
-        border-left: 8px solid;
-        color: #333;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    /* Efecto Imagen Gigante */
+    .modal-img {
+        display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95); justify-content: center; align-items: center; cursor: zoom-out;
     }
-    .deuda { border-left-color: #e74c3c; background-color: #fdf2f2; }
-    .limpio { border-left-color: #27ae60; background-color: #f2fdf5; }
-    .contenedor { max-width: 800px; margin: auto; padding-top: 100px; text-align: center; }
-    .btn-descarga { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; }
+    .modal-img img { max-width: 85%; max-height: 85%; border: 4px solid #00ccff; border-radius: 15px; box-shadow: 0 0 30px #00ccff; }
+    
+    .card-profe {
+        background: rgba(255,255,255,0.03); border: 1px solid #0059b3; padding: 15px; border-radius: 15px;
+        transition: 0.3s; position: relative;
+    }
+    .card-profe:hover { border-color: #ff007f; transform: translateY(-5px); }
+    .card-profe img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; cursor: zoom-in; }
+    
+    .btn-alquilar {
+        width: 100%; background: #00ccff; color: #000; border: none; padding: 10px; 
+        border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;
+    }
 </style>
 
-<div class="contenedor">
-    <h1 style="color: white; text-transform: uppercase;">📄 Estado de Paz y Salvo - Indumentaria</h1>
-    
-    <div id="mensaje-admin"></div>
+<div style="background-color: #000d1a; min-height: 100vh; padding: 40px; color: white;">
+    <h1 style="color: #00ccff; text-align: center;">👕 Catálogo de Indumentaria</h1>
+    <p style="text-align: center; color: #88a0b0;">Haz clic en la imagen para ver detalles. Recuerda apartar con 10 días de antelación.</p>
 
-    <div id="pendiente" class="paz-salvo-card deuda">
-        <h2 style="color: #c0392b;">⚠️ ENTREGA CON NOVEDADES</h2>
-        <hr>
-        <p><strong>Usuario:</strong> <span class="nombre-user"></span></p>
-        <p><strong>Aclaración:</strong> La prenda presenta daños o no ha sido entregada en su totalidad.</p>
-        <ul>
-            <li><strong>Estado:</strong> Incompleto / Deteriorado</li>
-            <li><strong>Observación:</strong> Se requiere reposición o limpieza profunda.</li>
-        </ul>
-        <button class="btn-descarga" onclick="descargarPazSalvo('Pendiente')">📥 Descargar Reporte de Daño</button>
-    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 40px;">
+        
+        <div class="card-profe">
+            <img src="{% static 'img/camisa_titular.jpg' %}" onclick="verGrande(this.src)" alt="Prenda">
+            <h3 style="margin: 10px 0 5px 0; color: #ff007f;">Uniforme Titular Sub-17</h3>
+            <p style="font-size: 13px; color: #aaa;">Estado: <span style="color: #27ae60;">Disponible</span></p>
+            
+            <div style="background: rgba(0,204,255,0.1); padding: 10px; border-radius: 8px; margin-top: 10px;">
+                <label style="font-size: 11px; color: #00ccff;">DÍA DE USO:</label>
+                <input type="date" id="fecha_alquiler_1" onchange="validarDias(this, 'msg_1')" style="width: 100%; background: transparent; border: 1px solid #0059b3; color: white; font-size: 12px; color-scheme: dark;">
+                <p id="msg_1" style="color: #ff4d4d; font-size: 10px; display: none; margin-top: 5px;">⚠️ Mínimo 10 días de anticipación.</p>
+            </div>
 
-    <div id="al-dia" class="paz-salvo-card limpio">
-        <h2 style="color: #27ae60;">✅ PAZ Y SALVO APROBADO</h2>
-        <hr>
-        <p><strong>Usuario:</strong> <span class="nombre-user"></span></p>
-        <p><strong>Aclaración:</strong> Todas las prendas fueron entregadas en óptimas condiciones.</p>
-        <ul>
-            <li><strong>Estado:</strong> Completo</li>
-            <li><strong>Fecha de Cierre:</strong> {% now "d/m/Y" %}</li>
-        </ul>
-        <button class="btn-descarga" onclick="descargarPazSalvo('Completado')">📥 Descargar Paz y Salvo (Excel)</button>
+            <button onclick="procesarAlquiler('Uniforme Titular Sub-17', 'fecha_alquiler_1')" class="btn-alquilar">
+                RESERVAR AHORA
+            </button>
+        </div>
+
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<div id="imageModal" class="modal-img" onclick="this.style.display='none'">
+    <img id="imgFull" src="">
+</div>
+
 <script>
-    const estadoPrenda = localStorage.getItem("estadoRopa"); // 'pendiente' o 'al-dia'
-    const nombreUser = localStorage.getItem("usuarioRopa") || "Usuario General";
+    function verGrande(src) {
+        document.getElementById('imgFull').src = src;
+        document.getElementById('imageModal').style.display = 'flex';
+    }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const secciones = document.querySelectorAll('.paz-salvo-card');
-        secciones.forEach(sec => sec.style.display = 'none');
+    function validarDias(input, msgId) {
+        const fechaUso = new Date(input.value);
+        const hoy = new Date();
+        const diff = Math.ceil((fechaUso - hoy) / (1000 * 60 * 60 * 24));
         
-        const elegido = document.getElementById(estadoPrenda);
-        if (elegido) {
-            elegido.style.display = 'block';
-            document.querySelectorAll('.nombre-user').forEach(el => el.innerText = nombreUser);
+        const msgError = document.getElementById(msgId);
+        if (diff < 10) {
+            msgError.style.display = 'block';
+            input.style.borderColor = '#ff4d4d';
+            return false;
+        } else {
+            msgError.style.display = 'none';
+            input.style.borderColor = '#0059b3';
+            return true;
         }
-    });
+    }
 
-    function descargarPazSalvo(status) {
-        const data = [
-            ["REPORTE DE INDUMENTARIA", "LIVE FUTBOL"],
-            ["Usuario", nombreUser],
-            ["Estado Final", status],
-            ["Fecha", new Date().toLocaleDateString()],
-            ["Observación", status === 'Completado' ? "Sin novedades" : "Pendiente por revisión de daños"]
-        ];
-        const ws = XLSX.utils.aoa_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "PazYSalvo");
-        XLSX.writeFile(wb, `Paz_y_Salvo_${nombreUser}.xlsx`);
+    function procesarAlquiler(nombre, inputId) {
+        const input = document.getElementById(inputId);
+        if (!input.value) return alert("Por favor selecciona una fecha.");
+        
+        if (validarDias(input, 'msg_1')) {
+            alert(`✅ Solicitud enviada para: ${nombre}\n⚠️ RECUERDA: Debes devolver la prenda al día siguiente del uso.`);
+        } else {
+            alert("❌ No se puede alquilar: Se requieren 10 días de anticipación.");
+        }
     }
 </script>
 {% endblock %}

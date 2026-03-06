@@ -24,6 +24,7 @@ urlpatterns = [
     # -----------------------------------------------------------
     # 🌸 MÓDULO EXCLUSIVO DE ROSITA (Ropa e Inventario)
     # -----------------------------------------------------------
+    path('tipos/', user_passes_test(es_rosita)(views.tipos), name='tipos'),
     path('formulario/', user_passes_test(es_rosita)(views.formulario), name='formulario'),
     path('api/guardar-prenda/', user_passes_test(es_rosita)(views.api_guardar_prenda), name='api_guardar_prenda'),
     path('api/obtener-prendas/', user_passes_test(es_rosita)(views.api_obtener_prendas), name='api_obtener_prendas'),
