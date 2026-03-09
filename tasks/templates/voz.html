@@ -16,18 +16,18 @@
             <form id="formBalones">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
                     <div>
-                        <label style="display: block; margin-bottom: 8px; font-size: 11px; font-weight: bold; color: #00ccff;">RESPONSABLE</label>
-                        <input type="text" id="usuario" placeholder="Nombre completo" style="width: 100%; height: 45px; background: #001122; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 15px; outline: none;">
+                        <label style="display: block; margin-bottom: 8px; font-size: 11px; font-weight: bold; color: #00ccff;">QUIEN ALQUILÓ</label>
+                        <input type="text" id="alquilado_por" placeholder="Nombre de quien alquiló" style="width: 100%; height: 45px; background: #001122; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 15px; outline: none;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-size: 11px; font-weight: bold; color: #ff4444;">QUIEN LO BOTÓ / DAÑÓ</label>
+                        <input type="text" id="usuario" placeholder="Nombre del responsable" style="width: 100%; height: 45px; background: #001122; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 15px; outline: none;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 8px; font-size: 11px; font-weight: bold; color: #00ccff;">MATERIAL</label>
                         <select id="tipo" style="width: 100%; height: 45px; background: #001122; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 10px;">
                             <option>Fútbol</option><option>Futsal</option><option>Voleibol</option><option>Baloncesto</option>
                         </select>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 8px; font-size: 11px; font-weight: bold; color: #00ccff;">FECHA</label>
-                        <input type="datetime-local" id="fecha_suceso" style="width: 100%; height: 45px; background: #001122; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 10px; color-scheme: dark;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 8px; font-size: 11px; font-weight: bold; color: #00ccff;">EVIDENCIA</label>
@@ -39,6 +39,7 @@
                     <select id="causa" style="width: 100%; height: 45px; background: #001122; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 10px;">
                         <option value="Perdido">Perdido</option><option value="Pinchado">Pinchado</option><option value="Robo">Robo</option>
                     </select>
+                    <input type="datetime-local" id="fecha_suceso" style="grid-column: span 2; width: 100%; height: 45px; background: #001122; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 10px; color-scheme: dark; margin-top: 10px;">
                 </div>
                 <button type="button" onclick="guardarBaja()" id="btnGuardar" style="width: 100%; margin-top: 25px; background: #00ccff; color: #000d1a; border: none; height: 50px; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase;">
                     🚀 Registrar Novedad
@@ -58,14 +59,12 @@
                         <tr style="background: #000d1a; font-size: 12px; color: #00ccff;">
                             <th style="padding: 15px;">FOTO</th>
                             <th>FECHA</th>
-                            <th>RESPONSABLE</th>
-                            <th>MATERIAL / LUGAR</th>
+                            <th>RESPONSABLES</th> <th>MATERIAL / LUGAR</th>
                             <th>ESTADO</th>
                             <th>ACCIÓN</th>
                         </tr>
                     </thead>
-                    <tbody id="tablaCuerpo">
-                        </tbody>
+                    <tbody id="tablaCuerpo"></tbody>
                 </table>
             </div>
         </div>
@@ -85,16 +84,12 @@
 
 <script>
 let datosGlobales = [];
-// RUTA DE TU IMAGEN POR DEFECTO
 const IMG_DEFAULT = "{% static 'sin evidencia.webp' %}";
 
-// 1. CARGA INICIAL FORZADA
 async function sincronizar(forzar = false) {
     try {
         const res = await fetch("{% url 'api_obtener_bajas' %}?t=" + Date.now());
         const data = await res.json();
-        
-        // Si los datos son diferentes O si estamos forzando la carga (al abrir la página)
         if (JSON.stringify(data) !== JSON.stringify(datosGlobales) || forzar) {
             datosGlobales = data;
             dibujarTabla(data);
@@ -112,13 +107,13 @@ function dibujarTabla(data) {
     tbody.innerHTML = data.map(b => `
         <tr>
             <td>
-                <img src="${b.imagen ? b.imagen : IMG_DEFAULT}" 
-                     class="img-celda" 
-                     onclick="verImg('${b.imagen ? b.imagen : IMG_DEFAULT}')"
-                     onerror="this.src='${IMG_DEFAULT}'">
+                <img src="${b.imagen ? b.imagen : IMG_DEFAULT}" class="img-celda" onclick="verImg('${b.imagen ? b.imagen : IMG_DEFAULT}')" onerror="this.src='${IMG_DEFAULT}'">
             </td>
             <td style="font-size: 11px; color:#88a0b0;">${b.fecha ? new Date(b.fecha).toLocaleString() : '---'}</td>
-            <td style="font-weight:bold;">${b.usuario || 'Anónimo'}</td>
+            <td style="text-align: left;">
+                <div style="font-size: 11px; color: #00ccff;">ALQUILÓ: <span style="color: white; font-weight: bold;">${b.alquilado_por || '---'}</span></div>
+                <div style="font-size: 11px; color: #ff4444;">BOTÓ: <span style="color: white; font-weight: bold;">${b.usuario || 'Anónimo'}</span></div>
+            </td>
             <td>${b.tipo}<br><small style="color:#00ccff">${b.lugar || '---'}</small></td>
             <td><span style="background:#004080; padding:4px 8px; border-radius:4px; font-size:10px;">${(b.causa || '---').toUpperCase()}</span></td>
             <td>
@@ -134,8 +129,9 @@ async function guardarBaja() {
     const btn = document.getElementById('btnGuardar');
     const file = document.getElementById('imagen_file').files[0];
     const user = document.getElementById('usuario').value.trim();
+    const alquilo = document.getElementById('alquilado_por').value.trim();
     
-    if (!user) return alert("Escribe el nombre del responsable.");
+    if (!user || !alquilo) return alert("Escribe el nombre de quien alquiló y quien lo botó.");
 
     btn.disabled = true;
     btn.innerText = "⏳ REGISTRANDO...";
@@ -143,6 +139,7 @@ async function guardarBaja() {
     const enviar = async (imgData) => {
         const payload = {
             usuario: user,
+            alquilado_por: alquilo,
             tipo: document.getElementById('tipo').value,
             fecha: document.getElementById('fecha_suceso').value,
             lugar: document.getElementById('lugar').value.trim(),
@@ -158,7 +155,7 @@ async function guardarBaja() {
 
         if (res.ok) {
             document.getElementById('formBalones').reset();
-            sincronizar(true); // Forzar recarga tras guardar
+            sincronizar(true);
         }
         btn.disabled = false;
         btn.innerText = "🚀 Registrar Novedad";
@@ -169,7 +166,7 @@ async function guardarBaja() {
         reader.onload = (e) => enviar(e.target.result);
         reader.readAsDataURL(file);
     } else {
-        enviar(null); // Enviamos null si no hay foto, el JS pondrá la default al dibujar
+        enviar(null);
     }
 }
 
@@ -185,9 +182,8 @@ async function eliminar(id) {
     }
 }
 
-// INICIO AL CARGAR LA PÁGINA
 window.onload = () => {
-    sincronizar(true); // El 'true' fuerza a que se dibuje la tabla de inmediato
+    sincronizar(true);
     setInterval(() => sincronizar(false), 8000); 
 };
 </script>
