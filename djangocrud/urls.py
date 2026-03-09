@@ -24,16 +24,14 @@ urlpatterns = [
     # -----------------------------------------------------------
     # 👕 MÓDULO DE ROPA (INDUMENTARIA)
     # -----------------------------------------------------------
-    # Rosita registra la ropa aquí
     path('formulario/', user_passes_test(es_rosita)(views.formulario), name='formulario'),
-    
-    # Profesores y Rosita ven el catálogo aquí para apartar
     path('tipos/', login_required(views.tipos), name='tipos'), 
     
-    # APIs de Ropa (Estas deben coincidir con tu JavaScript)
+    # APIs de Ropa
     path('api/guardar-prenda/', user_passes_test(es_rosita)(views.api_guardar_prenda), name='api_guardar_prenda'),
-    path('api/apartar-prenda/', login_required(views.api_apartar_prenda), name='api_apartar_prenda'),
+    path('api/apartar-prenda/<int:prenda_id>/', login_required(views.api_apartar_prenda), name='api_apartar_prenda'),
     path('api/obtener-prendas/', login_required(views.api_obtener_prendas), name='api_obtener_prendas'),
+    path('api/eliminar-prenda/<int:prenda_id>/', user_passes_test(es_rosita)(views.api_eliminar_prenda), name='api_eliminar_prenda'),
 
     # -----------------------------------------------------------
     # ⚽ MÓDULO DE BALONES (RADAR Y RENTA)
@@ -41,13 +39,14 @@ urlpatterns = [
     path('radar/', login_required(views.radar), name='radar'), 
     path('videos/', login_required(views.videos), name='videos'),
     
-    # APIs de Balones
+    # APIs de Balones (Entregas y Bajas)
     path('api/guardar-entrega/', login_required(views.api_guardar_entrega), name='api_guardar_entrega'),
     path('api/obtener-entregas/', login_required(views.api_obtener_entregas), name='api_obtener_entregas'),
     path('api/eliminar-entrega/<int:entrega_id>/', login_required(views.api_eliminar_entrega), name='api_eliminar_entrega'),
     
     path('api/guardar-baja/', login_required(views.api_guardar_baja), name='api_guardar_baja'),
     path('api/obtener-bajas/', login_required(views.api_obtener_bajas), name='api_obtener_bajas'),
+    path('api/eliminar-baja/<int:baja_id>/', login_required(views.api_eliminar_baja), name='api_eliminar_baja'),
 
     # -----------------------------------------------------------
     # 🔍 OBJETOS PERDIDOS (VOZ)
@@ -55,10 +54,12 @@ urlpatterns = [
     path('voz/', login_required(views.voz), name='voz'),
     path('api/guardar-objeto/', login_required(views.api_guardar_objeto), name='api_guardar_objeto'),
     path('api/obtener-objetos/', login_required(views.api_obtener_objetos), name='api_obtener_objetos'),
+    path('api/eliminar-objeto/<int:obj_id>/', login_required(views.api_eliminar_objeto), name='api_eliminar_objeto'),
 
     # -----------------------------------------------------------
     # 📝 TAREAS Y RUTINAS
     # -----------------------------------------------------------
+    path('tasks/', login_required(views.tasks), name='tasks'),
     path('tasks/create/', login_required(views.create_task), name='create_task'),
     path('tasks/<int:task_id>/', login_required(views.lista), name='lista'),
     path('tasks/<int:task_id>/completar/', login_required(views.completar), name='completar'),
