@@ -2,117 +2,89 @@
 {% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 <style>
-    .container-alquiler { background-color: #000d1a; min-height: 100vh; padding: 100px 20px 40px; color: white; }
-    .grid-prendas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-    
-    .card-prenda {
-        background: rgba(255, 255, 255, 0.03); border: 1px solid #0059b3;
-        border-radius: 20px; padding: 20px; transition: 0.4s;
+    .contenedor-tipos {
+        padding: 100px 20px;
+        background-color: #000d1a;
+        min-height: 100vh;
+        color: white;
     }
-    .card-prenda:hover { border-color: #ff007f; box-shadow: 0 0 20px rgba(255, 0, 127, 0.2); }
-    
-    .img-prenda { width: 100%; height: 200px; object-fit: cover; border-radius: 15px; cursor: pointer; }
-    
-    .badge-stock {
-        background: #ff007f; padding: 5px 10px; border-radius: 5px;
-        font-size: 12px; font-weight: bold; position: absolute; top: 30px; right: 30px;
+    table {
+        width: 100%;
+        background: rgba(255,255,255,0.05);
+        border-collapse: collapse;
+        border-radius: 15px;
+        overflow: hidden;
     }
-
-    .input-futbol {
-        width: 100%; background: #001a33; border: 1px solid #0059b3;
-        color: white; padding: 10px; border-radius: 8px; margin-top: 5px;
-    }
-    .btn-apartar {
-        width: 100%; background: linear-gradient(45deg, #ff007f, #ff4b2b);
-        color: white; border: none; padding: 12px; border-radius: 10px;
-        font-weight: bold; cursor: pointer; margin-top: 15px;
-    }
+    th { background: #0059b3; color: white; padding: 15px; text-align: left; }
+    td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .img-mini { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 1px solid #00ccff; }
+    .input-tabla { background: #001a33; border: 1px solid #00ccff; color: white; padding: 8px; border-radius: 5px; width: 100%; }
+    .btn-apartar-tabla { background: #5f17e4; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 </style>
 
-<div class="container-alquiler">
-    <h1 style="text-align: center; color: #00ccff;">👕 APARTADO DE INDUMENTARIA</h1>
-
-    <div class="grid-prendas" id="contenedor-prendas">
-        <div class="card-prenda animate__animated animate__fadeIn">
-            <span class="badge-stock">Quedan: 5</span>
-            <img src="{% static 'ropa_ejemplo.jpg' %}" class="img-prenda" onclick="verGrande(this.src)">
-            <h3 style="margin-top:15px;">Uniforme Titular Sub-15</h3>
-            
-            <form onsubmit="event.preventDefault(); procesarApartado(this);">
-                {% csrf_token %}
-                <input type="hidden" name="prenda_id" value="1">
-                <input type="hidden" name="nombre_prenda" value="Uniforme Titular Sub-15">
-
-                <label style="font-size: 11px; color: #00ccff;">PROFESOR:</label>
-                <select name="profesor" class="input-futbol" required>
-                    <option value="">-- Seleccionar --</option>
-                    {% for i in "34567891011" %}
-                    <option value="Profesor {{ i }}">Profesor {{ i }}</option>
-                    {% endfor %}
-                </select>
-
-                <label style="font-size: 11px; color: #00ccff; display: block; margin-top: 10px;">FECHA DE USO:</label>
-                <input type="date" name="fecha_uso" class="input-futbol" required>
-
-                <button type="submit" class="btn-apartar">RESERVAR AHORA</button>
-            </form>
-        </div>
-    </div>
-
-    {% if request.user.username == 'rosita' %}
-    <div style="margin-top: 80px; background: rgba(39, 174, 96, 0.1); padding: 30px; border-radius: 20px; border: 1px solid #27ae60;">
-        <h2 style="color: #27ae60;">📜 PANEL DE PAZ Y SALVO (Rosita)</h2>
-        <table style="width: 100%; color: white; margin-top: 20px; border-collapse: collapse;">
-            <tr style="border-bottom: 2px solid #27ae60;">
+<div class="contenedor-tipos">
+    <h1 style="text-align: center; color: #00ccff;">📋 Inventario y Apartado de Prendas</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Imagen</th>
+                <th>Nombre de la Prenda</th>
+                <th>Stock</th>
                 <th>Profesor</th>
-                <th>Prenda</th>
-                <th>Fecha Uso</th>
-                <th>Estado Entrega</th>
+                <th>Fecha de Uso</th>
                 <th>Acción</th>
             </tr>
-            <tbody id="tabla-paz-salvo">
-                </tbody>
-        </table>
-    </div>
-    {% endif %}
+        </thead>
+        <tbody id="tabla-prendas">
+            </tbody>
+    </table>
 </div>
 
 <script>
-async function procesarApartado(form) {
-    const fechaUso = new Date(form.fecha_uso.value);
-    const hoy = new Date();
-    const diffDays = Math.ceil((fechaUso - hoy) / (1000 * 60 * 60 * 24));
+    async function cargarInventario() {
+        const res = await fetch("{% url 'api_obtener_prendas' %}");
+        const prendas = await res.json();
+        let html = "";
 
-    if (diffDays < 10) {
-        alert("❌ ERROR: Debes apartar con 10 días de anticipación.");
-        return;
-    }
-
-    const confirmacion = confirm(`¿Confirmas el apartado de ${form.nombre_prenda.value}?\n\nRecuerda: Devolución obligatoria al día siguiente.`);
-    
-    if (confirmacion) {
-        const formData = new FormData(form);
-        const res = await fetch("{% url 'api_apartar_prenda' %}", {
-            method: "POST",
-            body: formData,
-            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        prendas.forEach(p => {
+            html += `
+            <tr>
+                <td><img src="${p.imagen_url}" class="img-mini" onclick="window.open(this.src)"></td>
+                <td><strong>${p.nombre}</strong></td>
+                <td><span style="color: #ff007f">${p.cantidad} disponibles</span></td>
+                <td>
+                    <select id="profesor-${p.id}" class="input-tabla">
+                        <option value="">Seleccionar...</option>
+                        ${[3,4,5,6,7,8,9,10,11].map(n => `<option value="Profesor ${n}">Profesor ${n}</option>`).join('')}
+                    </select>
+                </td>
+                <td><input type="date" id="fecha-${p.id}" class="input-tabla"></td>
+                <td>
+                    <button class="btn-apartar-tabla" onclick="apartarPrenda(${p.id}, '${p.nombre}')">Apartar</button>
+                </td>
+            </tr>`;
         });
-        if (res.ok) {
-            alert("✅ Apartado exitoso. Rosita ha sido notificada.");
-            location.reload();
-        }
+        document.getElementById("tabla-prendas").innerHTML = html || "<tr><td colspan='6' style='text-align:center'>No hay prendas registradas.</td></tr>";
     }
-}
 
-// Rosita decide quién entregó bien
-async function darPazYSalvo(id) {
-    const detalles = prompt("¿En qué estado entrega la prenda? (Ej: Limpio y completo)");
-    if (detalles) {
-        // Llamada a API para borrar de pendientes y actualizar stock
-        alert("✅ Paz y Salvo concedido. Prenda devuelta al inventario.");
+    async function apartarPrenda(id, nombre) {
+        const profesor = document.getElementById(`profesor-${id}`).value;
+        const fechaInput = document.getElementById(`fecha-${id}`).value;
+
+        if (!profesor || !fechaInput) return alert("Completa todos los campos");
+
+        const fechaUso = new Date(fechaInput);
+        const hoy = new Date();
+        const diff = Math.ceil((fechaUso - hoy) / (1000 * 60 * 60 * 24));
+
+        if (diff < 10) return alert("❌ Mínimo 10 días de anticipación.");
+
+        // Aquí envías a la API de apartado
+        alert(`✅ Apartado solicitado para ${nombre}.\nEntregar a: ${profesor}`);
     }
-}
+
+    document.addEventListener("DOMContentLoaded", cargarInventario);
 </script>
 {% endblock %}
