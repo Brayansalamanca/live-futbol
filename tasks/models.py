@@ -13,7 +13,7 @@ class Task(models.Model):
     def __str__(self):
         return f'{self.titulo} - by {self.user.username}'
 
-# 2. REGISTRO DE ENTREGAS
+# 2. REGISTRO DE ENTREGAS (Balones)
 class RegistroEntrega(models.Model):
     nombre = models.CharField(max_length=100)
     curso = models.CharField(max_length=20)
@@ -21,6 +21,9 @@ class RegistroEntrega(models.Model):
     lugar = models.CharField(max_length=100)
     marca = models.CharField(max_length=50, blank=True)
     fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Registro de Entrega"
 
 # 3. OBJETOS PERDIDOS
 class ObjetoPerdido(models.Model):
@@ -31,21 +34,18 @@ class ObjetoPerdido(models.Model):
     descripcion = models.TextField()
     fecha = models.DateTimeField(auto_now_add=True)
 
-# 4. INVENTARIO DE ROPA (Sincronizado con Formulario y Tipos)
+# 4. INVENTARIO DE ROPA (Sincronizado para Rosita)
 class PrendaRopa(models.Model):
-    objeto = models.CharField(max_length=100) # Nombre
-    cantidad = models.IntegerField(default=1) 
+    objeto = models.CharField(max_length=100)
+    cantidad = models.IntegerField(default=1)
     talla = models.CharField(max_length=20, blank=True, null=True)
-    imagen = models.TextField() # Base64
     estado = models.CharField(max_length=20, default='Disponible')
     condicion = models.CharField(max_length=20, default='Óptimo')
     detalle_defecto = models.TextField(blank=True, null=True)
-    
-    # Datos para Apartado
     nombre_apartado = models.CharField(max_length=100, blank=True, null=True)
     fecha_uso = models.DateField(blank=True, null=True)
+    imagen = models.TextField()  # Guardamos el Base64
     devuelto = models.BooleanField(default=True)
-    
     fecha_registro = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
