@@ -1,37 +1,61 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<div style="background-color: #000d1a; min-height: 100vh; padding: 40px; color: white;">
-    <div style="max-width: 800px; margin: 0 auto; background: rgba(255, 255, 255, 0.05); border: 1px solid #ff007f; padding: 30px; border-radius: 20px;">
-        <h2 style="color: #ff007f; text-align: center; text-transform: uppercase;">🆕 Registrar Nueva Prenda en Inventario</h2>
-        <p style="text-align: center; color: #88a0b0; font-size: 14px;">Espacio exclusivo para administración (Rosita)</p>
-        <hr style="border: 0.5px solid rgba(255,0,127,0.2); margin: 20px 0;">
+<style>
+    .contenedor-registro {
+        max-width: 600px;
+        margin: 80px auto;
+        padding: 30px;
+        background: rgba(0, 13, 26, 0.9);
+        border: 2px solid #0059b3;
+        border-radius: 20px;
+        color: white;
+        box-shadow: 0 0 30px rgba(0, 89, 179, 0.3);
+    }
+    .input-futbol {
+        width: 100%; padding: 12px; margin: 10px 0;
+        background: #001a33; border: 1px solid #00ccff;
+        color: white; border-radius: 10px;
+    }
+    .btn-registrar {
+        width: 100%; background: #5f17e4; color: white;
+        padding: 15px; border: none; border-radius: 10px;
+        font-weight: bold; cursor: pointer; font-size: 16px;
+    }
+</style>
 
-        <form action="/api/guardar-prenda/" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <label style="color: #00ccff; display: block; margin-bottom: 5px;">Nombre de la Prenda</label>
-                    <input type="text" name="nombre" placeholder="Ej: Uniforme Titular 2026" required style="width: 100%; background: #001a33; border: 1px solid #0059b3; color: white; padding: 10px; border-radius: 8px;">
-                </div>
-                <div>
-                    <label style="color: #00ccff; display: block; margin-bottom: 5px;">Categoría</label>
-                    <select name="categoria" style="width: 100%; background: #001a33; border: 1px solid #0059b3; color: white; padding: 10px; border-radius: 8px;">
-                        <option>Uniformes de Juego</option>
-                        <option>Petos Entrenamiento</option>
-                        <option>Implementos Portero</option>
-                    </select>
-                </div>
-            </div>
+<div class="contenedor-registro">
+    <h1 style="color: #00ccff; text-align: center;">📦 Registro de Inventario</h1>
+    <form onsubmit="event.preventDefault(); guardarInventario(this);">
+        {% csrf_token %}
+        <h3>1. Datos de la Prenda</h3>
+        <input type="text" name="nombre" class="input-futbol" placeholder="Nombre de la prenda (Ej: Uniforme Titular)" required>
+        
+        <label>Cantidad Disponible:</label>
+        <input type="number" name="cantidad" class="input-futbol" value="1" min="1" required>
 
-            <div style="margin-top: 20px;">
-                <label style="color: #00ccff; display: block; margin-bottom: 5px;">Imagen de la Prenda (Para el catálogo)</label>
-                <input type="file" name="imagen" accept="image/*" required style="width: 100%; color: #88a0b0;">
-            </div>
+        <h3>2. Imagen de Referencia</h3>
+        <input type="file" name="imagen" class="input-futbol" accept="image/*" required>
 
-            <button type="submit" style="width: 100%; margin-top: 30px; background: #ff007f; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                ✅ GUARDAR EN CATÁLOGO
-            </button>
-        </form>
-    </div>
+        <button type="submit" class="btn-registrar">🚀 SUBIR AL CATÁLOGO</button>
+    </form>
 </div>
+
+<script>
+async function guardarInventario(form) {
+    const formData = new FormData(form);
+    try {
+        const res = await fetch("{% url 'api_guardar_prenda' %}", {
+            method: "POST",
+            body: formData,
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        });
+        if (res.ok) {
+            alert("✅ Prenda subida con éxito al catálogo.");
+            window.location.href = "{% url 'tipos' %}";
+        }
+    } catch (e) { alert("Error al conectar."); }
+}
+</script>
 {% endblock %}
