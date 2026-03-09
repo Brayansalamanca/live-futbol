@@ -1,90 +1,39 @@
 {% extends 'base.html' %}
-{% load static %}
-
 {% block content %}
-<style>
-    .contenedor-tipos {
-        padding: 100px 20px;
-        background-color: #000d1a;
-        min-height: 100vh;
-        color: white;
-    }
-    table {
-        width: 100%;
-        background: rgba(255,255,255,0.05);
-        border-collapse: collapse;
-        border-radius: 15px;
-        overflow: hidden;
-    }
-    th { background: #0059b3; color: white; padding: 15px; text-align: left; }
-    td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .img-mini { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 1px solid #00ccff; }
-    .input-tabla { background: #001a33; border: 1px solid #00ccff; color: white; padding: 8px; border-radius: 5px; width: 100%; }
-    .btn-apartar-tabla { background: #5f17e4; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-</style>
-
-<div class="contenedor-tipos">
-    <h1 style="text-align: center; color: #00ccff;">📋 Inventario y Apartado de Prendas</h1>
-    
-    <table>
-        <thead>
+<div style="padding: 100px 20px; background: #000d1a; min-height: 100vh; color: white;">
+    <h1 style="text-align: center; color: #00ccff;">👕 Catálogo de Inventario</h1>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead style="background: #0059b3;">
             <tr>
                 <th>Imagen</th>
-                <th>Nombre de la Prenda</th>
-                <th>Stock</th>
-                <th>Profesor</th>
-                <th>Fecha de Uso</th>
+                <th>Prenda</th>
+                <th>Disponibles</th>
+                <th>Estado</th>
                 <th>Acción</th>
             </tr>
         </thead>
-        <tbody id="tabla-prendas">
+        <tbody id="tablaCuerpo" style="text-align: center;">
             </tbody>
     </table>
 </div>
 
 <script>
-    async function cargarInventario() {
+    async function cargar() {
         const res = await fetch("{% url 'api_obtener_prendas' %}");
         const prendas = await res.json();
         let html = "";
-
         prendas.forEach(p => {
             html += `
-            <tr>
-                <td><img src="${p.imagen_url}" class="img-mini" onclick="window.open(this.src)"></td>
-                <td><strong>${p.nombre}</strong></td>
-                <td><span style="color: #ff007f">${p.cantidad} disponibles</span></td>
-                <td>
-                    <select id="profesor-${p.id}" class="input-tabla">
-                        <option value="">Seleccionar...</option>
-                        ${[3,4,5,6,7,8,9,10,11].map(n => `<option value="Profesor ${n}">Profesor ${n}</option>`).join('')}
-                    </select>
-                </td>
-                <td><input type="date" id="fecha-${p.id}" class="input-tabla"></td>
-                <td>
-                    <button class="btn-apartar-tabla" onclick="apartarPrenda(${p.id}, '${p.nombre}')">Apartar</button>
-                </td>
+            <tr style="border-bottom: 1px solid #333;">
+                <td><img src="${p.imagen}" style="width: 60px; height: 60px; border-radius: 10px; margin: 10px;"></td>
+                <td>${p.nombre}</td>
+                <td style="color: #27ae60;">${p.cantidad}</td>
+                <td>${p.profesor === "Disponible" ? "✅ Disponible" : "🚩 " + p.profesor}</td>
+                <td><button onclick="window.location.href='#'" style="background:#ff007f; color:white; border:none; padding:5px 10px; border-radius:5px;">Apartar</button></td>
             </tr>`;
         });
-        document.getElementById("tabla-prendas").innerHTML = html || "<tr><td colspan='6' style='text-align:center'>No hay prendas registradas.</td></tr>";
+        document.getElementById('tablaCuerpo').innerHTML = html || "<tr><td colspan='5'>No hay prendas registradas</td></tr>";
     }
-
-    async function apartarPrenda(id, nombre) {
-        const profesor = document.getElementById(`profesor-${id}`).value;
-        const fechaInput = document.getElementById(`fecha-${id}`).value;
-
-        if (!profesor || !fechaInput) return alert("Completa todos los campos");
-
-        const fechaUso = new Date(fechaInput);
-        const hoy = new Date();
-        const diff = Math.ceil((fechaUso - hoy) / (1000 * 60 * 60 * 24));
-
-        if (diff < 10) return alert("❌ Mínimo 10 días de anticipación.");
-
-        // Aquí envías a la API de apartado
-        alert(`✅ Apartado solicitado para ${nombre}.\nEntregar a: ${profesor}`);
-    }
-
-    document.addEventListener("DOMContentLoaded", cargarInventario);
+    document.addEventListener("DOMContentLoaded", cargar);
 </script>
 {% endblock %}

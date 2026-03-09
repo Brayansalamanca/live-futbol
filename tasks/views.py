@@ -237,7 +237,7 @@ def api_eliminar_objeto(request, obj_id):
         return JsonResponse({"status": "success"})
 
 # ============================
-# 📉 BAJAS BALONES
+# 📉 BAJAS BALONES (Corregido para 2 personas)
 # ============================
 
 @login_required
@@ -249,7 +249,8 @@ def api_guardar_baja(request):
                 tipo_balon=data.get('tipo'),
                 causa=data.get('causa'),
                 marca=data.get('lugar', 'N/A'), 
-                responsable=data.get('usuario', request.user.username),
+                responsable=data.get('usuario'),          # Quién lo botó
+                alquilado_por=data.get('alquilado_por'), # <--- NUEVO: Quién lo alquiló
                 foto=data.get('imagen') 
             )
             return JsonResponse({"status": "success"})
@@ -262,8 +263,14 @@ def api_obtener_bajas(request):
     data = []
     for b in bajas_qs:
         data.append({
-            "id": b.id, "tipo": b.tipo_balon, "causa": b.causa, "lugar": b.marca,
-            "usuario": b.responsable, "imagen": b.foto, "fecha": b.fecha
+            "id": b.id, 
+            "tipo": b.tipo_balon, 
+            "causa": b.causa, 
+            "lugar": b.marca,
+            "usuario": b.responsable,           # El que lo botó
+            "alquilado_por": b.alquilado_por,    # El que lo alquiló
+            "imagen": b.foto, 
+            "fecha": b.fecha
         })
     return JsonResponse(data, safe=False)
 
