@@ -1,61 +1,69 @@
 {% extends 'base.html' %}
-{% load static %}
-
 {% block content %}
-<style>
-    .contenedor-registro {
-        max-width: 600px;
-        margin: 80px auto;
-        padding: 30px;
-        background: rgba(0, 13, 26, 0.9);
-        border: 2px solid #0059b3;
-        border-radius: 20px;
-        color: white;
-        box-shadow: 0 0 30px rgba(0, 89, 179, 0.3);
-    }
-    .input-futbol {
-        width: 100%; padding: 12px; margin: 10px 0;
-        background: #001a33; border: 1px solid #00ccff;
-        color: white; border-radius: 10px;
-    }
-    .btn-registrar {
-        width: 100%; background: #5f17e4; color: white;
-        padding: 15px; border: none; border-radius: 10px;
-        font-weight: bold; cursor: pointer; font-size: 16px;
-    }
-</style>
-
-<div class="contenedor-registro">
-    <h1 style="color: #00ccff; text-align: center;">📦 Registro de Inventario</h1>
-    <form onsubmit="event.preventDefault(); guardarInventario(this);">
-        {% csrf_token %}
-        <h3>1. Datos de la Prenda</h3>
-        <input type="text" name="nombre" class="input-futbol" placeholder="Nombre de la prenda (Ej: Uniforme Titular)" required>
+<div class="contenedor-registro" style="max-width: 500px; margin: 100px auto; background: #001a33; padding: 30px; border-radius: 20px; border: 1px solid #00ccff; color: white;">
+    <h2 style="text-align: center; color: #00ccff;">📦 Registrar Prenda</h2>
+    
+    <form id="formInventario">
+        <label>Nombre de la Prenda:</label>
+        <input type="text" id="nombre" class="input-futbol" placeholder="Ej: Uniforme Titular" style="width:100%; margin-bottom:15px; padding:10px; border-radius:10px; border:none;">
         
-        <label>Cantidad Disponible:</label>
-        <input type="number" name="cantidad" class="input-futbol" value="1" min="1" required>
+        <label>Cantidad Inicial:</label>
+        <input type="number" id="cantidad" class="input-futbol" value="1" min="1" style="width:100%; margin-bottom:15px; padding:10px; border-radius:10px; border:none;">
+        
+        <label>Foto de la Prenda:</label>
+        <input type="file" id="imagenInput" accept="image/*" style="width:100%; margin-bottom:20px;">
 
-        <h3>2. Imagen de Referencia</h3>
-        <input type="file" name="imagen" class="input-futbol" accept="image/*" required>
-
-        <button type="submit" class="btn-registrar">🚀 SUBIR AL CATÁLOGO</button>
+        <button type="button" id="btnGuardar" style="width: 100%; background: #5f17e4; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+            🚀 SUBIR AL CATÁLOGO
+        </button>
     </form>
 </div>
 
 <script>
-async function guardarInventario(form) {
-    const formData = new FormData(form);
-    try {
-        const res = await fetch("{% url 'api_guardar_prenda' %}", {
-            method: "POST",
-            body: formData,
-            headers: { "X-CSRFToken": "{{ csrf_token }}" }
-        });
-        if (res.ok) {
-            alert("✅ Prenda subida con éxito al catálogo.");
-            window.location.href = "{% url 'tipos' %}";
+    document.getElementById('btnGuardar').addEventListener('click', async () => {
+        const nombre = document.getElementById('nombre').value;
+        const cantidad = document.getElementById('cantidad').value;
+        const archivo = document.getElementById('imagenInput').files[0];
+
+        if (!nombre || !archivo) {
+            alert("⚠️ Por favor rellena el nombre y selecciona una foto.");
+            return;
         }
-    } catch (e) { alert("Error al conectar."); }
-}
+
+        // BLOQUEO DE BOTÓN PARA EVITAR DOBLE CLICK
+        const btn = document.getElementById('btnGuardar');
+        btn.disabled = true;
+        btn.innerText = "Subiendo...";
+
+        // CONVERTIR IMAGEN A BASE64
+        const reader = new FileReader();
+        reader.readAsDataURL(archivo);
+        reader.onload = async () => {
+            const base64 = reader.result;
+
+            const res = await fetch("{% url 'api_guardar_prenda' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    nombre: nombre,
+                    cantidad: cantidad,
+                    imagen: base64
+                })
+            });
+
+            const data = await res.json();
+            if (data.status === 'ok') {
+                alert("✅ Prenda registrada correctamente.");
+                window.location.href = "{% url 'tipos' %}";
+            } else {
+                alert("❌ Error: " + data.message);
+                btn.disabled = false;
+                btn.innerText = "🚀 SUBIR AL CATÁLOGO";
+            }
+        };
+    });
 </script>
 {% endblock %}

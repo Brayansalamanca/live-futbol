@@ -116,7 +116,7 @@ def signout(request):
     return redirect('home')
 
 # ============================
-# 📦 INVENTARIO ROPA (radar.html)
+# 📦 INVENTARIO ROPA (Corregido para Rosita)
 # ============================
 
 @login_required
@@ -126,35 +126,59 @@ def radar(request):
 @login_required
 def api_guardar_prenda(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        prenda = PrendaRopa.objects.create(
-            objeto=data.get('objeto'),
-            talla=data.get('talla'),
-            condicion=data.get('condicion'),
-            detalle_defecto=data.get('detalle_defecto', ''),
-            imagen=data.get('imagen'),
-            estado='Disponible'
-        )
-        return JsonResponse({"status": "success", "id": prenda.id})
+        try:
+            data = json.loads(request.body)
+            prenda = PrendaRopa.objects.create(
+                objeto=data.get('nombre'), # Sincronizado con el ID del HTML
+                cantidad=int(data.get('cantidad', 1)),
+                talla=data.get('talla', 'N/A'),
+                condicion=data.get('condicion', 'Óptimo'),
+                detalle_defecto=data.get('detalle_defecto', ''),
+                imagen=data.get('imagen'),
+                estado='Disponible',
+                devuelto=True
+            )
+            return JsonResponse({"status": "ok", "id": prenda.id})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 @login_required
 def api_obtener_prendas(request):
-    prendas = list(PrendaRopa.objects.all().values().order_by('-fecha_registro'))
-    return JsonResponse(prendas, safe=False)
+    prendas_qs = PrendaRopa.objects.all().order_by('-fecha_registro')
+    data = []
+    for p in prendas_qs:
+        data.append({
+            "id": p.id,
+            "nombre": p.objeto,
+            "cantidad": p.cantidad,
+            "imagen": p.imagen,
+            "estado": p.estado,
+            "profesor": p.nombre_apartado or "Disponible",
+            "fecha_uso": str(p.fecha_uso) if p.fecha_uso else "---",
+            "devuelto": p.devuelto
+        })
+    return JsonResponse(data, safe=False)
 
 @login_required
 def api_apartar_prenda(request, prenda_id):
     if request.method == "POST":
-        data = json.loads(request.body)
-        prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
-        if data.get('accion') == 'liberar':
-            prenda.estado = "Disponible"
-            prenda.nombre_apartado = ""
-        else:
-            prenda.estado = "Apartado"
-            prenda.nombre_apartado = data.get('nombre', request.user.username)
-        prenda.save()
-        return JsonResponse({"status": "success"})
+        try:
+            data = json.loads(request.body)
+            prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
+            if data.get('accion') == 'liberar':
+                prenda.estado = "Disponible"
+                prenda.nombre_apartado = ""
+                prenda.fecha_uso = None
+                prenda.devuelto = True
+            else:
+                prenda.estado = "Apartado"
+                prenda.nombre_apartado = data.get('nombre', request.user.username)
+                prenda.fecha_uso = data.get('fecha')
+                prenda.devuelto = False
+            prenda.save()
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 @login_required
 def api_eliminar_prenda(request, prenda_id):
@@ -175,11 +199,10 @@ def videos(request):
 def api_guardar_entrega(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        # Sincronizamos los nombres del JSON con el modelo
         RegistroEntrega.objects.create(
-            nombre=data.get('recibido_por'), # El JS envía 'recibido_por'
+            nombre=data.get('recibido_por'),
             curso=data.get('curso', 'N/A'),
-            objeto=data.get('balon'),       # El JS envía 'balon'
+            objeto=data.get('balon'),
             lugar=data.get('lugar', 'Cancha')
         )
         return JsonResponse({"status": "success"})
@@ -230,7 +253,7 @@ def api_eliminar_objeto(request, obj_id):
         return JsonResponse({"status": "success"})
 
 # ============================
-# 📉 BAJAS BALONES (voz.html)
+# 📉 BAJAS BALONES
 # ============================
 
 @login_required
@@ -238,15 +261,11 @@ def api_guardar_baja(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            # Ajustamos los nombres para que coincidan con el JS y tu Modelo
             BajaBalon.objects.create(
                 tipo_balon=data.get('tipo'),
                 causa=data.get('causa'),
-                # Usamos .get('lugar') para la marca o lugar según tu modelo
                 marca=data.get('lugar', 'N/A'), 
-                # El JS envía 'usuario', tu modelo pide 'responsable'
                 responsable=data.get('usuario', request.user.username),
-                # El JS envía 'imagen', tu modelo pide 'foto'
                 foto=data.get('imagen') 
             )
             return JsonResponse({"status": "success"})
@@ -255,7 +274,6 @@ def api_guardar_baja(request):
 
 @login_required
 def api_obtener_bajas(request):
-    # Obtenemos los datos y nos aseguramos de renombrar las llaves para el JS
     bajas_qs = BajaBalon.objects.all().order_by('-fecha')
     data = []
     for b in bajas_qs:
@@ -263,30 +281,23 @@ def api_obtener_bajas(request):
             "id": b.id,
             "tipo": b.tipo_balon,
             "causa": b.causa,
-            "lugar": b.marca, # Mapeamos marca a lugar para el frontend
-            "usuario": b.responsable, # Mapeamos responsable a usuario
-            "imagen": b.foto, # Mapeamos foto a imagen
+            "lugar": b.marca,
+            "usuario": b.responsable,
+            "imagen": b.foto,
             "fecha": b.fecha
         })
     return JsonResponse(data, safe=False)
 
-# ============================
-# 📧 EXTRAS (Correos)
-# ============================
-
 @login_required
-def enviar_rutina_correo(request):
-    if request.method == 'POST':
+def api_eliminar_baja(request, baja_id):
+    if request.method == "POST":
         try:
-            data = json.loads(request.body)
-            rutina = data.get('rutina', {})
-            contenido_html = f"<h2>Rutina de {request.user.username}</h2><p>{rutina}</p>"
-            email = EmailMessage('🏋️ Tu Rutina', contenido_html, to=[request.user.email])
-            email.content_subtype = "html"
-            email.send()
-            return JsonResponse({'success': True})
+            baja = get_object_or_404(BajaBalon, pk=baja_id)
+            baja.delete()
+            return JsonResponse({"status": "success"})
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
 
 # ============================
 # ✅ GESTIÓN DE TAREAS
@@ -335,14 +346,3 @@ def eliminar_tarea(request, task_id):
     if request.method == 'POST':
         task.delete()
     return redirect('tasks')
-@login_required
-def api_eliminar_baja(request, baja_id):
-    if request.method == "POST":
-        try:
-            # get_object_or_404 buscará en tu modelo BajaBalon
-            baja = get_object_or_404(BajaBalon, pk=baja_id)
-            baja.delete()
-            return JsonResponse({"status": "success"})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
-    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
