@@ -63,6 +63,8 @@ class BajaBalon(models.Model):
     responsable = models.CharField(max_length=100)
     foto = models.TextField()
     fecha = models.DateTimeField(auto_now_add=True)
+    responsable = models.CharField(max_length=100)
+    alquilado_por = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return f"Baja: {self.tipo_balon} - {self.causa}"
