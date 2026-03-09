@@ -25,23 +25,12 @@ from .tokens import account_activation_token
 # 🏠 VISTAS PÚBLICAS
 # ============================
 
-def home(request):
-    return render(request, 'home.html')
-
-def soporte(request):
-    return render(request, 'soporte.html')
-
-def tipos(request):
-    return render(request, 'tipos.html')
-
-def formulario(request):
-    return render(request, 'formulario.html')
-
-def ranking(request):
-    return render(request, 'ranking.html')
-
-def condiciones(request):
-    return render(request, 'condiciones.html')
+def home(request): return render(request, 'home.html')
+def soporte(request): return render(request, 'soporte.html')
+def tipos(request): return render(request, 'tipos.html')
+def formulario(request): return render(request, 'formulario.html')
+def ranking(request): return render(request, 'ranking.html')
+def condiciones(request): return render(request, 'condiciones.html')
 
 # ============================
 # 🔐 AUTENTICACIÓN
@@ -56,14 +45,12 @@ class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
 def signup(request):
     if request.method == 'GET':
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
-    
     form = CustomUserCreationForm(request.POST)
     if form.is_valid():
         try:
             user = form.save(commit=False)
             user.is_active = False
             user.save()
-
             current_site = request.get_host()
             subject = 'Confirma tu cuenta en Live Fútbol'
             message = render_to_string('confirmacion_email.html', {
@@ -74,7 +61,6 @@ def signup(request):
             })
             email = EmailMessage(subject, message, to=[user.email])
             email.send()
-
             return render(request, 'confirmacion_enviada.html')
         except Exception as e:
             return render(request, 'signup.html', {'form': form, 'error': 'Error en el registro.'})
@@ -86,7 +72,6 @@ def activar(request, uidb64, token):
         user = User.objects.filter(pk=uid).first()
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
-
     if user is not None and account_activation_token.check_token(user, token):
         user.is_active = True
         user.save()
@@ -97,11 +82,9 @@ def activar(request, uidb64, token):
 def signin(request):
     if request.method == 'GET':
         return render(request, 'signin.html', {'form': AuthenticationForm()})
-    
     username = request.POST.get('username')
     password = request.POST.get('password')
     user = authenticate(request, username=username, password=password)
-    
     if user is not None:
         login(request, user)
         return redirect('formulario')
@@ -116,12 +99,11 @@ def signout(request):
     return redirect('home')
 
 # ============================
-# 📦 INVENTARIO ROPA (Corregido para Rosita)
+# 📦 INVENTARIO ROPA (Actualizado para Curso/Evento)
 # ============================
 
 @login_required
-def radar(request):
-    return render(request, 'radar.html')
+def radar(request): return render(request, 'radar.html')
 
 @login_required
 def api_guardar_prenda(request):
@@ -129,7 +111,7 @@ def api_guardar_prenda(request):
         try:
             data = json.loads(request.body)
             prenda = PrendaRopa.objects.create(
-                objeto=data.get('nombre'), # Sincronizado con el ID del HTML
+                objeto=data.get('nombre'),
                 cantidad=int(data.get('cantidad', 1)),
                 talla=data.get('talla', 'N/A'),
                 condicion=data.get('condicion', 'Óptimo'),
@@ -154,6 +136,8 @@ def api_obtener_prendas(request):
             "imagen": p.imagen,
             "estado": p.estado,
             "profesor": p.nombre_apartado or "Disponible",
+            "curso": p.curso_apartado or "---", # Nuevo
+            "evento": p.evento_apartado or "---", # Nuevo
             "fecha_uso": str(p.fecha_uso) if p.fecha_uso else "---",
             "devuelto": p.devuelto
         })
@@ -168,11 +152,15 @@ def api_apartar_prenda(request, prenda_id):
             if data.get('accion') == 'liberar':
                 prenda.estado = "Disponible"
                 prenda.nombre_apartado = ""
+                prenda.curso_apartado = "" # Nuevo
+                prenda.evento_apartado = "" # Nuevo
                 prenda.fecha_uso = None
                 prenda.devuelto = True
             else:
                 prenda.estado = "Apartado"
                 prenda.nombre_apartado = data.get('nombre', request.user.username)
+                prenda.curso_apartado = data.get('curso', 'N/A') # Nuevo
+                prenda.evento_apartado = data.get('evento', 'N/A') # Nuevo
                 prenda.fecha_uso = data.get('fecha')
                 prenda.devuelto = False
             prenda.save()
@@ -188,12 +176,11 @@ def api_eliminar_prenda(request, prenda_id):
         return JsonResponse({"status": "success"})
 
 # ============================
-# ⚽ ENTREGAS BALONES (videos.html)
+# ⚽ ENTREGAS BALONES
 # ============================
 
 @login_required
-def videos(request):
-    return render(request, 'videos.html')
+def videos(request): return render(request, 'videos.html')
 
 @login_required
 def api_guardar_entrega(request):
@@ -215,17 +202,15 @@ def api_obtener_entregas(request):
 @login_required
 def api_eliminar_entrega(request, entrega_id):
     if request.method == "POST":
-        entrega = get_object_or_404(RegistroEntrega, pk=entrega_id)
-        entrega.delete()
+        get_object_or_404(RegistroEntrega, pk=entrega_id).delete()
         return JsonResponse({"status": "success"})
 
 # ============================
-# 🔍 OBJETOS PERDIDOS (voz.html)
+# 🔍 OBJETOS PERDIDOS
 # ============================
 
 @login_required
-def voz(request):
-    return render(request, 'voz.html')
+def voz(request): return render(request, 'voz.html')
 
 @login_required
 def api_guardar_objeto(request):
@@ -248,8 +233,7 @@ def api_obtener_objetos(request):
 @login_required
 def api_eliminar_objeto(request, obj_id):
     if request.method == "POST":
-        objeto = get_object_or_404(ObjetoPerdido, pk=obj_id)
-        objeto.delete()
+        get_object_or_404(ObjetoPerdido, pk=obj_id).delete()
         return JsonResponse({"status": "success"})
 
 # ============================
@@ -278,13 +262,8 @@ def api_obtener_bajas(request):
     data = []
     for b in bajas_qs:
         data.append({
-            "id": b.id,
-            "tipo": b.tipo_balon,
-            "causa": b.causa,
-            "lugar": b.marca,
-            "usuario": b.responsable,
-            "imagen": b.foto,
-            "fecha": b.fecha
+            "id": b.id, "tipo": b.tipo_balon, "causa": b.causa, "lugar": b.marca,
+            "usuario": b.responsable, "imagen": b.foto, "fecha": b.fecha
         })
     return JsonResponse(data, safe=False)
 
@@ -292,15 +271,14 @@ def api_obtener_bajas(request):
 def api_eliminar_baja(request, baja_id):
     if request.method == "POST":
         try:
-            baja = get_object_or_404(BajaBalon, pk=baja_id)
-            baja.delete()
+            get_object_or_404(BajaBalon, pk=baja_id).delete()
             return JsonResponse({"status": "success"})
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
-    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
+    return JsonResponse({"status": "error"}, status=405)
 
 # ============================
-# ✅ GESTIÓN DE TAREAS
+# ✅ TAREAS
 # ============================
 
 @login_required
@@ -310,39 +288,29 @@ def tasks(request):
 
 @login_required
 def create_task(request):
-    if request.method == 'GET':
-        return render(request, 'create_task.html', {'form': TaskForm()})
+    if request.method == 'GET': return render(request, 'create_task.html', {'form': TaskForm()})
     form = TaskForm(request.POST)
     if form.is_valid():
-        new_task = form.save(commit=False)
-        new_task.user = request.user
-        new_task.save()
+        new_task = form.save(commit=False); new_task.user = request.user; new_task.save()
         return redirect('tasks')
-    return render(request, 'create_task.html', {'form': form, 'error': 'Datos inválidos'})
+    return render(request, 'create_task.html', {'form': form})
 
 @login_required
 def lista(request, task_id):
     task = get_object_or_404(Task, pk=task_id, user=request.user)
-    if request.method == 'GET':
-        form = TaskForm(instance=task)
-        return render(request, 'lista.html', {'task': task, 'form': form})
+    if request.method == 'GET': return render(request, 'lista.html', {'task': task, 'form': TaskForm(instance=task)})
     form = TaskForm(request.POST, instance=task)
-    if form.is_valid():
-        form.save()
-        return redirect('tasks')
+    if form.is_valid(): form.save(); return redirect('tasks')
     return render(request, 'lista.html', {'task': task, 'form': form})
 
 @login_required
 def completar(request, task_id):
     task = get_object_or_404(Task, pk=task_id, user=request.user)
-    if request.method == 'POST':
-        task.diaCompletado = timezone.now()
-        task.save()
+    if request.method == 'POST': task.diaCompletado = timezone.now(); task.save()
     return redirect('tasks')
 
 @login_required
 def eliminar_tarea(request, task_id):
     task = get_object_or_404(Task, pk=task_id, user=request.user)
-    if request.method == 'POST':
-        task.delete()
+    if request.method == 'POST': task.delete()
     return redirect('tasks')
