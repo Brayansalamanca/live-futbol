@@ -21,61 +21,35 @@
     </script>
 
     <style>
-        /* CSS INTEGRADO - EVITANDO CONFLICTOS */
+        /* CSS INTEGRADO */
         nav {
             background-color: #88eafcf2;
             position: fixed;
-            top: 0;
-            width: 100%;
+            top: 0; width: 100%;
             font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
             z-index: 999;
             box-shadow: #504783 2px 5px 45px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
             min-height: 70px;
         }
 
         nav ul {
-            display: flex;
-            list-style: none;
-            align-items: center;
-            justify-content: center;
-            gap: 25px;
-            padding: 10px 15px;
-            margin: 0;
-            flex-wrap: wrap;
+            display: flex; list-style: none; align-items: center; justify-content: center;
+            gap: 25px; padding: 10px 15px; margin: 0; flex-wrap: wrap;
         }
 
         nav ul li a {
-            background-color: #ffffff;
-            color: #000000;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 18px;
-            transition: background-color 0.3s ease;
+            background-color: #ffffff; color: #000000; text-decoration: none;
+            padding: 8px 16px; border-radius: 10px; font-weight: bold;
+            font-size: 18px; transition: 0.3s ease;
         }
 
-        nav ul li a:hover {
-            background-color: #6155ff;
-            color: #ffffff;
-        }
+        nav ul li a:hover { background-color: #6155ff; color: #ffffff; }
 
         .menu-toggle {
-            display: none;
-            cursor: pointer;
-            font-size: 28px;
-            padding: 10px 15px;
-            position: absolute;
-            left: 10px;
-            top: 10px;
-            z-index: 1000;
-            color: #fff;
-            background: #84ccc0;
-            border-radius: 5px;
-            border: none;
+            display: none; cursor: pointer; font-size: 28px; padding: 10px 15px;
+            position: absolute; left: 10px; top: 10px; z-index: 1000;
+            color: #fff; background: #84ccc0; border-radius: 5px; border: none;
         }
 
         @media (max-width: 768px) {
@@ -93,19 +67,10 @@
         body {
             background-color: #78cbdaf2;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #ffffff;
-            margin: 0;
-            padding-top: 5rem; 
-            text-align: center;
+            color: #ffffff; margin: 0; padding-top: 5rem; text-align: center;
         }
 
-        .logo-container { display: flex; justify-content: center; margin: 0.5rem auto 0 auto; }
         .logo-container img { height: 4rem; width: 4rem; border-radius: 50%; box-shadow: #2533af 2px 5px 25px; }
-        
-        /* Clases de utilidad que usas en tus otros códigos */
-        .seccion { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
-        .d { max-width: 400px; margin: auto; background: #111111; padding: 2rem; border-radius: 10px; box-shadow: #e74c3c 2px 5px 45px; }
-        .v { z-index: 999; box-shadow: #c0392b 2px 5px 45px; transition: 1.1s; }
     </style>
 </head>
 <body>
@@ -118,38 +83,41 @@
                 </div>
             </li>
             
+            <li><a href="{% url 'home' %}">Inicio</a></li>
+            <li><a href="{% url 'soporte' %}">Soporte</a></li>
+
             {% if user.is_authenticated %}
                 {% if user.username == 'rosita' %}
                     <li><a href="{% url 'formulario' %}" style="color: #ff007f;">Registrar Ropa</a></li>
                     <li><a href="{% url 'tipos' %}">Control Inventario</a></li>
+
                 {% elif user.username == 'asistente_bienestar1' %}
                     <li><a href="{% url 'radar' %}" style="color: #0059b3;">Inventario Balones</a></li>
                     <li><a href="{% url 'videos' %}">Renta Balones</a></li>
                     <li><a href="{% url 'voz' %}">Bajas Balones</a></li>
+
                 {% else %}
                     <li><a href="{% url 'tipos' %}">Catálogo Ropa</a></li>
                     <li><a href="{% url 'tasks' %}">Mis Tareas</a></li>
                 {% endif %}
+
                 <li><a href="{% url 'logout' %}" style="background-color: #ff4444; color: white;">Salir</a></li>
+            
             {% else %}
-                <li><a href="{% url 'home' %}">Inicio</a></li>
                 <li><a href="{% url 'signup' %}">Registrarse</a></li>
                 <li><a href="{% url 'signin' %}">Iniciar Sesión</a></li>
-                <li><a href="{% url 'soporte' %}">Soporte</a></li>
             {% endif %}
         </ul>
     </nav>
     
     <main>
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const toggleButton = document.querySelector('.menu-toggle');
             const navMenu = document.getElementById('nav-menu');
-            
             if (toggleButton && navMenu) {
                 toggleButton.addEventListener('click', function() {
                     navMenu.classList.toggle('active');
