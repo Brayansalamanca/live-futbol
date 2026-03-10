@@ -32,7 +32,7 @@ def ranking(request): return render(request, 'ranking.html')
 def condiciones(request): return render(request, 'condiciones.html')
 
 # ============================
-# 🔐 AUTENTICACIÓN
+# 🔐 AUTENTICACIÓN Y GESTIÓN
 # ============================
 class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
     template_name = 'recuperar_contraseña.html'
@@ -43,23 +43,22 @@ class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
 def signup(request):
     if request.method == 'GET':
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
+    
     form = CustomUserCreationForm(request.POST)
     if form.is_valid():
         try:
             user = form.save(commit=False)
-            user.is_active = False
+            # El usuario se crea INACTIVO para que Rosita lo apruebe
+            user.is_active = False 
             user.save()
-            current_site = request.get_host()
-            subject = 'Confirma tu cuenta en Live Fútbol'
-            message = render_to_string('confirmacion_email.html', {
-                'user': user,
-                'domain': current_site,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': account_activation_token.make_token(user),
+            
+            # Opcional: Enviar correo (comentado si prefieres solo aprobación manual)
+            # ... lógica de email ...
+
+            return render(request, 'signup.html', {
+                'form': CustomUserCreationForm(),
+                'success': '¡Solicitud enviada! Rosita debe aprobar tu acceso.'
             })
-            email = EmailMessage(subject, message, to=[user.email])
-            email.send()
-            return render(request, 'confirmacion_enviada.html')
         except Exception as e:
             return render(request, 'signup.html', {'form': form, 'error': 'Error en el registro.'})
     return render(request, 'signup.html', {'form': form, 'error': 'Datos inválidos.'})
@@ -80,12 +79,22 @@ def activar(request, uidb64, token):
 def signin(request):
     if request.method == 'GET':
         return render(request, 'signin.html', {'form': AuthenticationForm()})
+    
     username = request.POST.get('username')
     password = request.POST.get('password')
     user = authenticate(request, username=username, password=password)
+    
     if user is not None:
+        if not user.is_active:
+            return render(request, 'signin.html', {
+                'form': AuthenticationForm(),
+                'error': 'Tu cuenta está pendiente de aprobación por Rosita.'
+            })
         login(request, user)
-        return redirect('formulario')
+        # Redirección por roles
+        if user.username == 'rosita': return redirect('formulario')
+        elif user.username == 'asistente_bienestar1': return redirect('radar')
+        return redirect('tipos')
     else:
         return render(request, 'signin.html', {
             'form': AuthenticationForm(),
@@ -95,6 +104,21 @@ def signin(request):
 def signout(request):
     logout(request)
     return redirect('home')
+
+# APIs para el Panel de Control en Ranking
+@login_required
+def api_obtener_usuarios_gestion(request):
+    # Solo superusuarios o Rosita deberían ver esto
+    usuarios = User.objects.exclude(is_superuser=True).values('id', 'username', 'email', 'is_active')
+    return JsonResponse(list(usuarios), safe=False)
+
+@login_required
+def api_cambiar_estado_usuario(request, user_id):
+    if request.method == "POST":
+        usuario = get_object_or_404(User, id=user_id)
+        usuario.is_active = not usuario.is_active
+        usuario.save()
+        return JsonResponse({"status": "success", "is_active": usuario.is_active})
 
 # ============================
 # 📦 INVENTARIO ROPA
