@@ -80,36 +80,21 @@ def activar(request, uidb64, token):
 def signin(request):
     if request.method == 'GET':
         return render(request, 'signin.html', {'form': AuthenticationForm()})
-    
-    # Tomamos los datos del formulario
     username = request.POST.get('username')
     password = request.POST.get('password')
     user = authenticate(request, username=username, password=password)
-    
     if user is not None:
         login(request, user)
-        
-        # --- AQUÍ ESTÁ EL FILTRO DE DESTINO ---
-        
-        # 1. Si el que entró es 'rosita', mándala a su formulario
-        if user.username == 'rosita':
-            return redirect('formulario')
-        
-        # 2. Si el que entró es el asistente, mándalo a su radar de balones
-        elif user.username == 'asistente_bienestar1':
-            return redirect('radar')
-        
-        # 3. PARA TODOS LOS DEMÁS USUARIOS (Cualquier otro nombre)
-        # Los mandamos directo al Catálogo (tipos)
-        else:
-            return redirect('tipos')
-            
+        return redirect('formulario')
     else:
-        # Si los datos están mal, se quedan en el login con el mensaje de error
         return render(request, 'signin.html', {
             'form': AuthenticationForm(),
             'error': 'Usuario o contraseña incorrectos'
         })
+
+def signout(request):
+    logout(request)
+    return redirect('home')
 
 # ============================
 # 📦 INVENTARIO ROPA
