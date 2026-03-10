@@ -5,126 +5,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Fútbol</title>
-    
     <link rel="stylesheet" href="{% static 'base.css' %}">
-    <script src="{% static 'js/chart.umd.min.js' %}"></script>
-    
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-        window.OneSignalDeferred = window.OneSignalDeferred || [];
-        OneSignalDeferred.push(async function(OneSignal) {
-            await OneSignal.init({
-                appId: "43623638-2360-4a76-927d-9953b3364482",
-                allowLocalhostAsSecureOrigin: true,
-            });
-        });
-    </script>
-
     <style>
-        /* CSS INTEGRADO */
         nav {
-            background-color: #88eafcf2;
-            position: fixed;
-            top: 0; width: 100%;
-            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-            z-index: 999;
-            box-shadow: #504783 2px 5px 45px;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 70px;
+            background-color: #88eafcf2; position: fixed; top: 0; width: 100%;
+            z-index: 999; box-shadow: #504783 2px 5px 45px;
+            display: flex; flex-direction: column; align-items: center; min-height: 70px;
         }
-
-        nav ul {
-            display: flex; list-style: none; align-items: center; justify-content: center;
-            gap: 25px; padding: 10px 15px; margin: 0; flex-wrap: wrap;
-        }
-
-        nav ul li a {
-            background-color: #ffffff; color: #000000; text-decoration: none;
-            padding: 8px 16px; border-radius: 10px; font-weight: bold;
-            font-size: 18px; transition: 0.3s ease;
-        }
-
-        nav ul li a:hover { background-color: #6155ff; color: #ffffff; }
-
-        .menu-toggle {
-            display: none; cursor: pointer; font-size: 28px; padding: 10px 15px;
-            position: absolute; left: 10px; top: 10px; z-index: 1000;
-            color: #fff; background: #84ccc0; border-radius: 5px; border: none;
-        }
-
+        nav ul { display: flex; list-style: none; gap: 20px; padding: 15px; margin: 0; flex-wrap: wrap; }
+        nav ul li a { background: white; color: black; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+        nav ul li a:hover { background: #6155ff; color: white; }
+        body { background-color: #78cbdaf2; padding-top: 80px; font-family: sans-serif; text-align: center; color: white; }
+        .menu-toggle { display: none; background: #84ccc0; border: none; font-size: 24px; cursor: pointer; padding: 10px; }
         @media (max-width: 768px) {
-            .menu-toggle { display: flex; justify-content: center; align-items: center; }
-            nav ul {
-                flex-direction: column; gap: 10px; width: 100%; padding: 60px 0 20px 0;
-                margin: 0; display: none; background-color: #70b3bef2;
-                position: absolute; top: 0; left: 0; box-shadow: 0 10px 15px rgba(0,0,0,0.6);
-            }
+            .menu-toggle { display: block; position: absolute; left: 10px; top: 10px; }
+            nav ul { display: none; flex-direction: column; width: 100%; background: #70b3bef2; }
             nav ul.active { display: flex; }
-            nav ul li.img { display: none; }
-            nav { background-color: transparent !important; box-shadow: none; }
         }
-
-        body {
-            background-color: #78cbdaf2;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #ffffff; margin: 0; padding-top: 5rem; text-align: center;
-        }
-
-        .logo-container img { height: 4rem; width: 4rem; border-radius: 50%; box-shadow: #2533af 2px 5px 25px; }
     </style>
 </head>
 <body>
     <nav>
-        <button class="menu-toggle" aria-label="Abrir Menú">☰</button>
+        <button class="menu-toggle">☰</button>
         <ul id="nav-menu">
-            <li class="img">
-                <div class="logo-container">
-                    <img src="{% static '1.webp' %}" alt="Logo">
-                </div>
-            </li>
-            
             <li><a href="{% url 'home' %}">Inicio</a></li>
             <li><a href="{% url 'soporte' %}">Soporte</a></li>
 
             {% if user.is_authenticated %}
                 {% if user.username == 'rosita' %}
-                    <li><a href="{% url 'formulario' %}" style="color: #ff007f;">Registrar Ropa</a></li>
-                    <li><a href="{% url 'tipos' %}">Control Inventario</a></li>
-
+                    <li><a href="{% url 'formulario' %}">Registrar Ropa</a></li>
+                    <li><a href="{% url 'tipos' %}">Inventario</a></li>
                 {% elif user.username == 'asistente_bienestar1' %}
-                    <li><a href="{% url 'radar' %}" style="color: #0059b3;">Inventario Balones</a></li>
-                    <li><a href="{% url 'videos' %}">Renta Balones</a></li>
-                    <li><a href="{% url 'voz' %}">Bajas Balones</a></li>
-
+                    <li><a href="{% url 'radar' %}">Radar Balones</a></li>
+                    <li><a href="{% url 'videos' %}">Renta</a></li>
+                    <li><a href="{% url 'voz' %}">Bajas</a></li>
                 {% else %}
-                    <li><a href="{% url 'tipos' %}">Catálogo Ropa</a></li>
-                    <li><a href="{% url 'tasks' %}">Mis Tareas</a></li>
+                    <li><a href="{% url 'tipos' %}">Catálogo</a></li>
+                    <li><a href="{% url 'tasks' %}">Tareas</a></li>
                 {% endif %}
-
-                <li><a href="{% url 'logout' %}" style="background-color: #ff4444; color: white;">Salir</a></li>
-            
+                <li><a href="{% url 'logout' %}" style="background: #ff4444; color: white;">Salir</a></li>
             {% else %}
-                <li><a href="{% url 'signup' %}">Registrarse</a></li>
-                <li><a href="{% url 'signin' %}">Iniciar Sesión</a></li>
+                <li><a href="{% url 'signup' %}">Registro</a></li>
+                <li><a href="{% url 'signin' %}">Login</a></li>
             {% endif %}
         </ul>
     </nav>
-    
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+
+    <main>{% block content %}{% endblock %}</main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggleButton = document.querySelector('.menu-toggle');
-            const navMenu = document.getElementById('nav-menu');
-            if (toggleButton && navMenu) {
-                toggleButton.addEventListener('click', function() {
-                    navMenu.classList.toggle('active');
-                    this.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-                });
-            }
-        });
+        document.querySelector('.menu-toggle').onclick = function() {
+            document.getElementById('nav-menu').classList.toggle('active');
+        };
     </script>
 </body>
 </html>
