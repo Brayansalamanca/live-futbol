@@ -77,24 +77,42 @@ def activar(request, uidb64, token):
     else:
         return render(request, 'confirmar_fallido.html')
 
+# 1. Definir los permisos (FUERA de cualquier función)
+def es_asistente_bienestar(user):
+    return user.is_authenticated and user.username == 'asistente_bienestar1'
+
+def es_rosita(user):
+    return user.is_authenticated and user.username == 'rosita'
+
+# 2. Función de inicio de sesión
 def signin(request):
     if request.method == 'GET':
         return render(request, 'signin.html', {'form': AuthenticationForm()})
+    
     username = request.POST.get('username')
     password = request.POST.get('password')
     user = authenticate(request, username=username, password=password)
+    
     if user is not None:
         login(request, user)
-        return redirect('formulario')
+        
+        # --- REDIRECCIÓN SEGÚN ROL ---
+        if user.username == 'rosita':
+            return redirect('formulario')  # Va a registrar ropa
+        
+        elif user.username == 'asistente_bienestar1':
+            return redirect('radar')       # Va a inventario de balones
+        
+        else:
+            return redirect('tipos')       # Todos los demás van al catálogo de ropa
+            
     else:
+        # Si las credenciales fallan
         return render(request, 'signin.html', {
             'form': AuthenticationForm(),
             'error': 'Usuario o contraseña incorrectos'
         })
-
-def signout(request):
-    logout(request)
-    return redirect('home')
+   
 
 # ============================
 # 📦 INVENTARIO ROPA
