@@ -181,6 +181,29 @@ async function eliminar(id) {
         sincronizar(true);
     }
 }
+function exportarExcel() {
+    if (datosGlobales.length === 0) return alert("No hay datos para exportar");
+
+    // Preparamos los datos para que el Excel se vea limpio
+    const datosExcel = datosGlobales.map(b => ({
+        "FECHA REGISTRO": b.fecha ? new Date(b.fecha).toLocaleString() : '---',
+        "QUIEN ALQUILÓ": b.alquilado_por || '---',
+        "RESPONSABLE (BOTÓ/DAÑÓ)": b.usuario || 'Anónimo',
+        "MATERIAL": b.tipo,
+        "LUGAR": b.lugar || '---',
+        "CAUSA / ESTADO": (b.causa || '---').toUpperCase()
+    }));
+
+    // Crear el libro de trabajo (Workbook)
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(datosExcel);
+
+    // Añadir la hoja al libro
+    XLSX.utils.book_append_sheet(wb, ws, "Reporte Bajas");
+
+    // Descargar el archivo
+    XLSX.writeFile(wb, "Reporte_Bajas_Deportivas.xlsx");
+}
 
 window.onload = () => {
     sincronizar(true);

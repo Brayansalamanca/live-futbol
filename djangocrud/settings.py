@@ -8,11 +8,9 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 2. Seguridad
-# En producción, nunca dejes la clave por defecto. Render la leerá del entorno.
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-z$!j#aip6tr)!7=l#1&=_*=jc4s*2@tve06#i&hwg&p5na7z2')
 
 # 3. DEBUG
-# Se desactiva automáticamente en Render (donde la variable RENDER existe)
 DEBUG = 'RENDER' not in os.environ
 
 # Permitir localhost y la URL de Render
@@ -35,7 +33,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Para servir archivos estáticos en la nube
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -65,7 +63,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'djangocrud.wsgi.application'
 
 # 4. CONFIGURACIÓN MONGODB
-# Prioriza la URL de conexión de las variables de entorno para mayor seguridad
 MONGO_URL = os.getenv('MONGO_URL', 'mongodb+srv://brayan:3143401305@cluster0.uuxqot8.mongodb.net/livefutbol_db?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true')
 
 DATABASES = {
@@ -102,9 +99,17 @@ if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
     WHITENOISE_MANIFEST_STRICT = False
 
-# Redirecciones
+# ==========================================
+# 🔑 CONFIGURACIÓN DE ACCESO Y REDIRECCIÓN
+# ==========================================
+# Esto evita el error de "/accounts/login/"
+LOGIN_URL = 'signin' 
 
-LOGOUT_REDIRECT_URL = 'signin' # Ajustado a tu nombre de URL
+# Redirección por defecto si la lógica de views.py no encuentra un rol
+LOGIN_REDIRECT_URL = 'tipos' 
+
+LOGOUT_REDIRECT_URL = 'signin'
+# ==========================================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -114,11 +119,10 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'saebra581@gmail.com'
-# Usa variable de entorno para la contraseña
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD', 'bfaslgsipjnpmnpd')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-# 7. Seguridad CORS y CSRF (Actualizado)
+# 7. Seguridad CORS y CSRF
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -129,9 +133,9 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://*.onrender.com" # Esto permite que Render acepte tus formularios
+    "https://*.onrender.com"
 ]
-# settings.py
-# Al final del archivo, agrega esto para las fotos:
+
+# Fotos y Medios
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
