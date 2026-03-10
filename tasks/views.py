@@ -24,7 +24,6 @@ from .tokens import account_activation_token
 # ============================
 # 🏠 VISTAS PÚBLICAS
 # ============================
-
 def home(request): return render(request, 'home.html')
 def soporte(request): return render(request, 'soporte.html')
 def tipos(request): return render(request, 'tipos.html')
@@ -35,7 +34,6 @@ def condiciones(request): return render(request, 'condiciones.html')
 # ============================
 # 🔐 AUTENTICACIÓN
 # ============================
-
 class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
     template_name = 'recuperar_contraseña.html'
     email_template_name = 'email_reset_password.html'
@@ -99,9 +97,8 @@ def signout(request):
     return redirect('home')
 
 # ============================
-# 📦 INVENTARIO ROPA (Actualizado para Curso/Evento)
+# 📦 INVENTARIO ROPA
 # ============================
-
 @login_required
 def radar(request): return render(request, 'radar.html')
 
@@ -127,20 +124,7 @@ def api_guardar_prenda(request):
 @login_required
 def api_obtener_prendas(request):
     prendas_qs = PrendaRopa.objects.all().order_by('-fecha_registro')
-    data = []
-    for p in prendas_qs:
-        data.append({
-            "id": p.id,
-            "nombre": p.objeto,
-            "cantidad": p.cantidad,
-            "imagen": p.imagen,
-            "estado": p.estado,
-            "profesor": p.nombre_apartado or "Disponible",
-            "curso": p.curso_apartado or "---", # Nuevo
-            "evento": p.evento_apartado or "---", # Nuevo
-            "fecha_uso": str(p.fecha_uso) if p.fecha_uso else "---",
-            "devuelto": p.devuelto
-        })
+    data = [{"id": p.id, "nombre": p.objeto, "cantidad": p.cantidad, "imagen": p.imagen, "estado": p.estado, "profesor": p.nombre_apartado or "Disponible", "curso": p.curso_apartado or "---", "evento": p.evento_apartado or "---", "fecha_uso": str(p.fecha_uso) if p.fecha_uso else "---", "devuelto": p.devuelto} for p in prendas_qs]
     return JsonResponse(data, safe=False)
 
 @login_required
@@ -150,35 +134,22 @@ def api_apartar_prenda(request, prenda_id):
             data = json.loads(request.body)
             prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
             if data.get('accion') == 'liberar':
-                prenda.estado = "Disponible"
-                prenda.nombre_apartado = ""
-                prenda.curso_apartado = "" # Nuevo
-                prenda.evento_apartado = "" # Nuevo
-                prenda.fecha_uso = None
-                prenda.devuelto = True
+                prenda.estado, prenda.nombre_apartado, prenda.curso_apartado, prenda.evento_apartado, prenda.fecha_uso, prenda.devuelto = "Disponible", "", "", "", None, True
             else:
-                prenda.estado = "Apartado"
-                prenda.nombre_apartado = data.get('nombre', request.user.username)
-                prenda.curso_apartado = data.get('curso', 'N/A') # Nuevo
-                prenda.evento_apartado = data.get('evento', 'N/A') # Nuevo
-                prenda.fecha_uso = data.get('fecha')
-                prenda.devuelto = False
+                prenda.estado, prenda.nombre_apartado, prenda.curso_apartado, prenda.evento_apartado, prenda.fecha_uso, prenda.devuelto = "Apartado", data.get('nombre', request.user.username), data.get('curso', 'N/A'), data.get('evento', 'N/A'), data.get('fecha'), False
             prenda.save()
             return JsonResponse({"status": "success"})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+        except Exception as e: return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 @login_required
 def api_eliminar_prenda(request, prenda_id):
     if request.method == "POST":
-        prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
-        prenda.delete()
+        get_object_or_404(PrendaRopa, pk=prenda_id).delete()
         return JsonResponse({"status": "success"})
 
 # ============================
 # ⚽ ENTREGAS BALONES
 # ============================
-
 @login_required
 def videos(request): return render(request, 'videos.html')
 
@@ -186,12 +157,7 @@ def videos(request): return render(request, 'videos.html')
 def api_guardar_entrega(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        RegistroEntrega.objects.create(
-            nombre=data.get('recibido_por'),
-            curso=data.get('curso', 'N/A'),
-            objeto=data.get('balon'),
-            lugar=data.get('lugar', 'Cancha')
-        )
+        RegistroEntrega.objects.create(nombre=data.get('recibido_por'), curso=data.get('curso', 'N/A'), objeto=data.get('balon'), lugar=data.get('lugar', 'Cancha'))
         return JsonResponse({"status": "success"})
 
 @login_required
@@ -206,40 +172,8 @@ def api_eliminar_entrega(request, entrega_id):
         return JsonResponse({"status": "success"})
 
 # ============================
-# 🔍 OBJETOS PERDIDOS
+# 📉 BAJAS BALONES
 # ============================
-
-@login_required
-def voz(request): return render(request, 'voz.html')
-
-@login_required
-def api_guardar_objeto(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        ObjetoPerdido.objects.create(
-            nombre_reporta=data.get('nombre'),
-            curso=data.get('curso'),
-            tipo_objeto=data.get('tipo'),
-            color=data.get('color'),
-            descripcion=data.get('dif')
-        )
-        return JsonResponse({"status": "success"})
-
-@login_required
-def api_obtener_objetos(request):
-    objetos = list(ObjetoPerdido.objects.all().values().order_by('-fecha'))
-    return JsonResponse(objetos, safe=False)
-
-@login_required
-def api_eliminar_objeto(request, obj_id):
-    if request.method == "POST":
-        get_object_or_404(ObjetoPerdido, pk=obj_id).delete()
-        return JsonResponse({"status": "success"})
-
-# ============================
-# 📉 BAJAS BALONES (Corregido para 2 personas)
-# ============================
-
 @login_required
 def api_guardar_baja(request):
     if request.method == "POST":
@@ -248,31 +182,18 @@ def api_guardar_baja(request):
             BajaBalon.objects.create(
                 tipo_balon=data.get('tipo'),
                 causa=data.get('causa'),
-                marca=data.get('lugar', 'N/A'), 
-                responsable=data.get('usuario'),          # Quién lo botó
-                alquilado_por=data.get('alquilado_por'), # <--- NUEVO: Quién lo alquiló
+                marca=data.get('lugar', 'N/A'),
+                responsable=data.get('usuario'), 
+                alquilado_por=data.get('alquilado_por'),
                 foto=data.get('imagen') 
             )
             return JsonResponse({"status": "success"})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+        except Exception as e: return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 @login_required
 def api_obtener_bajas(request):
-    bajas_qs = BajaBalon.objects.all().order_by('-fecha')
-    data = []
-    for b in bajas_qs:
-        data.append({
-            "id": b.id, 
-            "tipo": b.tipo_balon, 
-            "causa": b.causa, 
-            "lugar": b.marca,
-            "usuario": b.responsable,           # El que lo botó
-            "alquilado_por": b.alquilado_por,    # El que lo alquiló
-            "imagen": b.foto, 
-            "fecha": b.fecha
-        })
-    return JsonResponse(data, safe=False)
+    bajas = [{"id": b.id, "tipo": b.tipo_balon, "causa": b.causa, "lugar": b.marca, "usuario": b.responsable, "alquilado_por": b.alquilado_por, "imagen": b.foto, "fecha": b.fecha} for b in BajaBalon.objects.all().order_by('-fecha')]
+    return JsonResponse(bajas, safe=False)
 
 @login_required
 def api_eliminar_baja(request, baja_id):
@@ -280,14 +201,35 @@ def api_eliminar_baja(request, baja_id):
         try:
             get_object_or_404(BajaBalon, pk=baja_id).delete()
             return JsonResponse({"status": "success"})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+        except Exception as e: return JsonResponse({"status": "error", "message": str(e)}, status=400)
     return JsonResponse({"status": "error"}, status=405)
+
+# ============================
+# 🔍 OBJETOS PERDIDOS
+# ============================
+@login_required
+def voz(request): return render(request, 'voz.html')
+
+@login_required
+def api_guardar_objeto(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        ObjetoPerdido.objects.create(nombre_reporta=data.get('nombre'), curso=data.get('curso'), tipo_objeto=data.get('tipo'), color=data.get('color'), descripcion=data.get('dif'))
+        return JsonResponse({"status": "success"})
+
+@login_required
+def api_obtener_objetos(request):
+    return JsonResponse(list(ObjetoPerdido.objects.all().values().order_by('-fecha')), safe=False)
+
+@login_required
+def api_eliminar_objeto(request, obj_id):
+    if request.method == "POST":
+        get_object_or_404(ObjetoPerdido, pk=obj_id).delete()
+        return JsonResponse({"status": "success"})
 
 # ============================
 # ✅ TAREAS
 # ============================
-
 @login_required
 def tasks(request):
     tasks_list = Task.objects.filter(user=request.user, diaCompletado__isnull=True)
