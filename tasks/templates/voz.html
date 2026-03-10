@@ -11,7 +11,6 @@
             </h1>
         </div>
 
-        {% if perms.tasks.add_bajabalon %}
         <div style="background-color: rgba(0, 43, 92, 0.5); backdrop-filter: blur(10px); border-radius: 0 0 20px 20px; padding: 30px; margin-bottom: 40px; border: 1px solid rgba(0,204,255,0.1);">
             <form id="formBalones">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
@@ -46,12 +45,13 @@
                 </button>
             </form>
         </div>
-        {% endif %}
 
         <div style="background-color: #001a33; border: 1px solid #004080; border-radius: 15px; overflow: hidden;">
             <div style="padding: 15px; background: #002b5c; display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="margin:0; font-size: 14px; text-transform: uppercase;">Historial de Bajas</h2>
-                <button onclick="exportarExcel()" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 12px;">📥 EXCEL</button>
+                <button onclick="exportarExcel()" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px;">
+                    📥 DESCARGAR EXCEL
+                </button>
             </div>
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; color: white; text-align: center;">
@@ -59,7 +59,8 @@
                         <tr style="background: #000d1a; font-size: 12px; color: #00ccff;">
                             <th style="padding: 15px;">FOTO</th>
                             <th>FECHA</th>
-                            <th>RESPONSABLES</th> <th>MATERIAL / LUGAR</th>
+                            <th>RESPONSABLES</th> 
+                            <th>MATERIAL / LUGAR</th>
                             <th>ESTADO</th>
                             <th>ACCIÓN</th>
                         </tr>
@@ -78,6 +79,7 @@
 <style>
     .img-celda { width: 130px; height: 85px; object-fit: cover; border-radius: 8px; border: 2px solid #004080; cursor: pointer; }
     td { border-bottom: 1px solid #002b5c; padding: 12px; font-size: 14px; }
+    button:hover { opacity: 0.8; }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -86,6 +88,7 @@
 let datosGlobales = [];
 const IMG_DEFAULT = "{% static 'sin evidencia.webp' %}";
 
+// --- SINCRONIZACIÓN ---
 async function sincronizar(forzar = false) {
     try {
         const res = await fetch("{% url 'api_obtener_bajas' %}?t=" + Date.now());
@@ -99,7 +102,7 @@ async function sincronizar(forzar = false) {
 
 function dibujarTabla(data) {
     const tbody = document.getElementById('tablaCuerpo');
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="padding:30px; color:#88a0b0;">No hay reportes registrados.</td></tr>';
         return;
     }
@@ -117,14 +120,38 @@ function dibujarTabla(data) {
             <td>${b.tipo}<br><small style="color:#00ccff">${b.lugar || '---'}</small></td>
             <td><span style="background:#004080; padding:4px 8px; border-radius:4px; font-size:10px;">${(b.causa || '---').toUpperCase()}</span></td>
             <td>
-                {% if perms.tasks.delete_bajabalon %}
                 <button onclick="eliminar('${b.id}')" style="background:none; color:#ff4444; border:1px solid #ff4444; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Eliminar</button>
-                {% endif %}
             </td>
         </tr>
     `).join('');
 }
 
+// --- EXPORTAR A EXCEL ---
+function exportarExcel() {
+    if (!datosGlobales || datosGlobales.length === 0) {
+        alert("No hay datos disponibles para exportar.");
+        return;
+    }
+
+    // Mapeo de datos para que el Excel sea profesional
+    const registros = datosGlobales.map(b => ({
+        "FECHA SUCESO": b.fecha ? new Date(b.fecha).toLocaleString() : '---',
+        "QUIEN ALQUILÓ": b.alquilado_por || '---',
+        "RESPONSABLE (BOTÓ/DAÑÓ)": b.usuario || '---',
+        "MATERIAL": b.tipo,
+        "UBICACIÓN": b.lugar || '---',
+        "CAUSA": (b.causa || '---').toUpperCase()
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(registros);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Bajas");
+
+    // Descarga el archivo
+    XLSX.writeFile(wb, "Reporte_Bajas_LiveFutbol.xlsx");
+}
+
+// --- GUARDAR REGISTRO ---
 async function guardarBaja() {
     const btn = document.getElementById('btnGuardar');
     const file = document.getElementById('imagen_file').files[0];
@@ -147,18 +174,25 @@ async function guardarBaja() {
             imagen: imgData
         };
 
-        const res = await fetch("{% url 'api_guardar_baja' %}", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-            body: JSON.stringify(payload)
-        });
+        try {
+            const res = await fetch("{% url 'api_guardar_baja' %}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+                body: JSON.stringify(payload)
+            });
 
-        if (res.ok) {
-            document.getElementById('formBalones').reset();
-            sincronizar(true);
+            if (res.ok) {
+                document.getElementById('formBalones').reset();
+                sincronizar(true);
+            } else {
+                alert("Error al guardar el registro.");
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "🚀 Registrar Novedad";
         }
-        btn.disabled = false;
-        btn.innerText = "🚀 Registrar Novedad";
     };
 
     if (file) {
@@ -176,37 +210,20 @@ function verImg(src) {
 }
 
 async function eliminar(id) {
-    if (confirm("¿Eliminar registro?")) {
-        await fetch(`/api/eliminar-baja/${id}/`, { method: "POST", headers: { "X-CSRFToken": "{{ csrf_token }}" } });
-        sincronizar(true);
+    if (confirm("¿Eliminar este registro de baja?")) {
+        try {
+            const res = await fetch(`/api/eliminar-baja/${id}/`, { 
+                method: "POST", 
+                headers: { "X-CSRFToken": "{{ csrf_token }}" } 
+            });
+            if (res.ok) sincronizar(true);
+        } catch (e) { console.error(e); }
     }
-}
-function exportarExcel() {
-    if (datosGlobales.length === 0) return alert("No hay datos para exportar");
-
-    // Preparamos los datos para que el Excel se vea limpio
-    const datosExcel = datosGlobales.map(b => ({
-        "FECHA REGISTRO": b.fecha ? new Date(b.fecha).toLocaleString() : '---',
-        "QUIEN ALQUILÓ": b.alquilado_por || '---',
-        "RESPONSABLE (BOTÓ/DAÑÓ)": b.usuario || 'Anónimo',
-        "MATERIAL": b.tipo,
-        "LUGAR": b.lugar || '---',
-        "CAUSA / ESTADO": (b.causa || '---').toUpperCase()
-    }));
-
-    // Crear el libro de trabajo (Workbook)
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(datosExcel);
-
-    // Añadir la hoja al libro
-    XLSX.utils.book_append_sheet(wb, ws, "Reporte Bajas");
-
-    // Descargar el archivo
-    XLSX.writeFile(wb, "Reporte_Bajas_Deportivas.xlsx");
 }
 
 window.onload = () => {
     sincronizar(true);
+    // Sincronización automática cada 8 segundos
     setInterval(() => sincronizar(false), 8000); 
 };
 </script>
