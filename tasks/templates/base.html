@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>live futbol</title>
+    <title>Live Fútbol</title>
     <link rel="stylesheet" href="{% static 'base.css' %}">
     <script src="{% static 'js/chart.umd.min.js' %}"></script>
     
@@ -28,18 +28,23 @@
             {% if user.is_authenticated %}
                 
                 {% if user.username == 'rosita' %}
-                    <li><a href="/formulario" style="color: #ff007f; font-weight: bold;">Gestión de Ropa</a></li>
-                    <li><a href="/tipos">Inventario de Balones</a></li>
-                {% else %}
-                    <li><a href="/radar">Inventario de Balones</a></li>
+                    <li><a href="/formulario" style="color: #ff007f; font-weight: bold;">Registrar Ropa</a></li>
+                    <li><a href="/tipos">Control de Inventario</a></li>
+
+                {% elif user.username == 'asistente_bienestar' %}
+                    <li><a href="/radar" style="color: #00ccff;">Inventario Balones</a></li>
                     <li><a href="/videos">Renta de Balones</a></li>
                     <li><a href="/voz">Bajas de Balones</a></li>
+
+                {% else %}
+                    <li><a href="/tipos">Renta de Trajes / Ropa</a></li>
+                    <li><a href="/tasks">Mis Pendientes</a></li>
                 {% endif %}
                 
-                <li><a href="/logout" style="background-color: #ff4444; color: white; border-radius: 5px; padding: 5px 15px;">Logout</a></li>
+                <li><a href="/logout" style="background-color: #ff4444; color: white; border-radius: 5px; padding: 5px 15px; margin-left: 10px;">Cerrar Sesión</a></li>
             
             {% else %}
-                <li><a href="/">Home</a></li>
+                <li><a href="/">Inicio</a></li>
                 <li><a href="/signup">Registrarse</a></li>
                 <li><a href="/signin">Iniciar Sesión</a></li>
                 <li><a href="/soporte">Soporte</a></li>
