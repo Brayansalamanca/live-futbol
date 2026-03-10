@@ -27,12 +27,11 @@ from .tokens import account_activation_token
 def home(request): return render(request, 'home.html')
 def soporte(request): return render(request, 'soporte.html')
 def tipos(request): return render(request, 'tipos.html')
-def formulario(request): return render(request, 'formulario.html')
 def ranking(request): return render(request, 'ranking.html')
 def condiciones(request): return render(request, 'condiciones.html')
 
 # ============================
-# 🔐 AUTENTICACIÓN
+# 🔐 AUTENTICACIÓN Y ROLES
 # ============================
 class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
     template_name = 'recuperar_contraseña.html'
@@ -80,12 +79,20 @@ def activar(request, uidb64, token):
 def signin(request):
     if request.method == 'GET':
         return render(request, 'signin.html', {'form': AuthenticationForm()})
+    
     username = request.POST.get('username')
     password = request.POST.get('password')
     user = authenticate(request, username=username, password=password)
+    
     if user is not None:
         login(request, user)
-        return redirect('formulario')
+        # Redirección inteligente según el usuario
+        if user.username == 'rosita':
+            return redirect('formulario')
+        elif user.username == 'asistente_bienestar1':
+            return redirect('radar')
+        else:
+            return redirect('tipos') # Usuarios comunes van al catálogo
     else:
         return render(request, 'signin.html', {
             'form': AuthenticationForm(),
@@ -97,10 +104,14 @@ def signout(request):
     return redirect('home')
 
 # ============================
-# 📦 INVENTARIO ROPA
+# 📦 INVENTARIO ROPA (PROTEGIDO)
 # ============================
 @login_required
-def radar(request): return render(request, 'radar.html')
+def formulario(request):
+    # Protección: Solo rosita entra aquí
+    if request.user.username != 'rosita':
+        return redirect('tipos')
+    return render(request, 'formulario.html')
 
 @login_required
 def api_guardar_prenda(request):
@@ -148,8 +159,15 @@ def api_eliminar_prenda(request, prenda_id):
         return JsonResponse({"status": "success"})
 
 # ============================
-# ⚽ ENTREGAS BALONES
+# ⚽ ENTREGAS BALONES (PROTEGIDO)
 # ============================
+@login_required
+def radar(request):
+    # Protección: Solo bienestar entra aquí
+    if request.user.username != 'asistente_bienestar1':
+        return redirect('tipos')
+    return render(request, 'radar.html')
+
 @login_required
 def videos(request): return render(request, 'videos.html')
 
@@ -195,15 +213,6 @@ def api_obtener_bajas(request):
     bajas = [{"id": b.id, "tipo": b.tipo_balon, "causa": b.causa, "lugar": b.marca, "usuario": b.responsable, "alquilado_por": b.alquilado_por, "imagen": b.foto, "fecha": b.fecha} for b in BajaBalon.objects.all().order_by('-fecha')]
     return JsonResponse(bajas, safe=False)
 
-@login_required
-def api_eliminar_baja(request, baja_id):
-    if request.method == "POST":
-        try:
-            get_object_or_404(BajaBalon, pk=baja_id).delete()
-            return JsonResponse({"status": "success"})
-        except Exception as e: return JsonResponse({"status": "error", "message": str(e)}, status=400)
-    return JsonResponse({"status": "error"}, status=405)
-
 # ============================
 # 🔍 OBJETOS PERDIDOS
 # ============================
@@ -215,16 +224,6 @@ def api_guardar_objeto(request):
     if request.method == "POST":
         data = json.loads(request.body)
         ObjetoPerdido.objects.create(nombre_reporta=data.get('nombre'), curso=data.get('curso'), tipo_objeto=data.get('tipo'), color=data.get('color'), descripcion=data.get('dif'))
-        return JsonResponse({"status": "success"})
-
-@login_required
-def api_obtener_objetos(request):
-    return JsonResponse(list(ObjetoPerdido.objects.all().values().order_by('-fecha')), safe=False)
-
-@login_required
-def api_eliminar_objeto(request, obj_id):
-    if request.method == "POST":
-        get_object_or_404(ObjetoPerdido, pk=obj_id).delete()
         return JsonResponse({"status": "success"})
 
 # ============================
@@ -243,14 +242,6 @@ def create_task(request):
         new_task = form.save(commit=False); new_task.user = request.user; new_task.save()
         return redirect('tasks')
     return render(request, 'create_task.html', {'form': form})
-
-@login_required
-def lista(request, task_id):
-    task = get_object_or_404(Task, pk=task_id, user=request.user)
-    if request.method == 'GET': return render(request, 'lista.html', {'task': task, 'form': TaskForm(instance=task)})
-    form = TaskForm(request.POST, instance=task)
-    if form.is_valid(): form.save(); return redirect('tasks')
-    return render(request, 'lista.html', {'task': task, 'form': form})
 
 @login_required
 def completar(request, task_id):
