@@ -103,7 +103,7 @@ if not DEBUG:
     WHITENOISE_MANIFEST_STRICT = False
 
 # Redirecciones
-LOGIN_REDIRECT_URL = 'home'
+
 LOGOUT_REDIRECT_URL = 'signin' # Ajustado a tu nombre de URL
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -131,3 +131,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5173",
     "https://*.onrender.com" # Esto permite que Render acepte tus formularios
 ]
+# settings.py
+# Al final del archivo, agrega esto para las fotos:
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
