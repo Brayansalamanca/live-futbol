@@ -18,63 +18,109 @@
             });
         });
     </script>
+
+    <style>
+        nav {
+            background-color: #88eafcf2;
+            position: fixed;
+            top: 0; width: 100%;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            z-index: 999;
+            box-shadow: #504783 2px 5px 45px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 70px;
+        }
+
+        nav ul {
+            display: flex; list-style: none; align-items: center; justify-content: center;
+            gap: 25px; padding: 10px 15px; margin: 0; flex-wrap: wrap;
+        }
+
+        nav ul li a {
+            background-color: #ffffff; color: #000000; text-decoration: none;
+            padding: 8px 16px; border-radius: 10px; font-weight: bold;
+            font-size: 18px; transition: 0.3s ease;
+        }
+
+        nav ul li a:hover { background-color: #6155ff; color: #ffffff; }
+
+        .menu-toggle {
+            display: none; cursor: pointer; font-size: 28px; padding: 10px 15px;
+            position: absolute; left: 10px; top: 10px; z-index: 1000;
+            color: #fff; background: #84ccc0; border-radius: 5px; border: none;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: flex; justify-content: center; align-items: center; }
+            nav ul {
+                flex-direction: column; gap: 10px; width: 100%; padding: 60px 0 20px 0;
+                margin: 0; display: none; background-color: #70b3bef2;
+                position: absolute; top: 0; left: 0; box-shadow: 0 10px 15px rgba(0,0,0,0.6);
+            }
+            nav ul.active { display: flex; }
+            nav ul li.img { display: none; }
+            nav { background-color: transparent !important; box-shadow: none; }
+        }
+
+        body {
+            background-color: #78cbdaf2;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff; margin: 0; padding-top: 5rem; text-align: center;
+        }
+
+        .logo-container img { height: 4rem; width: 4rem; border-radius: 50%; box-shadow: #2533af 2px 5px 25px; }
+    </style>
 </head>
 <body>
     <nav>
-        <button class="menu-toggle" aria-label="Menú">☰</button>
+        <button class="menu-toggle" aria-label="Abrir Menú">☰</button>
         <ul id="nav-menu">
-            <li class="img"><img src="{% static '1.webp' %}" alt="Logo"></li>
+            <li class="img">
+                <div class="logo-container">
+                    <img src="{% static '1.webp' %}" alt="Logo">
+                </div>
+            </li>
             
             {% if user.is_authenticated %}
-                
                 {% if user.username == 'rosita' %}
-                    <li><a href="/formulario" style="color: #ff007f; font-weight: bold;">Registrar Ropa</a></li>
-                    <li><a href="/tipos">Control de Inventario</a></li>
+                    <li><a href="{% url 'formulario' %}" style="color: #ff007f;">Registrar Ropa</a></li>
+                    <li><a href="{% url 'tipos' %}">Control Inventario</a></li>
 
-                {% elif user.username == 'asistente_bienestar' %}
-                    <li><a href="/radar" style="color: #00ccff;">Inventario Balones</a></li>
-                    <li><a href="/videos">Renta de Balones</a></li>
-                    <li><a href="/voz">Bajas de Balones</a></li>
+                {% elif user.username == 'asistente_bienestar1' %}
+                    <li><a href="{% url 'radar' %}" style="color: #0059b3;">Inventario Balones</a></li>
+                    <li><a href="{% url 'videos' %}">Renta Balones</a></li>
+                    <li><a href="{% url 'voz' %}">Bajas Balones</a></li>
 
                 {% else %}
-                    <li><a href="/tipos">Renta de Trajes / Ropa</a></li>
-                    <li><a href="/tasks">Mis Pendientes</a></li>
+                    <li><a href="{% url 'tipos' %}">Catálogo Ropa</a></li>
+                    <li><a href="{% url 'tasks' %}">Mis Tareas</a></li>
                 {% endif %}
-                
-                <li><a href="/logout" style="background-color: #ff4444; color: white; border-radius: 5px; padding: 5px 15px; margin-left: 10px;">Cerrar Sesión</a></li>
+
+                <li><a href="{% url 'logout' %}" style="background-color: #ff4444; color: white;">Salir</a></li>
             
             {% else %}
-                <li><a href="/">Inicio</a></li>
-                <li><a href="/signup">Registrarse</a></li>
-                <li><a href="/signin">Iniciar Sesión</a></li>
-                <li><a href="/soporte">Soporte</a></li>
+                <li><a href="{% url 'home' %}">Inicio</a></li>
+                <li><a href="{% url 'signup' %}">Registrarse</a></li>
+                <li><a href="{% url 'signin' %}">Iniciar Sesión</a></li>
+                <li><a href="{% url 'soporte' %}">Soporte</a></li>
             {% endif %}
         </ul>
     </nav>
     
-    <main style="margin-top: 80px;">
-        {% block content %}
-        {% endblock %}
+    <main>
+        {% block content %}{% endblock %}
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const toggleButton = document.querySelector('.menu-toggle');
             const navMenu = document.getElementById('nav-menu');
-            
-            toggleButton.addEventListener('click', function() {
-                navMenu.classList.toggle('active');
-                this.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-            });
-            
-            navMenu.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function() {
-                    if (window.innerWidth <= 768) {
-                        navMenu.classList.remove('active');
-                        toggleButton.textContent = '☰';
-                    }
+            if (toggleButton && navMenu) {
+                toggleButton.addEventListener('click', function() {
+                    navMenu.classList.toggle('active');
+                    this.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
                 });
-            });
+            }
         });
     </script>
 </body>
