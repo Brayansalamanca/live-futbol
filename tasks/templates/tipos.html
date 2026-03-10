@@ -1,39 +1,132 @@
 {% extends 'base.html' %}
 {% block content %}
-<div style="padding: 100px 20px; background: #000d1a; min-height: 100vh; color: white;">
-    <h1 style="text-align: center; color: #00ccff;">👕 Catálogo de Inventario</h1>
-    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-        <thead style="background: #0059b3;">
-            <tr>
-                <th>Imagen</th>
-                <th>Prenda</th>
-                <th>Disponibles</th>
-                <th>Estado</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody id="tablaCuerpo" style="text-align: center;">
-            </tbody>
-    </table>
+<div style="padding: 100px 20px; background: #000d1a; min-height: 100vh; color: white; font-family: 'Inter', sans-serif;">
+    
+    <h1 style="text-align: center; color: #00ccff; text-transform: uppercase; font-weight: 900;">👕 Catálogo de Inventario</h1>
+    <div style="overflow-x: auto; background: rgba(0, 43, 92, 0.3); border-radius: 15px; border: 1px solid #0059b3; margin-top: 20px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #0059b3; color: white; text-transform: uppercase; font-size: 13px;">
+                <tr>
+                    <th style="padding: 15px;">Imagen</th>
+                    <th>Prenda</th>
+                    <th>Cantidad</th>
+                    <th>Estado / Responsable</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tablaCuerpo" style="text-align: center;"></tbody>
+        </table>
+    </div>
+
+    {% if request.user.username == 'rosita' %}
+    <div style="margin-top: 60px;">
+        <h2 style="color: #ffcc00; border-left: 5px solid #ffcc00; padding-left: 15px; text-transform: uppercase;">🛡️ Control de Devoluciones (Admin)</h2>
+        <div style="overflow-x: auto; background: rgba(255, 204, 0, 0.05); border-radius: 15px; border: 1px solid #ffcc00; margin-top: 20px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #ffcc00; color: #000d1a; font-size: 13px;">
+                    <tr>
+                        <th style="padding: 15px;">Prenda</th>
+                        <th>Quién tiene</th>
+                        <th>Curso / Evento</th>
+                        <th>Fecha Uso</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaDevoluciones" style="text-align: center;"></tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <script>
+    const USUARIO_ACTUAL = "{{ request.user.username }}";
+
     async function cargar() {
-        const res = await fetch("{% url 'api_obtener_prendas' %}");
-        const prendas = await res.json();
-        let html = "";
-        prendas.forEach(p => {
-            html += `
-            <tr style="border-bottom: 1px solid #333;">
-                <td><img src="${p.imagen}" style="width: 60px; height: 60px; border-radius: 10px; margin: 10px;"></td>
-                <td>${p.nombre}</td>
-                <td style="color: #27ae60;">${p.cantidad}</td>
-                <td>${p.profesor === "Disponible" ? "✅ Disponible" : "🚩 " + p.profesor}</td>
-                <td><button onclick="window.location.href='#'" style="background:#ff007f; color:white; border:none; padding:5px 10px; border-radius:5px;">Apartar</button></td>
-            </tr>`;
-        });
-        document.getElementById('tablaCuerpo').innerHTML = html || "<tr><td colspan='5'>No hay prendas registradas</td></tr>";
+        try {
+            const res = await fetch("{% url 'api_obtener_prendas' %}");
+            const prendas = await res.json();
+            
+            let htmlCatalogo = "";
+            let htmlDevoluciones = "";
+
+            prendas.forEach(p => {
+                const esDisponible = p.estado === "Disponible";
+                
+                // Lógica para la Tabla General
+                htmlCatalogo += `
+                <tr style="border-bottom: 1px solid rgba(0,89,179,0.2);">
+                    <td><img src="${p.imagen}" style="width: 70px; height: 70px; border-radius: 10px; margin: 10px; object-fit: cover; border: 2px solid #0059b3;"></td>
+                    <td style="font-weight: bold;">${p.nombre}</td>
+                    <td style="color: #27ae60; font-weight: bold;">${p.cantidad}</td>
+                    <td>
+                        <span style="background: ${esDisponible ? '#27ae60' : '#e74c3c'}; padding: 4px 10px; border-radius: 20px; font-size: 11px;">
+                            ${esDisponible ? "✅ Disponible" : "🚩 " + p.profesor}
+                        </span>
+                    </td>
+                    <td>
+                        ${esDisponible 
+                            ? `<button onclick="apartar('${p.id}')" style="background:#00ccff; color:#000d1a; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Apartar</button>`
+                            : `<button disabled style="background:#333; color:#777; border:none; padding:8px 15px; border-radius:5px;">Ocupado</button>`
+                        }
+                    </td>
+                </tr>`;
+
+                // Lógica para la Tabla de Rosita (Solo prendas apartadas no devueltas)
+                if (USUARIO_ACTUAL === 'rosita' && !esDisponible) {
+                    htmlDevoluciones += `
+                    <tr style="border-bottom: 1px solid rgba(255,204,0,0.2);">
+                        <td style="padding: 15px;">${p.nombre}</td>
+                        <td style="color: #ffcc00;">${p.profesor}</td>
+                        <td>${p.curso} / ${p.evento}</td>
+                        <td>${p.fecha_uso}</td>
+                        <td>
+                            <button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Marcar Devuelto</button>
+                        </td>
+                    </tr>`;
+                }
+            });
+
+            document.getElementById('tablaCuerpo').innerHTML = htmlCatalogo || "<tr><td colspan='5' style='padding:20px;'>No hay prendas registradas</td></tr>";
+            
+            const tablaDev = document.getElementById('tablaDevoluciones');
+            if(tablaDev) {
+                tablaDev.innerHTML = htmlDevoluciones || "<tr><td colspan='5' style='padding:20px;'>No hay prendas pendientes de devolución</td></tr>";
+            }
+
+        } catch (e) { console.error("Error al cargar:", e); }
     }
+
+    async function apartar(id) {
+        const nombre = prompt("¿A nombre de quién?");
+        if (!nombre) return;
+        const curso = prompt("¿Curso? (Ej: 1101)");
+        const evento = prompt("¿Para qué evento? (Ej: Interclases)");
+        const fecha = new Date().toISOString().split('T')[0];
+
+        const res = await fetch(`/api/apartar-prenda/${id}/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            body: JSON.stringify({ nombre, curso, evento, fecha, accion: 'apartar' })
+        });
+
+        if (res.ok) cargar();
+        else alert("Error al apartar");
+    }
+
+    async function liberar(id) {
+        if (!confirm("¿Confirmar que la prenda ha sido devuelta?")) return;
+        
+        const res = await fetch(`/api/apartar-prenda/${id}/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            body: JSON.stringify({ accion: 'liberar' })
+        });
+
+        if (res.ok) cargar();
+        else alert("Error al liberar");
+    }
+
     document.addEventListener("DOMContentLoaded", cargar);
 </script>
 {% endblock %}
