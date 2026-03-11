@@ -62,60 +62,92 @@
 </style>
 
 <script>
-    // Datos de ejemplo (Esto luego lo traeremos de la API de Django)
-    let usuarios = [
-        { id: 1, nombre: "Brayan Salamanca", email: "brayan@mail.com", rol: "Asistente", estado: "pendiente" },
-        { id: 2, nombre: "Rosita Admin", email: "rosita@mail.com", rol: "Administradora", estado: "activo" },
-        { id: 3, nombre: "Juan Perez", email: "juan@mail.com", rol: "Usuario", estado: "pendiente" }
-    ];
-
-    function cargarUsuarios() {
-        const tbody = document.getElementById('tablaUsuarios');
-        let pendientes = 0;
-        let activos = 0;
-
-        tbody.innerHTML = usuarios.map(u => {
-            if(u.estado === 'pendiente') pendientes++;
-            if(u.estado === 'activo') activos++;
-
-            return `
-                <tr>
-                    <td>
-                        <div style="font-weight: bold;">${u.nombre}</div>
-                        <div style="font-size: 11px; color: #88a0b0;">${u.email}</div>
-                    </td>
-                    <td><span style="color: #00ccff;">${u.rol}</span></td>
-                    <td>
-                        <span class="status-badge ${u.estado === 'activo' ? 'status-activo' : 'status-pendiente'}">
-                            ${u.estado.toUpperCase()}
-                        </span>
-                    </td>
-                    <td style="text-align: center;">
-                        ${u.estado === 'pendiente' ? 
-                            `<button class="btn-aprobar" onclick="cambiarEstado(${u.id}, 'activo')">APROBAR</button>` : 
-                            `<button class="btn-rechazar" onclick="cambiarEstado(${u.id}, 'pendiente')">SUSPENDER</button>`
-                        }
-                    </td>
-                </tr>
-            `;
-        }).join('');
-
-        document.getElementById('cont-pendientes').innerText = pendientes;
-        document.getElementById('cont-activos').innerText = activos;
+    // 1. Función para obtener el token de seguridad de Django (CSRF)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 
-    function cambiarEstado(id, nuevoEstado) {
-        const user = usuarios.find(u => u.id === id);
-        if(user) {
-            user.estado = nuevoEstado;
-            cargarUsuarios();
+    // 2. Cargar usuarios desde la API de Django
+    async function cargarUsuarios() {
+        try {
+            const response = await fetch('/api/usuarios/gestion/'); // Verifica que esta URL coincida con tu urls.py
+            const usuarios = await response.json();
+            
+            const tbody = document.getElementById('tablaUsuarios');
+            let pendientes = 0;
+            let activos = 0;
+
+            tbody.innerHTML = usuarios.map(u => {
+                if(u.estado === 'pendiente') pendientes++;
+                if(u.estado === 'activo') activos++;
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight: bold;">${u.nombre}</div>
+                            <div style="font-size: 11px; color: #88a0b0;">${u.email}</div>
+                        </td>
+                        <td><span style="color: #00ccff;">${u.rol || 'Sin Rol'}</span></td>
+                        <td>
+                            <span class="status-badge ${u.estado === 'activo' ? 'status-activo' : 'status-pendiente'}">
+                                ${u.estado.toUpperCase()}
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            <button class="${u.estado === 'pendiente' ? 'btn-aprobar' : 'btn-rechazar'}" 
+                                    onclick="cambiarEstado(${u.id})">
+                                ${u.estado === 'pendiente' ? 'APROBAR' : 'SUSPENDER'}
+                            </button>
+                            <button class="btn-rechazar" style="background: #660000; margin-left:10px;" 
+                                    onclick="eliminarUsuario(${u.id}, '${u.nombre}')">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('cont-pendientes').innerText = pendientes;
+            document.getElementById('cont-activos').innerText = activos;
+        } catch (error) {
+            console.error("Error cargando usuarios:", error);
+        }
+    }
+
+    // 3. Cambiar estado (Aprobar/Suspender)
+    async function cambiarEstado(id) {
+        const res = await fetch(`/api/usuarios/estado/${id}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        if(res.ok) cargarUsuarios();
+    }
+
+    // 4. Eliminar usuario permanentemente
+    async function eliminarUsuario(id, nombre) {
+        if(confirm(`¿Estás seguro de eliminar a ${nombre}? Esta acción no se puede deshacer.`)) {
+            const res = await fetch(`/api/usuarios/eliminar/${id}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            if(res.ok) cargarUsuarios();
         }
     }
 
     function filtrarUsuarios() {
         const busqueda = document.getElementById('buscarUsuario').value.toLowerCase();
         const filas = document.querySelectorAll('#tablaUsuarios tr');
-        
         filas.forEach(fila => {
             const texto = fila.innerText.toLowerCase();
             fila.style.display = texto.includes(busqueda) ? '' : 'none';
