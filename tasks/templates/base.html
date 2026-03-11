@@ -85,7 +85,8 @@
                 {% if user.username == 'rosita' %}
                     <li><a href="{% url 'formulario' %}" style="color: #ff007f;">Registrar Ropa</a></li>
                     <li><a href="{% url 'tipos' %}">Control Inventario</a></li>
-
+                    <li><a href="{% url 'ranking' %}" style="color: #ffcc00; border: 1px solid #ffcc00;">Aprobar Usuarios</a> </li>   
+                   
                 {% elif user.username == 'asistente_bienestar1' %}
                     <li><a href="{% url 'radar' %}" style="color: #0059b3;">Inventario Balones</a></li>
                     <li><a href="{% url 'videos' %}">Renta Balones</a></li>
