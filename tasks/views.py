@@ -43,7 +43,6 @@ class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
     email_template_name = 'email_reset_password.html'
     success_url = reverse_lazy('password_reset_done')
     success_message = "Te hemos enviado un enlace para restablecer tu contraseña"
-
 def signup(request):
     if request.method == 'GET':
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
@@ -52,33 +51,27 @@ def signup(request):
     if form.is_valid():
         try:
             user = form.save(commit=False)
-            # El usuario se crea INACTIVO para que Rosita lo apruebe
+            # CAPTURAMOS EL ROL: Importante para que Rosita lo vea en el Ranking
+            user.first_name = request.POST.get('rol', 'Usuario')
             user.is_active = False 
             user.save()
             
-            # Opcional: Enviar correo (comentado si prefieres solo aprobación manual)
-            # ... lógica de email ...
-
             return render(request, 'signup.html', {
                 'form': CustomUserCreationForm(),
                 'success': '¡Solicitud enviada! Rosita debe aprobar tu acceso.'
             })
         except Exception as e:
-            return render(request, 'signup.html', {'form': form, 'error': 'Error en el registro.'})
-    return render(request, 'signup.html', {'form': form, 'error': 'Datos inválidos.'})
+            return render(request, 'signup.html', {'form': form, 'error': f'Error en BD: {e}'})
+    
+    # --- CAMBIO CLAVE AQUÍ ---
+    # Esto extraerá el error específico (ej: "Contraseña muy corta")
+    errores = form.errors.as_data()
+    msg_error = "Datos inválidos: "
+    for campo, detalles in errores.items():
+        # detalles[0].message suele traer el texto del error de Django
+        msg_error += f"[{campo}: {detalles[0].message}] "
 
-def activar(request, uidb64, token):
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.filter(pk=uid).first()
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-    if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.save()
-        return render(request, 'confirmar_cuenta.html')
-    else:
-        return render(request, 'confirmar_fallido.html')
+    return render(request, 'signup.html', {'form': form, 'error': msg_error})
 
 def signin(request):
     if request.method == 'GET':
