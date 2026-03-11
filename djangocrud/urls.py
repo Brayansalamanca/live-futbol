@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required, user_passes_test
 from tasks import views
 
+
 # --- FUNCIONES DE PERMISOS ---
 def es_rosita(user):
     return user.is_authenticated and user.username == 'rosita'
@@ -15,6 +16,7 @@ urlpatterns = [
     # ============================
     # 🔐 GESTIÓN DE CUENTA Y BASE
     # ============================
+    path('activar/<uidb64>/<token>/', views.activar, name='activar'),
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('signup/', views.signup, name='signup'),
