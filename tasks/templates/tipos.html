@@ -3,6 +3,7 @@
 <div style="padding: 100px 20px; background: #000d1a; min-height: 100vh; color: white; font-family: 'Inter', sans-serif;">
     
     <h1 style="text-align: center; color: #00ccff; text-transform: uppercase; font-weight: 900;">👕 Catálogo de Inventario</h1>
+    
     <div style="overflow-x: auto; background: rgba(0, 43, 92, 0.3); border-radius: 15px; border: 1px solid #0059b3; margin-top: 20px;">
         <table style="width: 100%; border-collapse: collapse;">
             <thead style="background: #0059b3; color: white; text-transform: uppercase; font-size: 13px;">
@@ -42,6 +43,13 @@
 <script>
     const USUARIO_ACTUAL = "{{ request.user.username }}";
 
+    // Función para obtener la fecha mínima (Hoy + 10 días)
+    function obtenerFechaMinima() {
+        const hoy = new Date();
+        hoy.setDate(hoy.getDate() + 10);
+        return hoy.toISOString().split('T')[0];
+    }
+
     async function cargar() {
         try {
             const res = await fetch("{% url 'api_obtener_prendas' %}");
@@ -65,14 +73,43 @@
                         </span>
                     </td>
                     <td>
-                        ${esDisponible 
-                            ? `<button onclick="apartar('${p.id}')" style="background:#00ccff; color:#000d1a; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Apartar</button>`
-                            : `<button disabled style="background:#333; color:#777; border:none; padding:8px 15px; border-radius:5px;">Ocupado</button>`
-                        }
+                        <div style="display: flex; gap: 5px; justify-content: center;">
+                            ${esDisponible 
+                                ? `<button onclick="mostrarFormulario('${p.id}')" style="background:#00ccff; color:#000d1a; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Apartar</button>`
+                                : `<button disabled style="background:#333; color:#777; border:none; padding:8px 15px; border-radius:5px;">Ocupado</button>`
+                            }
+                            ${USUARIO_ACTUAL === 'rosita' ? `<button onclick="eliminarPrenda('${p.id}')" style="background:#ff4444; color:white; border:none; padding:8px 10px; border-radius:5px; cursor:pointer;">🗑️</button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+                <tr id="form-${p.id}" style="display: none; background: rgba(0, 204, 255, 0.05);">
+                    <td colspan="5" style="padding: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end;">
+                            <div>
+                                <label style="font-size: 11px; color: #00ccff;">NOMBRE</label>
+                                <input type="text" id="user-${p.id}" value="${USUARIO_ACTUAL}" readonly style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #00ccff;">CURSO</label>
+                                <input type="text" id="curso-${p.id}" placeholder="Ej: 1101" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #00ccff;">EVENTO</label>
+                                <input type="text" id="evento-${p.id}" placeholder="Ej: Interclases" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #00ccff;">FECHA (Mín. 10 días)</label>
+                                <input type="date" id="fecha-${p.id}" min="${obtenerFechaMinima()}" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
+                            </div>
+                            <div style="display: flex; gap: 5px;">
+                                <button onclick="confirmarApartado('${p.id}')" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; flex:1;">Confirmar</button>
+                                <button onclick="cerrarFormulario('${p.id}')" style="background:#e74c3c; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">X</button>
+                            </div>
+                        </div>
                     </td>
                 </tr>`;
 
-                // Lógica para la Tabla de Rosita (Solo prendas apartadas no devueltas)
+                // Lógica para la Tabla de Rosita
                 if (USUARIO_ACTUAL === 'rosita' && !esDisponible) {
                     htmlDevoluciones += `
                     <tr style="border-bottom: 1px solid rgba(255,204,0,0.2);">
@@ -97,12 +134,24 @@
         } catch (e) { console.error("Error al cargar:", e); }
     }
 
-    async function apartar(id) {
-        const nombre = prompt("¿A nombre de quién?");
-        if (!nombre) return;
-        const curso = prompt("¿Curso? (Ej: 1101)");
-        const evento = prompt("¿Para qué evento? (Ej: Interclases)");
-        const fecha = new Date().toISOString().split('T')[0];
+    function mostrarFormulario(id) {
+        document.getElementById(`form-${id}`).style.display = 'table-row';
+    }
+
+    function cerrarFormulario(id) {
+        document.getElementById(`form-${id}`).style.display = 'none';
+    }
+
+    async function confirmarApartado(id) {
+        const nombre = document.getElementById(`user-${id}`).value;
+        const curso = document.getElementById(`curso-${id}`).value;
+        const evento = document.getElementById(`evento-${id}`).value;
+        const fecha = document.getElementById(`fecha-${id}`).value;
+
+        if (!curso || !evento || !fecha) {
+            alert("Por favor completa todos los campos.");
+            return;
+        }
 
         const res = await fetch(`/api/apartar-prenda/${id}/`, {
             method: "POST",
@@ -114,17 +163,23 @@
         else alert("Error al apartar");
     }
 
+    async function eliminarPrenda(id) {
+        if (!confirm("¿Rosita, estás segura de eliminar esta prenda permanentemente?")) return;
+        const res = await fetch(`/api/eliminar-prenda/${id}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        });
+        if (res.ok) cargar();
+    }
+
     async function liberar(id) {
         if (!confirm("¿Confirmar que la prenda ha sido devuelta?")) return;
-        
         const res = await fetch(`/api/apartar-prenda/${id}/`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
             body: JSON.stringify({ accion: 'liberar' })
         });
-
         if (res.ok) cargar();
-        else alert("Error al liberar");
     }
 
     document.addEventListener("DOMContentLoaded", cargar);
