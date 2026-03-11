@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test # <--- CAMBIO AQUÍ
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.db import IntegrityError
@@ -20,6 +20,10 @@ import json
 from .models import Task, RegistroEntrega, ObjetoPerdido, PrendaRopa, BajaBalon
 from .forms import TaskForm, CustomUserCreationForm
 from .tokens import account_activation_token
+
+# Función de verificación (Añadir después de los imports)
+def es_rosita(user):
+    return user.is_authenticated and user.username == 'rosita'
 
 # ============================
 # 🏠 VISTAS PÚBLICAS
@@ -100,25 +104,44 @@ def signin(request):
             'form': AuthenticationForm(),
             'error': 'Usuario o contraseña incorrectos'
         })
+# ==========================================
+# 🏆 GESTIÓN DE USUARIOS (RANKING - ROSITA)
+# ==========================================
 
+@user_passes_test(es_rosita)
+def api_obtener_usuarios_gestion(request):
+    """API: Retorna la lista con rol capturado desde first_name"""
+    usuarios_db = User.objects.exclude(username='rosita').exclude(is_superuser=True)
+    data = []
+    for u in usuarios_db:
+        data.append({
+            'id': u.id,
+            'nombre': u.username,
+            'email': u.email,
+            'rol': u.first_name, # El rol que guardamos en signup
+            'estado': 'activo' if u.is_active else 'pendiente'
+        })
+    return JsonResponse(data, safe=False)
+
+@user_passes_test(es_rosita)
+def api_cambiar_estado_usuario(request, user_id):
+    if request.method == 'POST':
+        usuario = get_object_or_404(User, id=user_id)
+        usuario.is_active = not usuario.is_active
+        usuario.save()
+        return JsonResponse({'status': 'ok', 'nuevo_estado': usuario.is_active})
+
+@user_passes_test(es_rosita)
+def api_eliminar_usuario(request, user_id):
+    if request.method == 'POST':
+        usuario = get_object_or_404(User, id=user_id)
+        usuario.delete()
+        return JsonResponse({'status': 'deleted'})
 def signout(request):
     logout(request)
     return redirect('home')
 
-# APIs para el Panel de Control en Ranking
-@login_required
-def api_obtener_usuarios_gestion(request):
-    # Solo superusuarios o Rosita deberían ver esto
-    usuarios = User.objects.exclude(is_superuser=True).values('id', 'username', 'email', 'is_active')
-    return JsonResponse(list(usuarios), safe=False)
 
-@login_required
-def api_cambiar_estado_usuario(request, user_id):
-    if request.method == "POST":
-        usuario = get_object_or_404(User, id=user_id)
-        usuario.is_active = not usuario.is_active
-        usuario.save()
-        return JsonResponse({"status": "success", "is_active": usuario.is_active})
 
 # ============================
 # 📦 INVENTARIO ROPA

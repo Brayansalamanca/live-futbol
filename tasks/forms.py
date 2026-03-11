@@ -5,25 +5,42 @@ from .models import Task
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, label='Correo electrónico')
+    
+    # Añadimos el campo de Rol con las opciones solicitadas
+    ROLES = [
+        ('Asistente', 'Asistente'),
+        ('Coordinacion', 'Coordinación'),
+    ]
+    rol = forms.ChoiceField(
+        choices=ROLES, 
+        required=True, 
+        label='Rol solicitado',
+        widget=forms.Select(attrs={'class': 'form-control'}) # Mantiene consistencia visual
+    )
 
     class Meta:
         model = User
-        fields = ('username', 'email') # password1 y password2 los maneja UserCreationForm automáticamente
+        # Añadimos 'rol' a los campos del formulario
+        fields = ('username', 'email', 'rol') 
 
-    # ESTO ES LO QUE SOLUCIONA EL ERROR:
-    # Sobrescribimos la validación para evitar que Django use el comando iLIKE
     def clean_username(self):
         username = self.cleaned_data.get("username")
-        # Usamos filter().exists() que Djongo traduce a un comando compatible con MongoDB
+        # Mantenemos tu solución para Djongo/MongoDB
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError("Este nombre de usuario ya está registrado.")
         return username
+
+    # Agregamos validación para el correo (opcional pero recomendado)
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Este correo ya está en uso.")
+        return email
 
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['titulo', 'descripcion', 'importante']
-        # Añadimos widgets para que se vea mejor en el HTML
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Escribe un título'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Describe la tarea'}),
