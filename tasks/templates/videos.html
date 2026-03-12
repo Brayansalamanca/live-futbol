@@ -142,22 +142,19 @@
     let gradoActual = "";
     let letraActual = "";
 
-    // --- LISTA DE VETADOS (Escribe los nombres aquí) ---
-    const VETADOS = [
-        "pepito perez",
-        "fulano de tal"
-    ];
+    const VETADOS = ["pepito perez", "fulano de tal"];
 
     async function cargarDatos() {
         try {
             const res = await fetch("{% url 'api_obtener_entregas' %}");
             if (!res.ok) return;
             const nuevosRegistros = await res.json();
-            if (nuevosRegistros.length !== registros.length) {
+            // Actualizamos solo si hay cambios para no parpadear
+            if (JSON.stringify(nuevosRegistros) !== JSON.stringify(registros)) {
                 registros = nuevosRegistros;
                 dibujar();
             }
-        } catch (e) { console.warn("Servidor ocupado..."); }
+        } catch (e) { console.warn("Reintentando conexión..."); }
     }
 
     async function registrarEnNube() {
@@ -170,7 +167,6 @@
             return;
         }
 
-        // VALIDACIÓN DE VETADO
         if (VETADOS.includes(nombreInput.toLowerCase())) {
             alert("❌ ESTUDIANTE VETADO: No se permite el préstamo.");
             return;
@@ -193,34 +189,62 @@
                 resetearFormulario();
                 cargarDatos();
             }
-        } catch (error) { alert("Error de conexión."); }
+        } catch (error) { alert("Error de conexión al guardar."); }
     }
 
     function dibujar() {
         let html = "";
         const filtro = document.getElementById("buscador").value.toLowerCase();
+        
+        if (registros.length === 0) {
+            document.getElementById("tabla").innerHTML = "<tr><td colspan='5'>No hay préstamos activos.</td></tr>";
+            return;
+        }
+
         registros.forEach((r) => {
-            const nombre = r.nombre || r.recibido_por || "---";
-            const objeto = r.objeto || r.balon || "---";
+            // Mapeo flexible para asegurar que encuentre los datos
+            const nombre = r.nombre || r.recibido_por || r.usuario || "---";
+            const objeto = r.objeto || r.balon || r.tipo || "---";
             const curso = r.curso || "N/A";
-            if ((nombre + curso).toLowerCase().includes(filtro)) {
+            const lugar = r.lugar || "Cancha";
+            
+            if ((nombre + curso + objeto).toLowerCase().includes(filtro)) {
+                let fechaTexto = "---";
+                if (r.fecha) {
+                    try {
+                        // Si ya viene formateada la usa, sino crea objeto Date
+                        fechaTexto = r.fecha.includes('/') ? r.fecha : new Date(r.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    } catch(e) { fechaTexto = r.fecha; }
+                }
+
                 html += `
                 <tr>
                     <td><strong>${nombre}</strong><br><small>${curso}</small></td>
                     <td>${objeto}</td>
-                    <td>${r.lugar || 'Cancha'}</td>
-                    <td>${r.fecha ? new Date(r.fecha).toLocaleTimeString() : '---'}</td>
+                    <td>${lugar}</td>
+                    <td>${fechaTexto}</td>
                     <td><button class="btn-entregado" onclick="marcarEntregado('${r.id}')">✅ Finalizar</button></td>
                 </tr>`;
             }
         });
-        document.getElementById("tabla").innerHTML = html || "<tr><td colspan='5'>No hay préstamos activos.</td></tr>";
+        document.getElementById("tabla").innerHTML = html || "<tr><td colspan='5'>Sin resultados.</td></tr>";
     }
 
     async function marcarEntregado(id) {
-        if(confirm("¿Confirmas la devolución?")) {
-            const res = await fetch(`/api/eliminar-entrega/${id}/`, { method: "POST", headers: { "X-CSRFToken": "{{ csrf_token }}" } });
-            if (res.ok) cargarDatos();
+        if(confirm("¿Confirmas la devolución de este objeto?")) {
+            try {
+                const res = await fetch(`/api/eliminar-entrega/${id}/`, { 
+                    method: "POST", 
+                    headers: { "X-CSRFToken": "{{ csrf_token }}" } 
+                });
+                if (res.ok) {
+                    // Eliminación visual inmediata
+                    registros = registros.filter(r => r.id != id);
+                    dibujar();
+                } else {
+                    alert("No se pudo procesar la entrega.");
+                }
+            } catch (e) { alert("Error de red."); }
         }
     }
 
@@ -270,6 +294,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         cargarBotonesCursos();
         cargarDatos();
+        // Polling cada 8 segundos para mantener sincronizado
         setInterval(cargarDatos, 8000); 
     });
 </script>

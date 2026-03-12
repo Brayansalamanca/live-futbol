@@ -38,7 +38,6 @@
                     <select id="causa" style="width: 100%; height: 45px; background: #001122; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 10px;">
                         <option value="Perdido">Perdido</option><option value="Pinchado">Pinchado</option><option value="Robo">Robo</option>
                     </select>
-                    <input type="datetime-local" id="fecha_suceso" style="grid-column: span 2; width: 100%; height: 45px; background: #001122; border: 1px solid #0059b3; border-radius: 8px; color: white; padding: 0 10px; color-scheme: dark; margin-top: 10px;">
                 </div>
                 <button type="button" onclick="guardarBaja()" id="btnGuardar" style="width: 100%; margin-top: 25px; background: #00ccff; color: #000d1a; border: none; height: 50px; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase;">
                     🚀 Registrar Novedad
@@ -86,18 +85,15 @@
 
 <script>
 let datosGlobales = [];
-const IMG_DEFAULT = "{% static 'sin evidencia.webp' %}";
+const IMG_DEFAULT = "https://via.placeholder.com/150?text=Sin+Evidencia";
 
-// --- SINCRONIZACIÓN ---
-async function sincronizar(forzar = false) {
+async function sincronizar() {
     try {
-        const res = await fetch("{% url 'api_obtener_bajas' %}?t=" + Date.now());
+        const res = await fetch("{% url 'api_obtener_bajas' %}");
         const data = await res.json();
-        if (JSON.stringify(data) !== JSON.stringify(datosGlobales) || forzar) {
-            datosGlobales = data;
-            dibujarTabla(data);
-        }
-    } catch (e) { console.error("Error al cargar:", e); }
+        datosGlobales = data;
+        dibujarTabla(data);
+    } catch (e) { console.error("Error al sincronizar:", e); }
 }
 
 function dibujarTabla(data) {
@@ -107,58 +103,42 @@ function dibujarTabla(data) {
         return;
     }
 
-    tbody.innerHTML = data.map(b => `
-        <tr>
-            <td>
-                <img src="${b.imagen ? b.imagen : IMG_DEFAULT}" class="img-celda" onclick="verImg('${b.imagen ? b.imagen : IMG_DEFAULT}')" onerror="this.src='${IMG_DEFAULT}'">
-            </td>
-            <td style="font-size: 11px; color:#88a0b0;">${b.fecha ? new Date(b.fecha).toLocaleString() : '---'}</td>
-            <td style="text-align: left;">
-                <div style="font-size: 11px; color: #00ccff;">ALQUILÓ: <span style="color: white; font-weight: bold;">${b.alquilado_por || '---'}</span></div>
-                <div style="font-size: 11px; color: #ff4444;">BOTÓ: <span style="color: white; font-weight: bold;">${b.usuario || 'Anónimo'}</span></div>
-            </td>
-            <td>${b.tipo}<br><small style="color:#00ccff">${b.lugar || '---'}</small></td>
-            <td><span style="background:#004080; padding:4px 8px; border-radius:4px; font-size:10px;">${(b.causa || '---').toUpperCase()}</span></td>
-            <td>
-                <button onclick="eliminar('${b.id}')" style="background:none; color:#ff4444; border:1px solid #ff4444; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Eliminar</button>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = data.map(b => {
+        // Mapeo ultra-flexible para que NO salgan guiones si el server no los envía
+        const responsable = b.responsable || b.usuario || 'Anónimo';
+        const alquilo = b.alquilado_por || '---';
+        const material = b.tipo_balon || b.tipo || '---';
+        const lugar = b.lugar || 'Ubicación no especificada';
+        const causa = b.causa || 'Reportado';
+        const img = b.imagen || IMG_DEFAULT;
+        const fecha = b.fecha ? new Date(b.fecha).toLocaleString() : 'Reciente';
+
+        return `
+            <tr>
+                <td>
+                    <img src="${img}" class="img-celda" onclick="verImg('${img}')" onerror="this.src='${IMG_DEFAULT}'">
+                </td>
+                <td style="font-size: 11px; color:#88a0b0;">${fecha}</td>
+                <td style="text-align: left;">
+                    <div style="font-size: 11px; color: #00ccff;">ALQUILÓ: <span style="color: white; font-weight: bold;">${alquilo}</span></div>
+                    <div style="font-size: 11px; color: #ff4444;">BOTÓ: <span style="color: white; font-weight: bold;">${responsable}</span></div>
+                </td>
+                <td>${material}<br><small style="color:#00ccff">${lugar}</small></td>
+                <td><span style="background:#004080; padding:4px 8px; border-radius:4px; font-size:10px;">${causa.toUpperCase()}</span></td>
+                <td>
+                    <button onclick="eliminar('${b.id}')" style="background:none; color:#ff4444; border:1px solid #ff4444; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Eliminar</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
-// --- EXPORTAR A EXCEL ---
-function exportarExcel() {
-    if (!datosGlobales || datosGlobales.length === 0) {
-        alert("No hay datos disponibles para exportar.");
-        return;
-    }
-
-    // Mapeo de datos para que el Excel sea profesional
-    const registros = datosGlobales.map(b => ({
-        "FECHA SUCESO": b.fecha ? new Date(b.fecha).toLocaleString() : '---',
-        "QUIEN ALQUILÓ": b.alquilado_por || '---',
-        "RESPONSABLE (BOTÓ/DAÑÓ)": b.usuario || '---',
-        "MATERIAL": b.tipo,
-        "UBICACIÓN": b.lugar || '---',
-        "CAUSA": (b.causa || '---').toUpperCase()
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(registros);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Bajas");
-
-    // Descarga el archivo
-    XLSX.writeFile(wb, "Reporte_Bajas_LiveFutbol.xlsx");
-}
-
-// --- GUARDAR REGISTRO ---
 async function guardarBaja() {
     const btn = document.getElementById('btnGuardar');
     const file = document.getElementById('imagen_file').files[0];
     const user = document.getElementById('usuario').value.trim();
-    const alquilo = document.getElementById('alquilado_por').value.trim();
     
-    if (!user || !alquilo) return alert("Escribe el nombre de quien alquiló y quien lo botó.");
+    if (!user) return alert("Escribe al menos el nombre del responsable.");
 
     btn.disabled = true;
     btn.innerText = "⏳ REGISTRANDO...";
@@ -166,10 +146,9 @@ async function guardarBaja() {
     const enviar = async (imgData) => {
         const payload = {
             usuario: user,
-            alquilado_por: alquilo,
+            alquilado_por: document.getElementById('alquilado_por').value,
             tipo: document.getElementById('tipo').value,
-            fecha: document.getElementById('fecha_suceso').value,
-            lugar: document.getElementById('lugar').value.trim(),
+            lugar: document.getElementById('lugar').value,
             causa: document.getElementById('causa').value,
             imagen: imgData
         };
@@ -180,16 +159,12 @@ async function guardarBaja() {
                 headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
                 body: JSON.stringify(payload)
             });
-
             if (res.ok) {
                 document.getElementById('formBalones').reset();
-                sincronizar(true);
-            } else {
-                alert("Error al guardar el registro.");
+                sincronizar();
             }
-        } catch (e) {
-            console.error(e);
-        } finally {
+        } catch (e) { alert("Error al guardar."); }
+        finally {
             btn.disabled = false;
             btn.innerText = "🚀 Registrar Novedad";
         }
@@ -210,21 +185,23 @@ function verImg(src) {
 }
 
 async function eliminar(id) {
-    if (confirm("¿Eliminar este registro de baja?")) {
-        try {
-            const res = await fetch(`/api/eliminar-baja/${id}/`, { 
-                method: "POST", 
-                headers: { "X-CSRFToken": "{{ csrf_token }}" } 
-            });
-            if (res.ok) sincronizar(true);
-        } catch (e) { console.error(e); }
+    if (confirm("¿Eliminar este registro?")) {
+        const res = await fetch(`/api-eliminar-baja/${id}/`, { 
+            method: "POST", 
+            headers: { "X-CSRFToken": "{{ csrf_token }}" } 
+        });
+        if (res.ok) sincronizar();
     }
 }
 
-window.onload = () => {
-    sincronizar(true);
-    // Sincronización automática cada 8 segundos
-    setInterval(() => sincronizar(false), 8000); 
-};
+function exportarExcel() {
+    if (datosGlobales.length === 0) return alert("No hay datos.");
+    const ws = XLSX.utils.json_to_sheet(datosGlobales);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Bajas");
+    XLSX.writeFile(wb, "Reporte_Bajas.xlsx");
+}
+
+window.onload = sincronizar;
 </script>
 {% endblock %}
