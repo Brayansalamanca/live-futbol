@@ -129,22 +129,19 @@ def signout(request):
 # ==========================================
 # 🏆 GESTIÓN DE USUARIOS (GRUPOS AUTOMÁTICOS)
 # ==========================================
+
 @user_passes_test(es_coordinacion)
 def api_obtener_usuarios_gestion(request):
-    # Traemos a todos los usuarios excepto a Rosita y superusuarios
-    usuarios_db = User.objects.exclude(username='rosita').exclude(is_superuser=True).order_by('-date_joined')
+    usuarios_db = User.objects.exclude(username='rosita').exclude(is_superuser=True)
     data = []
-    
     for u in usuarios_db:
-        # 1. Obtenemos el grupo (si no tiene, devolvemos "Sin Grupo")
+        # Obtenemos el nombre del grupo principal si existe
         grupo = u.groups.first().name if u.groups.exists() else "Sin Grupo"
-        
-        # 2. El 'rol' lo guardamos en first_name durante el signup
         data.append({
             'id': u.id,
             'nombre': u.username,
             'email': u.email,
-            'rol': u.first_name if u.first_name else "No especificado", 
+            'rol': u.first_name, 
             'grupo_asignado': grupo,
             'estado': 'activo' if u.is_active else 'pendiente'
         })
@@ -154,30 +151,28 @@ def api_obtener_usuarios_gestion(request):
 def api_cambiar_estado_usuario(request, user_id):
     if request.method == 'POST':
         usuario = get_object_or_404(User, id=user_id)
-        
-        # Invertimos el estado (de inactivo a activo o viceversa)
         usuario.is_active = not usuario.is_active
         
-        # 🛡️ ASIGNACIÓN AUTOMÁTICA DE GRUPO
+        # Asignación automática de grupo al activar
         if usuario.is_active:
-            # Limpiamos el rol guardado en first_name
-            rol_solicitado = usuario.first_name.lower().strip()
+            rol = usuario.first_name.lower()
             nombre_grupo = ""
-            
-            if "profesor" in rol_solicitado:
-                nombre_grupo = 'profesores'
-            elif "coordinacion" in rol_solicitado:
-                nombre_grupo = 'coordinacion'
-            elif "asistente" in rol_solicitado:
-                nombre_grupo = 'asistente bienestar'
+            if "profesor" in rol: nombre_grupo = 'profesores'
+            elif "coordinacion" in rol: nombre_grupo = 'coordinacion'
+            elif "asistente" in rol: nombre_grupo = 'asistente bienestar'
             
             if nombre_grupo:
                 grupo, _ = Group.objects.get_or_create(name=nombre_grupo)
-                usuario.groups.clear() # Limpiamos grupos previos por seguridad
                 usuario.groups.add(grupo)
         
         usuario.save()
         return JsonResponse({'status': 'ok', 'nuevo_estado': usuario.is_active})
+
+@user_passes_test(es_coordinacion)
+def api_eliminar_usuario(request, user_id):
+    if request.method == 'POST':
+        get_object_or_404(User, id=user_id).delete()
+        return JsonResponse({'status': 'deleted'})
 
 # ==========================================
 # ⚽ MÓDULOS DE INVENTARIO Y BALONES
