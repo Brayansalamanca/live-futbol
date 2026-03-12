@@ -32,6 +32,18 @@ def es_asistente(user):
 def home(request): return render(request, 'home.html')
 def soporte(request): return render(request, 'soporte.html')
 def condiciones(request): return render(request, 'condiciones.html')
+def activar(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.filter(pk=uid).first()
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return render(request, 'confirmar_cuenta.html')
+    return render(request, 'confirmar_fallido.html')
 
 @login_required
 def tipos(request): return render(request, 'tipos.html')
@@ -157,7 +169,35 @@ def tasks(request):
 
 @login_required
 def api_guardar_objeto(request):
+    """Guarda un nuevo objeto perdido"""
     if request.method == "POST":
         data = json.loads(request.body)
-        ObjetoPerdido.objects.create(nombre_reporta=data.get('nombre'), tipo_objeto=data.get('tipo'), descripcion=data.get('dif'))
+        ObjetoPerdido.objects.create(
+            nombre_reporta=data.get('nombre'), 
+            tipo_objeto=data.get('tipo'), 
+            descripcion=data.get('dif')
+        )
         return JsonResponse({"status": "success"})
+
+@login_required
+def api_obtener_objetos(request):
+    """Lista de objetos perdidos con formato de fecha seguro"""
+    objetos = ObjetoPerdido.objects.all().order_by('-fecha')
+    data = []
+    for o in objetos:
+        data.append({
+            "id": o.id,
+            "nombre": o.nombre_reporta,
+            "tipo": o.tipo_objeto,
+            "descripcion": o.descripcion,
+            "fecha": o.fecha.strftime('%d/%m/%Y') if o.fecha else "Sin fecha"
+        })
+    return JsonResponse(data, safe=False)
+
+@login_required
+def api_eliminar_objeto(request, obj_id):
+    """Elimina un objeto perdido de la lista"""
+    if request.method == "POST":
+        get_object_or_404(ObjetoPerdido, pk=obj_id).delete()
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=405)
