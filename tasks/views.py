@@ -17,6 +17,13 @@ from .models import Task, RegistroEntrega, ObjetoPerdido, PrendaRopa, BajaBalon
 from .forms import TaskForm, CustomUserCreationForm
 from .tokens import account_activation_token
 
+class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
+    template_name = 'recuperar_password.html'
+    email_template_name = 'password_reset_email.html'
+    subject_template_name = 'password_reset_subject.txt'
+    success_message = "Instrucciones enviadas al correo."
+    success_url = reverse_lazy('password_reset_done')
+
 # ==========================================
 # 🔐 FUNCIONES DE VERIFICACIÓN
 # ==========================================
@@ -196,3 +203,72 @@ def api_eliminar_objeto(request, obj_id):
         get_object_or_404(ObjetoPerdido, pk=obj_id).delete()
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=405)
+# --- FALTANTES DE GESTIÓN DE USUARIOS ---
+@user_passes_test(es_coordinacion)
+def api_cambiar_estado_usuario(request, user_id):
+    if request.method == 'POST':
+        u = get_object_or_404(User, id=user_id)
+        u.is_active = not u.is_active
+        # Lógica de grupos según el rol (first_name)
+        if u.is_active:
+            rol = u.first_name.lower()
+            nombre_grupo = 'profesores' if 'profesor' in rol else 'coordinacion' if 'coordinacion' in rol else 'asistente bienestar' if 'asistente' in rol else ''
+            if nombre_grupo:
+                g, _ = Group.objects.get_or_create(name=nombre_grupo)
+                u.groups.add(g)
+        u.save()
+        return JsonResponse({'status': 'ok'})
+
+# --- FALTANTES DE ROPA ---
+@user_passes_test(es_coordinacion)
+def formulario(request): return render(request, 'formulario.html')
+
+@login_required
+def api_apartar_prenda(request, prenda_id):
+    prenda = get_object_or_404(PrendaRopa, id=prenda_id)
+    prenda.estado = 'Apartado'
+    prenda.save()
+    return JsonResponse({'status': 'ok'})
+
+@user_passes_test(es_coordinacion)
+def api_eliminar_prenda(request, prenda_id):
+    if request.method == 'POST':
+        get_object_or_404(PrendaRopa, id=prenda_id).delete()
+        return JsonResponse({'status': 'ok'})
+
+# --- FALTANTES DE BALONES/RADAR ---
+@user_passes_test(es_asistente)
+def videos(request): return render(request, 'videos.html')
+
+@user_passes_test(es_asistente)
+def voz(request): return render(request, 'voz.html')
+
+# --- FALTANTES DE TAREAS ---
+@login_required
+def create_task(request):
+    if request.method == 'GET': return render(request, 'create_task.html', {'form': TaskForm()})
+    form = TaskForm(request.POST)
+    if form.is_valid():
+        task = form.save(commit=False)
+        task.user = request.user
+        task.save()
+        return redirect('tasks')
+    return render(request, 'create_task.html', {'form': form})
+
+@login_required
+def lista(request, task_id): # Usado en path('tasks/<int:task_id>/')
+    task = get_object_or_404(Task, pk=task_id, user=request.user)
+    return render(request, 'task_detail.html', {'task': task})
+
+@login_required
+def completar(request, task_id):
+    task = get_object_or_404(Task, pk=task_id, user=request.user)
+    task.diaCompletado = timezone.now()
+    task.save()
+    return redirect('tasks')
+
+@login_required
+def eliminar_tarea(request, task_id):
+    task = get_object_or_404(Task, pk=task_id, user=request.user)
+    task.delete()
+    return redirect('tasks')
