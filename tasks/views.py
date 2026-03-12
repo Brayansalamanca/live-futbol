@@ -69,7 +69,6 @@ def signup(request):
     if form.is_valid():
         try:
             user = form.save(commit=False)
-            # Guardamos el rol seleccionado en el campo first_name para usarlo luego
             user.first_name = request.POST.get('rol', 'Sin Rol')
             user.is_active = False 
             user.save()
@@ -81,7 +80,6 @@ def signup(request):
         except Exception as e:
             return render(request, 'signup.html', {'form': form, 'error': f'Error en el registro: {e}'})
     
-    # Diagnóstico de errores para el usuario
     errors = form.errors.as_data()
     error_msg = "Datos inválidos: "
     for field, detail in errors.items():
@@ -115,7 +113,6 @@ def signin(request):
                 'error': 'Tu cuenta está pendiente de aprobación.'
             })
         login(request, user)
-        # Redirección inteligente por grupo
         if es_coordinacion(user): return redirect('formulario')
         if es_asistente(user): return redirect('radar')
         return redirect('tipos')
@@ -129,22 +126,18 @@ def signout(request):
 # ==========================================
 # 🏆 GESTIÓN DE USUARIOS (GRUPOS AUTOMÁTICOS)
 # ==========================================
+
 @user_passes_test(es_coordinacion)
 def api_obtener_usuarios_gestion(request):
-    # Traemos a todos los usuarios excepto a Rosita y superusuarios
-    usuarios_db = User.objects.exclude(username='rosita').exclude(is_superuser=True).order_by('-date_joined')
+    usuarios_db = User.objects.exclude(username='rosita').exclude(is_superuser=True)
     data = []
-    
     for u in usuarios_db:
-        # 1. Obtenemos el grupo (si no tiene, devolvemos "Sin Grupo")
         grupo = u.groups.first().name if u.groups.exists() else "Sin Grupo"
-        
-        # 2. El 'rol' lo guardamos en first_name durante el signup
         data.append({
             'id': u.id,
             'nombre': u.username,
             'email': u.email,
-            'rol': u.first_name if u.first_name else "No especificado", 
+            'rol': u.first_name, 
             'grupo_asignado': grupo,
             'estado': 'activo' if u.is_active else 'pendiente'
         })
@@ -154,30 +147,24 @@ def api_obtener_usuarios_gestion(request):
 def api_cambiar_estado_usuario(request, user_id):
     if request.method == 'POST':
         usuario = get_object_or_404(User, id=user_id)
-        
-        # Invertimos el estado (de inactivo a activo o viceversa)
         usuario.is_active = not usuario.is_active
-        
-        # 🛡️ ASIGNACIÓN AUTOMÁTICA DE GRUPO
         if usuario.is_active:
-            # Limpiamos el rol guardado en first_name
-            rol_solicitado = usuario.first_name.lower().strip()
+            rol = usuario.first_name.lower()
             nombre_grupo = ""
-            
-            if "profesor" in rol_solicitado:
-                nombre_grupo = 'profesores'
-            elif "coordinacion" in rol_solicitado:
-                nombre_grupo = 'coordinacion'
-            elif "asistente" in rol_solicitado:
-                nombre_grupo = 'asistente bienestar'
-            
+            if "profesor" in rol: nombre_grupo = 'profesores'
+            elif "coordinacion" in rol: nombre_grupo = 'coordinacion'
+            elif "asistente" in rol: nombre_grupo = 'asistente bienestar'
             if nombre_grupo:
                 grupo, _ = Group.objects.get_or_create(name=nombre_grupo)
-                usuario.groups.clear() # Limpiamos grupos previos por seguridad
                 usuario.groups.add(grupo)
-        
         usuario.save()
         return JsonResponse({'status': 'ok', 'nuevo_estado': usuario.is_active})
+
+@user_passes_test(es_coordinacion)
+def api_eliminar_usuario(request, user_id):
+    if request.method == 'POST':
+        get_object_or_404(User, id=user_id).delete()
+        return JsonResponse({'status': 'deleted'})
 
 # ==========================================
 # ⚽ MÓDULOS DE INVENTARIO Y BALONES
@@ -200,6 +187,7 @@ def api_eliminar_prenda(request, prenda_id):
         prenda.delete()
         return JsonResponse({"status": "success", "message": "Prenda eliminada correctamente"})
     return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
+
 @user_passes_test(es_coordinacion)
 def api_guardar_prenda(request):
     if request.method == "POST":
@@ -261,6 +249,13 @@ def api_obtener_bajas(request):
     bajas = list(BajaBalon.objects.all().values().order_by('-fecha'))
     return JsonResponse(bajas, safe=False)
 
+@user_passes_test(es_asistente)
+def api_eliminar_baja(request, baja_id):
+    if request.method == "POST":
+        get_object_or_404(BajaBalon, pk=baja_id).delete()
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=405)
+
 # ==========================================
 # ✅ TAREAS Y OBJETOS PERDIDOS
 # ==========================================
@@ -280,6 +275,26 @@ def create_task(request):
     return render(request, 'create_task.html', {'form': form})
 
 @login_required
+def lista(request, task_id):
+    task = get_object_or_404(Task, pk=task_id, user=request.user)
+    return render(request, 'task_detail.html', {'task': task})
+
+@login_required
+def completar(request, task_id):
+    task = get_object_or_404(Task, pk=task_id, user=request.user)
+    if request.method == 'POST':
+        task.diaCompletado = timezone.now()
+        task.save()
+    return redirect('tasks')
+
+@login_required
+def eliminar_tarea(request, task_id):
+    task = get_object_or_404(Task, pk=task_id, user=request.user)
+    if request.method == 'POST':
+        task.delete()
+    return redirect('tasks')
+
+@login_required
 def api_guardar_objeto(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -289,101 +304,10 @@ def api_guardar_objeto(request):
 @login_required
 def api_obtener_objetos(request):
     return JsonResponse(list(ObjetoPerdido.objects.all().values().order_by('-fecha')), safe=False)
-    # --- FUNCIONES FALTANTES PARA OBJETOS PERDIDOS Y TAREAS ---
 
 @login_required
 def api_eliminar_objeto(request, obj_id):
     if request.method == "POST":
-        objeto = get_object_or_404(ObjetoPerdido, pk=obj_id)
-        objeto.delete()
+        get_object_or_404(ObjetoPerdido, pk=obj_id).delete()
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=405)
-
-@login_required
-def lista(request, task_id):
-    task = get_object_or_404(Task, pk=task_id, user=request.user)
-    if request.method == 'GET':
-        form = TaskForm(instance=task)
-        return render(request, 'task_detail.html', {'task': task, 'form': form})
-    else:
-        form = TaskForm(request.POST, instance=task)
-        if form.is_valid():
-            form.save()
-            return redirect('tasks')
-        return render(request, 'task_detail.html', {'task': task, 'form': form})
-
-@login_required
-def completar(request, task_id):
-    task = get_object_or_404(Task, pk=task_id, user=request.user)
-    if request.method == 'POST':
-        task.diaCompletado = timezone.now()
-        task.save()
-        return redirect('tasks')
-
-@login_required
-def eliminar_tarea(request, task_id):
-    task = get_object_or_404(Task, pk=task_id, user=request.user)
-    if request.method == 'POST':
-        task.delete()
-        return redirect('tasks')
-@user_passes_test(es_asistente)
-def api_eliminar_baja(request, baja_id):
-    if request.method == "POST":
-        baja = get_object_or_404(BajaBalon, pk=baja_id)
-        baja.delete()
-        return JsonResponse({"status": "success", "message": "Registro de baja eliminado"})
-    return JsonResponse({"status": "error"}, status=405)
-# ==========================================
-# 🗑️ FUNCIONES DE ELIMINACIÓN Y GESTIÓN FINAL
-# ==========================================
-
-@user_passes_test(es_asistente)
-def api_eliminar_baja(request, baja_id):
-    """Elimina un registro de baja de balón"""
-    if request.method == "POST":
-        baja = get_object_or_404(BajaBalon, pk=baja_id)
-        baja.delete()
-        return JsonResponse({"status": "success"})
-    return JsonResponse({"status": "error"}, status=405)
-
-@login_required
-def api_eliminar_objeto(request, obj_id):
-    """Elimina un objeto perdido reportado"""
-    if request.method == "POST":
-        objeto = get_object_or_404(ObjetoPerdido, pk=obj_id)
-        objeto.delete()
-        return JsonResponse({"status": "success"})
-    return JsonResponse({"status": "error"}, status=405)
-
-@login_required
-def lista(request, task_id):
-    """Ver detalle o editar una tarea específica"""
-    task = get_object_or_404(Task, pk=task_id, user=request.user)
-    if request.method == 'GET':
-        form = TaskForm(instance=task)
-        return render(request, 'task_detail.html', {'task': task, 'form': form})
-    else:
-        form = TaskForm(request.POST, instance=task)
-        if form.is_valid():
-            form.save()
-            return redirect('tasks')
-        return render(request, 'task_detail.html', {'task': task, 'form': form})
-
-@login_required
-def completar(request, task_id):
-    """Marca una tarea como completada"""
-    task = get_object_or_404(Task, pk=task_id, user=request.user)
-    if request.method == 'POST':
-        task.diaCompletado = timezone.now()
-        task.save()
-        return redirect('tasks')
-    return redirect('tasks')
-
-@login_required
-def eliminar_tarea(request, task_id):
-    """Elimina una tarea del usuario"""
-    task = get_object_or_404(Task, pk=task_id, user=request.user)
-    if request.method == 'POST':
-        task.delete()
-        return redirect('tasks')
-    return redirect('tasks')
