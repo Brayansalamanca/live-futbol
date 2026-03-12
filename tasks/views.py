@@ -321,3 +321,10 @@ def eliminar_tarea(request, task_id):
     if request.method == 'POST':
         task.delete()
         return redirect('tasks')
+@user_passes_test(es_asistente)
+def api_eliminar_baja(request, baja_id):
+    if request.method == "POST":
+        baja = get_object_or_404(BajaBalon, pk=baja_id)
+        baja.delete()
+        return JsonResponse({"status": "success", "message": "Registro de baja eliminado"})
+    return JsonResponse({"status": "error"}, status=405)
