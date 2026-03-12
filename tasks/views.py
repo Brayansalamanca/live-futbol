@@ -91,18 +91,13 @@ def api_obtener_usuarios_gestion(request):
     return JsonResponse(data, safe=False)
 
 @user_passes_test(es_coordinacion)
-def api_cambiar_estado_usuario(request, user_id):
+def api_eliminar_usuario(request, user_id):
+    """Elimina un usuario de la base de datos (Solo Coordinación)"""
     if request.method == 'POST':
-        u = get_object_or_404(User, id=user_id)
-        u.is_active = not u.is_active
-        if u.is_active:
-            rol = u.first_name.lower()
-            nombre_grupo = 'profesores' if 'profesor' in rol else 'coordinacion' if 'coordinacion' in rol else 'asistente bienestar' if 'asistente' in rol else ''
-            if nombre_grupo:
-                g, _ = Group.objects.get_or_create(name=nombre_grupo)
-                u.groups.add(g)
-        u.save()
-        return JsonResponse({'status': 'ok'})
+        usuario = get_object_or_404(User, id=user_id)
+        usuario.delete()
+        return JsonResponse({'status': 'deleted'})
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
 # ==========================================
 # ⚽ MÓDULO BALONES (SOLO ASISTENTE)
