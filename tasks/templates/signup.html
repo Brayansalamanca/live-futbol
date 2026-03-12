@@ -120,15 +120,14 @@
       <span style="color: #ff6666; font-size: 0.8rem;">{{ form.password2.errors }}</span>
     </div>
     <div class="form-group">
-      <label for="id_rol">¿Cuál es tu cargo?</label>
-      <select name="rol" id="id_rol" required style="padding: 0.5rem; border-radius: 5px; border: none; outline: none; background: white; color: black;">
-        <option value="" disabled selected>Selecciona una opción</option>
-        <option value="Asistente de Bienestar">Asistente de Bienestar</option>
-        <option value="Coordinación">Coordinación</option>
-        <option value="Profesor">Profesor</option>
-        <option value="Administrativo">Administrativo</option>
-      </select>
-    </div>
+  <label for="id_rol">¿Cuál es tu cargo?</label>
+  <select name="rol" id="id_rol" required style="padding: 0.5rem; border-radius: 5px; border: none; outline: none; background: white; color: black;">
+    <option value="" disabled selected>Selecciona una opción</option>
+    <option value="asistente bienestar">Asistente de Bienestar</option>
+    <option value="coordinacion">Coordinación / Administrativo</option>
+    <option value="profesores">Profesor</option>
+  </select>
+</div>
 
     <div class="terms">
       <input type="checkbox" name="acepta" id="acepta" required>

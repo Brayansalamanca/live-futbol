@@ -69,6 +69,14 @@
         }
 
         .logo-container img { height: 4rem; width: 4rem; border-radius: 50%; box-shadow: #2533af 2px 5px 25px; }
+        
+        /* Estilo para el nombre del grupo/rol en el menú */
+        .user-role-tag {
+            font-size: 0.7rem;
+            display: block;
+            color: #504783;
+            margin-top: -5px;
+        }
     </style>
 </head>
 <body>
@@ -82,12 +90,13 @@
             </li>
             
             {% if user.is_authenticated %}
-                {% if user.username == 'rosita' %}
+                
+                {% if user.groups.all.0.name == 'coordinacion' or user.username == 'rosita' %}
                     <li><a href="{% url 'formulario' %}" style="color: #ff007f;">Registrar Ropa</a></li>
                     <li><a href="{% url 'tipos' %}">Control Inventario</a></li>
-                    <li><a href="{% url 'ranking' %}" style="color: #ffcc00; border: 1px solid #ffcc00;">Aprobar Usuarios</a> </li>   
-                   
-                {% elif user.username == 'asistente_bienestar1' %}
+                    <li><a href="{% url 'ranking' %}" style="color: #ffcc00; border: 1px solid #ffcc00;">Aprobar Usuarios</a></li>
+                
+                {% elif user.groups.all.0.name == 'asistente bienestar' %}
                     <li><a href="{% url 'radar' %}" style="color: #0059b3;">Inventario Balones</a></li>
                     <li><a href="{% url 'videos' %}">Renta Balones</a></li>
                     <li><a href="{% url 'voz' %}">Bajas Balones</a></li>
