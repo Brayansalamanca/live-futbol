@@ -189,6 +189,13 @@ def voz(request): return render(request, 'voz.html')
 
 # --- APIS DE ROPA ---
 @user_passes_test(es_coordinacion)
+def api_eliminar_prenda(request, prenda_id):
+    if request.method == "POST":
+        prenda = get_object_or_404(PrendaRopa, pk=prenda_id)
+        prenda.delete()
+        return JsonResponse({"status": "success", "message": "Prenda eliminada correctamente"})
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
+@user_passes_test(es_coordinacion)
 def api_guardar_prenda(request):
     if request.method == "POST":
         data = json.loads(request.body)
