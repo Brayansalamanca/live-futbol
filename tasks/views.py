@@ -284,3 +284,40 @@ def api_guardar_objeto(request):
 @login_required
 def api_obtener_objetos(request):
     return JsonResponse(list(ObjetoPerdido.objects.all().values().order_by('-fecha')), safe=False)
+    # --- FUNCIONES FALTANTES PARA OBJETOS PERDIDOS Y TAREAS ---
+
+@login_required
+def api_eliminar_objeto(request, obj_id):
+    if request.method == "POST":
+        objeto = get_object_or_404(ObjetoPerdido, pk=obj_id)
+        objeto.delete()
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=405)
+
+@login_required
+def lista(request, task_id):
+    task = get_object_or_404(Task, pk=task_id, user=request.user)
+    if request.method == 'GET':
+        form = TaskForm(instance=task)
+        return render(request, 'task_detail.html', {'task': task, 'form': form})
+    else:
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('tasks')
+        return render(request, 'task_detail.html', {'task': task, 'form': form})
+
+@login_required
+def completar(request, task_id):
+    task = get_object_or_404(Task, pk=task_id, user=request.user)
+    if request.method == 'POST':
+        task.diaCompletado = timezone.now()
+        task.save()
+        return redirect('tasks')
+
+@login_required
+def eliminar_tarea(request, task_id):
+    task = get_object_or_404(Task, pk=task_id, user=request.user)
+    if request.method == 'POST':
+        task.delete()
+        return redirect('tasks')
