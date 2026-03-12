@@ -142,28 +142,39 @@
     let gradoActual = "";
     let letraActual = "";
 
-    const VETADOS = ["pepito perez", "fulano de tal"];
+    // --- LISTA DE VETADOS ---
+    const VETADOS = [
+        "pepito perez",
+        "fulano de tal"
+    ];
 
+    // CARGAR DATOS DESDE EL SERVIDOR
     async function cargarDatos() {
         try {
-            const res = await fetch("{% url 'api_obtener_entregas' %}");
+            // Usamos una estampa de tiempo (?t=) para evitar que el navegador guarde cache viejo
+            const res = await fetch("{% url 'api_obtener_entregas' %}?t=" + Date.now());
             if (!res.ok) return;
+            
             const nuevosRegistros = await res.json();
-            // Actualizamos solo si hay cambios para no parpadear
+            
+            // Solo redibujamos si los datos realmente cambiaron
             if (JSON.stringify(nuevosRegistros) !== JSON.stringify(registros)) {
                 registros = nuevosRegistros;
                 dibujar();
             }
-        } catch (e) { console.warn("Reintentando conexión..."); }
+        } catch (e) { 
+            console.warn("Error de conexión con el servidor. Reintentando..."); 
+        }
     }
 
+    // REGISTRAR NUEVA ENTREGA
     async function registrarEnNube() {
         const nombreInput = document.getElementById("textoVoz").value.trim();
         const lugarInput = document.getElementById("lugarSelect").value;
         const cursoCompleto = gradoActual + (letraActual || "");
 
         if (!nombreInput || !objetoActual || !gradoActual) {
-            alert("⚠️ Completa: Nombre, Grado y Objeto");
+            alert("⚠️ Completa los campos: Nombre, Grado y Objeto");
             return;
         }
 
@@ -182,38 +193,52 @@
         try {
             const res = await fetch("{% url 'api_guardar_entrega' %}", {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+                headers: { 
+                    "Content-Type": "application/json", 
+                    "X-CSRFToken": "{{ csrf_token }}" 
+                },
                 body: JSON.stringify(datos)
             });
+            
             if (res.ok) {
                 resetearFormulario();
-                cargarDatos();
+                await cargarDatos(); // Recargar tabla inmediatamente
+            } else {
+                alert("Error al guardar en el servidor.");
             }
-        } catch (error) { alert("Error de conexión al guardar."); }
+        } catch (error) { 
+            alert("Error de conexión. Revisa tu internet."); 
+        }
     }
 
+    // DIBUJAR LA TABLA (EL CORAZÓN DEL SCRIPT)
     function dibujar() {
         let html = "";
         const filtro = document.getElementById("buscador").value.toLowerCase();
         
-        if (registros.length === 0) {
+        if (!registros || registros.length === 0) {
             document.getElementById("tabla").innerHTML = "<tr><td colspan='5'>No hay préstamos activos.</td></tr>";
             return;
         }
 
         registros.forEach((r) => {
-            // Mapeo flexible para asegurar que encuentre los datos
-            const nombre = r.nombre || r.recibido_por || r.usuario || "---";
+            // MAPEO FLEXIBLE: Busca el dato en cualquier nombre de variable posible
+            const nombre = r.nombre || r.recibido_por || r.usuario || r.estudiante || "---";
             const objeto = r.objeto || r.balon || r.tipo || "---";
-            const curso = r.curso || "N/A";
-            const lugar = r.lugar || "Cancha";
-            
+            const curso = r.curso || r.grado || "N/A";
+            const lugar = r.lugar || r.ubicacion || "Cancha";
+            const id = r.id || r._id; // Por si usas MongoDB (_id)
+
             if ((nombre + curso + objeto).toLowerCase().includes(filtro)) {
+                
+                // Formateo de fecha ultra-seguro
                 let fechaTexto = "---";
                 if (r.fecha) {
                     try {
-                        // Si ya viene formateada la usa, sino crea objeto Date
-                        fechaTexto = r.fecha.includes('/') ? r.fecha : new Date(r.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        const d = new Date(r.fecha);
+                        fechaTexto = !isNaN(d) 
+                            ? d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+                            : r.fecha;
                     } catch(e) { fechaTexto = r.fecha; }
                 }
 
@@ -223,13 +248,14 @@
                     <td>${objeto}</td>
                     <td>${lugar}</td>
                     <td>${fechaTexto}</td>
-                    <td><button class="btn-entregado" onclick="marcarEntregado('${r.id}')">✅ Finalizar</button></td>
+                    <td><button class="btn-entregado" onclick="marcarEntregado('${id}')">✅ Finalizar</button></td>
                 </tr>`;
             }
         });
         document.getElementById("tabla").innerHTML = html || "<tr><td colspan='5'>Sin resultados.</td></tr>";
     }
 
+    // FINALIZAR PRÉSTAMO (ELIMINAR)
     async function marcarEntregado(id) {
         if(confirm("¿Confirmas la devolución de este objeto?")) {
             try {
@@ -237,17 +263,21 @@
                     method: "POST", 
                     headers: { "X-CSRFToken": "{{ csrf_token }}" } 
                 });
+                
                 if (res.ok) {
-                    // Eliminación visual inmediata
-                    registros = registros.filter(r => r.id != id);
+                    // Borrado visual instantáneo para que se sienta rápido
+                    registros = registros.filter(r => (r.id || r._id) != id);
                     dibujar();
                 } else {
-                    alert("No se pudo procesar la entrega.");
+                    alert("No se pudo procesar la devolución.");
                 }
-            } catch (e) { alert("Error de red."); }
+            } catch (e) { 
+                alert("Error de red al intentar eliminar."); 
+            }
         }
     }
 
+    // FUNCIONES DE INTERFAZ (BOTONES)
     function seleccionarObjeto(btn, obj) {
         objetoActual = obj;
         document.querySelectorAll(".btn-objeto").forEach(b => b.classList.remove("activo"));
@@ -280,7 +310,9 @@
 
     function cargarBotonesCursos() {
         let html = "";
-        for(let i=3; i<=11; i++) html += `<button class="btn-curso" onclick="seleccionarGrado(this, ${i})">${i}°</button>`;
+        for(let i=3; i<=11; i++) {
+            html += `<button class="btn-curso" onclick="seleccionarGrado(this, ${i})">${i}°</button>`;
+        }
         document.getElementById("gradosContenedor").innerHTML = html;
     }
 
@@ -289,12 +321,14 @@
         document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
         objetoActual = ""; gradoActual = ""; letraActual = "";
         document.getElementById("letrasContenedor").innerHTML = "";
+        document.getElementById("lugarSelect").selectedIndex = 0;
     }
 
+    // INICIO
     document.addEventListener("DOMContentLoaded", () => {
         cargarBotonesCursos();
         cargarDatos();
-        // Polling cada 8 segundos para mantener sincronizado
+        // Sincronización automática cada 8 segundos
         setInterval(cargarDatos, 8000); 
     });
 </script>
