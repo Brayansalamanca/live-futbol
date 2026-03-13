@@ -15,6 +15,10 @@ def es_coordinacion(user):
         user.username == 'rosita'
     )
 
+def es_rosita(user):
+    """Permite el acceso solo a Rosita"""
+    return user.is_authenticated and user.username == 'rosita'
+
 def es_asistente(user):
     """Permite el acceso a usuarios del grupo 'asistente bienestar'"""
     return user.is_authenticated and user.groups.filter(name='asistente bienestar').exists()
@@ -39,11 +43,11 @@ urlpatterns = [
     path('soporte/', views.soporte, name='soporte'),
 
     # --- 🏆 GESTIÓN DE USUARIOS (RANKING) ---
-    # Solo Coordinación/Rosita gestiona quién entra a la plataforma
-    path('ranking/', user_passes_test(es_coordinacion)(views.ranking), name='ranking'),
-    path('api/usuarios/', user_passes_test(es_coordinacion)(views.api_obtener_usuarios_gestion), name='api_obtener_usuarios_gestion'),
-    path('api/usuarios/estado/<int:user_id>/', user_passes_test(es_coordinacion)(views.api_cambiar_estado_usuario), name='api_cambiar_estado_usuario'),
-    path('api/usuarios/eliminar/<int:user_id>/', user_passes_test(es_coordinacion)(views.api_eliminar_usuario), name='api_eliminar_usuario'),
+    # Solo Rosita gestiona quién entra a la plataforma
+    path('ranking/', user_passes_test(es_rosita)(views.ranking), name='ranking'),
+    path('api/usuarios/', user_passes_test(es_rosita)(views.api_obtener_usuarios_gestion), name='api_obtener_usuarios_gestion'),
+    path('api/usuarios/estado/<int:user_id>/', user_passes_test(es_rosita)(views.api_cambiar_estado_usuario), name='api_cambiar_estado_usuario'),
+    path('api/usuarios/eliminar/<int:user_id>/', user_passes_test(es_rosita)(views.api_eliminar_usuario), name='api_eliminar_usuario'),
 
     # --- 👕 MÓDULO ROPA ---
     path('formulario/', user_passes_test(es_coordinacion)(views.formulario), name='formulario'),
