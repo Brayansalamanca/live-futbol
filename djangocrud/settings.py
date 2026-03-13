@@ -62,19 +62,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'djangocrud.wsgi.application'
 
-# 4. CONFIGURACIÓN MONGODB
-MONGO_URL = os.getenv('MONGO_URL', 'mongodb+srv://brayan:3143401305@cluster0.uuxqot8.mongodb.net/livefutbol_db?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true')
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'livefutbol_db',
-        'ENFORCE_SCHEMA': False,
-        'CLIENT': {
-            'host': MONGO_URL,
+# 4. CONFIGURACIÓN BASE DE DATOS
+if 'RENDER' in os.environ:
+    # Producción: PostgreSQL
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600
+        )
+    }
+else:
+    # Local: SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

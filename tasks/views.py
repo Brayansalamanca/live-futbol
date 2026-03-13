@@ -29,7 +29,7 @@ class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
 # 🔐 FUNCIONES DE VERIFICACIÓN
 # ==========================================
 def es_coordinacion(user):
-    return user.is_authenticated and (user.groups.filter(name='coordinacion').exists() or user.username == 'rosita')
+    return user.is_authenticated and (user.groups.filter(name='coordinacion').exists() or user.username in ['rosita', 'rosita1'])
 
 def es_asistente(user):
     return user.is_authenticated and user.groups.filter(name='asistente bienestar').exists()
@@ -94,7 +94,7 @@ def ranking(request): return render(request, 'ranking.html')
 
 @user_passes_test(es_coordinacion)
 def api_obtener_usuarios_gestion(request):
-    usuarios = User.objects.exclude(username='rosita').exclude(is_superuser=True)
+    usuarios = User.objects.exclude(username__in=['rosita', 'rosita1']).exclude(is_superuser=True)
     data = [{'id': u.id, 'nombre': u.username, 'email': u.email, 'rol': u.first_name, 'estado': 'activo' if u.is_active else 'pendiente', 'grupo_asignado': u.groups.first().name if u.groups.exists() else 'Sin Grupo'} for u in usuarios]
     return JsonResponse(data, safe=False)
 
