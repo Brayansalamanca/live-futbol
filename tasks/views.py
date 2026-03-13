@@ -94,8 +94,22 @@ def ranking(request): return render(request, 'ranking.html')
 
 @user_passes_test(es_coordinacion)
 def api_obtener_usuarios_gestion(request):
-    usuarios = User.objects.exclude(username__in=['rosita', 'rosita1']).exclude(is_superuser=True)
-    data = [{'id': u.id, 'nombre': u.username, 'email': u.email, 'rol': u.first_name, 'estado': 'activo' if u.is_active else 'pendiente', 'grupo_asignado': u.groups.first().name if u.groups.exists() else 'Sin Grupo'} for u in usuarios]
+    # Djongo tiene problemas con consultas booleanas (ej. is_superuser=True),
+    # por eso filtramos en Python en lugar de usar exclude(is_superuser=True).
+    usuarios_qs = User.objects.exclude(username__in=['rosita', 'rosita1'])
+    usuarios = [u for u in usuarios_qs if not u.is_superuser]
+
+    data = [
+        {
+            'id': u.id,
+            'nombre': u.username,
+            'email': u.email,
+            'rol': u.first_name,
+            'estado': 'activo' if u.is_active else 'pendiente',
+            'grupo_asignado': u.groups.first().name if u.groups.exists() else 'Sin Grupo'
+        }
+        for u in usuarios
+    ]
     return JsonResponse(data, safe=False)
 
 @user_passes_test(es_coordinacion)

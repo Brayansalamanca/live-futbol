@@ -27,9 +27,16 @@
     async function cargarUsuarios() {
         try {
             const response = await fetch('/api/usuarios/');
-            const usuarios = await response.json();
             const tabla = document.getElementById('tabla-usuarios');
             tabla.innerHTML = '';
+
+            if (!response.ok) {
+                console.error('Error cargando usuarios:', response.status, response.statusText);
+                tabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#f5c6cb;">No se pudieron cargar los usuarios. Intenta recargar.</td></tr>`;
+                return;
+            }
+
+            const usuarios = await response.json();
 
             usuarios.forEach(u => {
                 const fila = document.createElement('tr');
@@ -57,6 +64,8 @@
             });
         } catch (error) {
             console.error("Error cargando usuarios:", error);
+            const tabla = document.getElementById('tabla-usuarios');
+            tabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#f5c6cb;">Ocurrió un error al cargar usuarios.</td></tr>`;
         }
     }
 
