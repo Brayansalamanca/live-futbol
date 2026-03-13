@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'corsheaders',
+    'djongo',
 ]
 
 MIDDLEWARE = [
@@ -63,11 +64,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'djangocrud.wsgi.application'
 
 # 4. CONFIGURACIÓN BASE DE DATOS
-# Local: SQLite
+MONGO_URL = os.getenv('MONGO_URL', 'mongodb+srv://brayan:3143401305@cluster0.uuxqot8.mongodb.net/livefutbol_db?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true')
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': 'livefutbol_db',
+        'ENFORCE_SCHEMA': False,
+        'CLIENT': {
+            'host': MONGO_URL,
+        }
     }
 }
 
