@@ -94,7 +94,7 @@ def ranking(request): return render(request, 'ranking.html')
 @user_passes_test(es_coordinacion)
 def api_obtener_usuarios_gestion(request):
     usuarios = User.objects.exclude(username='rosita').exclude(is_superuser=True)
-    data = [{'id': u.id, 'nombre': u.username, 'email': u.email, 'rol': u.first_name, 'estado': 'activo' if u.is_active else 'pendiente'} for u in usuarios]
+    data = [{'id': u.id, 'nombre': u.username, 'email': u.email, 'rol': u.first_name, 'estado': 'activo' if u.is_active else 'pendiente', 'grupo_asignado': u.groups.first().name if u.groups.exists() else 'Sin Grupo'} for u in usuarios]
     return JsonResponse(data, safe=False)
 
 @user_passes_test(es_coordinacion)
