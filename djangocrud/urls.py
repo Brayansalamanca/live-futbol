@@ -58,7 +58,7 @@ urlpatterns = [
     path('videos/', user_passes_test(es_asistente)(views.videos), name='videos'),
     path('voz/', user_passes_test(es_asistente)(views.voz), name='voz'),
     
-    path('api/guardar-entrega/', user_passes_test(es_profesor)(views.api_guardar_entrega), name='api_guardar_entrega'),
+    path('api/guardar-entrega/', user_passes_test(es_asistente)(views.api_guardar_entrega), name='api_guardar_entrega'),
     path('api/obtener-entregas/', login_required(views.api_obtener_entregas), name='api_obtener_entregas'),
     path('api/eliminar-entrega/<int:entrega_id>/', user_passes_test(es_asistente)(views.api_eliminar_entrega), name='api_eliminar_entrega'),
     path('api/guardar-baja/', user_passes_test(es_asistente)(views.api_guardar_baja), name='api_guardar_baja'),

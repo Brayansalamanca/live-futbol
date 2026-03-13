@@ -186,7 +186,7 @@ function verImg(src) {
 
 async function eliminar(id) {
     if (confirm("¿Eliminar este registro?")) {
-        const res = await fetch(`/api-eliminar-baja/${id}/`, { 
+        const res = await fetch(`/api/eliminar-baja/${id}/`, { 
             method: "POST", 
             headers: { "X-CSRFToken": "{{ csrf_token }}" } 
         });

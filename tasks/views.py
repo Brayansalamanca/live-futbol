@@ -116,13 +116,18 @@ def radar(request): return render(request, 'radar.html')
 def api_guardar_entrega(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        RegistroEntrega.objects.create(nombre=data.get('recibido_por'), objeto=data.get('balon'), curso=data.get('curso'))
+        RegistroEntrega.objects.create(
+            nombre=data.get('recibido_por'), 
+            objeto=data.get('balon'), 
+            curso=data.get('curso'),
+            lugar=data.get('lugar')
+        )
         return JsonResponse({"status": "success"})
 
 @login_required
 def api_obtener_entregas(request):
     entregas = RegistroEntrega.objects.all().order_by('-fecha')
-    data = [{"id": e.id, "nombre": e.nombre, "objeto": e.objeto, "curso": e.curso, "fecha": e.fecha.strftime('%d/%m/%Y %H:%M')} for e in entregas]
+    data = [{"id": e.id, "nombre": e.nombre, "objeto": e.objeto, "curso": e.curso, "lugar": e.lugar, "fecha": e.fecha.strftime('%d/%m/%Y %H:%M')} for e in entregas]
     return JsonResponse(data, safe=False)
 
 @user_passes_test(es_asistente)
@@ -135,13 +140,20 @@ def api_eliminar_entrega(request, entrega_id):
 def api_guardar_baja(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        BajaBalon.objects.create(tipo_balon=data.get('tipo'), causa=data.get('causa'), responsable=data.get('usuario'))
+        BajaBalon.objects.create(
+            tipo_balon=data.get('tipo'), 
+            causa=data.get('causa'), 
+            responsable=data.get('usuario'),
+            marca=data.get('lugar'),
+            alquilado_por=data.get('alquilado_por'),
+            foto=data.get('imagen') or ''
+        )
         return JsonResponse({"status": "success"})
 
 @login_required
 def api_obtener_bajas(request):
     bajas = BajaBalon.objects.all().order_by('-fecha')
-    data = [{"id": b.id, "tipo": b.tipo_balon, "causa": b.causa, "responsable": b.responsable, "fecha": b.fecha.strftime('%d/%m/%Y %H:%M')} for b in bajas]
+    data = [{"id": b.id, "tipo": b.tipo_balon, "causa": b.causa, "responsable": b.responsable, "lugar": b.marca, "alquilado_por": b.alquilado_por, "imagen": b.foto, "fecha": b.fecha.strftime('%d/%m/%Y %H:%M')} for b in bajas]
     return JsonResponse(data, safe=False)
 
 @user_passes_test(es_asistente)
