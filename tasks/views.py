@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.core.mail import send_mail
 from django.utils.encoding import force_bytes, force_str
 from django.http import JsonResponse
 import json
@@ -228,6 +229,17 @@ def api_cambiar_estado_usuario(request, user_id):
             if nombre_grupo:
                 g, _ = Group.objects.get_or_create(name=nombre_grupo)
                 u.groups.add(g)
+            # Enviar email de confirmación al usuario
+            try:
+                send_mail(
+                    'Cuenta Activada - Live Fútbol',
+                    f'Hola {u.username},\n\nTu solicitud de acceso ha sido aprobada. Tu cuenta está ahora activa y puedes iniciar sesión en la plataforma.\n\nSaludos,\nEquipo de Live Fútbol',
+                    'saebra581@gmail.com',
+                    [u.email],
+                    fail_silently=False,
+                )
+            except:
+                pass  # Si falla el email, continuar
         u.save()
         return JsonResponse({'status': 'ok'})
 
