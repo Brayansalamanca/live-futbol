@@ -2,194 +2,192 @@
 {% load static %}
 
 {% block content %}
-<div style="padding-top: 110px; max-width: 1100px; margin: 0 auto; padding-left: 20px; padding-right: 20px; text-align: center;">
+<div style="padding-top: 110px; max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <h1 style="background: linear-gradient(135deg,#0079ff,#00e5ff); color: white; padding: 20px; border-radius: 16px; margin-bottom: 20px;">🎯 Control de Balones Dañados y Objetos Perdidos</h1>
 
-    <h1 style="background-color: #e67e22; color: white; padding: 20px; border-radius: 15px; margin-bottom: 30px;">🔍 Radar de Objetos Perdidos</h1>
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; justify-content: space-between;">
+        <div style="flex: 1; min-width: 240px; background: #0f1d44; color: #e5f3ff; padding: 18px; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,.25);">
+            <strong style="font-size: .95rem; color: #81d3ff;">Modo principal</strong><br>Registra balones dañados y objetos perdidos con evidencias y ubicación.
+        </div>
 
-    <div style="background-color: #ffffff; padding: 30px; border-radius: 20px; color: #000; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: left;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
-            
+        <div style="flex: 1; min-width: 240px; background: #081d1f; color: #c2f7ff; padding: 18px; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,.25);">
+            <strong style="font-size: .95rem; color: #66ffdb;">Auto actualización</strong><br>Vista sincronizada para ver cambios de ciclo sin recargar.
+        </div>
+
+        <div style="flex: 1; min-width: 240px; background: #1f081f; color: #f4c0ff; padding: 18px; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,.25);">
+            <strong style="font-size: .95rem; color: #ff9bf7;">Depuración</strong><br>Edite, elimine o marque como resuelto en un solo panel.
+        </div>
+    </div>
+
+    <div style="background: #fff; border-radius: 18px; padding: 24px; box-shadow: 0 10px 28px rgba(0,0,0,.14); margin-bottom: 20px;">
+        <h2 style="margin-top: 0; color: #0b1a2b;">1. Reportar incidencia</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 12px;">
             <div>
-                <label style="color: #333; font-weight: bold; display: block; margin-bottom: 8px;">¿Quién lo encontró?</label>
-                <input id="nombre_reporta" placeholder="Nombre completo..." style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ddd; color: #000;">
-            </div>
-
-            <div>
-                <label style="color: #333; font-weight: bold; display: block; margin-bottom: 8px;">Curso</label>
-                <input id="curso_reporta" placeholder="Ej: 10A, 11B..." style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ddd; color: #000;">
-            </div>
-
-            <div>
-                <label style="color: #333; font-weight: bold; display: block; margin-bottom: 8px;">Tipo de Objeto</label>
-                <select id="tipo_objeto" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ddd; color: #000;">
-                    <option value="">Seleccionar</option>
-                    <option>Cartuchera</option>
-                    <option>Chaqueta / Saco</option>
-                    <option>Termo / Botella</option>
-                    <option>Cuaderno / Libro</option>
-                    <option>Gafas</option>
-                    <option>Llaves</option>
-                    <option>Celular</option>
-                    <option>Otro</option>
+                <label style="display:block;font-weight:700;margin-bottom:6px;color:#152b4f;">Tipo</label>
+                <select id="tipoIncidencia" style="width:100%;padding:10px;border-radius: 8px;border:1px solid #b0b0b0;">
+                    <option value="">Seleccione</option>
+                    <option value="Balón Dañado">Balón Dañado</option>
+                    <option value="Objeto Perdido">Objeto Perdido</option>
+                    <option value="Otro">Otro</option>
                 </select>
             </div>
-
             <div>
-                <label style="color: #333; font-weight: bold; display: block; margin-bottom: 8px;">Subir Foto (Evidencia)</label>
-                <input type="file" id="imagen_file" style="width: 100%; color: #333;">
+                <label style="display:block;font-weight:700;margin-bottom:6px;color:#152b4f;">Quien reporta</label>
+                <input id="reportadoPor" placeholder="Nombre o responsable" style="width:100%;padding:10px;border-radius:8px;border:1px solid #b0b0b0;" />
+            </div>
+            <div>
+                <label style="display:block;font-weight:700;margin-bottom:6px;color:#152b4f;">Curso</label>
+                <input id="cursoReporta" placeholder="Ej: 10A" style="width:100%;padding:10px;border-radius:8px;border:1px solid #b0b0b0;" />
+            </div>
+            <div>
+                <label style="display:block;font-weight:700;margin-bottom:6px;color:#152b4f;">Lugar</label>
+                <input id="lugarReporta" placeholder="Ej: Cancha fútbol" style="width:100%;padding:10px;border-radius:8px;border:1px solid #b0b0b0;" />
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px;">
             <div>
-                <label style="color: #333; font-weight: bold; display: block; margin-bottom: 8px;">Color Predominante</label>
-                <input id="color_objeto" placeholder="Ej: Azul con negro..." style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ddd; color: #000;">
+                <label style="display:block;font-weight:700;margin-bottom:6px;color:#152b4f;">Descripción</label>
+                <textarea id="descripcionIncidencia" placeholder="Detalle (daño / característica / marca)" style="width:100%;height:100px;padding:10px;border-radius:8px;border:1px solid #b0b0b0;"></textarea>
             </div>
             <div>
-                <label style="color: #333; font-weight: bold; display: block; margin-bottom: 8px;">Descripción o Seña Particular</label>
-                <textarea id="descripcion_dif" placeholder="Ej: Tiene un sticker de Batman, le falta un botón..." style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ddd; color: #000; min-height: 60px;"></textarea>
+                <label style="display:block;font-weight:700;margin-bottom:6px;color:#152b4f;">Foto</label>
+                <input id="imagenIncidencia" type="file" accept="image/*" style="width:100%;"/>
+                <small style="color:#666;">Si no sube foto, se usa imagen por defecto.</small>
             </div>
         </div>
 
-        <button onclick="registrarObjeto()" style="background-color: #e67e22; color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px;">
-            🚀 PUBLICAR OBJETO ENCONTRADO
+        <button onclick="guardarIncidencia()" style="background:#28a745;color:white;border:0;padding:12px 18px;font-weight:700;border-radius:8px;cursor:pointer;font-size:1rem;">
+            📌 Guardar Incidencia
         </button>
     </div>
 
-    <input id="busqueda" placeholder="🔍 Buscar por objeto, color o descripción..." onkeyup="dibujar()" 
-           style="width: 100%; padding: 15px; border-radius: 15px; border: none; font-size: 16px; color: #000; margin-bottom: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <div style="margin-bottom: 20px; display:flex; gap:8px; align-items:center;">
+        <h2 style="margin:0;color:#22335b;">2. Historial unificado</h2>
+        <button onclick="cargarIncidencias()" style="background:#3483fa;color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;">🔄 Actualizar</button>
+    </div>
 
-    <h2 style="background-color: #2c3e50; color: white; padding: 12px; border-radius: 10px; margin-bottom: 15px;">📦 Galería de Objetos Encontrados</h2>
-    <div style="overflow-x: auto; background: white; border-radius: 15px; margin-bottom: 40px;">
-        <table style="width: 100%; border-collapse: collapse; color: #333;">
-            <thead style="background-color: #2c3e50; color: white;">
-                <tr>
-                    <th style="padding: 15px;">Foto</th>
-                    <th>Información</th>
-                    <th>Color / Detalle</th>
-                    <th>Reportado por</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="tablaObjetos"></tbody>
+    <div style="overflow-x:auto; background:#fff; border:1px solid #d3d8e4; border-radius:14px; padding:16px; box-shadow:0 8px 18px rgba(0,0,0,.08);">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;color:#1f2d46;">
+            <thead style="background:#f2f6ff;border-bottom:1px solid #c2d0e4;"><tr>
+                <th style="padding:10px;">Tipo</th>
+                <th>Descripción</th>
+                <th>Lugar</th>
+                <th>Reportó</th>
+                <th>Curso</th>
+                <th>Fecha</th>
+                <th>Foto</th>
+                <th>Acción</th>
+            </tr></thead>
+            <tbody id="tablaIncidencias"></tbody>
         </table>
     </div>
 </div>
 
-<div id="visor_lost" onclick="cerrarVisor()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; justify-content: center; align-items: center;">
-    <img id="img_visor_lost" style="max-width: 90%; max-height: 90%; border: 3px solid white; border-radius: 5px;">
+<div id="visor_radar" onclick="this.style.display='none'" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;justify-content:center;align-items:center;"> 
+    <img id="img_radar" style="max-width:92%;max-height:92%;border:3px solid #fff;border-radius:8px;" />
 </div>
 
-<style>
-    .img-lost { 
-        width: 100px; height: 100px; object-fit: cover; border-radius: 10px; 
-        border: 2px solid #e67e22; cursor: pointer; transition: 0.3s;
+<script>
+const IMG_DEFAULT_RADAR = '{% static "sin evidencia.webp" %}';
+
+async function cargarIncidencias() {
+    const [bajas, objetos] = await Promise.all([
+        fetch('{% url "api_obtener_bajas" %}').then(r=>r.json()).catch(()=>[]),
+        fetch('{% url "api_obtener_objetos" %}').then(r=>r.json()).catch(()=>[])
+    ]);
+    const combinadas = [
+        ...bajas.map(x => ({...x, tipo:'Balón Dañado', fuente:'baja'})),
+        ...objetos.map(x => ({...x, tipo: x.tipo_objeto || 'Objeto Perdido', fuente:'objeto'}))
+    ];
+
+    const tbody = document.getElementById('tablaIncidencias');
+    if(!combinadas.length){
+        tbody.innerHTML = '<tr><td colspan="8" style="padding:14px;text-align:center;color:#667;">No hay incidencias registradas.</td></tr>';
+        return;
     }
-    .img-lost:hover { transform: scale(1.05); }
-    td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; vertical-align: middle; }
-    .btn-borrar { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+    tbody.innerHTML = combinadas.map(item => {
+        const fecha = item.fecha ? new Date(item.fecha).toLocaleString('es-CO') : '-';
+        const img = item.imagen || item.foto || IMG_DEFAULT_RADAR;
+        const lugar = item.lugar || item.marca || 'Sin lugar';
+        const curso = item.curso || item.curso_apartado || 'N/A';
+        const reporte = item.responsable || item.nombre || item.nombre_reporta || 'Anónimo';
+        const descripcion = item.causa || item.descripcion || item.dif || item.detalle || '-';
+
+        return `<tr>
+            <td style="padding:8px;">${item.tipo}</td>
+            <td>${descripcion}</td>
+            <td>${lugar}</td>
+            <td>${reporte}</td>
+            <td>${curso}</td>
+            <td>${fecha}</td>
+            <td><img src="${img}" onerror="this.src='${IMG_DEFAULT_RADAR}'" style="width:45px;height:45px;object-fit:cover;border-radius:6px;cursor:pointer;" onclick="verRadarImg('${img}')"></td>
+            <td><button onclick="borrarIncidencia('${item.fuente}','${item.id || item._id}')" style="color:#fff;background:#f55;border:0;border-radius:8px;padding:4px 8px;cursor:pointer;">Borrar</button></td>
+        </tr>`;
+    }).join('');
+}
+
+async function guardarIncidencia() {
+    const tipo = document.getElementById('tipoIncidencia').value;
+    const reportado = document.getElementById('reportadoPor').value.trim() || 'Anónimo';
+    const curso = document.getElementById('cursoReporta').value.trim() || 'N/A';
+    let lugar = document.getElementById('lugarReporta').value.trim();
+    lugar = lugar || 'Sin lugar';
+    const descripcion = document.getElementById('descripcionIncidencia').value.trim();
+    const file = document.getElementById('imagenIncidencia').files[0];
+
+    if (!tipo) { alert('Selecciona un tipo de incidencia'); return; }
+
+    const send = async (picture) => {
+        if(tipo === 'Balón Dañado') {
+            const body = { tipo_balon: tipo, causa: descripcion || 'Daño reportado', responsable: reportado, marca: lugar, alquilado_por: curso, imagen: picture || IMG_DEFAULT_RADAR };
+            await fetch('{% url "api_guardar_baja" %}', { method:'POST', headers:{ 'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}' }, body:JSON.stringify(body)});
+        } else {
+            const body = { nombre: reportado, curso: curso, tipo: tipo, color:'-', dif: descripcion || '-', imagen: picture || IMG_DEFAULT_RADAR };
+            await fetch('{% url "api_guardar_objeto" %}', { method:'POST', headers:{ 'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}' }, body:JSON.stringify(body)});
+        }
+        await cargarIncidencias();
+        alert('Incidencia guardada correctamente');
+        document.getElementById('tipoIncidencia').value='';
+        document.getElementById('reportadoPor').value='';
+        document.getElementById('cursoReporta').value='';
+        document.getElementById('lugarReporta').value='';
+        document.getElementById('descripcionIncidencia').value='';
+        document.getElementById('imagenIncidencia').value='';
+    };
+
+    if(file){
+        const reader = new FileReader();
+        reader.onload = e=>send(e.target.result);
+        reader.readAsDataURL(file);
+    } else {
+        send(null);
+    }
+}
+
+async function borrarIncidencia(fuente, id) {
+    if(!confirm('¿Eliminar esta incidencia?')) return;
+    const url = fuente === 'baja' ? `/api/eliminar-baja/${id}/` : `/api/eliminar-objeto/${id}/`;
+    await fetch(url, { method:'POST', headers:{ 'X-CSRFToken':'{{ csrf_token }}' } });
+    await cargarIncidencias();
+}
+
+function verRadarImg(src) {
+    const visor = document.getElementById('visor_radar');
+    const img = document.getElementById('img_radar');
+    img.src = src || IMG_DEFAULT_RADAR;
+    visor.style.display = 'flex';
+}
+
+cargarIncidencias();
+setInterval(cargarIncidencias, 8000);
+</script>
+
+<style>
+    body { background: #f2f7ff; }
+    table td, table th { border: 1px solid #dfe6f1; }
 </style>
 
-<script>
-let objetosGlobal = [];
-
-// CARGAR DATOS CON POLLING LENTO (8 segundos para no saturar)
-async function cargarObjetos() {
-    try {
-        const res = await fetch("{% url 'api_obtener_objetos' %}");
-        const data = await res.json();
-        
-        // Solo redibuja si hay cambios en la cantidad
-        if (data.length !== objetosGlobal.length) {
-            objetosGlobal = data;
-            dibujar();
-        }
-    } catch (e) { console.error("Error al cargar:", e); }
-}
-
-async function registrarObjeto() {
-    const nombre = document.getElementById("nombre_reporta").value.trim();
-    const curso = document.getElementById("curso_reporta").value.trim();
-    const tipo = document.getElementById("tipo_objeto").value;
-    const color = document.getElementById("color_objeto").value.trim();
-    const dif = document.getElementById("descripcion_dif").value.trim();
-    const file = document.getElementById("imagen_file").files[0];
-
-    if (!nombre || !tipo || !file) { 
-        alert("⚠️ Por favor completa el nombre, el tipo de objeto y sube una foto."); 
-        return; 
-    }
-
-    const reader = new FileReader();
-    reader.onload = async e => {
-        const datos = {
-            nombre: nombre,
-            curso: curso,
-            tipo: tipo,
-            color: color,
-            dif: dif,
-            foto: e.target.result // Se envía como Base64
-        };
-
-        const res = await fetch("{% url 'api_guardar_objeto' %}", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-            body: JSON.stringify(datos)
-        });
-
-        if (res.ok) {
-            alert("✅ Objeto reportado con éxito.");
-            location.reload();
-        }
-    };
-    reader.readAsDataURL(file);
-}
-
-function dibujar() {
-    let html = "";
-    let filtro = document.getElementById("busqueda").value.toLowerCase();
-
-    objetosGlobal.forEach((obj) => {
-        // Buscador inteligente
-        const contenidoBusqueda = (obj.tipo_objeto + obj.color + obj.descripcion).toLowerCase();
-        if (!contenidoBusqueda.includes(filtro)) return;
-
-        html += `
-        <tr>
-            <td><img class="img-lost" src="${obj.foto || ''}" onclick="verImagen('${obj.foto}')"></td>
-            <td><b style="font-size:1.1em; color:#d35400;">${obj.tipo_objeto}</b><br><small>${obj.fecha ? new Date(obj.fecha).toLocaleDateString() : ''}</small></td>
-            <td><b>Color:</b> ${obj.color}<br><small>${obj.descripcion}</small></td>
-            <td><b>${obj.nombre_reporta}</b><br>Curso: ${obj.curso || 'N/A'}</td>
-            <td>
-                <button class="btn-borrar" onclick="eliminarObjeto('${obj.id}')">Eliminar</button>
-            </td>
-        </tr>`;
-    });
-
-    document.getElementById("tablaObjetos").innerHTML = html || "<tr><td colspan='5'>No se han encontrado objetos con ese criterio.</td></tr>";
-}
-
-async function eliminarObjeto(id) {
-    if(confirm("¿Este objeto ya fue devuelto a su dueño?")) {
-        const res = await fetch(`/api/eliminar-objeto/${id}/`, {
-            method: "POST",
-            headers: { "X-CSRFToken": "{{ csrf_token }}" }
-        });
-        if(res.ok) cargarObjetos();
-    }
-}
-
-// VISOR
-function verImagen(s) {
-    const v = document.getElementById("visor_lost");
-    const img = document.getElementById("img_visor_lost");
-    img.src = s; v.style.display = "flex";
-}
-function cerrarVisor() { document.getElementById("visor_lost").style.display = "none"; }
-
-document.addEventListener("DOMContentLoaded", () => {
-    cargarObjetos();
-    setInterval(cargarObjetos, 8000); // Polling cada 8 segundos
-});
-</script>
 {% endblock %}

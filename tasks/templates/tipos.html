@@ -3,14 +3,34 @@
 <div style="padding: 100px 20px; background: #000d1a; min-height: 100vh; color: white; font-family: 'Inter', sans-serif;">
     
     <h1 style="text-align: center; color: #00ccff; text-transform: uppercase; font-weight: 900;">👕 Catálogo de Inventario</h1>
-    
+    <div style="margin: 10px 0; text-align: center;">
+        <label style="color: #00ccff;">Filtrar por talla:</label>
+        <select id="filtroTalla" style="padding: 8px; border-radius: 8px; border:1px solid #0059b3; background:#001a33; color:white;">
+            <option value="">Todas</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+            <option value="10">10</option>
+            <option value="12">12</option>
+            <option value="14">14</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+        </select>
+    </div>
+
     <div style="overflow-x: auto; background: rgba(0, 43, 92, 0.3); border-radius: 15px; border: 1px solid #0059b3; margin-top: 20px;">
         <table style="width: 100%; border-collapse: collapse;">
             <thead style="background: #0059b3; color: white; text-transform: uppercase; font-size: 13px;">
                 <tr>
                     <th style="padding: 15px;">Imagen</th>
                     <th>Prenda</th>
-                    <th>Cantidad</th>
+                    <th>Talla</th>
+                    <th>Stock</th>
+                    <th>Reservados</th>
+                    <th>Devolución</th>
                     <th>Estado / Responsable</th>
                     <th>Acción</th>
                 </tr>
@@ -52,7 +72,10 @@
 
     async function cargar() {
         try {
-            const res = await fetch("{% url 'api_obtener_prendas' %}");
+            const filtroTalla = document.getElementById('filtroTalla').value;
+            const url = new URL("{% url 'api_obtener_prendas' %}", window.location.origin);
+            if (filtroTalla) url.searchParams.append('talla', filtroTalla);
+            const res = await fetch(url.toString());
             const prendas = await res.json();
             
             let htmlCatalogo = "";
@@ -66,7 +89,10 @@
                 <tr style="border-bottom: 1px solid rgba(0,89,179,0.2);">
                     <td><img src="${p.imagen}" style="width: 70px; height: 70px; border-radius: 10px; margin: 10px; object-fit: cover; border: 2px solid #0059b3;"></td>
                     <td style="font-weight: bold;">${p.nombre}</td>
+                    <td style="font-weight: bold;">${p.talla || '-'}</td>
                     <td style="color: #27ae60; font-weight: bold;">${p.cantidad}</td>
+                    <td style="color: #f1c40f; font-weight: bold;">${p.cantidad_apartada || 0}</td>
+                    <td style="color: #9bd4ff; font-weight: bold;">${p.fecha_devolucion || '---'}</td>
                     <td>
                         <span style="background: ${esDisponible ? '#27ae60' : '#e74c3c'}; padding: 4px 10px; border-radius: 20px; font-size: 11px;">
                             ${esDisponible ? "✅ Disponible" : "🚩 " + p.profesor}
@@ -100,6 +126,14 @@
                             <div>
                                 <label style="font-size: 11px; color: #00ccff;">FECHA (Mín. 10 días)</label>
                                 <input type="date" id="fecha-${p.id}" min="${obtenerFechaMinima()}" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #00ccff;">CANTIDAD A ALQUILAR</label>
+                                <input type="number" id="cantidad-${p.id}" min="1" value="1" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #00ccff;">DÍAS DE ALQUILER</label>
+                                <input type="number" id="dias-${p.id}" min="1" value="1" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
                             </div>
                             <div style="display: flex; gap: 5px;">
                                 <button onclick="confirmarApartado('${p.id}')" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; flex:1;">Confirmar</button>
@@ -147,16 +181,18 @@
         const curso = document.getElementById(`curso-${id}`).value;
         const evento = document.getElementById(`evento-${id}`).value;
         const fecha = document.getElementById(`fecha-${id}`).value;
+        const dias = document.getElementById(`dias-${id}`).value;
+        const cantidad = document.getElementById(`cantidad-${id}`).value;
 
-        if (!curso || !evento || !fecha) {
-            alert("Por favor completa todos los campos.");
+        if (!curso || !evento || !fecha || !dias || !cantidad) {
+            alert("Por favor completa todos los campos (incluye días y cantidad a alquilar).");
             return;
         }
 
         const res = await fetch(`/api/apartar-prenda/${id}/`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-            body: JSON.stringify({ nombre, curso, evento, fecha, accion: 'apartar' })
+            body: JSON.stringify({ nombre, curso, evento, fecha, dias_alquiler: dias, cantidad_alquilada: cantidad, accion: 'apartar' })
         });
 
         if (res.ok) cargar();
@@ -171,6 +207,8 @@
         });
         if (res.ok) cargar();
     }
+
+    document.getElementById('filtroTalla').addEventListener('change', cargar);
 
     async function liberar(id) {
         if (!confirm("¿Confirmar que la prenda ha sido devuelta?")) return;

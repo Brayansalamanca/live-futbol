@@ -46,6 +46,7 @@ class ObjetoPerdido(models.Model):
 class PrendaRopa(models.Model):
     objeto = models.CharField(max_length=100)
     cantidad = models.IntegerField(default=1)
+    cantidad_apartada = models.IntegerField(default=0)
     talla = models.CharField(max_length=20, blank=True, null=True)
     estado = models.CharField(max_length=20, default='Disponible')
     condicion = models.CharField(max_length=20, default='Óptimo')
@@ -56,6 +57,7 @@ class PrendaRopa(models.Model):
     curso_apartado = models.CharField(max_length=50, blank=True, null=True)
     evento_apartado = models.CharField(max_length=100, blank=True, null=True)
     fecha_uso = models.DateField(blank=True, null=True)
+    dias_alquiler = models.IntegerField(blank=True, null=True, default=0)
     
     imagen = models.TextField() # Base64 o URL
     devuelto = models.BooleanField(default=True)

@@ -6,6 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.utils import timezone
 from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordResetView
+from datetime import datetime, timedelta
 from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import send_mail
@@ -142,7 +143,7 @@ def api_guardar_entrega(request):
 @login_required
 def api_obtener_entregas(request):
     entregas = RegistroEntrega.objects.all().order_by('-fecha')
-    data = [{"id": e.id, "nombre": e.nombre, "objeto": e.objeto, "curso": e.curso, "lugar": e.lugar, "fecha": e.fecha.strftime('%d/%m/%Y %H:%M')} for e in entregas]
+    data = [{"id": e.id, "nombre": e.nombre, "objeto": e.objeto, "curso": e.curso, "lugar": e.lugar, "fecha": e.fecha.isoformat()} for e in entregas]
     return JsonResponse(data, safe=False)
 
 @user_passes_test(es_asistente)
@@ -150,25 +151,41 @@ def api_eliminar_entrega(request, entrega_id):
     if request.method == "POST":
         get_object_or_404(RegistroEntrega, pk=entrega_id).delete()
         return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
+
+@user_passes_test(es_asistente)
+def api_editar_entrega(request, entrega_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        entrega = get_object_or_404(RegistroEntrega, pk=entrega_id)
+        entrega.nombre = data.get('nombre', entrega.nombre)
+        entrega.objeto = data.get('objeto', entrega.objeto)
+        entrega.curso = data.get('curso', entrega.curso)
+        entrega.lugar = data.get('lugar', entrega.lugar)
+        entrega.save()
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
 
 @user_passes_test(es_asistente)
 def api_guardar_baja(request):
     if request.method == "POST":
         data = json.loads(request.body)
+        # Imagen por defecto para bajas sin evidencia
+        imagen_defecto = data.get('imagen') or '/static/sin evidencia.webp'
         BajaBalon.objects.create(
             tipo_balon=data.get('tipo'), 
             causa=data.get('causa'), 
             responsable=data.get('usuario'),
             marca=data.get('lugar'),
             alquilado_por=data.get('alquilado_por'),
-            foto=data.get('imagen') or ''
+            foto=imagen_defecto
         )
         return JsonResponse({"status": "success"})
 
 @login_required
 def api_obtener_bajas(request):
     bajas = BajaBalon.objects.all().order_by('-fecha')
-    data = [{"id": b.id, "tipo": b.tipo_balon, "causa": b.causa, "responsable": b.responsable, "lugar": b.marca, "alquilado_por": b.alquilado_por, "imagen": b.foto, "fecha": b.fecha.strftime('%d/%m/%Y %H:%M')} for b in bajas]
+    data = [{"id": b.id, "tipo": b.tipo_balon, "causa": b.causa, "responsable": b.responsable, "lugar": b.marca, "alquilado_por": b.alquilado_por, "imagen": b.foto, "fecha": b.fecha.isoformat()} for b in bajas]
     return JsonResponse(data, safe=False)
 
 @user_passes_test(es_asistente)
@@ -184,12 +201,48 @@ def api_eliminar_baja(request, baja_id):
 def api_guardar_prenda(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        PrendaRopa.objects.create(objeto=data.get('nombre'), cantidad=int(data.get('cantidad', 1)), talla=data.get('talla', 'N/A'), estado='Disponible')
+        PrendaRopa.objects.create(
+            objeto=data.get('nombre'),
+            cantidad=int(data.get('cantidad', 1)),
+            talla=data.get('talla', ''),
+            imagen=data.get('imagen', ''),
+            estado='Disponible'
+        )
         return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
 
 @login_required
 def api_obtener_prendas(request):
-    return JsonResponse(list(PrendaRopa.objects.all().values().order_by('-fecha_registro')), safe=False)
+    talla_filtro = request.GET.get('talla')
+    if talla_filtro:
+        prendas = PrendaRopa.objects.filter(talla__iexact=talla_filtro)
+    else:
+        prendas = PrendaRopa.objects.all()
+    prendas = prendas.order_by('-fecha_registro')
+    result = []
+    for p in prendas:
+        if p.fecha_uso and p.dias_alquiler:
+            fecha_devolucion = (p.fecha_uso + timedelta(days=p.dias_alquiler)).strftime('%d/%m/%Y')
+        else:
+            fecha_devolucion = ''
+
+        result.append({
+            'id': p.id,
+            'nombre': p.objeto,
+            'cantidad': p.cantidad,
+            'cantidad_apartada': p.cantidad_apartada,
+            'talla': p.talla,
+            'estado': p.estado,
+            'detalle_defecto': p.detalle_defecto,
+            'profesor': p.nombre_apartado or '',
+            'curso': p.curso_apartado or '',
+            'evento': p.evento_apartado or '',
+            'dias_alquiler': p.dias_alquiler,
+            'fecha_uso': p.fecha_uso.strftime('%d/%m/%Y') if p.fecha_uso else '',
+            'fecha_devolucion': fecha_devolucion,
+            'imagen': p.imagen
+        })
+    return JsonResponse(result, safe=False)
 
 @login_required
 def tasks(request):
@@ -264,8 +317,54 @@ def formulario(request): return render(request, 'formulario.html')
 @login_required
 def api_apartar_prenda(request, prenda_id):
     prenda = get_object_or_404(PrendaRopa, id=prenda_id)
-    prenda.estado = 'Apartado'
-    prenda.save()
+
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+    data = json.loads(request.body)
+    accion = data.get('accion', 'apartar')
+
+    if accion == 'apartar':
+        cantidad_solicitada = int(data.get('cantidad_alquilada', 1))
+        if cantidad_solicitada < 1:
+            return JsonResponse({'status': 'error', 'message': 'Cantidad a apartar debe ser 1 o mayor'}, status=400)
+        if cantidad_solicitada > prenda.cantidad:
+            return JsonResponse({'status': 'error', 'message': 'No hay suficientes unidades disponibles'}, status=400)
+
+        prenda.cantidad -= cantidad_solicitada
+        prenda.cantidad_apartada += cantidad_solicitada
+        prenda.estado = 'Apartado' if prenda.cantidad == 0 else 'Parcialmente Apartado'
+        prenda.nombre_apartado = data.get('nombre') or prenda.nombre_apartado
+        prenda.curso_apartado = data.get('curso') or prenda.curso_apartado
+        prenda.evento_apartado = data.get('evento') or prenda.evento_apartado
+
+        fecha_value = data.get('fecha')
+        if fecha_value:
+            try:
+                prenda.fecha_uso = datetime.fromisoformat(fecha_value).date()
+            except Exception:
+                try:
+                    prenda.fecha_uso = datetime.strptime(fecha_value, '%Y-%m-%d').date()
+                except Exception:
+                    pass
+
+        prenda.dias_alquiler = int(data.get('dias_alquiler', prenda.dias_alquiler or 0))
+        prenda.save()
+
+    elif accion == 'liberar':
+        prenda.cantidad += prenda.cantidad_apartada
+        prenda.cantidad_apartada = 0
+        prenda.estado = 'Disponible'
+        prenda.nombre_apartado = ''
+        prenda.curso_apartado = ''
+        prenda.evento_apartado = ''
+        prenda.fecha_uso = None
+        prenda.dias_alquiler = 0
+        prenda.save()
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Acción desconocida'}, status=400)
+
     return JsonResponse({'status': 'ok'})
 
 @user_passes_test(es_coordinacion)

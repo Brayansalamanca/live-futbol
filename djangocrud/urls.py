@@ -57,6 +57,8 @@ urlpatterns = [
     path('api/obtener-prendas/', login_required(views.api_obtener_prendas), name='api_obtener_prendas'),
     path('api/eliminar-prenda/<int:prenda_id>/', user_passes_test(es_coordinacion)(views.api_eliminar_prenda), name='api_eliminar_prenda'),
 
+    path('api/editar-entrega/<int:entrega_id>/', user_passes_test(es_asistente)(views.api_editar_entrega), name='api_editar_entrega'),
+
     # --- ⚽ MÓDULO BALONES (Radar, Renta y Bajas) ---
     path('radar/', user_passes_test(es_asistente)(views.radar), name='radar'), 
     path('videos/', user_passes_test(es_asistente)(views.videos), name='videos'),

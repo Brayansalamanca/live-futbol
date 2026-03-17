@@ -85,7 +85,7 @@
 
 <script>
 let datosGlobales = [];
-const IMG_DEFAULT = "https://via.placeholder.com/150?text=Sin+Evidencia";
+const IMG_DEFAULT = "{% static 'sin evidencia.webp' %}";
 
 async function sincronizar() {
     try {
@@ -111,7 +111,18 @@ function dibujarTabla(data) {
         const lugar = b.lugar || 'Ubicación no especificada';
         const causa = b.causa || 'Reportado';
         const img = b.imagen || IMG_DEFAULT;
-        const fecha = b.fecha ? new Date(b.fecha).toLocaleString() : 'Reciente';
+        let fecha = 'Reciente';
+        if (b.fecha) {
+            const date = new Date(b.fecha);
+            if (!isNaN(date.getTime())) {
+                fecha = date.toLocaleString();
+            } else {
+                // Manejo seguro si el backend devuelve un string no ISO
+                const fallback = b.fecha.replace(/\//g, '-').replace(' ', 'T');
+                const date2 = new Date(fallback);
+                fecha = !isNaN(date2.getTime()) ? date2.toLocaleString() : b.fecha;
+            }
+        }
 
         return `
             <tr>
