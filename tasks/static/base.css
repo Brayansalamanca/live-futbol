@@ -185,10 +185,13 @@ th {
     text-transform: uppercase;
 }
 
+/* 7. TABLA DE PRÉSTAMOS - CORRECCIÓN DE VISIBILIDAD */
 td {
     padding: 15px;
-    color:black;
-    font-size: 14px;
+    color: #1a1a1a !important; /* Fuerza el color negro casi puro */
+    font-size: 16px;           /* Un poco más grande para que se lea mejor */
+    font-weight: 600;          /* Grosor medio para resaltar el nombre */
+    border-bottom: 1px solid #eee;
 }
 
 /* Filas de la tabla con el diseño de reporte */
