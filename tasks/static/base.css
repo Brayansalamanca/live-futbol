@@ -179,6 +179,7 @@ thead tr {
 }
 
 th {
+    color:black;
     padding: 15px;
     font-size: 13px;
     text-transform: uppercase;
