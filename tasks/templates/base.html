@@ -19,7 +19,65 @@
         });
     </script>
 
- 
+    <style>
+        nav {
+            background-color: #88eafcf2;
+            position: fixed;
+            top: 0; width: 100%;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            z-index: 999;
+            box-shadow: #504783 2px 5px 45px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 70px;
+        }
+
+        nav ul {
+            display: flex; list-style: none; align-items: center; justify-content: center;
+            gap: 25px; padding: 10px 15px; margin: 0; flex-wrap: wrap;
+        }
+
+        nav ul li a {
+            background-color: #ffffff; color: #000000; text-decoration: none;
+            padding: 8px 16px; border-radius: 10px; font-weight: bold;
+            font-size: 18px; transition: 0.3s ease;
+        }
+
+        nav ul li a:hover { background-color: #6155ff; color: #ffffff; }
+
+        .menu-toggle {
+            display: none; cursor: pointer; font-size: 28px; padding: 10px 15px;
+            position: absolute; left: 10px; top: 10px; z-index: 1000;
+            color: #fff; background: #84ccc0; border-radius: 5px; border: none;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: flex; justify-content: center; align-items: center; }
+            nav ul {
+                flex-direction: column; gap: 10px; width: 100%; padding: 60px 0 20px 0;
+                margin: 0; display: none; background-color: #70b3bef2;
+                position: absolute; top: 0; left: 0; box-shadow: 0 10px 15px rgba(0,0,0,0.6);
+            }
+            nav ul.active { display: flex; }
+            nav ul li.img { display: none; }
+            nav { background-color: transparent !important; box-shadow: none; }
+        }
+
+        body {
+            background-color: #78cbdaf2;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff; margin: 0; padding-top: 5rem; text-align: center;
+        }
+
+        .logo-container img { height: 4rem; width: 4rem; border-radius: 50%; box-shadow: #2533af 2px 5px 25px; }
+        
+        /* Estilo para el nombre del grupo/rol en el menú */
+        .user-role-tag {
+            font-size: 0.7rem;
+            display: block;
+            color: #504783;
+            margin-top: -5px;
+        }
+    </style>
 </head>
 <body>
     <nav>
