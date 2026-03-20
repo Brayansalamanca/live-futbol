@@ -1,30 +1,22 @@
 /* ================= VARIABLES PRO ================= */
 
 :root {
-  /* Fondo principal: Un azul muy pálido, casi blanco, más moderno */
-  --bg: #f8fafc;
-  --bg-soft: #f1f5f9;
+  --bg: #f4f9ff;
+  --bg-soft: #eaf4ff;
 
-  /* Navbar: Negro azulado profundo con transparencia para el efecto Blur */
-  --nav: rgba(15, 23, 42, 0.9); 
-  
-  /* Tarjetas: No uses negro puro (#000). Usa un "Dark Mode" azulado */
-  --card: #1e293b; 
+  --nav: rgba(255,255,255,0.85);
+  --card: #ffffff;
 
-  /* Textos: Mejor contraste para lectura */
-  --text: #f8fafc;        /* Texto claro sobre tarjetas oscuras */
-  --text-soft: #94a3b8;   /* Para descripciones menos importantes */
-  --text-dark: #1e293b;   /* Para texto sobre el fondo claro (body) */
+  --text: #1e293b;
+  --text-soft: #64748b;
 
-  /* Colores de Marca (Fútbol) */
-  --primary: #3b82f6;     /* Azul deportivo eléctrico */
-  --secondary: #10b981;   /* Verde césped para éxitos o botones */
+  --primary: #2e86de;
+  --secondary: #27ae60;
 
-  --danger: #ff4757;
+  --danger: #ef4444;
 
-  --radius: 16px;
-  /* Sombra más natural y profunda */
-  --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 /* 🌙 MODO NOCHE */
@@ -53,7 +45,7 @@
 
 body {
   margin: 0;
-  padding-top: 125px;
+  padding-top: 85px;
   font-family: 'Poppins', sans-serif;
 
   background: linear-gradient(135deg, var(--bg), var(--bg-soft));
@@ -199,18 +191,9 @@ h1 {
   margin: 20px auto;
   max-width: 90%;
 
-  /* El degradado de fondo */
   background: linear-gradient(135deg, var(--primary), var(--secondary));
-
-  /* 1. Recorta el fondo al texto (Prefijo para Chrome/Safari) */
   -webkit-background-clip: text;
-  /* 2. Recorta el fondo al texto (Propiedad estándar para Firefox/Otros) */
-  background-clip: text;
-
-  /* 3. Hace que el color sólido del texto sea transparente para que se vea el fondo */
   -webkit-text-fill-color: transparent;
-  /* 4. Respaldo para navegadores que no soportan text-fill-color */
-  color: transparent; 
 }
 
 h2, h3 {
