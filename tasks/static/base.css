@@ -198,9 +198,18 @@ h1 {
   margin: 20px auto;
   max-width: 90%;
 
+  /* El degradado de fondo */
   background: linear-gradient(135deg, var(--primary), var(--secondary));
+
+  /* 1. Recorta el fondo al texto (Prefijo para Chrome/Safari) */
   -webkit-background-clip: text;
+  /* 2. Recorta el fondo al texto (Propiedad estándar para Firefox/Otros) */
+  background-clip: text;
+
+  /* 3. Hace que el color sólido del texto sea transparente para que se vea el fondo */
   -webkit-text-fill-color: transparent;
+  /* 4. Respaldo para navegadores que no soportan text-fill-color */
+  color: transparent; 
 }
 
 h2, h3 {
