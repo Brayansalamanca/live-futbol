@@ -1,25 +1,68 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4" style="color: #ffcc00; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">
+<div class="container-fluid" style="padding: 100px 20px; background: #000d1a; min-height: 100vh; color: white; font-family: 'Inter', sans-serif;">
+    
+    <h2 class="text-center mb-4" style="color: #ffcc00; text-transform: uppercase; font-weight: 900; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">
         🏆 Gestión de Usuarios y Permisos
     </h2>
-    
-    <div class="table-responsive" style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 15px; backdrop-filter: blur(10px);">
-        <table class="table table-hover" style="color: white; border-collapse: separate; border-spacing: 0 10px;">
-            <thead>
-                <tr style="background-color: #504783; color: white;">
-                    <th>Usuario</th>
-                    <th>Email</th>
-                    <th>Rol Solicitado</th>
-                    <th>Grupo Actual</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-usuarios">
-                </tbody>
-        </table>
+
+    <div style="margin: 20px auto; max-width: 600px; text-align: center;">
+        <input type="text" id="buscadorUsuarios" onkeyup="filtrarUsuarios()" placeholder="🔍 Buscar por nombre, usuario o email..." 
+               style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #0059b3; background: #001a33; color: white; font-size: 16px; outline: none;">
+    </div>
+
+    <div class="seccion-grupo mb-5">
+        <h3 style="color: #00ccff; border-left: 5px solid #00ccff; padding-left: 15px;">👨‍🏫 PROFESORES</h3>
+        <div class="table-responsive" style="background: rgba(0, 204, 255, 0.05); border-radius: 15px; border: 1px solid rgba(0, 204, 255, 0.2); padding: 10px;">
+            <table class="table table-hover" style="color: white; text-align: center;">
+                <thead style="background: #0059b3; color: white;">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Email</th>
+                        <th>Rol Solicitado</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-profesores"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="seccion-grupo mb-5">
+        <h3 style="color: #ffcc00; border-left: 5px solid #ffcc00; padding-left: 15px;">⚖️ COORDINACIÓN</h3>
+        <div class="table-responsive" style="background: rgba(255, 204, 0, 0.05); border-radius: 15px; border: 1px solid rgba(255, 204, 0, 0.2); padding: 10px;">
+            <table class="table table-hover" style="color: white; text-align: center;">
+                <thead style="background: #997a00; color: white;">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Email</th>
+                        <th>Rol Solicitado</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-coordinacion"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="seccion-grupo mb-5">
+        <h3 style="color: #2ecc71; border-left: 5px solid #2ecc71; padding-left: 15px;">⚽ ASISTENTE BIENESTAR</h3>
+        <div class="table-responsive" style="background: rgba(46, 204, 113, 0.05); border-radius: 15px; border: 1px solid rgba(46, 204, 113, 0.2); padding: 10px;">
+            <table class="table table-hover" style="color: white; text-align: center;">
+                <thead style="background: #1e8449; color: white;">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Email</th>
+                        <th>Rol Solicitado</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-asistente"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -27,84 +70,91 @@
     async function cargarUsuarios() {
         try {
             const response = await fetch('/api/usuarios/');
-            const tabla = document.getElementById('tabla-usuarios');
-            tabla.innerHTML = '';
-
-            if (!response.ok) {
-                console.error('Error cargando usuarios:', response.status, response.statusText);
-                tabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#f5c6cb;">No se pudieron cargar los usuarios. Intenta recargar.</td></tr>`;
-                return;
-            }
-
             const usuarios = await response.json();
+
+            const tablas = {
+                profesores: document.getElementById('tabla-profesores'),
+                coordinacion: document.getElementById('tabla-coordinacion'),
+                asistente: document.getElementById('tabla-asistente')
+            };
+
+            // Limpiar tablas
+            Object.values(tablas).forEach(t => t.innerHTML = '');
 
             usuarios.forEach(u => {
                 const fila = document.createElement('tr');
+                fila.className = 'fila-dato';
                 fila.style.background = "rgba(0, 0, 0, 0.2)";
                 
-                // Estilo para el badge de estado
                 const statusBadge = u.estado === 'activo' 
                     ? '<span class="badge bg-success">Activo</span>' 
                     : '<span class="badge bg-warning text-dark">Pendiente</span>';
 
                 fila.innerHTML = `
-                    <td class="align-middle">${u.nombre}</td>
+                    <td class="align-middle" style="font-weight: bold;">@${u.nombre}</td>
                     <td class="align-middle">${u.email}</td>
                     <td class="align-middle"><b style="color: #88eafc;">${u.rol}</b></td>
-                    <td class="align-middle"><i>${u.grupo_asignado}</i></td>
                     <td class="align-middle">${statusBadge}</td>
                     <td class="align-middle">
                         <button onclick="cambiarEstado(${u.id})" class="btn btn-sm ${u.estado === 'activo' ? 'btn-outline-warning' : 'btn-success'}">
                             ${u.estado === 'activo' ? 'Desactivar' : 'Aprobar'}
                         </button>
-                        <button onclick="eliminarUsuario(${u.id})" class="btn btn-sm btn-danger ml-2">Eliminar</button>
+                        <button onclick="eliminarUsuario(${u.id})" class="btn btn-sm btn-danger ml-2">🗑️</button>
                     </td>
                 `;
-                tabla.appendChild(fila);
+
+                // Lógica de clasificación por rol (first_name)
+                const rolLower = u.rol.toLowerCase();
+                if (rolLower.includes('profesor')) {
+                    tablas.profesores.appendChild(fila);
+                } else if (rolLower.includes('coordinacion')) {
+                    tablas.coordinacion.appendChild(fila);
+                } else if (rolLower.includes('asistente')) {
+                    tablas.asistente.appendChild(fila);
+                }
             });
+
         } catch (error) {
             console.error("Error cargando usuarios:", error);
-            const tabla = document.getElementById('tabla-usuarios');
-            tabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#f5c6cb;">Ocurrió un error al cargar usuarios.</td></tr>`;
         }
     }
 
+    // 🔍 FUNCIÓN DEL BUSCADOR
+    function filtrarUsuarios() {
+        const busqueda = document.getElementById('buscadorUsuarios').value.toLowerCase();
+        const filas = document.querySelectorAll('.fila-dato');
+
+        filas.forEach(fila => {
+            const texto = fila.innerText.toLowerCase();
+            fila.style.display = texto.includes(busqueda) ? "" : "none";
+        });
+    }
+
     async function cambiarEstado(id) {
-        if (!confirm("¿Deseas cambiar el estado y permisos de este usuario?")) return;
-        
+        if (!confirm("¿Deseas cambiar el acceso de este usuario?")) return;
         const response = await fetch(`/api/usuarios/estado/${id}/`, {
             method: 'POST',
             headers: { 'X-CSRFToken': '{{ csrf_token }}' }
         });
-
-        if (response.ok) {
-            alert("Estado y Grupo actualizados correctamente.");
-            cargarUsuarios(); // Recargar la tabla
-        }
+        if (response.ok) cargarUsuarios();
     }
 
     async function eliminarUsuario(id) {
-        if (!confirm("¿Estás seguro de eliminar permanentemente a este usuario?")) return;
-
+        if (!confirm("¿Eliminar permanentemente?")) return;
         const response = await fetch(`/api/usuarios/eliminar/${id}/`, {
             method: 'POST',
             headers: { 'X-CSRFToken': '{{ csrf_token }}' }
         });
-
-        if (response.ok) {
-            alert("Usuario eliminado.");
-            cargarUsuarios();
-        }
+        if (response.ok) cargarUsuarios();
     }
 
-    // Cargar al iniciar la página
     document.addEventListener('DOMContentLoaded', cargarUsuarios);
 </script>
 
 <style>
-    .btn-sm { border-radius: 8px; font-weight: bold; margin: 2px; }
-    .table th { border: none; padding: 15px; }
-    .table td { border: none; padding: 15px; }
-    .badge { padding: 8px 12px; border-radius: 6px; }
+    .btn-sm { border-radius: 8px; font-weight: bold; padding: 5px 12px; }
+    .table td, .table th { border: none !important; vertical-align: middle; }
+    .seccion-grupo h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; }
+    .badge { font-size: 0.75rem; text-transform: uppercase; }
 </style>
 {% endblock %}

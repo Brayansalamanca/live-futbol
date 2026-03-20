@@ -2,26 +2,28 @@
 {% block content %}
 <div style="padding: 100px 20px; background: #000d1a; min-height: 100vh; color: white; font-family: 'Inter', sans-serif;">
     
-    <h1 style="text-align: center; color: #00ccff; text-transform: uppercase; font-weight: 900;">👕 Catálogo de Inventario</h1>
-    <div style="margin: 10px 0; text-align: center;">
-        <label style="color: #00ccff;">Filtrar por talla:</label>
-        <select id="filtroTalla" style="padding: 8px; border-radius: 8px; border:1px solid #0059b3; background:#001a33; color:white;">
-            <option value="">Todas</option>
-            <option value="6">6</option>
-            <option value="8">8</option>
-            <option value="10">10</option>
-            <option value="12">12</option>
-            <option value="14">14</option>
-            <option value="XS">XS</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
-            <option value="XXL">XXL</option>
-        </select>
+    <h1 style="text-align: center; color: #00ccff; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">👕 Catálogo de Inventario</h1>
+    
+    <div style="max-width: 800px; margin: 30px auto; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; background: rgba(0, 204, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 204, 255, 0.2);">
+        <div style="flex: 2; min-width: 250px;">
+            <label style="color: #00ccff; font-size: 12px; display: block; margin-bottom: 5px;">BUSCAR PRENDA:</label>
+            <input type="text" id="busquedaNombre" onkeyup="filtrarCatalogo()" placeholder="Ej: Camiseta, Pantalón..." 
+                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #0059b3; background: #001a33; color: white; outline: none;">
+        </div>
+        
+        <div style="flex: 1; min-width: 150px;">
+            <label style="color: #00ccff; font-size: 12px; display: block; margin-bottom: 5px;">FILTRAR TALLA:</label>
+            <select id="filtroTalla" onchange="filtrarCatalogo()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #0059b3; background: #001a33; color: white; cursor: pointer;">
+                <option value="">Todas las tallas</option>
+                <option value="6">6</option> <option value="8">8</option> <option value="10">10</option>
+                <option value="12">12</option> <option value="14">14</option> <option value="XS">XS</option>
+                <option value="S">S</option> <option value="M">M</option> <option value="L">L</option>
+                <option value="XL">XL</option> <option value="XXL">XXL</option>
+            </select>
+        </div>
     </div>
 
-    <div style="overflow-x: auto; background: rgba(0, 43, 92, 0.3); border-radius: 15px; border: 1px solid #0059b3; margin-top: 20px;">
+    <div style="overflow-x: auto; background: rgba(0, 43, 92, 0.3); border-radius: 15px; border: 1px solid #0059b3; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
         <table style="width: 100%; border-collapse: collapse;">
             <thead style="background: #0059b3; color: white; text-transform: uppercase; font-size: 13px;">
                 <tr>
@@ -46,8 +48,10 @@
             <table style="width: 100%; border-collapse: collapse;">
                 <thead style="background: #ffcc00; color: #000d1a; font-size: 13px;">
                     <tr>
-                        <th style="padding: 15px;">Prenda</th>
+                        <th style="padding: 15px;">Foto</th>
+                        <th>Prenda</th>
                         <th>Quién tiene</th>
+                        <th>Cantidad</th>
                         <th>Curso / Evento</th>
                         <th>Fecha Uso</th>
                         <th>Acción</th>
@@ -60,10 +64,20 @@
     {% endif %}
 </div>
 
+<div id="visorImagen" onclick="cerrarVisor()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; cursor: zoom-out;">
+    <img id="imgGrande" src="" style="width: 45vw; height: auto; border: 5px solid #00ccff; border-radius: 15px; box-shadow: 0 0 50px rgba(0, 204, 255, 0.5); object-fit: contain;">
+</div>
+
 <script>
     const USUARIO_ACTUAL = "{{ request.user.username }}";
+    let DATOS_PRENDAS = []; // Almacén local para filtrar sin recargar la API
 
-    // Función para obtener la fecha mínima (Hoy + 10 días)
+    function ampliarImagen(src) {
+        document.getElementById('imgGrande').src = src;
+        document.getElementById('visorImagen').style.display = 'flex';
+    }
+    function cerrarVisor() { document.getElementById('visorImagen').style.display = 'none'; }
+
     function obtenerFechaMinima() {
         const hoy = new Date();
         hoy.setDate(hoy.getDate() + 10);
@@ -72,150 +86,126 @@
 
     async function cargar() {
         try {
-            const filtroTalla = document.getElementById('filtroTalla').value;
-            const url = new URL("{% url 'api_obtener_prendas' %}", window.location.origin);
-            if (filtroTalla) url.searchParams.append('talla', filtroTalla);
-            const res = await fetch(url.toString());
-            const prendas = await res.json();
-            
-            let htmlCatalogo = "";
-            let htmlDevoluciones = "";
-
-            prendas.forEach(p => {
-                const esDisponible = p.estado === "Disponible";
-                
-                // Lógica para la Tabla General
-                htmlCatalogo += `
-                <tr style="border-bottom: 1px solid rgba(0,89,179,0.2);">
-                    <td><img src="${p.imagen}" style="width: 70px; height: 70px; border-radius: 10px; margin: 10px; object-fit: cover; border: 2px solid #0059b3;"></td>
-                    <td style="font-weight: bold;">${p.nombre}</td>
-                    <td style="font-weight: bold;">${p.talla || '-'}</td>
-                    <td style="color: #27ae60; font-weight: bold;">${p.cantidad}</td>
-                    <td style="color: #f1c40f; font-weight: bold;">${p.cantidad_apartada || 0}</td>
-                    <td style="color: #9bd4ff; font-weight: bold;">${p.fecha_devolucion || '---'}</td>
-                    <td>
-                        <span style="background: ${esDisponible ? '#27ae60' : '#e74c3c'}; padding: 4px 10px; border-radius: 20px; font-size: 11px;">
-                            ${esDisponible ? "✅ Disponible" : "🚩 " + p.profesor}
-                        </span>
-                    </td>
-                    <td>
-                        <div style="display: flex; gap: 5px; justify-content: center;">
-                            ${esDisponible 
-                                ? `<button onclick="mostrarFormulario('${p.id}')" style="background:#00ccff; color:#000d1a; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Apartar</button>`
-                                : `<button disabled style="background:#333; color:#777; border:none; padding:8px 15px; border-radius:5px;">Ocupado</button>`
-                            }
-                            ${USUARIO_ACTUAL === 'rosita' ? `<button onclick="eliminarPrenda('${p.id}')" style="background:#ff4444; color:white; border:none; padding:8px 10px; border-radius:5px; cursor:pointer;">🗑️</button>` : ''}
-                        </div>
-                    </td>
-                </tr>
-                <tr id="form-${p.id}" style="display: none; background: rgba(0, 204, 255, 0.05);">
-                    <td colspan="5" style="padding: 20px;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end;">
-                            <div>
-                                <label style="font-size: 11px; color: #00ccff;">NOMBRE</label>
-                                <input type="text" id="user-${p.id}" value="${USUARIO_ACTUAL}" readonly style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
-                            </div>
-                            <div>
-                                <label style="font-size: 11px; color: #00ccff;">CURSO</label>
-                                <input type="text" id="curso-${p.id}" placeholder="Ej: 1101" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
-                            </div>
-                            <div>
-                                <label style="font-size: 11px; color: #00ccff;">EVENTO</label>
-                                <input type="text" id="evento-${p.id}" placeholder="Ej: Interclases" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
-                            </div>
-                            <div>
-                                <label style="font-size: 11px; color: #00ccff;">FECHA (Mín. 10 días)</label>
-                                <input type="date" id="fecha-${p.id}" min="${obtenerFechaMinima()}" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
-                            </div>
-                            <div>
-                                <label style="font-size: 11px; color: #00ccff;">CANTIDAD A ALQUILAR</label>
-                                <input type="number" id="cantidad-${p.id}" min="1" value="1" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
-                            </div>
-                            <div>
-                                <label style="font-size: 11px; color: #00ccff;">DÍAS DE ALQUILER</label>
-                                <input type="number" id="dias-${p.id}" min="1" value="1" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;">
-                            </div>
-                            <div style="display: flex; gap: 5px;">
-                                <button onclick="confirmarApartado('${p.id}')" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; flex:1;">Confirmar</button>
-                                <button onclick="cerrarFormulario('${p.id}')" style="background:#e74c3c; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">X</button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>`;
-
-                // Lógica para la Tabla de Rosita
-                if (USUARIO_ACTUAL === 'rosita' && !esDisponible) {
-                    htmlDevoluciones += `
-                    <tr style="border-bottom: 1px solid rgba(255,204,0,0.2);">
-                        <td style="padding: 15px;">${p.nombre}</td>
-                        <td style="color: #ffcc00;">${p.profesor}</td>
-                        <td>${p.curso} / ${p.evento}</td>
-                        <td>${p.fecha_uso}</td>
-                        <td>
-                            <button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Marcar Devuelto</button>
-                        </td>
-                    </tr>`;
-                }
-            });
-
-            document.getElementById('tablaCuerpo').innerHTML = htmlCatalogo || "<tr><td colspan='5' style='padding:20px;'>No hay prendas registradas</td></tr>";
-            
-            const tablaDev = document.getElementById('tablaDevoluciones');
-            if(tablaDev) {
-                tablaDev.innerHTML = htmlDevoluciones || "<tr><td colspan='5' style='padding:20px;'>No hay prendas pendientes de devolución</td></tr>";
-            }
-
+            const res = await fetch("{% url 'api_obtener_prendas' %}");
+            DATOS_PRENDAS = await res.json();
+            filtrarCatalogo(); // Renderiza inicialmente
         } catch (e) { console.error("Error al cargar:", e); }
     }
 
-    function mostrarFormulario(id) {
-        document.getElementById(`form-${id}`).style.display = 'table-row';
+    // 🔍 FUNCIÓN DE FILTRADO COMBINADO
+    function filtrarCatalogo() {
+        const busqueda = document.getElementById('busquedaNombre').value.toLowerCase();
+        const tallaSel = document.getElementById('filtroTalla').value;
+        
+        const prendasFiltradas = DATOS_PRENDAS.filter(p => {
+            const coincideNombre = p.nombre.toLowerCase().includes(busqueda);
+            const coincideTalla = tallaSel === "" || p.talla === tallaSel;
+            return coincideNombre && coincideTalla;
+        });
+
+        renderizarTablas(prendasFiltradas);
     }
 
-    function cerrarFormulario(id) {
-        document.getElementById(`form-${id}`).style.display = 'none';
+    function renderizarTablas(prendas) {
+        let htmlCatalogo = "";
+        let htmlDevoluciones = "";
+
+        prendas.forEach(p => {
+            const esDisponible = p.estado === "Disponible";
+            
+            htmlCatalogo += `
+            <tr class="fila-prenda" style="border-bottom: 1px solid rgba(0,89,179,0.2);">
+                <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" style="width: 70px; height: 70px; border-radius: 10px; margin: 10px; object-fit: cover; border: 2px solid #0059b3; cursor: zoom-in;"></td>
+                <td style="font-weight: bold;">${p.nombre}</td>
+                <td style="font-weight: bold;">${p.talla || '-'}</td>
+                <td style="color: #27ae60; font-weight: bold;">${p.cantidad}</td>
+                <td style="color: #f1c40f; font-weight: bold;">${p.cantidad_apartada || 0}</td>
+                <td style="color: #9bd4ff; font-weight: bold;">${p.fecha_devolucion || '---'}</td>
+                <td>
+                    <span style="background: ${esDisponible ? '#27ae60' : '#e74c3c'}; padding: 4px 10px; border-radius: 20px; font-size: 11px;">
+                        ${esDisponible ? "✅ Disponible" : "🚩 " + p.profesor}
+                    </span>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px; justify-content: center;">
+                        ${esDisponible 
+                            ? `<button onclick="mostrarFormulario('${p.id}')" style="background:#00ccff; color:#000d1a; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Apartar</button>`
+                            : `<button disabled style="background:#333; color:#777; border:none; padding:8px 15px; border-radius:5px;">Ocupado</button>`
+                        }
+                        ${USUARIO_ACTUAL === 'rosita' ? `<button onclick="eliminarPrenda('${p.id}')" style="background:#ff4444; color:white; border:none; padding:8px 10px; border-radius:5px; cursor:pointer;">🗑️</button>` : ''}
+                    </div>
+                </td>
+            </tr>
+            <tr id="form-${p.id}" style="display: none; background: rgba(0, 204, 255, 0.05);">
+                <td colspan="8" style="padding: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; align-items: end;">
+                        <div><label style="font-size: 11px; color: #00ccff;">NOMBRE</label><input type="text" id="user-${p.id}" value="${USUARIO_ACTUAL}" readonly style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
+                        <div><label style="font-size: 11px; color: #00ccff;">CURSO</label><input type="text" id="curso-${p.id}" placeholder="Ej: 1101" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
+                        <div><label style="font-size: 11px; color: #00ccff;">EVENTO</label><input type="text" id="evento-${p.id}" placeholder="Ej: Interclases" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
+                        <div><label style="font-size: 11px; color: #00ccff;">FECHA</label><input type="date" id="fecha-${p.id}" min="${obtenerFechaMinima()}" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
+                        <div><label style="font-size: 11px; color: #00ccff;">CANTIDAD</label><input type="number" id="cantidad-${p.id}" min="1" value="1" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
+                        <div><label style="font-size: 11px; color: #00ccff;">DÍAS</label><input type="number" id="dias-${p.id}" min="1" value="1" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
+                        <div style="display: flex; gap: 5px;"><button onclick="confirmarApartado('${p.id}')" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; flex:1;">OK</button><button onclick="cerrarFormulario('${p.id}')" style="background:#e74c3c; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">X</button></div>
+                    </div>
+                </td>
+            </tr>`;
+
+            if (USUARIO_ACTUAL === 'rosita' && !esDisponible) {
+                htmlDevoluciones += `
+                <tr style="border-bottom: 1px solid rgba(255,204,0,0.2);">
+                    <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" style="width: 50px; height: 50px; border-radius: 8px; border: 1px solid #ffcc00; object-fit: cover;"></td>
+                    <td style="padding: 15px;">${p.nombre}</td>
+                    <td style="color: #ffcc00; font-weight: bold;">${p.profesor}</td>
+                    <td style="font-weight: bold; font-size: 1.2rem;">${p.cantidad_apartada}</td>
+                    <td>${p.curso} / ${p.evento}</td>
+                    <td>${p.fecha_uso}</td>
+                    <td><button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Marcar Devuelto</button></td>
+                </tr>`;
+            }
+        });
+
+        document.getElementById('tablaCuerpo').innerHTML = htmlCatalogo || "<tr><td colspan='8' style='padding:20px;'>No se encontraron prendas</td></tr>";
+        const tablaDev = document.getElementById('tablaDevoluciones');
+        if(tablaDev) tablaDev.innerHTML = htmlDevoluciones || "<tr><td colspan='7' style='padding:20px;'>No hay pendientes</td></tr>";
     }
+
+    // Funciones de acción
+    function mostrarFormulario(id) { document.getElementById(`form-${id}`).style.display = 'table-row'; }
+    function cerrarFormulario(id) { document.getElementById(`form-${id}`).style.display = 'none'; }
 
     async function confirmarApartado(id) {
-        const nombre = document.getElementById(`user-${id}`).value;
-        const curso = document.getElementById(`curso-${id}`).value;
-        const evento = document.getElementById(`evento-${id}`).value;
-        const fecha = document.getElementById(`fecha-${id}`).value;
-        const dias = document.getElementById(`dias-${id}`).value;
-        const cantidad = document.getElementById(`cantidad-${id}`).value;
-
-        if (!curso || !evento || !fecha || !dias || !cantidad) {
-            alert("Por favor completa todos los campos (incluye días y cantidad a alquilar).");
-            return;
-        }
-
+        const data = {
+            nombre: document.getElementById(`user-${id}`).value,
+            curso: document.getElementById(`curso-${id}`).value,
+            evento: document.getElementById(`evento-${id}`).value,
+            fecha: document.getElementById(`fecha-${id}`).value,
+            dias_alquiler: document.getElementById(`dias-${id}`).value,
+            cantidad_alquilada: document.getElementById(`cantidad-${id}`).value,
+            accion: 'apartar'
+        };
         const res = await fetch(`/api/apartar-prenda/${id}/`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-            body: JSON.stringify({ nombre, curso, evento, fecha, dias_alquiler: dias, cantidad_alquilada: cantidad, accion: 'apartar' })
-        });
-
-        if (res.ok) cargar();
-        else alert("Error al apartar");
-    }
-
-    async function eliminarPrenda(id) {
-        if (!confirm("¿Rosita, estás segura de eliminar esta prenda permanentemente?")) return;
-        const res = await fetch(`/api/eliminar-prenda/${id}/`, {
-            method: "POST",
-            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+            body: JSON.stringify(data)
         });
         if (res.ok) cargar();
     }
-
-    document.getElementById('filtroTalla').addEventListener('change', cargar);
 
     async function liberar(id) {
-        if (!confirm("¿Confirmar que la prenda ha sido devuelta?")) return;
+        if (!confirm("¿Marcar como devuelto?")) return;
         const res = await fetch(`/api/apartar-prenda/${id}/`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
             body: JSON.stringify({ accion: 'liberar' })
+        });
+        if (res.ok) cargar();
+    }
+
+    async function eliminarPrenda(id) {
+        if (!confirm("¿Eliminar?")) return;
+        const res = await fetch(`/api/eliminar-prenda/${id}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
         });
         if (res.ok) cargar();
     }

@@ -7,10 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Fútbol</title>
 
-    <!-- CSS externo (SE MANTIENE) -->
     <link rel="stylesheet" href="{% static 'base.css' %}">
 
-    <!-- JS -->
     <script src="{% static 'js/chart.umd.min.js' %}"></script>
     
     <!-- OneSignal -->
@@ -24,123 +22,6 @@
             });
         });
     </script>
-
-    <!-- ESTILOS (SE MANTIENEN PERO LIMPIOS) -->
-    <style>
-        nav {
-            background-color: #88eafcf2;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-            z-index: 999;
-            box-shadow: #504783 2px 5px 45px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 70px;
-        }
-
-        nav ul {
-            display: flex;
-            list-style: none;
-            align-items: center;
-            justify-content: center;
-            gap: 25px;
-            padding: 10px 15px;
-            margin: 0;
-            flex-wrap: wrap;
-        }
-
-        nav ul li a {
-            background-color: #ffffff;
-            color: #000000;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 18px;
-            transition: 0.3s ease;
-        }
-
-        nav ul li a:hover {
-            background-color: #6155ff;
-            color: #ffffff;
-        }
-
-        .menu-toggle {
-            display: none;
-            cursor: pointer;
-            font-size: 28px;
-            padding: 10px 15px;
-            position: absolute;
-            left: 10px;
-            top: 10px;
-            z-index: 1000;
-            color: #fff;
-            background: #84ccc0;
-            border-radius: 5px;
-            border: none;
-        }
-
-        @media (max-width: 768px) {
-            .menu-toggle {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-
-            nav ul {
-                flex-direction: column;
-                gap: 10px;
-                width: 100%;
-                padding: 60px 0 20px 0;
-                margin: 0;
-                display: none;
-                background-color: #70b3bef2;
-                position: absolute;
-                top: 0;
-                left: 0;
-                box-shadow: 0 10px 15px rgba(0,0,0,0.6);
-            }
-
-            nav ul.active {
-                display: flex;
-            }
-
-            nav ul li.img {
-                display: none;
-            }
-
-            nav {
-                background-color: transparent !important;
-                box-shadow: none;
-            }
-        }
-
-        body {
-            background-color: #78cbdaf2;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #ffffff;
-            margin: 0;
-            padding-top: 5rem;
-            text-align: center;
-        }
-
-        .logo-container img {
-            height: 4rem;
-            width: 4rem;
-            border-radius: 50%;
-            box-shadow: #2533af 2px 5px 25px;
-        }
-
-        .user-role-tag {
-            font-size: 0.7rem;
-            display: block;
-            color: #504783;
-            margin-top: -5px;
-        }
-    </style>
 
 </head>
 
@@ -159,12 +40,12 @@
             {% if user.is_authenticated %}
                 
                 {% if user.groups.all.0.name == 'coordinacion' or user.username == 'rosita' %}
-                    <li><a href="{% url 'formulario' %}" style="color: #ff007f;">Registrar Ropa</a></li>
+                    <li><a href="{% url 'formulario' %}">Registrar Ropa</a></li>
                     <li><a href="{% url 'tipos' %}">Control Inventario</a></li>
-                    <li><a href="{% url 'ranking' %}" style="color: #ffcc00; border: 1px solid #ffcc00;">Aprobar Usuarios</a></li>
+                    <li><a href="{% url 'ranking' %}">Aprobar Usuarios</a></li>
                 
                 {% elif user.groups.all.0.name == 'asistente bienestar' %}
-                    <li><a href="{% url 'radar' %}" style="color: #0059b3;">Inventario Balones</a></li>
+                    <li><a href="{% url 'radar' %}">Inventario Balones</a></li>
                     <li><a href="{% url 'videos' %}">Renta Balones</a></li>
                     <li><a href="{% url 'voz' %}">Bajas Balones</a></li>
 
@@ -173,7 +54,7 @@
                     <li><a href="{% url 'tasks' %}">Mis Tareas</a></li>
                 {% endif %}
 
-                <li><a href="{% url 'logout' %}" style="background-color: #ff4444; color: white;">Salir</a></li>
+                <li><a href="{% url 'logout' %}" class="logout">Salir</a></li>
             
             {% else %}
                 <li><a href="{% url 'home' %}">Inicio</a></li>
@@ -182,6 +63,9 @@
                 <li><a href="{% url 'soporte' %}">Soporte</a></li>
             {% endif %}
         </ul>
+
+        <!-- BOTÓN MODO -->
+        <button id="theme-toggle">🌙</button>
     </nav>
 
     <main>
@@ -189,15 +73,32 @@
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggleButton = document.querySelector('.menu-toggle');
-            const navMenu = document.getElementById('nav-menu');
+        // MENÚ
+        const toggleButton = document.querySelector('.menu-toggle');
+        const navMenu = document.getElementById('nav-menu');
 
-            if (toggleButton && navMenu) {
-                toggleButton.addEventListener('click', function() {
-                    navMenu.classList.toggle('active');
-                    this.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-                });
+        toggleButton.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+            this.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+        });
+
+        // MODO OSCURO
+        const btn = document.getElementById("theme-toggle");
+
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark-mode");
+            btn.textContent = "☀️";
+        }
+
+        btn.addEventListener("click", () => {
+            document.body.classList.toggle("dark-mode");
+
+            if (document.body.classList.contains("dark-mode")) {
+                localStorage.setItem("theme", "dark");
+                btn.textContent = "☀️";
+            } else {
+                localStorage.setItem("theme", "light");
+                btn.textContent = "🌙";
             }
         });
     </script>
