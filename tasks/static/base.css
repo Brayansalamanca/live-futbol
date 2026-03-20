@@ -1,22 +1,22 @@
 /* ================= VARIABLES PRO ================= */
 
 :root {
-  --bg: #f4f9ff;
-  --bg-soft: #eaf4ff;
+  /* CAMBIA ESTO PARA QUE SEA NEGRO POR DEFECTO */
+  --bg: #0f172a;           /* Azul oscuro/negro */
+  --bg-soft: #1e293b;
 
-  --nav: rgba(255,255,255,0.85);
-  --card: #ffffff;
+  --nav: rgba(15, 23, 42, 0.9); /* Navbar oscura con transparencia */
+  --card: #1e293b;         /* Tarjetas oscuras */
 
-  --text: #1e293b;
-  --text-soft: #64748b;
+  --text: #f8fafc;         /* Texto claro para que se lea sobre el negro */
+  --text-soft: #94a3b8;
+  --text-dark: #f8fafc;    /* Asegúrate de que esto sea claro también */
 
-  --primary: #2e86de;
-  --secondary: #27ae60;
-
-  --danger: #ef4444;
-
-  --radius: 14px;
-  --shadow: 0 10px 30px rgba(0,0,0,0.08);
+  --primary: #3b82f6; 
+  --secondary: #10b981;
+  --danger: #ff4757;
+  --radius: 16px;
+  --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
 /* 🌙 MODO NOCHE */
