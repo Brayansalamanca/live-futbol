@@ -73,6 +73,10 @@ DATABASES = {
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
             'host': MONGO_URL,
+            'authMechanism': 'SCRAM-SHA-1', # Ayuda a la compatibilidad con Atlas
+            'serverSelectionTimeoutMS': 5000, # Si en 5 segundos no conecta, falla (evita el 502)
+            'connectTimeoutMS': 5000,
+            'retryWrites': True,
         }
     }
 }
