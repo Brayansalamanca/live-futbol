@@ -18,6 +18,8 @@ import json
 from .models import Task, RegistroEntrega, ObjetoPerdido, PrendaRopa, BajaBalon
 from .forms import TaskForm, CustomUserCreationForm
 from .tokens import account_activation_token
+from django.contrib.sites.shortcuts import get_current_site 
+
 class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
     template_name = 'recuperar_contraseña.html'
     email_template_name = 'password_reset_email.html'
@@ -87,9 +89,12 @@ def activar(request, uidb64, token):
 @login_required
 def tipos(request): return render(request, 'tipos.html')
 
+
+
 def signup(request):
     if request.method == 'GET':
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
+    
     form = CustomUserCreationForm(request.POST)
     if form.is_valid():
         try:
@@ -97,21 +102,33 @@ def signup(request):
             user.first_name = request.POST.get('rol', 'Sin Rol')
             user.is_active = False 
             user.save()
-            return render(request, 'signup.html', {'form': CustomUserCreationForm(), 'success': '¡Solicitud enviada!'})
-        except Exception as e:
-            return render(request, 'signup.html', {'form': form, 'error': str(e)})
-    return render(request, 'signup.html', {'form': form, 'error': "Datos inválidos"})
 
-def signin(request):
-    if request.method == 'GET': return render(request, 'signin.html', {'form': AuthenticationForm()})
-    user = authenticate(request, username=request.POST.get('username'), password=request.POST.get('password'))
-    if user is not None:
-        if not user.is_active: return render(request, 'signin.html', {'form': AuthenticationForm(), 'error': 'Cuenta pendiente.'})
-        login(request, user)
-        if es_coordinacion(user): return redirect('formulario')
-        if es_asistente(user): return redirect('radar')
-        return redirect('tipos')
-    return render(request, 'signin.html', {'form': AuthenticationForm(), 'error': 'Credenciales incorrectas'})
+            # --- LÓGICA DE ENVÍO DE CORREO AÑADIDA ---
+            current_site = get_current_site(request)
+            subject = 'Activa tu cuenta - Live Fútbol'
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = account_activation_token.make_token(user)
+            
+            # Construcción del enlace de activación
+            activation_link = f"http://{current_site.domain}/activar/{uid}/{token}/"
+            
+            message = f"Hola {user.username},\n\nGracias por registrarte. Por favor activa tu cuenta haciendo clic en el siguiente enlace:\n\n{activation_link}\n\nSi no creaste esta cuenta, ignora este mensaje."
+
+            send_mail(
+                subject,
+                message,
+                'saebra581@gmail.com',
+                [user.email],
+                fail_silently=False,
+            )
+            # ---------------------------------------
+
+            return render(request, 'signup.html', {'form': CustomUserCreationForm(), 'success': '¡Solicitud enviada! Revisa tu correo para activar la cuenta.'})
+        except Exception as e:
+            print(f"Error en signup: {e}") # Para que lo veas en la terminal
+            return render(request, 'signup.html', {'form': form, 'error': f"Error al enviar correo: {str(e)}"})
+            
+    return render(request, 'signup.html', {'form': form, 'error': "Datos inválidos"})
 
 def signout(request):
     logout(request)
