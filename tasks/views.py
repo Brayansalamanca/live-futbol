@@ -85,31 +85,55 @@ def signup(request):
     
     form = CustomUserCreationForm(request.POST)
     if form.is_valid():
+        username = form.cleaned_data.get('username')
+        email = form.cleaned_data.get('email')
+
+        # 1. Validar duplicados manualmente (Fundamental para MongoDB/Djongo)
+        if User.objects.filter(username=username).exists():
+            return render(request, 'signup.html', {'form': form, 'error': 'Este nombre de usuario ya está en uso.'})
+        
+        if User.objects.filter(email=email).exists():
+            return render(request, 'signup.html', {'form': form, 'error': 'Este correo ya está registrado.'})
+
         try:
+            # 2. Crear el usuario pero dejarlo inactivo
             user = form.save(commit=False)
             user.first_name = request.POST.get('rol', 'Sin Rol')
-            user.is_active = False 
+            user.is_active = False  # El usuario no puede entrar hasta activar correo
             user.save()
 
+            # 3. Generar token y link de activación
             current_site = get_current_site(request)
-            subject = 'Activa tu cuenta - Live Fútbol'
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = account_activation_token.make_token(user)
             
-            activation_link = f"http://{current_site.domain}/activar/{uid}/{token}/"
-            message = f"Hola {user.username},\n\nGracias por registrarte. Por favor activa tu cuenta haciendo clic en el siguiente enlace:\n\n{activation_link}\n\nSi no creaste esta cuenta, ignora este mensaje."
-
-            send_mail(subject, message, 'saebra581@gmail.com', [user.email], fail_silently=False)
-
-            return render(request, 'signup.html', {'form': CustomUserCreationForm(), 'success': '¡Solicitud enviada! Revisa tu correo.'})
-        except Exception as e:
-            return render(request, 'signup.html', {'form': form, 'error': f"Error al enviar correo: {str(e)}"})
+            # Usamos https si estás en Render, si no, http
+            protocol = 'https' if request.is_secure() else 'http'
+            activation_link = f"{protocol}://{current_site.domain}/activar/{uid}/{token}/"
             
-    return render(request, 'signup.html', {'form': form, 'error': "Datos inválidos"})
+            subject = 'Activa tu cuenta - Live Fútbol'
+            message = f"Hola {user.username},\n\nGracias por registrarte en Live Fútbol. Para completar tu registro y que la coordinación pueda darte acceso, activa tu cuenta haciendo clic en el siguiente enlace:\n\n{activation_link}\n\nSi no creaste esta cuenta, puedes ignorar este mensaje.\n\nSaludos,\nEl equipo de Live Fútbol"
 
-def signin(request):
-    if request.method == 'GET': 
-        return render(request, 'signin.html', {'form': AuthenticationForm()})
+            # 4. Enviar correo (usamos fail_silently=True para que si falla el correo, no se caiga el server)
+            send_mail(
+                subject, 
+                message, 
+                'saebra581@gmail.com', 
+                [user.email], 
+                fail_silently=True
+            )
+
+            return render(request, 'signup.html', {
+                'form': CustomUserCreationForm(), 
+                'success': '¡Registro casi listo! Revisa tu correo para activar la cuenta.'
+            })
+
+        except Exception as e:
+            # Si algo falla al guardar en la DB
+            return render(request, 'signup.html', {'form': form, 'error': f"Error en el registro: {str(e)}"})
+            
+    # Si el formulario no es válido (ej. contraseñas no coinciden)
+    return render(request, 'signup.html', {'form': form, 'error': "Por favor, verifica los datos ingresados."})
     
     user = authenticate(request, username=request.POST.get('username'), password=request.POST.get('password'))
     
