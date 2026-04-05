@@ -1,31 +1,24 @@
+import json
+from datetime import datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
-from django.utils import timezone
+from django.utils import timezone, encoding, http
 from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordResetView
-from datetime import datetime, timedelta
 from django.contrib.messages.views import SuccessMessageMixin
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.core.mail import send_mail
-from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.http import JsonResponse
-import json
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.contrib.sites.shortcuts import get_current_site
 
-# Importación de modelos y formularios
+# Importación de modelos y formularios locales
 from .models import Task, RegistroEntrega, ObjetoPerdido, PrendaRopa, BajaBalon
 from .forms import TaskForm, CustomUserCreationForm
 from .tokens import account_activation_token
-from django.contrib.sites.shortcuts import get_current_site 
-# Agrega estas líneas al principio de tu views.py
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from django.core.mail import EmailMultiAlternatives
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.contrib.sites.shortcuts import get_current_site
 
 # ==========================================
 # 🔐 RECUPERACIÓN DE CONTRASEÑA
@@ -84,38 +77,28 @@ def activar(request, uidb64, token):
     
 @login_required
 def tipos(request): return render(request, 'tipos.html')
-
 def signup(request):
     if request.method == 'GET':
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
     
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
-        username = request.POST.get('username')
-        email_dest = request.POST.get('email')
-        rol_seleccionado = request.POST.get('rol')
-
-        # 1. Validar duplicados ANTES de procesar nada
-        if User.objects.filter(username=username).exists():
-            return render(request, 'signup.html', {'form': form, 'error': 'El usuario ya existe.'})
-
         if form.is_valid():
             try:
-                # 2. Guardar usuario
+                # 1. Guardar el usuario primero
                 user = form.save(commit=False)
-                user.first_name = rol_seleccionado or 'Sin Rol'
+                user.first_name = request.POST.get('rol') or 'Sin Rol'
                 user.is_active = False 
                 user.save()
 
-                # 3. Preparar el correo
+                # 2. Generar datos del correo
                 current_site = get_current_site(request)
-                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                uid = http.urlsafe_base64_encode(encoding.force_bytes(user.pk))
                 token = account_activation_token.make_token(user)
                 
                 subject = 'Activa tu cuenta - Live Fútbol'
                 from_email = 'Live Fútbol <saebra581@gmail.com>'
-                to = [user.email]
-
+                
                 context = {
                     'user': user,
                     'domain': current_site.domain,
@@ -123,26 +106,27 @@ def signup(request):
                     'token': token,
                 }
 
-                # IMPORTANTE: Cambié el nombre al que vimos en tu imagen
+                # 3. Renderizar y enviar (fail_silently=True para evitar 502 si falla el SMTP)
                 html_content = render_to_string('confirmacion_email.html', context)
                 text_content = strip_tags(html_content)
 
-                msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+                msg = EmailMultiAlternatives(subject, text_content, from_email, [user.email])
                 msg.attach_alternative(html_content, "text/html")
-                
-                # Enviamos
-                msg.send(fail_silently=False)
+                msg.send(fail_silently=True) 
 
                 return render(request, 'signup.html', {
                     'form': CustomUserCreationForm(), 
-                    'success': 'Solicitud enviada. Revisa tu correo.'
+                    'success': 'Solicitud enviada. Revisa tu correo para verificar tu dirección.'
                 })
 
             except Exception as e:
-                # Esto evita el 502. Te dirá el error real en la página.
-                return render(request, 'signup.html', {'form': form, 'error': f"Error técnico: {str(e)}"})
-        else:
-            return render(request, 'signup.html', {'form': form, 'error': "Formulario inválido."})
+                # Esto imprimirá el error real en los logs de Render
+                print(f"Error en Registro: {e}")
+                return render(request, 'signup.html', {'form': form, 'error': f"Error en la base de datos: {str(e)}"})
+        
+        return render(request, 'signup.html', {'form': form, 'error': "Datos del formulario incorrectos."})
+
+
 # --- CORRECCIÓN AQUÍ: SE SEPARÓ SIGNIN ---
 def signin(request):
     if request.method == 'GET':
