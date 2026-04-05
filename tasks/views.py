@@ -95,27 +95,23 @@ def signup(request):
         email_dest = request.POST.get('email')
         rol_seleccionado = request.POST.get('rol')
 
-        # 1. Validaciones para evitar duplicados en MongoDB
+        # 1. Validar duplicados ANTES de procesar nada
         if User.objects.filter(username=username).exists():
-            return render(request, 'signup.html', {'form': form, 'error': 'Este nombre de usuario ya está en uso.'})
-        
-        if User.objects.filter(email=email_dest).exists():
-            return render(request, 'signup.html', {'form': form, 'error': 'Este correo ya está registrado.'})
+            return render(request, 'signup.html', {'form': form, 'error': 'El usuario ya existe.'})
 
         if form.is_valid():
             try:
-                # 2. Crear usuario inactivo
+                # 2. Guardar usuario
                 user = form.save(commit=False)
                 user.first_name = rol_seleccionado or 'Sin Rol'
                 user.is_active = False 
                 user.save()
 
-                # 3. Datos para el enlace de activación
+                # 3. Preparar el correo
                 current_site = get_current_site(request)
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 token = account_activation_token.make_token(user)
                 
-                # --- ENVÍO DE CORREO USANDO TU ARCHIVO EXACTO ---
                 subject = 'Activa tu cuenta - Live Fútbol'
                 from_email = 'Live Fútbol <saebra581@gmail.com>'
                 to = [user.email]
@@ -127,25 +123,26 @@ def signup(request):
                     'token': token,
                 }
 
-                # AQUÍ ESTÁ EL CAMBIO: Usamos "confirmacion_email.html"
+                # IMPORTANTE: Cambié el nombre al que vimos en tu imagen
                 html_content = render_to_string('confirmacion_email.html', context)
                 text_content = strip_tags(html_content)
 
                 msg = EmailMultiAlternatives(subject, text_content, from_email, to)
                 msg.attach_alternative(html_content, "text/html")
                 
-                # Dejamos fail_silently=False para ver errores en los logs si falla
+                # Enviamos
                 msg.send(fail_silently=False)
 
                 return render(request, 'signup.html', {
                     'form': CustomUserCreationForm(), 
-                    'success': '¡Solicitud enviada! Revisa tu correo para activar tu cuenta. Luego, Rosita autorizará tu acceso.'
+                    'success': 'Solicitud enviada. Revisa tu correo.'
                 })
 
             except Exception as e:
-                return render(request, 'signup.html', {'form': form, 'error': f"Error crítico: {str(e)}"})
-        
-    return render(request, 'signup.html', {'form': form, 'error': "Datos inválidos."})
+                # Esto evita el 502. Te dirá el error real en la página.
+                return render(request, 'signup.html', {'form': form, 'error': f"Error técnico: {str(e)}"})
+        else:
+            return render(request, 'signup.html', {'form': form, 'error': "Formulario inválido."})
 # --- CORRECCIÓN AQUÍ: SE SEPARÓ SIGNIN ---
 def signin(request):
     if request.method == 'GET':
