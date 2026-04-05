@@ -82,13 +82,13 @@ def signup(request):
     if request.method == 'GET':
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
     
-    form = CustomUserCreationForm(request.POST)
-    
     if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
         username = request.POST.get('username')
         email = request.POST.get('email')
+        rol_seleccionado = request.POST.get('rol') # Captura el cargo del <select>
 
-        # 1. Verificación manual contra la DB (Djongo/MongoDB a veces ignora la validación del form)
+        # 1. Validación manual prioritaria para evitar errores de MongoDB
         if User.objects.filter(username=username).exists():
             return render(request, 'signup.html', {'form': form, 'error': 'Este nombre de usuario ya está en uso.'})
         
@@ -97,42 +97,35 @@ def signup(request):
 
         if form.is_valid():
             try:
-                # 2. Creamos el usuario INACTIVO (is_active = False)
+                # 2. Crear usuario INACTIVO
                 user = form.save(commit=False)
-                # Guardamos el rol en first_name para usarlo en la lógica de grupos después
-                user.first_name = request.POST.get('rol', 'Sin Rol')
+                # Guardamos el rol en first_name para que Rosita sepa qué grupo asignar
+                user.first_name = rol_seleccionado or 'Sin Rol'
                 user.is_active = False  
                 user.save()
 
-                # 3. Generar token y link de activación por correo
+                # 3. Lógica del Token y Link
                 current_site = get_current_site(request)
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 token = account_activation_token.make_token(user)
                 protocol = 'https' if request.is_secure() else 'http'
                 activation_link = f"{protocol}://{current_site.domain}/activar/{uid}/{token}/"
                 
+                # 4. Envío del correo de bienvenida/activación
                 subject = 'Activa tu cuenta - Live Fútbol'
-                message = f"Hola {user.username},\n\nGracias por registrarte. Para validar tu correo, haz clic en el siguiente enlace:\n\n{activation_link}\n\nNota: Después de activar tu correo, el equipo de coordinación (Rosita) deberá darte acceso final para que puedas iniciar sesión."
+                message = f"Hola {user.username},\n\nGracias por registrarte. Haz clic en el enlace para verificar tu correo:\n\n{activation_link}\n\nNota: Tras verificar tu correo, tu solicitud pasará a revisión por Coordinación (Rosita) para darte el acceso final."
 
-                # 4. Enviar correo
-                send_mail(
-                    subject, 
-                    message, 
-                    'saebra581@gmail.com', 
-                    [user.email], 
-                    fail_silently=True
-                )
+                send_mail(subject, message, 'saebra581@gmail.com', [user.email], fail_silently=True)
 
                 return render(request, 'signup.html', {
                     'form': CustomUserCreationForm(), 
-                    'success': '¡Registro exitoso! Revisa tu correo para activar tu cuenta. Luego, Rosita te dará acceso al sistema.'
+                    'success': 'Solicitud enviada. Revisa tu correo para verificar la cuenta; luego Rosita autorizará tu ingreso.'
                 })
 
             except Exception as e:
-                return render(request, 'signup.html', {'form': form, 'error': f"Error interno: {str(e)}"})
-        else:
-            # Errores de validación de Django (contraseña corta, coincidencia, etc.)
-            return render(request, 'signup.html', {'form': form, 'error': "Error en los datos. Revisa que las contraseñas coincidan y cumplan los requisitos."})
+                return render(request, 'signup.html', {'form': form, 'error': f"Error en el servidor: {str(e)}"})
+        
+    return render(request, 'signup.html', {'form': form, 'error': "Verifica los datos del formulario."})
 
 def activar(request, uidb64, token):
     try:
@@ -141,14 +134,14 @@ def activar(request, uidb64, token):
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
     
+    # VALIDACIÓN DEL TOKEN
     if user is not None and account_activation_token.check_token(user, token):
-        # IMPORTANTE: No ponemos is_active = True aquí. 
-        # Solo mostramos mensaje de éxito de correo validado.
-        # Rosita lo activará manualmente desde el Ranking.
+        # IMPORTANTE: NO ponemos user.is_active = True aquí.
+        # Solo confirmamos que el correo es real. 
+        # El usuario aparecerá en el "Ranking" de Rosita con estado 'pendiente'.
         return render(request, 'confirmar_cuenta.html')
     
     return render(request, 'confirmar_fallido.html')
-    
 # --- CORRECCIÓN AQUÍ: SE SEPARÓ SIGNIN ---
 def signin(request):
     if request.method == 'GET':
