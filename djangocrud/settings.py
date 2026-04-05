@@ -119,13 +119,13 @@ LOGOUT_REDIRECT_URL = 'signin'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 6. Configuración de Correo (Gmail)
-# Asegúrate de que estas líneas estén ASÍ exactamente
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
+EMAIL_PORT = 465  # <--- Cambia de 587 a 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True # <--- Cambia TLS por SSL
 EMAIL_HOST_USER = 'saebra581@gmail.com'
-EMAIL_HOST_PASSWORD = 'lhuukgqvmxfoxaju' # Tu nueva clave sin espacios
+EMAIL_HOST_PASSWORD = 'lhuukgqvmxfoxaju'
 
 # AÑADE ESTO para evitar problemas de conexión colgada
 EMAIL_TIMEOUT = 10
