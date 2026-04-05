@@ -1,3 +1,4 @@
+# tokens.py
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
@@ -6,4 +7,5 @@ class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
             str(user.pk) + str(timestamp) + str(user.is_active)
         )
 
+# Esta es la variable que importaremos en views.py
 account_activation_token = AccountActivationTokenGenerator()

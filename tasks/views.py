@@ -82,55 +82,63 @@ def signup(request):
     if request.method == 'GET':
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
     
-    # Si es POST, procesamos
-    form = CustomUserCreationForm(request.POST)
-    
-    # Extraemos datos manualmente para mayor seguridad
-    username = request.POST.get('username')
-    email = request.POST.get('email')
-    rol_seleccionado = request.POST.get('rol')
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        username = request.POST.get('username')
+        email_dest = request.POST.get('email')
+        rol_seleccionado = request.POST.get('rol')
 
-    # 1. VALIDACIÓN MANUAL (Evita que Djongo lance excepciones 502 por duplicados)
-    if User.objects.filter(username=username).exists():
-        return render(request, 'signup.html', {'form': form, 'error': 'Este nombre de usuario ya está en uso.'})
-    
-    if User.objects.filter(email=email).exists():
-        return render(request, 'signup.html', {'form': form, 'error': 'Este correo ya está registrado.'})
+        # 1. Validaciones para evitar duplicados en MongoDB
+        if User.objects.filter(username=username).exists():
+            return render(request, 'signup.html', {'form': form, 'error': 'Este nombre de usuario ya está en uso.'})
+        
+        if User.objects.filter(email=email_dest).exists():
+            return render(request, 'signup.html', {'form': form, 'error': 'Este correo ya está registrado.'})
 
-    if form.is_valid():
-        try:
-            # 2. CREACIÓN DEL USUARIO
-            user = form.save(commit=False)
-            user.first_name = rol_seleccionado or 'Sin Rol'
-            user.is_active = False  # NO ACTIVAR TODAVÍA (Falta correo y Rosita)
-            user.save()
+        if form.is_valid():
+            try:
+                # 2. Crear usuario inactivo
+                user = form.save(commit=False)
+                user.first_name = rol_seleccionado or 'Sin Rol'
+                user.is_active = False 
+                user.save()
 
-            # 3. GENERACIÓN DE TOKEN PARA EL CORREO
-            current_site = get_current_site(request)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = account_activation_token.make_token(user)
-            protocol = 'https' if request.is_secure() else 'http'
-            activation_link = f"{protocol}://{current_site.domain}/activar/{uid}/{token}/"
-            
-            # Mensaje para el correo
-            subject = 'Activa tu cuenta - Live Fútbol'
-            message = f"Hola {user.username},\n\nVerifica tu correo haciendo clic aquí:\n\n{activation_link}\n\nDespués de esto, Rosita (Coordinación) revisará tu perfil para darte acceso."
+                # 3. Datos para el enlace de activación
+                current_site = get_current_site(request)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                token = account_activation_token.make_token(user)
+                
+                # --- ENVÍO DE CORREO USANDO TU ARCHIVO EXACTO ---
+                subject = 'Activa tu cuenta - Live Fútbol'
+                from_email = 'Live Fútbol <saebra581@gmail.com>'
+                to = [user.email]
 
-            # 4. ENVÍO DE MAIL (fail_silently para evitar que falle la vista si el SMTP falla)
-            send_mail(subject, message, 'saebra581@gmail.com', [user.email], fail_silently=True)
+                context = {
+                    'user': user,
+                    'domain': current_site.domain,
+                    'uid': uid,
+                    'token': token,
+                }
 
-            return render(request, 'signup.html', {
-                'form': CustomUserCreationForm(), 
-                'success': 'Solicitud enviada. Revisa tu correo para verificar la cuenta; luego Rosita autorizará tu ingreso.'
-            })
+                # AQUÍ ESTÁ EL CAMBIO: Usamos "confirmacion_email.html"
+                html_content = render_to_string('confirmacion_email.html', context)
+                text_content = strip_tags(html_content)
 
-        except Exception as e:
-            # Si hay un error de base de datos, lo capturamos aquí en lugar de que de 502
-            print(f"DEBUG ERROR: {e}")
-            return render(request, 'signup.html', {'form': form, 'error': f"Error al guardar en base de datos: {str(e)}"})
-    
-    # Si el formulario no es válido (ej. contraseñas no coinciden)
-    return render(request, 'signup.html', {'form': form, 'error': "Los datos no son válidos. Revisa la contraseña."})
+                msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+                msg.attach_alternative(html_content, "text/html")
+                
+                # Dejamos fail_silently=False para ver errores en los logs si falla
+                msg.send(fail_silently=False)
+
+                return render(request, 'signup.html', {
+                    'form': CustomUserCreationForm(), 
+                    'success': '¡Solicitud enviada! Revisa tu correo para activar tu cuenta. Luego, Rosita autorizará tu acceso.'
+                })
+
+            except Exception as e:
+                return render(request, 'signup.html', {'form': form, 'error': f"Error crítico: {str(e)}"})
+        
+    return render(request, 'signup.html', {'form': form, 'error': "Datos inválidos."})
 # --- CORRECCIÓN AQUÍ: SE SEPARÓ SIGNIN ---
 def signin(request):
     if request.method == 'GET':
