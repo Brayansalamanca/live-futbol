@@ -77,11 +77,11 @@ def activar(request, uidb64, token):
         user = None
     
     if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.save()
-        return render(request, 'confirmar_cuenta.html')
+        # QUITAMOS: user.is_active = True 
+        # El usuario sigue inactivo, pero el token ya fue validado.
+        return render(request, 'confirmar_cuenta.html') # Este HTML debe decir "Correo verificado, espera a Rosita"
     return render(request, 'confirmar_fallido.html')
-
+    
 @login_required
 def tipos(request): return render(request, 'tipos.html')
 
