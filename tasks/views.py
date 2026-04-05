@@ -86,7 +86,6 @@ def signup(request):
         username = form.cleaned_data.get('username')
         email = form.cleaned_data.get('email')
 
-        # Verificación de duplicados para evitar bloqueos en MongoDB
         if User.objects.filter(username=username).exists():
             return render(request, 'signup.html', {'form': form, 'error': 'El usuario ya existe.'})
         if User.objects.filter(email=email).exists():
@@ -98,7 +97,6 @@ def signup(request):
             user.is_active = False 
             user.save()
 
-            # Enlace dinámico para Render
             current_site = get_current_site(request)
             domain = current_site.domain
             uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -134,7 +132,7 @@ def signout(request):
     return redirect('home')
 
 # ==========================================
-# 🏆 GESTIÓN Y OTROS (APIs)
+# ⚽ APIs Y GESTIÓN
 # ==========================================
 @user_passes_test(es_coordinacion)
 def ranking(request): return render(request, 'ranking.html')
@@ -180,7 +178,10 @@ def api_editar_entrega(request, entrega_id):
     if request.method == "POST":
         data = json.loads(request.body)
         e = get_object_or_404(RegistroEntrega, pk=entrega_id)
-        e.nombre, e.objeto, e.curso, e.lugar = data.get('nombre'), data.get('objeto'), data.get('curso'), data.get('lugar')
+        e.nombre = data.get('nombre')
+        e.objeto = data.get('objeto')
+        e.curso = data.get('curso')
+        e.lugar = data.get('lugar')
         e.save()
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=405)
@@ -189,7 +190,14 @@ def api_editar_entrega(request, entrega_id):
 def api_guardar_baja(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        BajaBalon.objects.create(tipo_balon=data.get('tipo'), causa=data.get('causa'), responsable=data.get('usuario'), marca=data.get('lugar'), alquilado_por=data.get('alquilado_por'), foto=data.get('imagen', '/static/sin evidencia.webp'))
+        BajaBalon.objects.create(
+            tipo_balon=data.get('tipo'), 
+            causa=data.get('causa'), 
+            responsable=data.get('usuario'), 
+            marca=data.get('lugar'), 
+            alquilado_por=data.get('alquilado_por'), 
+            foto=data.get('imagen', '/static/sin evidencia.webp')
+        )
         return JsonResponse({"status": "success"})
 
 @login_required
@@ -203,6 +211,7 @@ def api_eliminar_baja(request, baja_id):
     if request.method == "POST":
         get_object_or_404(BajaBalon, pk=baja_id).delete()
         return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=405)
 
 @user_passes_test(es_coordinacion)
 def api_guardar_prenda(request):
@@ -210,6 +219,7 @@ def api_guardar_prenda(request):
         data = json.loads(request.body)
         PrendaRopa.objects.create(objeto=data.get('nombre'), cantidad=int(data.get('cantidad', 1)), talla=data.get('talla', ''), imagen=data.get('imagen', ''), estado='Disponible')
         return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "error"}, status=405)
 
 @login_required
 def api_obtener_prendas(request):
@@ -230,6 +240,7 @@ def api_guardar_objeto(request):
         data = json.loads(request.body)
         ObjetoPerdido.objects.create(nombre_reporta=data.get('nombre'), tipo_objeto=data.get('tipo'), descripcion=data.get('dif'))
         return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=405)
 
 @login_required
 def api_obtener_objetos(request):
@@ -243,8 +254,12 @@ def api_cambiar_estado_usuario(request, user_id):
         u = get_object_or_404(User, id=user_id)
         u.is_active = not u.is_active
         if u.is_active:
-            rol = u.first_name.lower()
-            nombre_grupo = 'profesores' if 'profesor' in rol else 'coordinacion' if 'coordinacion' in rol else 'asistente bienestar' if 'asistente' in rol else ''
+            rol = (u.first_name or "").lower()
+            nombre_grupo = ''
+            if 'profesor' in rol: nombre_grupo = 'profesores'
+            elif 'coordinacion' in rol: nombre_grupo = 'coordinacion'
+            elif 'asistente' in rol: nombre_grupo = 'asistente bienestar'
+            
             if nombre_grupo:
                 g, _ = Group.objects.get_or_create(name=nombre_grupo)
                 u.groups.add(g)
@@ -252,6 +267,7 @@ def api_cambiar_estado_usuario(request, user_id):
             except: pass
         u.save()
         return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'}, status=405)
 
 @user_passes_test(es_coordinacion)
 def formulario(request): return render(request, 'formulario.html')
@@ -274,6 +290,7 @@ def api_eliminar_prenda(request, prenda_id):
     if request.method == 'POST':
         get_object_or_404(PrendaRopa, id=prenda_id).delete()
         return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'}, status=405)
 
 @user_passes_test(es_asistente)
 def videos(request): return render(request, 'videos.html')
