@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-z$!j#aip6tr)!7=l#1&=_*=jc4s*2@tve06#i&hwg&p5na7z2')
 
 # 3. DEBUG
-DEBUG = 'RENDER' not in os.environ
+DEBUG = False
 
 # Permitir localhost y la URL de Render
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']

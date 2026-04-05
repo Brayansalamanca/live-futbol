@@ -3,15 +3,16 @@
 <html lang="es">
 
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Fútbol</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'base.css' %}">
 
     <script src="{% static 'js/chart.umd.min.js' %}"></script>
     
-    <!-- OneSignal -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
         window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -22,7 +23,6 @@
             });
         });
     </script>
-
 </head>
 
 <body>
@@ -30,13 +30,13 @@
     <nav>
         <button class="menu-toggle" aria-label="Abrir Menú">☰</button>
 
-        <ul id="nav-menu">
-            <li class="img">
-                <div class="logo-container">
-                    <img src="{% static '1.webp' %}" alt="Logo">
-                </div>
-            </li>
+        <div class="logo-container">
+            <a href="{% url 'home' %}">
+                <img src="{% static '1.webp' %}" alt="Logo Live Futbol">
+            </a>
+        </div>
 
+        <ul id="nav-menu">
             {% if user.is_authenticated %}
                 
                 {% if user.groups.all.0.name == 'coordinacion' or user.username == 'rosita' %}
@@ -64,8 +64,7 @@
             {% endif %}
         </ul>
 
-        <!-- BOTÓN MODO -->
-        <button id="theme-toggle">🌙</button>
+        <button id="theme-toggle" title="Cambiar tema">🌙</button>
     </nav>
 
     <main>
@@ -73,7 +72,7 @@
     </main>
 
     <script>
-        // MENÚ
+        // Lógica del Menú Responsive
         const toggleButton = document.querySelector('.menu-toggle');
         const navMenu = document.getElementById('nav-menu');
 
@@ -82,9 +81,10 @@
             this.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
         });
 
-        // MODO OSCURO
+        // Lógica de Persistencia del Modo Oscuro
         const btn = document.getElementById("theme-toggle");
 
+        // Al cargar la página, verificar si ya existía un tema guardado
         if (localStorage.getItem("theme") === "dark") {
             document.body.classList.add("dark-mode");
             btn.textContent = "☀️";
@@ -100,6 +100,14 @@
                 localStorage.setItem("theme", "light");
                 btn.textContent = "🌙";
             }
+        });
+
+        // Cerrar menú móvil al hacer clic en un enlace (opcional para mejor UX)
+        document.querySelectorAll('#nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                toggleButton.textContent = '☰';
+            });
         });
     </script>
 
