@@ -85,46 +85,61 @@ def signup(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             try:
-                # 1. Guardar el usuario primero
+                # 1. INTENTO DE GUARDADO (Aquí es donde ocurre el 502)
                 user = form.save(commit=False)
-                user.first_name = request.POST.get('rol') or 'Sin Rol'
+                user.first_name = request.POST.get('rol', 'Sin Rol')
                 user.is_active = False 
-                user.save()
-
-                # 2. Generar datos del correo
-                current_site = get_current_site(request)
-                uid = http.urlsafe_base64_encode(encoding.force_bytes(user.pk))
-                token = account_activation_token.make_token(user)
                 
-                subject = 'Activa tu cuenta - Live Fútbol'
-                from_email = 'Live Fútbol <saebra581@gmail.com>'
-                
-                context = {
-                    'user': user,
-                    'domain': current_site.domain,
-                    'uid': uid,
-                    'token': token,
-                }
+                print("DEBUG: Intentando guardar en MongoDB...")
+                user.save() 
+                print("DEBUG: Usuario guardado exitosamente.")
 
-                # 3. Renderizar y enviar (fail_silently=True para evitar 502 si falla el SMTP)
-                html_content = render_to_string('confirmacion_email.html', context)
-                text_content = strip_tags(html_content)
+                # 2. GENERACIÓN DE TOKEN Y CORREO
+                try:
+                    current_site = get_current_site(request)
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
+                    token = account_activation_token.make_token(user)
+                    
+                    context = {
+                        'user': user,
+                        'domain': current_site.domain,
+                        'uid': uid,
+                        'token': token,
+                    }
 
-                msg = EmailMultiAlternatives(subject, text_content, from_email, [user.email])
-                msg.attach_alternative(html_content, "text/html")
-                msg.send(fail_silently=True) 
+                    html_content = render_to_string('confirmacion_email.html', context)
+                    text_content = strip_tags(html_content)
+
+                    msg = EmailMultiAlternatives(
+                        'Activa tu cuenta - Live Fútbol',
+                        text_content,
+                        'Live Fútbol <saebra581@gmail.com>',
+                        [user.email]
+                    )
+                    msg.attach_alternative(html_content, "text/html")
+                    
+                    print("DEBUG: Intentando enviar correo...")
+                    msg.send(fail_silently=True)
+                    print("DEBUG: Correo enviado (o falló silenciosamente).")
+
+                except Exception as mail_error:
+                    print(f"DEBUG: Error enviando correo: {mail_error}")
+                    # No detenemos el proceso si falla el correo, el usuario ya se creó.
 
                 return render(request, 'signup.html', {
                     'form': CustomUserCreationForm(), 
-                    'success': 'Solicitud enviada. Revisa tu correo para verificar tu dirección.'
+                    'success': 'Registro exitoso. Revisa tu correo (si no llega, contacta a Rosita).'
                 })
 
             except Exception as e:
-                # Esto imprimirá el error real en los logs de Render
-                print(f"Error en Registro: {e}")
-                return render(request, 'signup.html', {'form': form, 'error': f"Error en la base de datos: {str(e)}"})
-        
-        return render(request, 'signup.html', {'form': form, 'error': "Datos del formulario incorrectos."})
+                # SI ESTO SE EJECUTA, VERÁS EL ERROR EN LA PÁGINA EN VEZ DEL 502
+                print(f"DEBUG: ERROR CRÍTICO EN BASE DE DATOS: {e}")
+                return render(request, 'signup.html', {
+                    'form': form, 
+                    'error': f"Error de conexión con la base de datos: {str(e)}"
+                })
+        else:
+            return render(request, 'signup.html', {'form': form, 'error': "Datos inválidos en el formulario."})
 
 
 # --- CORRECCIÓN AQUÍ: SE SEPARÓ SIGNIN ---
