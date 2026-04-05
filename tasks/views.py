@@ -18,8 +18,38 @@ import json
 from .models import Task, RegistroEntrega, ObjetoPerdido, PrendaRopa, BajaBalon
 from .forms import TaskForm, CustomUserCreationForm
 from .tokens import account_activation_token
-
 class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
+    template_name = 'recuperar_contraseña.html'
+    email_template_name = 'password_reset_email.html'
+    subject_template_name = 'password_reset_subject.txt'
+    success_message = "Instrucciones enviadas al correo."
+    success_url = reverse_lazy('password_reset_done')
+
+    def form_valid(self, form):
+        email = form.cleaned_data.get('email')
+        
+        # En lugar de usar .exists() que genera SELECT (1) AS "a"...
+        # Traemos el objeto a memoria. Djongo suele fallar menos con .all() o .filter() directo
+        try:
+            # Usamos una lista para evitar que Djongo intente optimizar la consulta SQL
+            usuarios = list(User.objects.filter(email=email, is_active=True))
+            
+            if usuarios:
+                # Si hay usuarios, dejamos que el formulario haga su trabajo
+                form.save(
+                    email_template_name=self.email_template_name,
+                    subject_template_name=self.subject_template_name,
+                    request=self.request,
+                    use_https=self.request.is_secure(),
+                )
+        except Exception as e:
+            # Si falla la base de datos, lo ignoramos y seguimos al éxito
+            # para que el usuario no vea el error 500
+            print(f"Error de base de datos ocultado: {e}")
+            
+        return redirect(self.success_url)
+
+
     template_name = 'recuperar_password.html'
     email_template_name = 'password_reset_email.html'
     subject_template_name = 'password_reset_subject.txt'

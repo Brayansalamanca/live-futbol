@@ -39,6 +39,7 @@ urlpatterns = [
     path('signin/', views.signin, name='signin'),
     path('logout/', views.signout, name='logout'),
     path('activar/<uidb64>/<token>/', views.activar, name='activar'),
+     path('restablecer_/', views.signup, name='signup'),
     path('condiciones/', views.condiciones, name='condiciones'),
     path('soporte/', views.soporte, name='soporte'),
 
@@ -84,8 +85,24 @@ urlpatterns = [
     path('tasks/<int:task_id>/eliminar/', login_required(views.eliminar_tarea), name='eliminar_tarea'),
 
     # --- 🔑 RECUPERACIÓN DE CLAVE ---
-    path('recuperar/', views.CustomPasswordResetView.as_view(), name='password_reset'),
-    path('recuperar/enviado/', auth_views.PasswordResetDoneView.as_view(template_name='enlace_enviado.html'), name='password_reset_done'),
-    path('recuperar/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='restablecer_password.html'), name='password_reset_confirm'),
-    path('recuperar/completo/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
-]
+ # --- 🔑 RECUPERACIÓN DE CLAVE ---
+    # 1. El usuario pide recuperar (ingresa correo)
+    path('recuperar/', views.CustomPasswordResetView.as_view(
+        template_name='recuperar_contraseña.html' # <-- Aquí agregamos tu archivo
+    ), name='password_reset'),
+
+    # 2. Confirmación de que el correo se envió
+    path('recuperar/enviado/', auth_views.PasswordResetDoneView.as_view(
+        template_name='enlace_enviado.html'
+    ), name='password_reset_done'),
+
+    # 3. El usuario hace clic en el link del correo y llega aquí
+    path('recuperar/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='restablecer_password.html' # <-- Asegúrate que se llame así tu archivo
+    ), name='password_reset_confirm'),
+
+    # 4. Mensaje de éxito final
+    path('recuperar/completo/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='password_reset_complete.html'
+    ), name='password_reset_complete'),
+] 
