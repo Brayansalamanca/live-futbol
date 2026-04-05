@@ -85,53 +85,28 @@ def signup(request):
     
     form = CustomUserCreationForm(request.POST)
     if form.is_valid():
-        username = form.cleaned_data.get('username')
-        email = form.cleaned_data.get('email')
-
-        # 1. Verificación manual para evitar el error de "Ya registrado"
-        if User.objects.filter(username=username).exists():
-            return render(request, 'signup.html', {'form': form, 'error': 'Este nombre de usuario ya está en uso.'})
-        
-        if User.objects.filter(email=email).exists():
-            return render(request, 'signup.html', {'form': form, 'error': 'Este correo ya está registrado.'})
-
         try:
             user = form.save(commit=False)
             user.first_name = request.POST.get('rol', 'Sin Rol')
-            user.is_active = False # No puede entrar hasta que Rosita lo vea o active el link
+            user.is_active = False 
             user.save()
 
-            # 2. Generar el enlace con el dominio REAL (Render)
             current_site = get_current_site(request)
-            domain = current_site.domain # Esto tomará "tu-app.onrender.com" automáticamente
+            subject = 'Activa tu cuenta - Live Fútbol'
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = account_activation_token.make_token(user)
             
-            activation_link = f"https://{domain}/activar/{uid}/{token}/"
-            
-            # 3. Diseño del correo (Sin etiquetas visibles)
-            subject = 'Activa tu cuenta - Live Fútbol'
-            message = f"Hola {user.username},\n\nPara completar tu registro en Live Fútbol, por favor activa tu cuenta haciendo clic en el siguiente enlace:\n\n{activation_link}\n\nSi no creaste esta cuenta, puedes ignorar este mensaje."
+            activation_link = f"http://{current_site.domain}/activar/{uid}/{token}/"
+            message = f"Hola {user.username},\n\nGracias por registrarte. Por favor activa tu cuenta haciendo clic en el siguiente enlace:\n\n{activation_link}\n\nSi no creaste esta cuenta, ignora este mensaje."
 
-            send_mail(
-                subject,
-                message,
-                'saebra581@gmail.com',
-                [user.email],
-                fail_silently=False,
-            )
+            send_mail(subject, message, 'saebra581@gmail.com', [user.email], fail_silently=False)
 
-            return render(request, 'signup.html', {'form': CustomUserCreationForm(), 'success': '¡Solicitud enviada! Revisa tu correo para activar la cuenta.'})
-            
+            return render(request, 'signup.html', {'form': CustomUserCreationForm(), 'success': '¡Solicitud enviada! Revisa tu correo.'})
         except Exception as e:
-            # Si algo falla, borramos el usuario creado para que no quede "en el limbo"
-            if 'user' in locals():
-                user.delete()
-            return render(request, 'signup.html', {'form': form, 'error': f"Error técnico: {str(e)}"})
+            return render(request, 'signup.html', {'form': form, 'error': f"Error al enviar correo: {str(e)}"})
             
-    return render(request, 'signup.html', {'form': form, 'error': "Por favor corrige los errores en el formulario."})
-    if request.method == 'GET':
-    
+    return render(request, 'signup.html', {'form': form, 'error': "Datos inválidos"})
+
 def signin(request):
     if request.method == 'GET': 
         return render(request, 'signin.html', {'form': AuthenticationForm()})
