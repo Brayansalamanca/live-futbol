@@ -21,6 +21,9 @@ from django.contrib.sites.shortcuts import get_current_site
 from .models import Task, RegistroEntrega, ObjetoPerdido, PrendaRopa, BajaBalon
 from .forms import TaskForm, CustomUserCreationForm
 from .tokens import account_activation_token
+import socket
+# Forzar a que use IPv4 para evitar el error 101
+socket.getaddrinfo = lambda *args: [(socket.AF_INET, socket.SOCK_STREAM, 6, '', (args[0], args[1]))]
 
 # ==========================================
 # 🔐 RECUPERACIÓN DE CONTRASEÑA
