@@ -26,36 +26,71 @@
 </head>
 
 <body>
+    <style>
+        #nav-menu {
+    display: flex;
+    align-items: center; /* Esto alinea el logo verticalmente con los textos */
+    list-style: none;
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+}
 
-    <nav>
+.logo-item {
+    margin-right: auto; /* Esto empuja los demás botones a la derecha si quieres espacio */
+}
+
+.logo-container img {
+    height: 50px; /* Ajusta el tamaño a tu gusto */
+    display: block;
+}
+#nav-menu {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    width: 100%; /* Asegura que ocupe el espacio disponible */
+}
+
+/* Para que el botón de la luna no flote raro, dale un margen */
+#theme-toggle {
+    margin-left: 20px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+}
+    </style>
+
+
+  <nav>
         <button class="menu-toggle" aria-label="Abrir Menú">☰</button>
 
-        <div class="logo-container">
-            <a href="{% url 'home' %}">
-                <img src="{% static '1.webp' %}" alt="Logo Live Futbol">
-            </a>
-        </div>
-
         <ul id="nav-menu">
+            <li class="logo-item">
+                <div class="logo-container">
+                    <a href="{% url 'home' %}">
+                        <img src="{% static '1.webp' %}" alt="Logo Live Futbol">
+                    </a>
+                </div>
+            </li>
+
             {% if user.is_authenticated %}
-                
                 {% if user.groups.all.0.name == 'coordinacion' or user.username == 'rosita' %}
                     <li><a href="{% url 'formulario' %}">Registrar Ropa</a></li>
                     <li><a href="{% url 'tipos' %}">Control Inventario</a></li>
                     <li><a href="{% url 'ranking' %}">Aprobar Usuarios</a></li>
-                
                 {% elif user.groups.all.0.name == 'asistente bienestar' %}
                     <li><a href="{% url 'radar' %}">Inventario Balones</a></li>
                     <li><a href="{% url 'videos' %}">Renta Balones</a></li>
                     <li><a href="{% url 'voz' %}">Bajas Balones</a></li>
-
                 {% else %}
                     <li><a href="{% url 'tipos' %}">Catálogo Ropa</a></li>
                     <li><a href="{% url 'tasks' %}">Mis Tareas</a></li>
                 {% endif %}
-
                 <li><a href="{% url 'logout' %}" class="logout">Salir</a></li>
-            
             {% else %}
                 <li><a href="{% url 'home' %}">Inicio</a></li>
                 <li><a href="{% url 'signup' %}">Registrarse</a></li>
@@ -70,6 +105,8 @@
     <main>
         {% block content %}{% endblock %}
     </main>
+
+
 
     <script>
         // Lógica del Menú Responsive
