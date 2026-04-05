@@ -121,7 +121,7 @@ def signup(request):
                     msg.attach_alternative(html_content, "text/html")
                     
                     print("DEBUG: Intentando enviar correo...")
-                    msg.send(fail_silently=True)
+                    msg.send(fail_silently=False)
                     print("DEBUG: Correo enviado (o falló silenciosamente).")
 
                 except Exception as mail_error:
