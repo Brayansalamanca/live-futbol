@@ -125,7 +125,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'saebra581@gmail.com'
-EMAIL_HOST_PASSWORD = 'wvvzqyvfozyegare' 
+EMAIL_HOST_PASSWORD = 'lhuu kgqv mxfo xaju' 
 DEFAULT_FROM_EMAIL = 'Live Fútbol <saebra581@gmail.com>'
 
 # 7. Seguridad CORS y CSRF
