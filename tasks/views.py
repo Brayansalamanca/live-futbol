@@ -83,42 +83,72 @@ def signup(request):
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
     
     form = CustomUserCreationForm(request.POST)
-    if form.is_valid():
-        username = form.cleaned_data.get('username')
-        email = form.cleaned_data.get('email')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
 
+        # 1. Verificación manual contra la DB (Djongo/MongoDB a veces ignora la validación del form)
         if User.objects.filter(username=username).exists():
             return render(request, 'signup.html', {'form': form, 'error': 'Este nombre de usuario ya está en uso.'})
         
         if User.objects.filter(email=email).exists():
             return render(request, 'signup.html', {'form': form, 'error': 'Este correo ya está registrado.'})
 
-        try:
-            user = form.save(commit=False)
-            user.first_name = request.POST.get('rol', 'Sin Rol')
-            user.is_active = False 
-            user.save()
+        if form.is_valid():
+            try:
+                # 2. Creamos el usuario INACTIVO (is_active = False)
+                user = form.save(commit=False)
+                # Guardamos el rol en first_name para usarlo en la lógica de grupos después
+                user.first_name = request.POST.get('rol', 'Sin Rol')
+                user.is_active = False  
+                user.save()
 
-            current_site = get_current_site(request)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = account_activation_token.make_token(user)
-            protocol = 'https' if request.is_secure() else 'http'
-            activation_link = f"{protocol}://{current_site.domain}/activar/{uid}/{token}/"
-            
-            subject = 'Activa tu cuenta - Live Fútbol'
-            message = f"Hola {user.username},\n\nGracias por registrarte en Live Fútbol. Activa tu cuenta aquí:\n\n{activation_link}"
+                # 3. Generar token y link de activación por correo
+                current_site = get_current_site(request)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                token = account_activation_token.make_token(user)
+                protocol = 'https' if request.is_secure() else 'http'
+                activation_link = f"{protocol}://{current_site.domain}/activar/{uid}/{token}/"
+                
+                subject = 'Activa tu cuenta - Live Fútbol'
+                message = f"Hola {user.username},\n\nGracias por registrarte. Para validar tu correo, haz clic en el siguiente enlace:\n\n{activation_link}\n\nNota: Después de activar tu correo, el equipo de coordinación (Rosita) deberá darte acceso final para que puedas iniciar sesión."
 
-            send_mail(subject, message, 'saebra581@gmail.com', [user.email], fail_silently=True)
+                # 4. Enviar correo
+                send_mail(
+                    subject, 
+                    message, 
+                    'saebra581@gmail.com', 
+                    [user.email], 
+                    fail_silently=True
+                )
 
-            return render(request, 'signup.html', {
-                'form': CustomUserCreationForm(), 
-                'success': '¡Registro casi listo! Revisa tu correo para activar la cuenta.'
-            })
-        except Exception as e:
-            return render(request, 'signup.html', {'form': form, 'error': f"Error en el registro: {str(e)}"})
-            
-    return render(request, 'signup.html', {'form': form, 'error': "Por favor, verifica los datos ingresados."})
+                return render(request, 'signup.html', {
+                    'form': CustomUserCreationForm(), 
+                    'success': '¡Registro exitoso! Revisa tu correo para activar tu cuenta. Luego, Rosita te dará acceso al sistema.'
+                })
 
+            except Exception as e:
+                return render(request, 'signup.html', {'form': form, 'error': f"Error interno: {str(e)}"})
+        else:
+            # Errores de validación de Django (contraseña corta, coincidencia, etc.)
+            return render(request, 'signup.html', {'form': form, 'error': "Error en los datos. Revisa que las contraseñas coincidan y cumplan los requisitos."})
+
+def activar(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.filter(pk=uid).first()
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    
+    if user is not None and account_activation_token.check_token(user, token):
+        # IMPORTANTE: No ponemos is_active = True aquí. 
+        # Solo mostramos mensaje de éxito de correo validado.
+        # Rosita lo activará manualmente desde el Ranking.
+        return render(request, 'confirmar_cuenta.html')
+    
+    return render(request, 'confirmar_fallido.html')
+    
 # --- CORRECCIÓN AQUÍ: SE SEPARÓ SIGNIN ---
 def signin(request):
     if request.method == 'GET':
