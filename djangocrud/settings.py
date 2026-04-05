@@ -115,13 +115,14 @@ LOGOUT_REDIRECT_URL = 'signin'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 6. Configuración de Correo (Gmail)
+# 6. Configuración de Correo (Gmail)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'saebra581@gmail.com'
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD', 'bfaslgsipjnpmnpd')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = 'wvvzqyvfozyegare' 
+DEFAULT_FROM_EMAIL = 'Live Fútbol <saebra581@gmail.com>'
 
 # 7. Seguridad CORS y CSRF
 CORS_ALLOWED_ORIGINS = [
