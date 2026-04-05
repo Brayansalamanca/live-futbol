@@ -19,6 +19,13 @@ from .models import Task, RegistroEntrega, ObjetoPerdido, PrendaRopa, BajaBalon
 from .forms import TaskForm, CustomUserCreationForm
 from .tokens import account_activation_token
 from django.contrib.sites.shortcuts import get_current_site 
+# Agrega estas líneas al principio de tu views.py
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.core.mail import EmailMultiAlternatives
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.sites.shortcuts import get_current_site
 
 # ==========================================
 # 🔐 RECUPERACIÓN DE CONTRASEÑA
