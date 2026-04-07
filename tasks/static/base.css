@@ -1,386 +1,301 @@
-/* ================= VARIABLES PRO ================= */
+/* ==========================================================================
+   LIVE FUTBOL - ESTILO HÍBRIDO (PRO DARK & SANDY LIGHT)
+   ========================================================================== */
 
 :root {
-  /* CAMBIA ESTO PARA QUE SEA NEGRO POR DEFECTO */
-  --bg: #0f172a;           /* Azul oscuro/negro */
-  --bg-soft: #1e293b;
-
-  --nav: rgba(15, 23, 42, 0.9); /* Navbar oscura con transparencia */
-  --card: #1e293b;         /* Tarjetas oscuras */
-
-  --text: #f8fafc;         /* Texto claro para que se lea sobre el negro */
-  --text-soft: #94a3b8;
-  --text-dark: #f8fafc;    /* Asegúrate de que esto sea claro también */
-
-  --primary: #3b82f6; 
-  --secondary: #10b981;
-  --danger: #ff4757;
-  --radius: 16px;
-  --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    /* 🌙 MODO NOCHE POR DEFECTO (Pro Dark) */
+    --bg: #0f172a;
+    --bg-soft: #1e293b;
+    --nav: rgba(15, 23, 42, 0.95);
+    --card: #1e293b;
+    --text: #f8fafc;
+    --text-soft: #94a3b8;
+    --primary: #3b82f6; 
+    --secondary: #10b981;
+    --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    --border: rgba(255, 255, 255, 0.05);
+    --radius: 16px;
 }
 
-/* 🌙 MODO NOCHE */
-.dark-mode {
-  --bg: #0f172a;
-  --bg-soft: #1e293b;
-
-  --nav: rgba(15,23,42,0.85);
-  --card: #1e293b;
-
-  --text: #f1f5f9;
-  --text-soft: #94a3b8;
-
-  --primary: #60a5fa;
-  --secondary: #4ade80;
-
-  --shadow: 0 10px 30px rgba(0,0,0,0.4);
+/* ☀️ MODO DÍA (Arena y Petróleo) */
+body.light-mode {
+    --bg: #faf7f6;
+    --bg-soft: #e3ded7;
+    --nav: rgba(250, 247, 246, 0.95);
+    --card: #cbcac7;
+    --text: #333333;
+    --text-soft: #285570;
+    --primary: #285570;
+    --secondary: #64748b;
+    --shadow: 0 10px 30px rgba(40, 85, 112, 0.15);
+    --border: rgba(40, 85, 112, 0.1);
 }
 
 /* ================= BASE ================= */
-
 * {
-  box-sizing: border-box;
-  transition: all 0.25s ease;
+    box-sizing: border-box;
+    transition: all 0.25s ease;
 }
 
 body {
-  margin: 0;
-  padding-top: 85px;
-  font-family: 'Poppins', sans-serif;
-
-  background: linear-gradient(135deg, var(--bg), var(--bg-soft));
-  color: var(--text);
-  text-align: center;
+    margin: 0;
+    padding-top: 100px; /* Espacio para que el navbar no tape el contenido */
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, var(--bg), var(--bg-soft));
+    color: var(--text);
+    min-height: 100vh;
+    text-align: center;
 }
 
-/* ================= NAVBAR ================= */
-
+/* ================= NAVBAR MAESTRO ================= */
 nav {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 999;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  background: var(--nav);
-  backdrop-filter: blur(12px);
-
-  box-shadow: var(--shadow);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4rem;
+    height: 80px;
+    background: var(--nav);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border);
 }
 
-nav ul {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  padding: 10px;
-  margin: 0;
-  flex-wrap: wrap;
+/* Bloque Izquierda: Logo */
+.logo-container {
+    display: flex;
+    align-items: center;
+    margin: 0;
 }
 
-nav ul li {
-  list-style: none;
+.logo-container img {
+    height: 50px;
+    width: auto;
+    display: block;
+    border-radius: 50%;
+    background: white; /* Resalta el logo en cualquier modo */
+    padding: 3px;
+    box-shadow: var(--shadow);
 }
 
-nav ul li a {
-  background: transparent;
-  color: var(--text);
-
-  text-decoration: none;
-  padding: 8px 16px;
-
-  border-radius: 10px;
-  font-weight: 600;
-
-  border: 1px solid transparent;
+/* Bloque Centro: Menú */
+#nav-menu {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 30px;
+    margin: 0;
+    padding: 0;
+    flex: 1; 
+    justify-content: center;
 }
 
-nav ul li a:hover {
-  background: var(--primary);
-  color: white;
-  transform: translateY(-2px);
+#nav-menu a {
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 10px;
 }
 
-/* BOTÓN MODO */
+#nav-menu a:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
 
+/* Bloque Derecha: Botón Luna/Sol */
 #theme-toggle {
-  position: absolute;
-  right: 15px;
-  top: 10px;
-
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-
-  border: none;
-  border-radius: 10px;
-  padding: 8px 12px;
-
-  cursor: pointer;
-  box-shadow: var(--shadow);
-}
-
-#theme-toggle:hover {
-  transform: scale(1.1);
-}
-
-/* ================= BOTÓN HAMBURGUESA ================= */
-
-.menu-toggle {
-  display: none;
-  position: absolute;
-  left: 10px;
-  top: 10px;
-
-  font-size: 26px;
-  padding: 8px 12px;
-
-  color: white;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
-
-/* ================= RESPONSIVE ================= */
-
-@media (max-width: 768px) {
-
-  .menu-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
+}
 
-  nav ul {
-    flex-direction: column;
-    width: 100%;
-    padding: 70px 0 20px 0;
+#theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* Botón Hamburguesa Móvil */
+.menu-toggle {
     display: none;
-
-    background: var(--card);
-    position: absolute;
-    top: 0;
-    left: 0;
-
-    box-shadow: var(--shadow);
-  }
-
-  nav ul.active {
-    display: flex;
-  }
-
-  nav ul li a {
-    width: 85%;
-    margin: 5px auto;
-    background: var(--card);
-  }
-
-  nav ul li.img {
-    display: none;
-  }
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 28px;
+    cursor: pointer;
 }
 
-/* ================= TITULOS ================= */
-h1 {
-  font-size: 32px;
-  margin: 20px auto;
-  max-width: 90%;
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    nav {
+        padding: 0 2rem;
+        justify-content: space-between;
+    }
 
-  /* El degradado de fondo */
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+    .menu-toggle {
+        display: block;
+        z-index: 1001;
+    }
 
-  /* 1. Recorta el fondo al texto (Prefijo para Chrome/Safari) */
-  -webkit-background-clip: text;
-  /* 2. Recorta el fondo al texto (Propiedad estándar para Firefox/Otros) */
-  background-clip: text;
+    /* El logo desaparece en el menú desplegable porque ya está en el navbar */
+    .logo-item {
+        display: none;
+    }
 
-  /* 3. Hace que el color sólido del texto sea transparente para que se vea el fondo */
-  -webkit-text-fill-color: transparent;
-  /* 4. Respaldo para navegadores que no soportan text-fill-color */
-  color: transparent; 
+    #nav-menu {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 80px; /* Empieza justo debajo del navbar */
+        left: 0;
+        width: 100%;
+        background: var(--nav);
+        padding: 20px 0;
+        box-shadow: var(--shadow);
+    }
+
+    #nav-menu.active {
+        display: flex;
+    }
+
+    #nav-menu a {
+        width: 80%;
+        margin: 5px auto;
+    }
 }
 
-h2, h3 {
-  color: var(--text);
-  margin: 20px auto;
-}
-
-/* ================= TEXTO ================= */
-
-p {
-  background: var(--card);
-  color: var(--text-soft);
-
-  padding: 20px;
-  border-radius: var(--radius);
-
-  max-width: 80%;
-  margin: 20px auto;
-
-  box-shadow: var(--shadow);
-}
-
-/* ================= BOTONES ================= */
-
-button {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-
-  padding: 10px 18px;
-  font-size: 15px;
-
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-
-  box-shadow: var(--shadow);
-}
-
-button:hover {
-  transform: scale(1.05);
-}
-
-/* ================= SECCIONES ================= */
-
+/* ================= SECCIONES Y TARJETAS ================= */
 .seccion {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 25px;
-  padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* ================= TARJETAS ================= */
-
-.video,
-.estadisticas {
-  background: var(--card);
-  padding: 20px;
-  border-radius: var(--radius);
-
-  flex: 1 1 300px;
-
-  box-shadow: var(--shadow);
-}
-
-.video {
-  height: 300px;
-}
-
-/* ================= JUGADORES ================= */
-
-.jugadores {
-  background: var(--card);
-  color: var(--text);
-
-  padding: 25px;
-  border-radius: var(--radius);
-
-  margin: 20px auto;
-  max-width: 90%;
-
-  box-shadow: var(--shadow);
-  text-align: left;
-
-  border-left: 5px solid var(--primary);
-}
-
-/* ================= HOVER ================= */
-
-.estadisticas:hover,
-.video:hover {
-  transform: translateY(-5px);
-}
-
-.jugadores:hover {
-  transform: translateY(-3px);
-}
-
-/* ================= LOGO ================= */
-
-.logo-container {
-  display: flex;
-  justify-content: center;
-  margin: 0.5rem auto;
-}
-
-img {
-  height: 4rem;
-  width: 4rem;
-  border-radius: 50%;
-  box-shadow: var(--shadow);
+.card, .video, .estadisticas, .jugadores, .task-item {
+    background: var(--card);
+    padding: 25px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
 }
 
 /* ================= TABLAS ================= */
-
 table {
-  width: 90%;
-  margin: 30px auto;
-  border-spacing: 10px;
-
-  background: var(--card);
-  color: var(--text);
-
-  border-radius: 10px;
-  box-shadow: var(--shadow);
+    width: 90%;
+    margin: 30px auto;
+    border-collapse: collapse;
+    background: var(--card);
+    color: var(--text);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
 }
 
-/* ================= LINKS ================= */
-
-.task-link {
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: bold;
+th, td {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
 }
 
-.task-link:hover {
-  color: var(--secondary);
+th {
+    background: var(--primary);
+    color: white;
+}
+/* ================= ESTRUCTURAS ESPECÍFICAS (LAS LÍNEAS FALTANTES) ================= */
+
+/* 1. Títulos con el degradado pro */
+h1 {
+    font-size: 32px;
+    margin: 20px auto;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent; 
+    font-weight: 800;
 }
 
-/* ================= ITEMS ================= */
-
-.task-item {
-  background: var(--card);
-  padding: 15px;
-  margin: 10px auto;
-
-  border-radius: 10px;
-  max-width: 90%;
-
-  box-shadow: var(--shadow);
+/* 2. Brackets de Eliminatorias (Conectores) */
+.round:not(:last-child) .match::after {
+    content: "";
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    width: 30px;
+    height: 2px;
+    background: var(--primary);
 }
 
-/* ================= EXTRA ================= */
-
-ul, li {
-  list-style: none;
+.round:not(:last-child) .match:nth-child(odd)::before {
+    content: "";
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    width: 2px;
+    height: calc(100% + 60px);
+    background: var(--primary);
 }
 
-.d {
-  max-width: 400px;
-  margin: auto;
-
-  background: var(--card);
-  padding: 2rem;
-
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+/* 3. El cuadro del Campeón (Dorado siempre) */
+#cuadro-campeon {
+    background: linear-gradient(145deg, #facc15, #b45309);
+    padding: 30px;
+    border-radius: 25px;
+    text-align: center;
+    max-width: 320px;
+    margin: 40px auto;
+    color: #000;
+    box-shadow: 0 0 40px rgba(250, 204, 21, 0.5);
 }
 
-.c {
-  height: 10px;
-  width: 30px;
-  background: var(--primary);
+/* 4. Inputs de marcador estilo "Neon" */
+.score-input {
+    width: 50px;
+    height: 35px;
+    background: #000 !important;
+    color: #00ffcc !important;
+    border: 2px solid var(--primary) !important;
+    border-radius: 8px;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
 }
 
-.v {
-  box-shadow: var(--shadow);
+/* 5. Decoración lateral en tarjetas de jugadores */
+.jugadores {
+    border-left: 5px solid var(--primary);
+    text-align: left;
 }
 
-.v:hover {
-  filter: brightness(1.2);
+/* 6. Botones con degradado */
+button:not(#theme-toggle):not(.menu-toggle) {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+/* 7. Logos pequeños en tablas y brackets */
+.logo-tabla, .logo-bracket {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 8px;
 }
