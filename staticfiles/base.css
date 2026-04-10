@@ -9,7 +9,7 @@
     --nav: rgba(15, 23, 42, 0.98);
     --card: #1e293b;
     --text: #f8fafc;
-    --text-soft: #94a3b8;
+    --text-soft: #000000;
     --primary: #3b82f6; 
     --secondary: #10b981;
     --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
@@ -17,20 +17,18 @@
     --radius: 12px;
 }
 
-/* ☀️ MODO DÍA (Cálido, Beige/Crema*/
+/* ☀️ MODO DÍA (Cálido, Beige/Crema, Amigable inspirado en tus capturas) */
 body.light-mode {
-    --bg: #f5f4f0;           /* Fondo beige cálido muy suave (como en tu captura) */
-    --bg-soft: #eae7df;      /* Beige ligeramente más oscuro para el gradiente */
-    --nav: rgba(255, 255, 255, 0.98); /* Navbar blanco limpio */
-    
-    --card: #ffffff;         /* Tarjetas blancas para que resalten suavemente */
-    --text: #37536d;         /* Azul pizarra/petróleo para los textos principales */
-    --text-soft: #64748b;    /* Gris azulado para textos secundarios */
-    
-    --primary: #4b6b8a;      /* Azul "denim" de los botones (Fútbol, Básquet) */
+    --bg: #47d1ffcc;           /* Fondo beige cálido muy suave (como en tu captura) */
+    --bg-soft: #86c2de;      /* Beige ligeramente más oscuro para el gradiente */
+    --nav: rgba(46, 116, 202, 0.98); /* Navbar blanco limpio */
+    --card: #6c97f4;         /* Tarjetas blancas para que resalten suavemente */
+    --text: #000000;         /* Azul pizarra/petróleo para los textos principales */
+    --text-soft: #0c0d0d;    /* Gris azulado para textos secundarios */
+    --primary: #96a2ae;      /* Azul "denim" de los botones (Fútbol, Básquet) */
     --secondary: #324a61;    /* Azul pizarra más oscuro para contrastes */
     
-    --shadow: 0 8px 20px rgba(55, 83, 109, 0.08); /* Sombra azulada muy sutil */
+    --shadow: 0 8px 20px rgba(69, 130, 187, 0.352); /* Sombra azulada muy sutil */
     --border: rgba(55, 83, 109, 0.1);
 }
 
@@ -76,8 +74,8 @@ nav {
 }
 
 .logo-container img {
-    height: 50px;
-    width: auto;
+    height: 40px;
+    width: 70px;
     display: block;
     border-radius: 50%;
     background: white; 

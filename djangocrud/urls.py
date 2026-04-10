@@ -72,11 +72,17 @@ urlpatterns = [
     path('api/obtener-bajas/', login_required(views.api_obtener_bajas), name='api_obtener_bajas'),
     path('api/eliminar-baja/<int:baja_id>/', user_passes_test(es_asistente)(views.api_eliminar_baja), name='api_eliminar_baja'),
 
-    # --- 🔍 OBJETOS PERDIDOS ---
+    # --- 🔍 OBJETOS PERDIDOS (CONVIVENCIA V1 y V2) ---
+    
+    # Versión Antigua (No la borres porque me dijiste que la usas para otra cosa)
     path('api/guardar-objeto/', login_required(views.api_guardar_objeto), name='api_guardar_objeto'),
     path('api/obtener-objetos/', login_required(views.api_obtener_objetos), name='api_obtener_objetos'),
     path('api/eliminar-objeto/<int:obj_id>/', login_required(views.api_eliminar_objeto), name='api_eliminar_objeto'),
 
+    # NUEVA Versión V2 (La que creamos ahora con los nombres únicos)
+    path('api/v2/hallazgos/guardar/', login_required(views.hallazgo_v2_guardar), name='hallazgo_v2_guardar'),
+    path('api/v2/hallazgos/listar/', login_required(views.hallazgo_v2_listar), name='hallazgo_v2_listar'),
+    path('api/v2/hallazgos/eliminar/<int:item_id>/', login_required(views.hallazgo_v2_eliminar), name='hallazgo_v2_eliminar'),
     # --- ✅ TAREAS ---
     path('tasks/', login_required(views.tasks), name='tasks'),
     path('tasks/create/', login_required(views.create_task), name='create_task'),

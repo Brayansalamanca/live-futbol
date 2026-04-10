@@ -26,71 +26,7 @@
 </head>
 
 <body>
-    <style>
-    /* 1. El Navbar es el jefe del diseño */
-    nav {
-        display: flex;
-        align-items: center; /* Centra verticalmente logo, menú y luna */
-        
-        /* ESTO ES LO IMPORTANTE: Crea tres áreas separadas */
-        justify-content: space-between; 
-        
-        padding: 0 4rem; /* Espacio elegante a los lados para que no toquen el borde */
-        height: 80px;    /* Altura fija del navbar */
-        background: var(--nav); /* Usamos tu color oscuro */
-        box-shadow: var(--shadow);
-    }
-
-    /* 2. El bloque de la izquierda (Logo) */
-    .logo-container {
-        display: flex;
-        align-items: center;
-        margin: 0; /* Ya no necesitamos el margin-right: auto */
-    }
-
-    .logo-container img {
-        height: 50px; /* Tamaño del logo */
-        width: auto;
-        display: block;
-        border-radius: 50%; /* Si quieres que sea circular */
-    }
-
-    /* 3. El bloque del centro (Menú de Links) */
-    #nav-menu {
-        display: flex;
-        align-items: center;
-        list-style: none;
-        gap: 30px; /* Espacio elegante ENTRE los botones */
-        margin: 0;
-        padding: 0;
-        
-        /* Esto asegura que el menú esté más centrado, no en la esquina */
-        flex: 1; 
-        justify-content: center; /* Centra los links en su espacio */
-    }
-
-    /* Estilo de los links para que se vean pro */
-    #nav-menu a {
-        text-decoration: none;
-        color: var(--text); /* Usamos tu color claro */
-        font-weight: 600;
-        transition: color 0.3s ease;
-    }
-
-    #nav-menu a:hover {
-        color: var(--primary); /* Color de acento al pasar el mouse */
-    }
-
-    /* 4. El bloque de la derecha (Botón de Luna) */
-    #theme-toggle {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        padding: 0;
-        margin-left: 30px; /* Un pequeño espacio del menú */
-    }
-</style>
+ 
 
 
   <nav>

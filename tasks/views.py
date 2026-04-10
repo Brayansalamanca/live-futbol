@@ -260,6 +260,8 @@ def api_guardar_baja(request):
         )
         return JsonResponse({"status": "success"})
 
+
+
 @login_required
 def api_obtener_bajas(request):
     bajas = BajaBalon.objects.all().order_by('-fecha')
@@ -288,6 +290,7 @@ def api_guardar_prenda(request):
         )
         return JsonResponse({"status": "ok"})
     return JsonResponse({"status": "error"}, status=405)
+    
 
 @login_required
 def api_obtener_prendas(request):
@@ -412,3 +415,57 @@ def completar(request, task_id):
 def eliminar_tarea(request, task_id):
     get_object_or_404(Task, pk=task_id, user=request.user).delete()
     return redirect('tasks')
+# ==========================================
+# 👗 NUEVO MÓDULO: HALLAZGOS Y PERTENENCIAS (V2)
+# ==========================================
+
+@login_required
+def hallazgo_v2_guardar(request):
+    """ Guarda objetos encontrados con nombres de función únicos """
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            # Usamos los campos exactos de tu modelo ObjetoPerdido
+            ObjetoPerdido.objects.create(
+                nombre_reporta=data.get('nombre', 'Anónimo'),
+                tipo_objeto=data.get('tipo', 'Sin especificar'),
+                descripcion=data.get('color', 'Sin descripción'),
+                entregado=False
+            )
+            return JsonResponse({"status": "success", "message": "Objeto registrado en V2"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    return JsonResponse({"status": "error"}, status=405)
+
+@login_required
+def hallazgo_v2_listar(request):
+    """ Lista objetos no entregados sin interferir con otras APIs """
+    # Intentamos usar el campo de fecha que tengas disponible
+    objetos = ObjetoPerdido.objects.filter(entregado=False).order_by('-id')
+    
+    data = []
+    for o in objetos:
+        # Formateo de fecha seguro
+        fecha_txt = "S/F"
+        if hasattr(o, 'fecha_registro') and o.fecha_registro:
+            fecha_txt = o.fecha_registro.strftime('%d/%m/%Y')
+        elif hasattr(o, 'fecha') and o.fecha:
+            fecha_txt = o.fecha.strftime('%d/%m/%Y')
+
+        data.append({
+            "id": o.id,
+            "nombre": o.nombre_reporta,
+            "tipo": o.tipo_objeto,
+            "color": o.descripcion,
+            "fecha": fecha_txt
+        })
+    return JsonResponse(data, safe=False)
+
+@login_required
+def hallazgo_v2_eliminar(request, item_id):
+    """ Borrado físico del objeto por ID """
+    if request.method == "POST":
+        objeto = get_object_or_404(ObjetoPerdido, id=item_id)
+        objeto.delete()
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=405)
