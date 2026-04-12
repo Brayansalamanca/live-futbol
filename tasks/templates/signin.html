@@ -2,19 +2,16 @@
 
 {% block content %}
 <style>
-  .form-container {
+.form-container {
     max-width: 400px;
     margin: auto;
-    background: #000;
     padding: 2rem;
     border-radius: 10px;
-    box-shadow: #332e2e 2px 5px 45px;
-    color: white;
+    box-shadow: 2px 5px 45px; /* Dejamos la sombra para marcar la forma */
   }
 
   .form-container h1 {
     text-align: center;
-    color: #ca9999;
     margin-bottom: 1rem;
   }
 
@@ -33,33 +30,31 @@
   .form-group input {
     padding: 0.5rem;
     border-radius: 5px;
-    border: none;
+    border: none; /* Como el original */
     outline: none;
   }
 
   .form-container button {
     padding: 0.7rem;
-    background-color: #b0e6b2;
-    color: #000;
-    border: none;
+    border: none; /* Como el original */
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    transition: background 0.3s;
+    transition: opacity 0.3s;
     width: 100%;
     margin-top: 0.5rem;
   }
 
   .form-container button:hover {
-    background-color: #8ac28d;
+    opacity: 0.8;
   }
 
   .secondary-btn {
-    background-color: #a17878;
+    margin-top: 0.5rem;
   }
 
   .link-btn {
-    background-color: #82a3c3;
+    margin-top: 0.5rem;
   }
 </style>
 

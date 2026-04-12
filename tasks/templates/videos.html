@@ -80,6 +80,8 @@
         cursor: pointer; 
         font-weight: bold; 
     }
+    
+    
 </style>
 
 <div class="contenedor-registro">
@@ -90,6 +92,7 @@
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Fútbol')">⚽ Fútbol</button>
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Básquet')">🏀 Básquet</button>
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Volley')">🏐 Volley</button>
+        <br>
         <br>
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'Cuerda')">🥨 Cuerda</button>
         <button class="btn-objeto" onclick="seleccionarObjeto(this,'Juegos de mesa')">Juegos de mesa</button>
@@ -107,15 +110,22 @@
     cursor: pointer;        /* Que el mouse cambie al pasar por encima */
 ">
         <option>sin un lugar </option>
-        <option>Cancha Externa</option>
+
+        
+        <option>Cancha Sintetica </option>
         <option>Cancha Externa</option>
         <option>Cancha de Baloncesto</option>
         <option>Cancha de Volley</option>
         <option>Coliseo / Salón</option>
     </select>
 
-    <h3>3. Nombre de la persona</h3>
-    <input id="textoVoz" placeholder="Escribe el nombre del estudiante...">
+    <h3 sty>
+        3. Nombre de la persona</h3>
+    <input  style="  width: 13rem;           /* Más ancho */
+    font-size: 20px;        /* Letra mucho más grande */
+    padding: 15px;          /* Espacio interno para que no se vea apretado */
+    border-radius: 12px;    /* Bordes redondeados para que se vea moderno */
+    cursor: pointer;        /* Que el mouse cambie al pasar por encima */" id="textoVoz" placeholder="Escribe el nombre del estudiante...">
 
     <div id="seccionCurso" style="margin: 20px 0; border: 1px solid rgba(255,255,255,0.3); padding: 15px; border-radius: 10px;">
         <h3>4. Selecciona el Curso</h3>

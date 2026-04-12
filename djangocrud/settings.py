@@ -11,10 +11,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-z$!j#aip6tr)!7=l#1&=_*=jc4s*2@tve06#i&hwg&p5na7z2')
 
 # 3. DEBUG
-DEBUG = False
+DEBUG = True
 
 # Permitir localhost y la URL de Render
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', '.app.github.dev']
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [
@@ -135,14 +135,16 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
+    
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://django2-xo79.onrender.com",
-    "https://*.onrender.com"
+    "https://*.onrender.com",       # <--- Asegúrate de que tenga esta coma
+    "https://*.app.github.dev"      # <--- Ahora sí reconocerá el Codespace
 ]
 
 # Fotos y Medios

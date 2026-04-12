@@ -1,61 +1,71 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <p style="text-align: left;"><strong style="color: rgb(204, 69, 69);"> Términos y condiciones de uso – Live Futbol</strong>
-    <br>
-    <br>
-<strong style="color: rgb(204, 69, 69);">1. Aceptación del uso</strong>
-<br>
-Al acceder y utilizar la plataforma Live Futbol, el usuario acepta voluntariamente todos los términos y condiciones aquí establecidos. Estos términos rigen el uso de la página web, sus contenidos, entrenamientos y herramientas. Si no estás de acuerdo con alguno de los puntos, te recomendamos no continuar utilizando nuestros servicios.
-<br>
-<br>
-<strong style="color: rgb(204, 69, 69);">2. Finalidad de la plataforma </strong>
-<br>
-Live Futbol es una plataforma educativa y de entrenamiento virtual enfocada en el aprendizaje teórico y práctico del fútbol. Está diseñada para brindar acceso a contenidos relacionados con la formación física y táctica, sin necesidad de pertenecer a un club físico.
-Su uso está orientado a personas que deseen mejorar por cuenta propia, con el apoyo de instructores y recursos digitales.
-<br>
-<br>
-<strong style="color: rgb(204, 69, 69);">3. Responsabilidad del usuario</strong>
-<br>
-Todo usuario es responsable de su propio uso del sistema. Live Futbol no se hace responsable por el mal uso de los contenidos publicados ni de las consecuencias derivadas de entrenamientos realizados sin supervisión profesional directa.
-El usuario entiende que realizar actividad física conlleva riesgos y acepta usarlos bajo su propio criterio, responsabilidad y condición física.
-<br>
-<br>
-<strong style="color: rgb(204, 69, 69);">4. Exención de responsabilidad por lesiones o daños</strong>
-<br>
-Live Futbol no se hace responsable por lesiones físicas, accidentes, molestias, fatiga u otros efectos adversos derivados de la práctica de ejercicios, rutinas o consejos obtenidos a través de esta plataforma.
-Todo entrenamiento debe ser adaptado a las capacidades reales de la persona. En caso de dudas, se recomienda consultar con un médico o entrenador profesional certificado.
-<br>
-<br>
-<strong style="color: rgb(204, 69, 69);">5. No garantizamos mejoras futbolísticas</strong>
-<br>
-El sistema está diseñado como herramienta de apoyo, no como garantía de éxito. Live Futbol no asegura que el usuario mejore su rendimiento, obtenga logros deportivos o alcance un nivel profesional.
-Los resultados dependerán exclusivamente del esfuerzo, disciplina y capacidades del usuario.
-<br>
-<br>
-<strong style="color: rgb(204, 69, 69);">6. Uso por menores de 18 o mayores de 40 años</strong>
-<br>
-Esta plataforma está dirigida a personas con edades entre 18 y 40 años, dado que los entrenamientos pueden implicar exigencia física.
-Si una persona menor de 18 años o mayor de 40 años accede y utiliza la plataforma, lo hace bajo su propio riesgo, y Live Futbol no asume ninguna responsabilidad por los resultados o problemas derivados.
-El usuario declara tener la edad adecuada al momento de registrarse.
-<br>
-<br>
-<strong style="color: rgb(204, 69, 69);">7. Seguridad y datos personales</strong>
-<br>
-La información proporcionada por los usuarios al registrarse será tratada con confidencialidad. No compartimos datos con terceros sin consentimiento, salvo que sea requerido por ley. Se recomienda usar contraseñas seguras y mantener los datos de acceso protegidos.
-<br>
-<br>
-<strong style="color: rgb(204, 69, 69);">8. Modificaciones a estos términos</strong>
-<br>
-Live Futbol se reserva el derecho de modificar, actualizar o eliminar cualquiera de estos términos en cualquier momento, sin previo aviso.
-El usuario acepta que el uso continuo de la plataforma después de dichos cambios implica su aceptación automática.
-<br>
-<br>
-<strong style="color: rgb(204, 69, 69);">9. Contacto y soporte</strong>
-<br>
-Para dudas, consultas o reportes relacionados con estos términos, puedes escribirnos a:
-<br>
-<br>
-<strong style="color: rgb(204, 69, 69);">📧 salamancaayalabrayandavid@gmail.com</strong>
-</p>
+<style>
+  .terms-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    text-align: left;
+    line-height: 1.6;
+    background: var(--card); /* Usa el color de tu variable */
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .terms-container h1 {
+    color: #cc4545;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    background: none;
+    -webkit-text-fill-color: initial;
+  }
+  .terms-container h2 {
+    color: #cc4545;
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding-bottom: 0.5rem;
+  }
+  .terms-container p, .terms-container li {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  .highlight {
+    font-weight: bold;
+    color: #cc4545;
+  }
+</style>
+
+<div class="terms-container">
+  <h1>Términos y Condiciones de Uso – Gestión Logística MKS</h1>
+  <p><em>Plataforma de soporte administrativo para la <strong>Fundación Melanie Klein (Colegio MKS)</strong></em></p>
+
+  <h2>1. Objeto de la Plataforma</h2>
+  <p>Esta plataforma ha sido diseñada exclusivamente como una herramienta de <strong>apoyo logístico e institucional</strong>. Su objetivo principal es optimizar la gestión de inventarios, el alquiler o préstamo de recursos pedagógicos y la coordinación entre el cuerpo docente y el área administrativa de la Fundación Melanie Klein.</p>
+
+  <h2>2. Responsabilidad en la Gestión de Recursos</h2>
+  <p>El uso de la plataforma para el registro de préstamos, alquileres o asignación de materiales implica una responsabilidad administrativa por parte del usuario. <span class="highlight">La veracidad de los datos ingresados y el cuidado físico de los elementos gestionados son responsabilidad exclusiva de los docentes y personal administrativo autorizados.</span></p>
+
+  <h2>3. Entrega Técnica y Soporte</h2>
+  <p>Se establece que el desarrollador hace entrega de la herramienta en su estado funcional óptimo para las necesidades actuales del colegio. <span class="highlight">A partir de este momento, el mantenimiento preventivo, la actualización de datos de inventario y cualquier soporte técnico post-entrega no recaen sobre el desarrollador original</span>, pasando a ser gestionados por el área técnica designada por el Colegio MKS.</p>
+
+  <h2>4. Uso de Activos y Equipos</h2>
+  <p>La plataforma facilita la logística de préstamo, pero no reemplaza las políticas internas de cuidado de activos del colegio. Cualquier daño, pérdida o mal uso de los equipos gestionados a través de este sistema se regirá por el Manual de Convivencia y el reglamento interno de la institución.</p>
+
+  <h2>5. Privacidad y Datos Institucionales</h2>
+  <p>Toda la información referente a inventarios, registros docentes y logística interna es de propiedad privada de la <strong>Fundación Melanie Klein</strong>. El sistema debe ser utilizado bajo estrictas normas de confidencialidad, evitando compartir credenciales de acceso con personal no autorizado.</p>
+
+  <h2>6. Exención de Responsabilidad Civil</h2>
+  <p>El desarrollador no se hace responsable por errores en la logística escolar, fallos en la planificación de eventos o discrepancias en el inventario físico resultantes del uso del software. La herramienta es un facilitador de registro y no un supervisor autónomo de los recursos institucionales.</p>
+
+  <h2>7. Propiedad del Software</h2>
+  <p>Este sistema se entrega para el uso interno y perpetuo de la Fundación Melanie Klein. Queda prohibida su reproducción, venta o distribución a otras instituciones sin la autorización previa del desarrollador.</p>
+
+  <h2>8. Contacto para Soporte Institucional</h2>
+  <p>Para reportes de fallos técnicos previos al cierre de implementación o dudas sobre el funcionamiento del sistema, favor contactar a:</p>
+  <p><strong>Departamento de Logística / Sistemas – Colegio MKS</strong><br>
+  <strong>Desarrollador:</strong> salamancaayalabrayandavid@gmail.com</p>
+</div>
 {% endblock %}
