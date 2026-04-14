@@ -201,6 +201,15 @@ def api_eliminar_usuario(request, user_id):
         return JsonResponse({'status': 'deleted'})
     return JsonResponse({'status': 'error'}, status=405)
 
+# Al final de tasks/views.py
+
+@login_required
+def horarios(request):
+    return render(request, 'horarios.html')
+
+@login_required
+def profesores(request):
+    return render(request, 'profesores.html')
 # ==========================================
 # ⚽ MÓDULO BALONES (SOLO ASISTENTE)
 # ==========================================

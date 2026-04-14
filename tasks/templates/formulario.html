@@ -1,41 +1,209 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<div class="contenedor-registro" style="max-width: 500px; margin: 100px auto; background: #001a33; padding: 30px; border-radius: 20px; border: 1px solid #00ccff; color: white;">
-    <h2 style="text-align: center; color: #00ccff;">📦 Registrar Prenda</h2>
-    
-    <form id="formInventario">
-        <label>Nombre de la Prenda:</label>
-        <input type="text" id="nombre" class="input-futbol" placeholder="Ej: Uniforme Titular" style="width:100%; margin-bottom:15px; padding:10px; border-radius:10px; border:none;">
+<div class="contenedor-registro-prenda">
+    <div class="card card-registro-premium">
+        <div class="header-registro">
+            <div class="icono-flotante">📦</div>
+            <h2>Registrar Nueva Prenda</h2>
+            <p>Añade nuevos artículos al inventario oficial de Live Futbol</p>
+        </div>
         
-        <label>Cantidad Inicial:</label>
-        <input type="number" id="cantidad" class="input-futbol" value="1" min="1" style="width:100%; margin-bottom:15px; padding:10px; border-radius:10px; border:none;">
+        <form id="formInventario" class="form-moderno">
+            {% csrf_token %}
+            
+            <div class="grupo-input">
+                <label for="nombre">Nombre de la Prenda</label>
+                <input type="text" id="nombre" class="input-hibrido-grande" placeholder="Ej: Camiseta Titular 2026">
+            </div>
 
-        <label>Talla:</label>
-        <select id="talla" style="width:100%; margin-bottom:15px; padding:10px; border-radius:10px; border:none; background:#001a33; color:white;">
-            <option value="">Selecciona una talla</option>
-            <option value="6">6</option>
-            <option value="8">8</option>
-            <option value="10">10</option>
-            <option value="12">12</option>
-            <option value="14">14</option>
-            <option value="XS">XS</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
-            <option value="XXL">XXL</option>
-        </select>
-        
-        <label>Foto de la Prenda:</label>
-        <input type="file" id="imagenInput" accept="image/*" style="width:100%; margin-bottom:20px;">
+            <div class="fila-doble">
+                <div class="grupo-input">
+                    <label for="cantidad">Cantidad Inicial</label>
+                    <input type="number" id="cantidad" class="input-hibrido-grande" value="1" min="1">
+                </div>
+                
+                <div class="grupo-input">
+                    <label for="talla">Talla</label>
+                    <select id="talla" class="input-hibrido-grande select-custom">
+                        <option value="">Seleccionar...</option>
+                        <optgroup label="Infantil">
+                            <option value="6">6</option><option value="8">8</option><option value="10">10</option><option value="12">12</option><option value="14">14</option>
+                        </optgroup>
+                        <optgroup label="Adulto">
+                            <option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
 
-        <button type="button" id="btnGuardar" style="width: 100%; background: #5f17e4; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-            🚀 SUBIR AL CATÁLOGO
-        </button>
-    </form>
+            <div class="grupo-input">
+                <label>Foto de la Prenda</label>
+                <div class="upload-container" onclick="document.getElementById('imagenInput').click()">
+                    <input type="file" id="imagenInput" accept="image/*" hidden onchange="previsualizar(this)">
+                    <div id="preview-placeholder">
+                        <span class="upload-icon">📸</span>
+                        <p>Haz clic para subir o arrastra una imagen</p>
+                    </div>
+                    <img id="preview-img" src="" style="display: none;" class="img-preview-fija">
+                </div>
+            </div>
+
+            <button type="button" id="btnGuardar" class="btn-principal-grande">
+                <span>🚀 SUBIR AL CATÁLOGO</span>
+            </button>
+        </form>
+    </div>
 </div>
 
+<style>
+    .contenedor-registro-prenda {
+        padding: 120px 20px 60px;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    .card-registro-premium {
+        width: 100%;
+        max-width: 550px;
+        padding: 40px !important;
+        border: 1px solid var(--border);
+        box-shadow: 0 15px 35px var(--shadow);
+        animation: fadeIn 0.5s ease;
+    }
+
+    .header-registro { text-align: center; margin-bottom: 30px; }
+    
+    .icono-flotante {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        display: inline-block;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .header-registro h2 {
+        color: var(--primary);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: -1px;
+        margin-bottom: 5px;
+    }
+
+    .header-registro p { color: var(--text-soft); font-size: 0.95rem; }
+
+    .form-moderno { display: flex; flex-direction: column; gap: 20px; }
+
+    .grupo-input { display: flex; flex-direction: column; gap: 8px; }
+    
+    .grupo-input label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--primary);
+        text-transform: uppercase;
+        margin-left: 5px;
+    }
+
+    .input-hibrido-grande {
+        width: 100%;
+        padding: 15px;
+        border-radius: 12px;
+        border: 2px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .input-hibrido-grande:focus {
+        border-color: var(--nav);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(24, 127, 74, 0.1);
+    }
+
+    .fila-doble {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    /* Área de subida */
+    .upload-container {
+        border: 2px dashed var(--nav);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        background: var(--bg-soft);
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        min-height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .upload-container:hover { background: #e0f2ff; border-color: var(--primary); }
+
+    .upload-icon { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+
+    .img-preview-fija {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        position: absolute;
+        top: 0; left: 0;
+        background: white;
+    }
+
+    .btn-principal-grande {
+        background: var(--nav);
+        color: white;
+        padding: 18px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.3s;
+        margin-top: 10px;
+    }
+
+    .btn-principal-grande:hover {
+        background: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .btn-principal-grande:active { transform: translateY(0); }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
 <script>
+    // Previsualización de imagen
+    function previsualizar(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-img').src = e.target.result;
+                document.getElementById('preview-img').style.display = 'block';
+                document.getElementById('preview-placeholder').style.display = 'none';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
     document.getElementById('btnGuardar').addEventListener('click', async () => {
         const nombre = document.getElementById('nombre').value;
         const cantidad = document.getElementById('cantidad').value;
@@ -43,43 +211,43 @@
         const archivo = document.getElementById('imagenInput').files[0];
 
         if (!nombre || !archivo || !talla) {
-            alert("⚠️ Por favor rellena el nombre, la talla y selecciona una foto.");
+            alert("⚠️ Por favor completa los campos y sube una foto.");
             return;
         }
 
-        // BLOQUEO DE BOTÓN PARA EVITAR DOBLE CLICK
         const btn = document.getElementById('btnGuardar');
         btn.disabled = true;
-        btn.innerText = "Subiendo...";
+        btn.innerHTML = "<span>⏳ PROCESANDO...</span>";
 
-        // CONVERTIR IMAGEN A BASE64
         const reader = new FileReader();
         reader.readAsDataURL(archivo);
         reader.onload = async () => {
-            const base64 = reader.result;
+            try {
+                const res = await fetch("{% url 'api_guardar_prenda' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        cantidad: cantidad,
+                        talla: talla,
+                        imagen: reader.result
+                    })
+                });
 
-            const res = await fetch("{% url 'api_guardar_prenda' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: JSON.stringify({
-                    nombre: nombre,
-                    cantidad: cantidad,
-                    talla: talla,
-                    imagen: base64
-                })
-            });
-
-            const data = await res.json();
-            if (data.status === 'ok') {
-                alert("✅ Prenda registrada correctamente.");
-                window.location.href = "{% url 'tipos' %}";
-            } else {
-                alert("❌ Error: " + data.message);
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    window.location.href = "{% url 'tipos' %}";
+                } else {
+                    alert("❌ Error: " + data.message);
+                    btn.disabled = false;
+                    btn.innerHTML = "<span>🚀 SUBIR AL CATÁLOGO</span>";
+                }
+            } catch (e) {
+                console.error(e);
                 btn.disabled = false;
-                btn.innerText = "🚀 SUBIR AL CATÁLOGO";
             }
         };
     });

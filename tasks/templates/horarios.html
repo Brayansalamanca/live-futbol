@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <style>
+        :root {
+            --bg: #f4f7f6;
+            --primary: #187f4a;
+            --secondary: #8fa3ff;
+            --border: #dcdcdc;
+            --text: #222;
+            --white: #ffffff;
+            --teens: #ff8fa3;
+            --seniors: #ffb7c5;
+            --masters: #8fa3ff;
+            --clase-bg: #b2ebf2;
+            --clase-border: #00acc1;
+            --clase-text: #006064;
+            --relevo-bg: #ffe0b2;
+            --relevo-border: #fb8c00;
+            --relevo-text: #5d4037;
+        }
+
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); }
+
+        /* NAVBAR */
+        .navbar {
+            width: 100%; background: #222; display: flex; justify-content: center; gap: 20px;
+            padding: 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .nav-btn {
+            border: none; background: transparent; color: white; padding: 10px 20px;
+            border-radius: 10px; cursor: pointer; font-weight: 600; transition: 0.3s;
+        }
+        .nav-btn.active { background: var(--primary); }
+
+        /* SECCIONES */
+        .view-section { display: none; padding: 20px; max-width: 1400px; margin: auto; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* TABLAS Y GRID */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        th { background: var(--primary); color: white; padding: 12px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.1); }
+        td { border: 1px solid var(--border); padding: 8px; text-align: center; height: 80px; vertical-align: top; }
+        .hora-col { background: #eef2ff; font-weight: bold; width: 80px; vertical-align: middle; }
+
+        /* ASIGNACIÓN */
+        .config-panel { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 8px; outline: none; }
+        .btn-save-all { background: #000; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+        /* TARJETAS DE CLASE */
+        .info-card { 
+            background: var(--clase-bg); border-left: 4px solid var(--clase-border); 
+            padding: 5px; font-size: 0.7rem; text-align: left; border-radius: 4px; margin-bottom: 3px;
+        }
+        .info-card.tipo-relevo { background: var(--relevo-bg); border-color: var(--relevo-border); }
+        .info-card b { display: block; color: var(--clase-text); }
+
+        /* MODAL */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; }
+        .modal { 
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 25px; border-radius: 15px; z-index: 2001; width: 320px;
+        }
+
+        /* FILTROS PANEL */
+        .controls { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center; background: white; padding: 15px; border-radius: 12px; }
+        .btn-list { padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; background: #f9f9f9; }
+        .btn-list.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* INDICADOR SYNC */
+        .sync { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: #10b981; font-weight: bold; }
+        .dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        .row-link { cursor: pointer; transition: 0.2s; }
+        .row-link:hover { background: #f0fdf4 !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <button class="nav-btn active" id="btn-asignar" onclick="cambiarVista('asignar')">✏️ Modo Asignación</button>
+        <button class="nav-btn" id="btn-panel" onclick="cambiarVista('panel')">📊 Panel de Control</button>
+    </nav>
+
+    <section id="vista-asignar" class="view-section active">
+        <div class="config-panel">
+            <strong>PROFESOR:</strong>
+            <input type="text" id="nombreProfesor" placeholder="Nombre completo">
+            <button class="btn-save-all" onclick="guardarHorarioDB()">💾 Guardar Todo el Horario</button>
+            <small style="color: #666;">* Haz clic en las celdas para añadir clases antes de guardar.</small>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="hora-col">HORA</th>
+                    <th>LUNES</th><th>MARTES</th><th>MIÉRCOLES</th><th>JUEVES</th><th>VIERNES</th><th>SÁBADO</th>
+                </tr>
+            </thead>
+            <tbody id="gridAsignar"></tbody>
+        </table>
+    </section>
+
+    <section id="vista-panel" class="view-section">
+        <div class="controls">
+            <div>
+                <button class="btn-list active" id="btn-view-profe" onclick="cambiarModoLista('profesores')">👤 Profesores</button>
+                <button class="btn-list" id="btn-view-curso" onclick="cambiarModoLista('cursos')">🏫 Cursos</button>
+            </div>
+            <input type="text" id="searchBar" placeholder="Buscar..." oninput="renderizarLista()">
+            <div class="sync"><div class="dot"></div> Sincronizando (2s)</div>
+        </div>
+
+        <h2 id="panelTitle" style="color: var(--primary);">Listado de Profesores</h2>
+        <table id="tablaPanel">
+            <thead id="headPanel"></thead>
+            <tbody id="bodyPanel"></tbody>
+        </table>
+    </section>
+
+    <div class="overlay" id="overlay" onclick="cerrarModal()"></div>
+    <div class="modal" id="modal">
+        <h3 id="modalTitle">Asignar Bloque</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <select id="m_tipo">
+                <option value="clase">📚 CLASE</option>
+                <option value="relevo">🔄 RELEVO</option>
+            </select>
+            <input type="text" id="m_materia" placeholder="Materia (Ej: Fútbol)">
+            <input type="text" id="m_salon" placeholder="Salón / Cancha">
+            <input type="text" id="m_curso" placeholder="Curso (Ej: 11A)">
+            <button class="btn-save-all" onclick="confirmarCelda()">Confirmar Bloque</button>
+            <button style="background:#ff5252; color:white; border:none; padding:8px; border-radius:8px; cursor:pointer;" onclick="borrarCelda()">Eliminar</button>
+        </div>
+    </div>
+
+    <script>
+        const HORAS = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
+        const DIAS_IDS = [1, 2, 3, 4, 5, 6];
+        let datosTemporales = {}; // Lo que se está dibujando en "Asignar"
+        let celdaActiva = null;
+        let modoLista = "profesores";
+        let intervalSync = null;
+
+        // --- LÓGICA DE VISTAS ---
+        function cambiarVista(vista) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('vista-' + vista).classList.add('active');
+            document.getElementById('btn-' + vista).classList.add('active');
+
+            if (vista === 'panel') {
+                renderizarLista();
+                intervalSync = setInterval(renderizarLista, 2000);
+            } else {
+                clearInterval(intervalSync);
+                generarGridAsignar();
+            }
+        }
+
+        // --- LÓGICA DE ASIGNACIÓN (EL CALENDARIO) ---
+        function generarGridAsignar() {
+            const body = document.getElementById("gridAsignar");
+            let html = "";
+            HORAS.forEach(hora => {
+                html += `<tr><td class="hora-col">${hora}</td>`;
+                DIAS_IDS.forEach(dia => {
+                    const id = `cell-${hora}-${dia}`;
+                    const data = datosTemporales[id];
+                    html += `<td onclick="abrirModal('${id}', '${hora}')" style="cursor:pointer">`;
+                    if(data) {
+                        html += `<div class="info-card tipo-${data.tipo}"><b>${data.materia}</b>${data.curso} - ${data.salon}</div>`;
+                    }
+                    html += `</td>`;
+                });
+                html += `</tr>`;
+            });
+            body.innerHTML = html;
+        }
+
+        function abrirModal(id, hora) {
+            celdaActiva = id;
+            document.getElementById("modalTitle").innerText = "Hora: " + hora;
+            document.getElementById("modal").style.display = "block";
+            document.getElementById("overlay").style.display = "block";
+        }
+
+        function cerrarModal() {
+            document.getElementById("modal").style.display = "none";
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        function confirmarCelda() {
+            const materia = document.getElementById("m_materia").value;
+            const curso = document.getElementById("m_curso").value;
+            const salon = document.getElementById("m_salon").value;
+            if(!materia || !curso) return alert("Materia y Curso son obligatorios");
+
+            datosTemporales[celdaActiva] = {
+                tipo: document.getElementById("m_tipo").value,
+                materia, curso, salon
+            };
+            cerrarModal();
+            generarGridAsignar();
+        }
+
+        function borrarCelda() {
+            delete datosTemporales[celdaActiva];
+            cerrarModal();
+            generarGridAsignar();
+        }
+
+        function guardarHorarioDB() {
+            const profe = document.getElementById("nombreProfesor").value.trim();
+            if(!profe) return alert("Ingresa el nombre del profesor");
+            if(Object.keys(datosTemporales).length === 0) return alert("El horario está vacío");
+
+            let db = JSON.parse(localStorage.getItem("cal_db_v2")) || [];
+            
+            for (let cellId in datosTemporales) {
+                const item = datosTemporales[cellId];
+                db.push({
+                    id: Date.now() + Math.random(),
+                    cellId,
+                    profesor: profe,
+                    ...item
+                });
+            }
+
+            localStorage.setItem("cal_db_v2", JSON.stringify(db));
+            alert("✅ Horario guardado y sincronizado");
+            datosTemporales = {};
+            document.getElementById("nombreProfesor").value = "";
+            generarGridAsignar();
+        }
+
+        // --- LÓGICA DEL PANEL (LISTADO Y VISTA DETALLE) ---
+        function cambiarModoLista(modo) {
+            modoLista = modo;
+            document.getElementById("btn-view-profe").classList.toggle("active", modo === "profesores");
+            document.getElementById("btn-view-curso").classList.toggle("active", modo === "cursos");
+            renderizarLista();
+        }
+
+        function renderizarLista() {
+            const db = JSON.parse(localStorage.getItem("cal_db_v2")) || [];
+            const search = document.getElementById("searchBar").value.toLowerCase();
+            const body = document.getElementById("bodyPanel");
+            const head = document.getElementById("headPanel");
+            
+            let html = "";
+            if (modoLista === "profesores") {
+                head.innerHTML = "<tr><th>NOMBRE DEL PROFESOR</th><th>CLASES ASIGNADAS</th></tr>";
+                const unicos = [...new Set(db.map(x => x.profesor))];
+                unicos.forEach(p => {
+                    if(p.toLowerCase().includes(search)) {
+                        const cant = db.filter(x => x.profesor === p).length;
+                        html += `<tr class="row-link" onclick="verDetalle('${p}', 'profesor')"><td>👤 ${p}</td><td>${cant} bloques</td></tr>`;
+                    }
+                });
+            } else {
+                head.innerHTML = "<tr><th>CURSO / SALÓN</th><th>PROFESOR A CARGO</th></tr>";
+                const cursos = [...new Set(db.map(x => x.curso))];
+                cursos.forEach(c => {
+                    if(c.toLowerCase().includes(search)) {
+                        const profe = db.find(x => x.curso === c).profesor;
+                        html += `<tr class="row-link" onclick="verDetalle('${c}', 'curso')"><td>🏫 ${c}</td><td>${profe}</td></tr>`;
+                    }
+                });
+            }
+            body.innerHTML = html || "<tr><td colspan='2'>No hay datos</td></tr>";
+        }
+
+        // ESTA ES LA MAGIA: Al dar clic, se reconstruye el calendario solo para ese profesor/curso
+        function verDetalle(valor, tipo) {
+            const db = JSON.parse(localStorage.getItem("cal_db_v2")) || [];
+            const filtrados = db.filter(x => tipo === 'profesor' ? x.profesor === valor : x.curso === valor);
+            
+            const panelBody = document.getElementById("bodyPanel");
+            const panelHead = document.getElementById("headPanel");
+            
+            document.getElementById("panelTitle").innerHTML = `📅 Horario Detallado: ${valor} <button onclick="renderizarLista()" style="font-size:12px; cursor:pointer;">(Volver)</button>`;
+            
+            panelHead.innerHTML = "<tr><th>HORA</th><th>LUN</th><th>MAR</th><th>MIE</th><th>JUE</th><th>VIE</th><th>SAB</th></tr>";
+            
+            let html = "";
+            HORAS.forEach(hora => {
+                html += `<tr><td class="hora-col">${hora}</td>`;
+                DIAS_IDS.forEach(dia => {
+                    const id = `cell-${hora}-${dia}`;
+                    const reg = filtrados.find(f => f.cellId === id);
+                    html += `<td>`;
+                    if(reg) {
+                        html += `<div class="info-card tipo-${reg.tipo}">
+                                    <b>${reg.materia}</b>
+                                    <small>${reg.salon} ${tipo === 'profesor' ? '' : '('+reg.profesor+')'}</small>
+                                    <button onclick="eliminarRegistro(${reg.id})" style="display:block; border:none; background:none; color:red; cursor:pointer; font-size:9px;">[X]</button>
+                                 </div>`;
+                    }
+                    html += `</td>`;
+                });
+                html += `</tr>`;
+            });
+            panelBody.innerHTML = html;
+            // Detener el polling mientras se ve el detalle para que no se borre la vista
+            clearInterval(intervalSync);
+        }
+
+        function eliminarRegistro(id) {
+            if(!confirm("¿Eliminar bloque?")) return;
+            let db = JSON.parse(localStorage.getItem("cal_db_v2")) || [];
+            db = db.filter(x => x.id !== id);
+            localStorage.setItem("cal_db_v2", JSON.stringify(db));
+            cambiarVista('panel'); // Refrescar
+        }
+
+        window.onload = () => generarGridAsignar();
+    </script>
+</body>
+</html>
+{% endblock %}

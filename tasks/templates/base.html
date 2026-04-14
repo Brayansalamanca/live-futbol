@@ -42,17 +42,22 @@
             </li>
 
             {% if user.is_authenticated %}
-                {% if user.groups.all.0.name == 'coordinacion' or user.username == 'rosita' %}
+                {% if user.groups.all.0.name == 'coordinacion' %}
                     <li><a href="{% url 'formulario' %}">Registrar Ropa</a></li>
                     <li><a href="{% url 'tipos' %}">Control Inventario</a></li>
                     <li><a href="{% url 'ranking' %}">Aprobar Usuarios</a></li>
+                    <li><a href="{% url 'videos' %}">Renta Balones</a></li>
                 {% elif user.groups.all.0.name == 'asistente bienestar' %}
                     <li><a href="{% url 'radar' %}">Inventario Balones</a></li>
                     <li><a href="{% url 'videos' %}">Renta Balones</a></li>
                     <li><a href="{% url 'voz' %}">Bajas Balones</a></li>
+                    <li><a href="{% url 'profesores' %}">Profesores</a></li>
                 {% else %}
                     <li><a href="{% url 'tipos' %}">Catálogo Ropa</a></li>
-                    <li><a href="{% url 'tasks' %}">Mis Tareas</a></li>
+                    <li><a href="{% url 'horarios' %}">Horario</a></li>
+                    <li><a href="{% url 'profesores' %}">Profesores</a></li>
+                    <li><a href="{% url 'videos' %}">Renta Balones</a></li>
+
                 {% endif %}
                 <li><a href="{% url 'logout' %}" class="logout">Salir</a></li>
             {% else %}

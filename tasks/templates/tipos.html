@@ -1,19 +1,20 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<div style="padding: 100px 20px; background: #000d1a; min-height: 100vh; color: white; font-family: 'Inter', sans-serif;">
+<div class="seccion-inventario">
     
-    <h1 style="text-align: center; color: #00ccff; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">👕 Catálogo de Inventario</h1>
+    <h1 class="titulo-principal">👕 Catálogo de Inventario</h1>
     
-    <div style="max-width: 800px; margin: 30px auto; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; background: rgba(0, 204, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 204, 255, 0.2);">
-        <div style="flex: 2; min-width: 250px;">
-            <label style="color: #00ccff; font-size: 12px; display: block; margin-bottom: 5px;">BUSCAR PRENDA:</label>
-            <input type="text" id="busquedaNombre" onkeyup="filtrarCatalogo()" placeholder="Ej: Camiseta, Pantalón..." 
-                   style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #0059b3; background: #001a33; color: white; outline: none;">
+    <div class="card card-filtros">
+        <div class="filtro-item flex-2">
+            <label>BUSCAR PRENDA:</label>
+            <input type="text" id="busquedaNombre" onkeyup="filtrarCatalogo()" placeholder="Ej: Camiseta, Pantalón..." class="input-hibrido">
         </div>
         
-        <div style="flex: 1; min-width: 150px;">
-            <label style="color: #00ccff; font-size: 12px; display: block; margin-bottom: 5px;">FILTRAR TALLA:</label>
-            <select id="filtroTalla" onchange="filtrarCatalogo()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #0059b3; background: #001a33; color: white; cursor: pointer;">
+        <div class="filtro-item flex-1">
+            <label>FILTRAR TALLA:</label>
+            <select id="filtroTalla" onchange="filtrarCatalogo()" class="input-hibrido">
                 <option value="">Todas las tallas</option>
                 <option value="6">6</option> <option value="8">8</option> <option value="10">10</option>
                 <option value="12">12</option> <option value="14">14</option> <option value="XS">XS</option>
@@ -23,54 +24,106 @@
         </div>
     </div>
 
-    <div style="overflow-x: auto; background: rgba(0, 43, 92, 0.3); border-radius: 15px; border: 1px solid #0059b3; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead style="background: #0059b3; color: white; text-transform: uppercase; font-size: 13px;">
-                <tr>
-                    <th style="padding: 15px;">Imagen</th>
-                    <th>Prenda</th>
-                    <th>Talla</th>
-                    <th>Stock</th>
-                    <th>Reservados</th>
-                    <th>Devolución</th>
-                    <th>Estado / Responsable</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody id="tablaCuerpo" style="text-align: center;"></tbody>
-        </table>
-    </div>
-
-    {% if request.user.username == 'rosita' %}
-    <div style="margin-top: 60px;">
-        <h2 style="color: #ffcc00; border-left: 5px solid #ffcc00; padding-left: 15px; text-transform: uppercase;">🛡️ Control de Devoluciones (Admin)</h2>
-        <div style="overflow-x: auto; background: rgba(255, 204, 0, 0.05); border-radius: 15px; border: 1px solid #ffcc00; margin-top: 20px;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead style="background: #ffcc00; color: #000d1a; font-size: 13px;">
+    <div class="card card-tabla-inventario">
+        <div class="table-responsive">
+            <table class="tabla-limpia">
+                <thead>
                     <tr>
-                        <th style="padding: 15px;">Foto</th>
+                        <th style="padding: 15px;">Imagen</th>
                         <th>Prenda</th>
-                        <th>Quién tiene</th>
-                        <th>Cantidad</th>
-                        <th>Curso / Evento</th>
-                        <th>Fecha Uso</th>
+                        <th>Talla</th>
+                        <th>Stock</th>
+                        <th>Reservados</th>
+                        <th>Devolución</th>
+                        <th>Estado / Responsable</th>
                         <th>Acción</th>
                     </tr>
                 </thead>
-                <tbody id="tablaDevoluciones" style="text-align: center;"></tbody>
+                <tbody id="tablaCuerpo"></tbody>
             </table>
+        </div>
+    </div>
+
+    {% if request.user.username == 'rosita' %}
+    <div class="admin-section">
+        <h2 class="titulo-admin">🛡️ Control de Devoluciones (Admin)</h2>
+        <div class="card card-tabla-admin">
+            <div class="table-responsive">
+                <table class="tabla-limpia">
+                    <thead class="head-admin">
+                        <tr>
+                            <th style="padding: 15px;">Foto</th>
+                            <th>Prenda</th>
+                            <th>Quién tiene</th>
+                            <th>Cantidad</th>
+                            <th>Curso / Evento</th>
+                            <th>Fecha Uso</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaDevoluciones"></tbody>
+                </table>
+            </div>
         </div>
     </div>
     {% endif %}
 </div>
 
-<div id="visorImagen" onclick="cerrarVisor()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; cursor: zoom-out;">
-    <img id="imgGrande" src="" style="width: 45vw; height: auto; border: 5px solid #00ccff; border-radius: 15px; box-shadow: 0 0 50px rgba(0, 204, 255, 0.5); object-fit: contain;">
+<div id="visorImagen" onclick="cerrarVisor()" class="visor-modal">
+    <img id="imgGrande" src="" class="img-ampliada">
 </div>
+
+<style>
+    .seccion-inventario { padding: 80px 20px 50px; min-height: 100vh; max-width: 1200px; margin: 0 auto; }
+    
+    .titulo-principal { text-align: center; color: var(--primary); text-transform: uppercase; font-weight: 900; margin-bottom: 30px; }
+
+    /* Estilos de Filtros */
+    .card-filtros { display: flex; gap: 15px; flex-wrap: wrap; padding: 20px; margin-bottom: 30px; border: 1px solid var(--border); }
+    .filtro-item { min-width: 150px; }
+    .flex-2 { flex: 2; }
+    .flex-1 { flex: 1; }
+    .filtro-item label { color: var(--primary); font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px; }
+
+    /* Estilos de Tabla */
+    .card-tabla-inventario, .card-tabla-admin { padding: 0 !important; overflow: hidden; border: 1px solid var(--border); }
+    .table-responsive { overflow-x: auto; }
+    .tabla-limpia { width: 100%; border-collapse: collapse; text-align: center; color: var(--text); }
+    
+    .tabla-limpia thead { background: var(--primary); color: white; font-size: 12px; text-transform: uppercase; }
+    .tabla-limpia td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+
+    /* Colores de celdas */
+    .stock-ok { color: #27ae60; font-weight: bold; }
+    .stock-wait { color: #f39c12; font-weight: bold; }
+    .fecha-info { color: var(--text-soft); font-size: 12px; }
+
+    /* Badges de Estado */
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; color: white; }
+    .badge-ok { background: #27ae60; }
+    .badge-fail { background: #e74c3c; }
+
+    /* Admin Section */
+    .admin-section { margin-top: 60px; }
+    .titulo-admin { color: #d35400; border-left: 5px solid #d35400; padding-left: 15px; font-size: 1.2rem; margin-bottom: 20px; }
+    .head-admin { background: #d35400 !important; }
+
+    /* Imágenes */
+    .img-tabla { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); cursor: zoom-in; }
+
+    /* Visor */
+    .visor-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+    .img-ampliada { width: auto; max-width: 80%; max-height: 80%; border: 4px solid var(--primary); border-radius: 12px; }
+
+    /* Formulario interno de la tabla */
+    .form-row { background: var(--bg-soft); }
+    .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; padding: 15px; }
+    .grid-form label { font-size: 10px; color: var(--primary); font-weight: bold; display: block; }
+</style>
 
 <script>
     const USUARIO_ACTUAL = "{{ request.user.username }}";
-    let DATOS_PRENDAS = []; // Almacén local para filtrar sin recargar la API
+    let DATOS_PRENDAS = [];
 
     function ampliarImagen(src) {
         document.getElementById('imgGrande').src = src;
@@ -78,115 +131,91 @@
     }
     function cerrarVisor() { document.getElementById('visorImagen').style.display = 'none'; }
 
-    function obtenerFechaMinima() {
-        const hoy = new Date();
-        hoy.setDate(hoy.getDate() + 10);
-        return hoy.toISOString().split('T')[0];
-    }
-
     async function cargar() {
         try {
             const res = await fetch("{% url 'api_obtener_prendas' %}");
             DATOS_PRENDAS = await res.json();
-            filtrarCatalogo(); // Renderiza inicialmente
-        } catch (e) { console.error("Error al cargar:", e); }
+            filtrarCatalogo();
+        } catch (e) { console.error("Error:", e); }
     }
 
-    // 🔍 FUNCIÓN DE FILTRADO COMBINADO
     function filtrarCatalogo() {
         const busqueda = document.getElementById('busquedaNombre').value.toLowerCase();
         const tallaSel = document.getElementById('filtroTalla').value;
-        
-        const prendasFiltradas = DATOS_PRENDAS.filter(p => {
-            const coincideNombre = p.nombre.toLowerCase().includes(busqueda);
-            const coincideTalla = tallaSel === "" || p.talla === tallaSel;
-            return coincideNombre && coincideTalla;
-        });
-
-        renderizarTablas(prendasFiltradas);
+        const filtradas = DATOS_PRENDAS.filter(p => (p.nombre.toLowerCase().includes(busqueda)) && (tallaSel === "" || p.talla === tallaSel));
+        renderizarTablas(filtradas);
     }
 
     function renderizarTablas(prendas) {
-        let htmlCatalogo = "";
-        let htmlDevoluciones = "";
-
+        let htmlCat = ""; let htmlDev = "";
         prendas.forEach(p => {
-            const esDisponible = p.estado === "Disponible";
-            
-            htmlCatalogo += `
-            <tr class="fila-prenda" style="border-bottom: 1px solid rgba(0,89,179,0.2);">
-                <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" style="width: 70px; height: 70px; border-radius: 10px; margin: 10px; object-fit: cover; border: 2px solid #0059b3; cursor: zoom-in;"></td>
-                <td style="font-weight: bold;">${p.nombre}</td>
-                <td style="font-weight: bold;">${p.talla || '-'}</td>
-                <td style="color: #27ae60; font-weight: bold;">${p.cantidad}</td>
-                <td style="color: #f1c40f; font-weight: bold;">${p.cantidad_apartada || 0}</td>
-                <td style="color: #9bd4ff; font-weight: bold;">${p.fecha_devolucion || '---'}</td>
-                <td>
-                    <span style="background: ${esDisponible ? '#27ae60' : '#e74c3c'}; padding: 4px 10px; border-radius: 20px; font-size: 11px;">
-                        ${esDisponible ? "✅ Disponible" : "🚩 " + p.profesor}
-                    </span>
-                </td>
-                <td>
-                    <div style="display: flex; gap: 5px; justify-content: center;">
-                        ${esDisponible 
-                            ? `<button onclick="mostrarFormulario('${p.id}')" style="background:#00ccff; color:#000d1a; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Apartar</button>`
-                            : `<button disabled style="background:#333; color:#777; border:none; padding:8px 15px; border-radius:5px;">Ocupado</button>`
-                        }
-                        ${USUARIO_ACTUAL === 'rosita' ? `<button onclick="eliminarPrenda('${p.id}')" style="background:#ff4444; color:white; border:none; padding:8px 10px; border-radius:5px; cursor:pointer;">🗑️</button>` : ''}
-                    </div>
-                </td>
-            </tr>
-            <tr id="form-${p.id}" style="display: none; background: rgba(0, 204, 255, 0.05);">
-                <td colspan="8" style="padding: 20px;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; align-items: end;">
-                        <div><label style="font-size: 11px; color: #00ccff;">NOMBRE</label><input type="text" id="user-${p.id}" value="${USUARIO_ACTUAL}" readonly style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
-                        <div><label style="font-size: 11px; color: #00ccff;">CURSO</label><input type="text" id="curso-${p.id}" placeholder="Ej: 1101" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
-                        <div><label style="font-size: 11px; color: #00ccff;">EVENTO</label><input type="text" id="evento-${p.id}" placeholder="Ej: Interclases" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
-                        <div><label style="font-size: 11px; color: #00ccff;">FECHA</label><input type="date" id="fecha-${p.id}" min="${obtenerFechaMinima()}" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
-                        <div><label style="font-size: 11px; color: #00ccff;">CANTIDAD</label><input type="number" id="cantidad-${p.id}" min="1" value="1" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
-                        <div><label style="font-size: 11px; color: #00ccff;">DÍAS</label><input type="number" id="dias-${p.id}" min="1" value="1" style="width:100%; background:#001a33; border:1px solid #0059b3; color:white; padding:8px; border-radius:5px;"></div>
-                        <div style="display: flex; gap: 5px;"><button onclick="confirmarApartado('${p.id}')" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; flex:1;">OK</button><button onclick="cerrarFormulario('${p.id}')" style="background:#e74c3c; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">X</button></div>
-                    </div>
-                </td>
-            </tr>`;
-
-            if (USUARIO_ACTUAL === 'rosita' && !esDisponible) {
-                htmlDevoluciones += `
-                <tr style="border-bottom: 1px solid rgba(255,204,0,0.2);">
-                    <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" style="width: 50px; height: 50px; border-radius: 8px; border: 1px solid #ffcc00; object-fit: cover;"></td>
-                    <td style="padding: 15px;">${p.nombre}</td>
-                    <td style="color: #ffcc00; font-weight: bold;">${p.profesor}</td>
-                    <td style="font-weight: bold; font-size: 1.2rem;">${p.cantidad_apartada}</td>
-                    <td>${p.curso} / ${p.evento}</td>
-                    <td>${p.fecha_uso}</td>
-                    <td><button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Marcar Devuelto</button></td>
+            const esDisp = p.estado === "Disponible";
+            htmlCat += `
+                <tr>
+                    <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" class="img-tabla"></td>
+                    <td style="font-weight: bold;">${p.nombre}</td>
+                    <td>${p.talla || '-'}</td>
+                    <td class="stock-ok">${p.cantidad}</td>
+                    <td class="stock-wait">${p.cantidad_apartada || 0}</td>
+                    <td class="fecha-info">${p.fecha_devolucion || '---'}</td>
+                    <td><span class="badge ${esDisp ? 'badge-ok' : 'badge-fail'}">${esDisp ? '✅ Disponible' : '🚩 ' + p.profesor}</span></td>
+                    <td>
+                        <div style="display: flex; gap: 5px; justify-content: center;">
+                            ${esDisp ? `<button onclick="toggleForm('${p.id}')" style="background:var(--primary); color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Apartar</button>` : `<button disabled style="background:#ccc; color:#666; border:none; padding:6px 12px; border-radius:4px;">Ocupado</button>`}
+                            ${USUARIO_ACTUAL === 'rosita' ? `<button onclick="eliminarPrenda('${p.id}')" style="background:#e74c3c; color:white; border:none; padding:6px 8px; border-radius:4px;">🗑️</button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+                <tr id="form-${p.id}" class="form-row" style="display: none;">
+                    <td colspan="8">
+                        <div class="grid-form">
+                            <div><label>CURSO</label><input type="text" id="curso-${p.id}" class="input-hibrido" style="height:35px"></div>
+                            <div><label>EVENTO</label><input type="text" id="evento-${p.id}" class="input-hibrido" style="height:35px"></div>
+                            <div><label>FECHA</label><input type="date" id="fecha-${p.id}" class="input-hibrido" style="height:35px"></div>
+                            <div><label>CANT.</label><input type="number" id="cant-${p.id}" value="1" class="input-hibrido" style="height:35px"></div>
+                            <div style="display:flex; gap:5px; align-items:flex-end;">
+                                <button onclick="confirmar('${p.id}')" style="background:#27ae60; color:white; border:none; height:35px; border-radius:4px; flex:1;">OK</button>
+                                <button onclick="toggleForm('${p.id}')" style="background:#95a5a6; color:white; border:none; height:35px; border-radius:4px; padding:0 10px;">X</button>
+                            </div>
+                        </div>
+                    </td>
                 </tr>`;
+            if (USUARIO_ACTUAL === 'rosita' && !esDisp) {
+                htmlDev += `
+                    <tr>
+                        <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" class="img-tabla" style="width:40px; height:40px"></td>
+                        <td>${p.nombre}</td>
+                        <td style="color:#d35400; font-weight:bold;">${p.profesor}</td>
+                        <td>${p.cantidad_apartada}</td>
+                        <td>${p.curso} / ${p.evento}</td>
+                        <td>${p.fecha_uso}</td>
+                        <td><button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:6px 12px; border-radius:4px;">Devuelto</button></td>
+                    </tr>`;
             }
         });
-
-        document.getElementById('tablaCuerpo').innerHTML = htmlCatalogo || "<tr><td colspan='8' style='padding:20px;'>No se encontraron prendas</td></tr>";
-        const tablaDev = document.getElementById('tablaDevoluciones');
-        if(tablaDev) tablaDev.innerHTML = htmlDevoluciones || "<tr><td colspan='7' style='padding:20px;'>No hay pendientes</td></tr>";
+        document.getElementById('tablaCuerpo').innerHTML = htmlCat || "<tr><td colspan='8'>No hay prendas</td></tr>";
+        const tDev = document.getElementById('tablaDevoluciones');
+        if(tDev) tDev.innerHTML = htmlDev || "<tr><td colspan='7'>Sin pendientes</td></tr>";
     }
 
-    // Funciones de acción
-    function mostrarFormulario(id) { document.getElementById(`form-${id}`).style.display = 'table-row'; }
-    function cerrarFormulario(id) { document.getElementById(`form-${id}`).style.display = 'none'; }
+    function toggleForm(id) { 
+        const row = document.getElementById(`form-${id}`);
+        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+    }
 
-    async function confirmarApartado(id) {
-        const data = {
-            nombre: document.getElementById(`user-${id}`).value,
+    async function confirmar(id) {
+        const payload = {
+            nombre: USUARIO_ACTUAL,
             curso: document.getElementById(`curso-${id}`).value,
             evento: document.getElementById(`evento-${id}`).value,
             fecha: document.getElementById(`fecha-${id}`).value,
-            dias_alquiler: document.getElementById(`dias-${id}`).value,
-            cantidad_alquilada: document.getElementById(`cantidad-${id}`).value,
+            cantidad_alquilada: document.getElementById(`cant-${id}`).value,
             accion: 'apartar'
         };
         const res = await fetch(`/api/apartar-prenda/${id}/`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-            body: JSON.stringify(data)
+            body: JSON.stringify(payload)
         });
         if (res.ok) cargar();
     }

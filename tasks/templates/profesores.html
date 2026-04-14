@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="contenedor-principal" style="padding-top: 100px; max-width: 1200px; margin: 0 auto; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1>🔍 Control de Objetos Perdidos</h1>
+        <div id="status-indicador" style="font-size: 12px; color: var(--text-soft);">
+            <span class="dot" style="height: 10px; width: 10px; background-color: #4CAF50; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
+            Sincronizado en tiempo real
+        </div>
+    </header>
+
+    <div class="jugadores" style="margin-bottom: 25px; padding: 15px; background: var(--card); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <input type="text" id="inputBusqueda" onkeyup="filtrarTablas()" placeholder="Filtrar por prenda, color, lugar o nombre de estudiante..." 
+               style="width: 100%; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; font-size: 16px;">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 25px;">
+        
+        <aside style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <div class="card-form" style="background: white; padding: 20px; border-radius: 12px; border-top: 5px solid var(--primary); shadow: var(--shadow);">
+                <h3 style="color: var(--primary); margin-bottom: 15px;">📦 Registrar Hallazgo</h3>
+                <form id="formHallazgo" onsubmit="event.preventDefault(); guardarHallazgo();">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <input id="h_tipo" list="tipos" placeholder="Tipo de prenda (Saco, Gorra...)" required style="padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+                        <datalist id="tipos">
+                            <option value="Saco/Busito">
+                            <option value="Chaqueta">
+                            <option value="Gorra">
+                            <option value="Sudadera">
+                            <option value="Uniforme Diario">
+                        </datalist>
+                        <input id="h_color" placeholder="Color y marca (Ej: Azul oscuro Adidas)" required style="padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+                        <input id="h_lugar" placeholder="¿Dónde apareció? (Ej: Cancha sintética)" required style="padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+                        <button type="submit" style="width:100%; padding: 12px; font-weight: bold; cursor: pointer;">Registrar en Inventario</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-form" style="background: #f8fafc; padding: 20px; border-radius: 12px; border-top: 5px solid var(--secondary);">
+                <h3 style="color: var(--secondary); margin-bottom: 5px;">🙋‍♂️ ¿Alguien busca algo?</h3>
+                <p style="font-size: 12px; color: #64748b; margin-bottom: 15px;">Anota los datos del estudiante que perdió una prenda.</p>
+                <form id="formSolicitud" onsubmit="event.preventDefault(); guardarSolicitud();">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <input id="s_nombre" placeholder="Nombre completo" required style="padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+                        <input id="s_curso" placeholder="Curso (Ej: 902)" required style="padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+                        <input id="s_prenda" placeholder="Prenda que busca" required style="padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+                        <button type="submit" style="width:100%; background: var(--secondary); padding: 12px; font-weight: bold; cursor: pointer;">Anotar Pedido</button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
+        <main style="display: flex; flex-direction: column; gap: 25px;">
+            
+            <section>
+                <h3 style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    🧺 Inventario Actual <span id="countH" style="font-size: 12px; background: var(--primary); color: white; padding: 2px 8px; border-radius: 10px;">0</span>
+                </h3>
+                <div style="background: var(--card); border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead style="background: rgba(0,0,0,0.05);">
+                            <tr>
+                                <th style="padding: 12px;">Prenda</th>
+                                <th style="padding: 12px;">Detalles</th>
+                                <th style="padding: 12px;">Ubicación</th>
+                                <th style="padding: 12px;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaHallazgos"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section>
+                <h3 style="margin-bottom: 10px; color: var(--secondary); display: flex; align-items: center; gap: 10px;">
+                    ⏳ Personas Buscando <span id="countS" style="font-size: 12px; background: var(--secondary); color: white; padding: 2px 8px; border-radius: 10px;">0</span>
+                </h3>
+                <div style="background: var(--card); border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead style="background: rgba(0,0,0,0.05);">
+                            <tr>
+                                <th style="padding: 12px;">Estudiante</th>
+                                <th style="padding: 12px;">Curso</th>
+                                <th style="padding: 12px;">Busca</th>
+                                <th style="padding: 12px;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaSolicitudes"></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</div>
+
+<script>
+// Lógica de Sincronización y CRUD
+const API_URLS = {
+    hallazgos: '/api/obtener-objetos/',
+    solicitudes: '/api/obtener-solicitudes/',
+    guardarH: '/api/guardar-objeto/',
+    guardarS: '/api/guardar-solicitud/',
+    eliminar: '/api/eliminar-item/' // Centralizado
+};
+
+async function fetchDataTable() {
+    try {
+        const [resH, resS] = await Promise.all([
+            fetch(API_URLS.hallazgos),
+            fetch(API_URLS.solicitudes)
+        ]);
+        
+        const hallazgos = await resH.json();
+        const solicitudes = await resS.json();
+
+        renderHallazgos(hallazgos);
+        renderSolicitudes(solicitudes);
+        
+        document.getElementById('countH').innerText = hallazgos.length;
+        document.getElementById('countS').innerText = solicitudes.length;
+
+    } catch (error) {
+        console.error("Error de conexión:", error);
+    }
+}
+
+function renderHallazgos(data) {
+    const container = document.getElementById('tablaHallazgos');
+    container.innerHTML = data.length ? data.map(h => `
+        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+            <td style="padding: 12px;"><strong>${h.tipo}</strong></td>
+            <td style="padding: 12px;">${h.color}</td>
+            <td style="padding: 12px;"><small>📍 ${h.lugar}</small></td>
+            <td style="padding: 12px;">
+                <button onclick="resolverItem('${h.id}', 'hallazgo')" style="background:#10b981; padding: 5px 10px; font-size: 11px;">Entregar</button>
+            </td>
+        </tr>
+    `).join('') : '<tr><td colspan="4" style="padding:20px; text-align:center; color:#94a3b8;">No hay objetos en estante</td></tr>';
+}
+
+function renderSolicitudes(data) {
+    const container = document.getElementById('tablaSolicitudes');
+    container.innerHTML = data.length ? data.map(s => `
+        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+            <td style="padding: 12px; color: var(--primary);"><strong>${s.nombre}</strong></td>
+            <td style="padding: 12px;">${s.curso}</td>
+            <td style="padding: 12px;">${s.prenda_buscada}</td>
+            <td style="padding: 12px;">
+                <button onclick="resolverItem('${s.id}', 'solicitud')" style="background:var(--secondary); padding: 5px 10px; font-size: 11px;">Cerrar</button>
+            </td>
+        </tr>
+    `).join('') : '<tr><td colspan="4" style="padding:20px; text-align:center; color:#94a3b8;">No hay solicitudes activas</td></tr>';
+}
+
+async function resolverItem(id, tipo) {
+    if(!confirm("¿Deseas marcar este registro como resuelto/entregado?")) return;
+    
+    await fetch(`${API_URLS.eliminar}${id}/`, { 
+        method: 'DELETE',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'}
+    });
+    fetchDataTable();
+}
+
+async function guardarHallazgo() {
+    const btn = document.querySelector('#formHallazgo button');
+    btn.disabled = true;
+    
+    const data = {
+        tipo: document.getElementById('h_tipo').value,
+        color: document.getElementById('h_color').value,
+        lugar: document.getElementById('h_lugar').value
+    };
+
+    await fetch(API_URLS.guardarH, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+        body: JSON.stringify(data)
+    });
+
+    document.getElementById('formHallazgo').reset();
+    btn.disabled = false;
+    fetchDataTable();
+}
+
+// ... (Función guardarSolicitud similar a guardarHallazgo)
+
+function filtrarTablas() {
+    const query = document.getElementById('inputBusqueda').value.toLowerCase();
+    const filas = document.querySelectorAll('tbody tr');
+    filas.forEach(f => {
+        f.style.display = f.innerText.toLowerCase().includes(query) ? "" : "none";
+    });
+}
+
+// Sincronización automática de alta frecuencia (2s)
+setInterval(fetchDataTable, 2000);
+fetchDataTable();
+</script>
+{% endblock %}

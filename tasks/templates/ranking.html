@@ -1,70 +1,114 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<div class="container-fluid" style="padding: 100px 20px; background: #000d1a; min-height: 100vh; color: white; font-family: 'Inter', sans-serif;">
+<div class="seccion-usuarios">
     
-    <h2 class="text-center mb-4" style="color: #ffcc00; text-transform: uppercase; font-weight: 900; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">
-        🏆 Gestión de Usuarios y Permisos
-    </h2>
+    <h2 class="titulo-principal">🏆 Gestión de Usuarios y Permisos</h2>
 
-    <div style="margin: 20px auto; max-width: 600px; text-align: center;">
-        <input type="text" id="buscadorUsuarios" onkeyup="filtrarUsuarios()" placeholder="🔍 Buscar por nombre, usuario o email..." 
-               style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #0059b3; background: #001a33; color: white; font-size: 16px; outline: none;">
+    <div class="card card-busqueda">
+        <input type="text" id="buscadorUsuarios" onkeyup="filtrarUsuarios()" 
+               placeholder="🔍 Buscar por nombre, usuario o email..." class="input-hibrido">
     </div>
 
-    <div class="seccion-grupo mb-5">
-        <h3 style="color: #00ccff; border-left: 5px solid #00ccff; padding-left: 15px;">👨‍🏫 PROFESORES</h3>
-        <div class="table-responsive" style="background: rgba(0, 204, 255, 0.05); border-radius: 15px; border: 1px solid rgba(0, 204, 255, 0.2); padding: 10px;">
-            <table class="table table-hover" style="color: white; text-align: center;">
-                <thead style="background: #0059b3; color: white;">
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Email</th>
-                        <th>Rol Solicitado</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-profesores"></tbody>
-            </table>
+    <div class="seccion-grupo">
+        <h3 class="label-profesor">👨‍🏫 PROFESORES</h3>
+        <div class="card card-tabla-hibrida">
+            <div class="table-responsive">
+                <table class="tabla-gestion">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol Solicitado</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-profesores"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div class="seccion-grupo mb-5">
-        <h3 style="color: #ffcc00; border-left: 5px solid #ffcc00; padding-left: 15px;">⚖️ COORDINACIÓN</h3>
-        <div class="table-responsive" style="background: rgba(255, 204, 0, 0.05); border-radius: 15px; border: 1px solid rgba(255, 204, 0, 0.2); padding: 10px;">
-            <table class="table table-hover" style="color: white; text-align: center;">
-                <thead style="background: #997a00; color: white;">
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Email</th>
-                        <th>Rol Solicitado</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-coordinacion"></tbody>
-            </table>
+    <div class="seccion-grupo">
+        <h3 class="label-coord">⚖️ COORDINACIÓN</h3>
+        <div class="card card-tabla-hibrida color-coord">
+            <div class="table-responsive">
+                <table class="tabla-gestion">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol Solicitado</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-coordinacion"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div class="seccion-grupo mb-5">
-        <h3 style="color: #2ecc71; border-left: 5px solid #2ecc71; padding-left: 15px;">⚽ ASISTENTE BIENESTAR</h3>
-        <div class="table-responsive" style="background: rgba(46, 204, 113, 0.05); border-radius: 15px; border: 1px solid rgba(46, 204, 113, 0.2); padding: 10px;">
-            <table class="table table-hover" style="color: white; text-align: center;">
-                <thead style="background: #1e8449; color: white;">
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Email</th>
-                        <th>Rol Solicitado</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-asistente"></tbody>
-            </table>
+    <div class="seccion-grupo">
+        <h3 class="label-asist">⚽ ASISTENTE BIENESTAR</h3>
+        <div class="card card-tabla-hibrida color-asist">
+            <div class="table-responsive">
+                <table class="tabla-gestion">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol Solicitado</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-asistente"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .seccion-usuarios { padding: 80px 20px 50px; min-height: 100vh; max-width: 1100px; margin: 0 auto; }
+    .titulo-principal { text-align: center; color: var(--primary); text-transform: uppercase; font-weight: 900; margin-bottom: 30px; }
+
+    /* Buscador */
+    .card-busqueda { max-width: 600px; margin: 0 auto 40px; padding: 15px !important; border: 1px solid var(--border); }
+
+    /* Secciones */
+    .seccion-grupo { margin-bottom: 40px; }
+    .seccion-grupo h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 15px; padding-left: 15px; }
+    
+    .label-profesor { color: #007bff; border-left: 5px solid #007bff; }
+    .label-coord { color: #d35400; border-left: 5px solid #d35400; }
+    .label-asist { color: #28a745; border-left: 5px solid #28a745; }
+
+    /* Tablas Híbridas */
+    .card-tabla-hibrida { padding: 0 !important; overflow: hidden; border: 1px solid var(--border); }
+    .tabla-gestion { width: 100%; border-collapse: collapse; text-align: center; color: var(--text); }
+    
+    .tabla-gestion thead { background: #007bff; color: white; font-size: 12px; text-transform: uppercase; }
+    .color-coord thead { background: #d35400 !important; }
+    .color-asist thead { background: #28a745 !important; }
+
+    .tabla-gestion td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
+    .fila-dato:hover { background: var(--bg-soft); }
+
+    /* Badges y Botones */
+    .badge-status { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .bg-activo { background: #e8f5e9; color: #2e7d32; }
+    .bg-pendiente { background: #fff3e0; color: #ef6c00; }
+
+    .btn-aprobar { background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .btn-desactivar { background: none; color: #d35400; border: 1px solid #d35400; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .btn-eliminar { background: none; border: none; font-size: 18px; cursor: pointer; margin-left: 10px; }
+
+    .table-responsive { overflow-x: auto; }
+</style>
 
 <script>
     async function cargarUsuarios() {
@@ -78,32 +122,30 @@
                 asistente: document.getElementById('tabla-asistente')
             };
 
-            // Limpiar tablas
             Object.values(tablas).forEach(t => t.innerHTML = '');
 
             usuarios.forEach(u => {
                 const fila = document.createElement('tr');
                 fila.className = 'fila-dato';
-                fila.style.background = "rgba(0, 0, 0, 0.2)";
                 
-                const statusBadge = u.estado === 'activo' 
-                    ? '<span class="badge bg-success">Activo</span>' 
-                    : '<span class="badge bg-warning text-dark">Pendiente</span>';
+                const badgeClass = u.estado === 'activo' ? 'bg-activo' : 'bg-pendiente';
+                const badgeText = u.estado === 'activo' ? 'Activo' : 'Pendiente';
 
                 fila.innerHTML = `
-                    <td class="align-middle" style="font-weight: bold;">@${u.nombre}</td>
-                    <td class="align-middle">${u.email}</td>
-                    <td class="align-middle"><b style="color: #88eafc;">${u.rol}</b></td>
-                    <td class="align-middle">${statusBadge}</td>
-                    <td class="align-middle">
-                        <button onclick="cambiarEstado(${u.id})" class="btn btn-sm ${u.estado === 'activo' ? 'btn-outline-warning' : 'btn-success'}">
-                            ${u.estado === 'activo' ? 'Desactivar' : 'Aprobar'}
-                        </button>
-                        <button onclick="eliminarUsuario(${u.id})" class="btn btn-sm btn-danger ml-2">🗑️</button>
+                    <td style="font-weight: bold; color: var(--primary);">@${u.nombre}</td>
+                    <td>${u.email}</td>
+                    <td style="font-weight: bold;">${u.rol}</td>
+                    <td><span class="badge-status ${badgeClass}">${badgeText}</span></td>
+                    <td>
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <button onclick="cambiarEstado(${u.id})" class="${u.estado === 'activo' ? 'btn-desactivar' : 'btn-aprobar'}">
+                                ${u.estado === 'activo' ? 'Desactivar' : 'Aprobar'}
+                            </button>
+                            <button onclick="eliminarUsuario(${u.id})" class="btn-eliminar">🗑️</button>
+                        </div>
                     </td>
                 `;
 
-                // Lógica de clasificación por rol (first_name)
                 const rolLower = u.rol.toLowerCase();
                 if (rolLower.includes('profesor')) {
                     tablas.profesores.appendChild(fila);
@@ -114,16 +156,12 @@
                 }
             });
 
-        } catch (error) {
-            console.error("Error cargando usuarios:", error);
-        }
+        } catch (error) { console.error("Error:", error); }
     }
 
-    // 🔍 FUNCIÓN DEL BUSCADOR
     function filtrarUsuarios() {
         const busqueda = document.getElementById('buscadorUsuarios').value.toLowerCase();
         const filas = document.querySelectorAll('.fila-dato');
-
         filas.forEach(fila => {
             const texto = fila.innerText.toLowerCase();
             fila.style.display = texto.includes(busqueda) ? "" : "none";
@@ -150,11 +188,4 @@
 
     document.addEventListener('DOMContentLoaded', cargarUsuarios);
 </script>
-
-<style>
-    .btn-sm { border-radius: 8px; font-weight: bold; padding: 5px 12px; }
-    .table td, .table th { border: none !important; vertical-align: middle; }
-    .seccion-grupo h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; }
-    .badge { font-size: 0.75rem; text-transform: uppercase; }
-</style>
 {% endblock %}
