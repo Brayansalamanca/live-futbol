@@ -67,7 +67,7 @@ urlpatterns = [
     path('radar/', user_passes_test(es_asistente)(views.radar), name='radar'), 
     # --- 📅 MÓDULO INFORMACIÓN (Horarios y Profesores) ---
     path('horarios/', login_required(views.horarios), name='horarios'),
-    path('profesores/', login_required(views.profesores), name='profesores'),
+    path('profesores/', login_required(views.lista_profesores), name='profesores'),
     
     path('api/guardar-entrega/', user_passes_test(es_asistente)(views.api_guardar_entrega), name='api_guardar_entrega'),
     path('api/obtener-entregas/', login_required(views.api_obtener_entregas), name='api_obtener_entregas'),

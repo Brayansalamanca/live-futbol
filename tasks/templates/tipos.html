@@ -47,6 +47,28 @@
     {% if request.user.username == 'rosita' %}
     <div class="admin-section">
         <h2 class="titulo-admin">🛡️ Control de Devoluciones (Admin)</h2>
+        
+        <h3 style="color: #e74c3c; margin-top: 20px;">🚨 Entregas Atrasadas (Vencidas)</h3>
+        <div class="card card-tabla-admin" style="border: 1px solid #e74c3c; margin-bottom: 30px;">
+            <div class="table-responsive">
+                <table class="tabla-limpia">
+                    <thead style="background: #e74c3c; color: white;">
+                        <tr>
+                            <th style="padding: 15px;">Foto</th>
+                            <th>Prenda</th>
+                            <th>Quién tiene</th>
+                            <th>Cantidad</th>
+                            <th>Curso / Evento</th>
+                            <th>Fecha Uso</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaAtrasados"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3 style="color: #27ae60;">✅ Entregas a Tiempo / Próximas</h3>
         <div class="card card-tabla-admin">
             <div class="table-responsive">
                 <table class="tabla-limpia">
@@ -125,6 +147,13 @@
     const USUARIO_ACTUAL = "{{ request.user.username }}";
     let DATOS_PRENDAS = [];
 
+    // Calcular la fecha mínima (10 días de anticipación)
+    function obtenerFechaMinima() {
+        let d = new Date();
+        d.setDate(d.getDate() + 10);
+        return d.toISOString().split('T')[0];
+    }
+
     function ampliarImagen(src) {
         document.getElementById('imgGrande').src = src;
         document.getElementById('visorImagen').style.display = 'flex';
@@ -147,9 +176,18 @@
     }
 
     function renderizarTablas(prendas) {
-        let htmlCat = ""; let htmlDev = "";
+        let htmlCat = ""; 
+        let htmlDev = "";
+        let htmlAtrasados = "";
+        const fechaMinima = obtenerFechaMinima();
+        
+        const hoyObj = new Date();
+        hoyObj.setHours(0,0,0,0);
+
         prendas.forEach(p => {
             const esDisp = p.estado === "Disponible";
+            
+            // Renderizado Catálogo Principal
             htmlCat += `
                 <tr>
                     <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" class="img-tabla"></td>
@@ -171,8 +209,8 @@
                         <div class="grid-form">
                             <div><label>CURSO</label><input type="text" id="curso-${p.id}" class="input-hibrido" style="height:35px"></div>
                             <div><label>EVENTO</label><input type="text" id="evento-${p.id}" class="input-hibrido" style="height:35px"></div>
-                            <div><label>FECHA</label><input type="date" id="fecha-${p.id}" class="input-hibrido" style="height:35px"></div>
-                            <div><label>CANT.</label><input type="number" id="cant-${p.id}" value="1" class="input-hibrido" style="height:35px"></div>
+                            <div><label>FECHA EXACTA USO (Min 10 días)</label><input type="date" id="fecha-${p.id}" min="${fechaMinima}" class="input-hibrido" style="height:35px" required></div>
+                            <div><label>CANT. (Máx ${p.cantidad})</label><input type="number" id="cant-${p.id}" value="1" min="1" max="${p.cantidad}" class="input-hibrido" style="height:35px"></div>
                             <div style="display:flex; gap:5px; align-items:flex-end;">
                                 <button onclick="confirmar('${p.id}')" style="background:#27ae60; color:white; border:none; height:35px; border-radius:4px; flex:1;">OK</button>
                                 <button onclick="toggleForm('${p.id}')" style="background:#95a5a6; color:white; border:none; height:35px; border-radius:4px; padding:0 10px;">X</button>
@@ -180,22 +218,63 @@
                         </div>
                     </td>
                 </tr>`;
+
+            // Renderizado Admin Devoluciones
             if (USUARIO_ACTUAL === 'rosita' && !esDisp) {
-                htmlDev += `
+                let esAtrasado = false;
+                
+                // Procesar la fecha que viene en formato DD/MM/YYYY del backend
+                if (p.fecha_uso) {
+                    const partesFecha = p.fecha_uso.split('/');
+                    if (partesFecha.length === 3) {
+                        const dia = parseInt(partesFecha[0], 10);
+                        const mes = parseInt(partesFecha[1], 10) - 1; // Mes en JS es 0-11
+                        const anio = parseInt(partesFecha[2], 10);
+                        
+                        const fechaUsoObj = new Date(anio, mes, dia);
+                        
+                        // Le sumamos 2 días de tolerancia a la fecha de uso
+                        const fechaLimite = new Date(fechaUsoObj);
+                        fechaLimite.setDate(fechaLimite.getDate() + 2);
+                        
+                        // Si hoy es mayor a la fecha límite, entonces está atrasado
+                        if (hoyObj > fechaLimite) {
+                            esAtrasado = true;
+                        }
+                    }
+                }
+
+                // Mostrar curso y evento si existen, sino indicar que es antiguo/no guardado
+                const cursoTexto = p.curso ? p.curso : 'Sin curso';
+                const eventoTexto = p.evento ? p.evento : 'Sin evento';
+
+                const filaDevolucion = `
                     <tr>
                         <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" class="img-tabla" style="width:40px; height:40px"></td>
                         <td>${p.nombre}</td>
                         <td style="color:#d35400; font-weight:bold;">${p.profesor}</td>
                         <td>${p.cantidad_apartada}</td>
-                        <td>${p.curso} / ${p.evento}</td>
-                        <td>${p.fecha_uso}</td>
-                        <td><button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:6px 12px; border-radius:4px;">Devuelto</button></td>
+                        <td>${cursoTexto} / ${eventoTexto}</td>
+                        <td style="color: ${esAtrasado ? '#e74c3c' : 'inherit'}; font-weight:bold;">${p.fecha_uso || 'Antiguo / Sin fecha'}</td>
+                        <td><button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Devuelto</button></td>
                     </tr>`;
+
+                if (esAtrasado) {
+                    htmlAtrasados += filaDevolucion;
+                } else {
+                    htmlDev += filaDevolucion;
+                }
             }
         });
+
         document.getElementById('tablaCuerpo').innerHTML = htmlCat || "<tr><td colspan='8'>No hay prendas</td></tr>";
-        const tDev = document.getElementById('tablaDevoluciones');
-        if(tDev) tDev.innerHTML = htmlDev || "<tr><td colspan='7'>Sin pendientes</td></tr>";
+        
+        if (USUARIO_ACTUAL === 'rosita') {
+            const tDev = document.getElementById('tablaDevoluciones');
+            const tAtrasados = document.getElementById('tablaAtrasados');
+            if(tDev) tDev.innerHTML = htmlDev || "<tr><td colspan='7'>Sin entregas pendientes a tiempo</td></tr>";
+            if(tAtrasados) tAtrasados.innerHTML = htmlAtrasados || "<tr><td colspan='7'>No hay devoluciones atrasadas 🎉</td></tr>";
+        }
     }
 
     function toggleForm(id) { 
@@ -204,20 +283,52 @@
     }
 
     async function confirmar(id) {
+        const fechaVal = document.getElementById(`fecha-${id}`).value;
+        const cantVal = document.getElementById(`cant-${id}`).value;
+        const cantMax = document.getElementById(`cant-${id}`).max;
+        
+        if(!fechaVal) {
+            alert("El día exacto de uso es obligatorio.");
+            return;
+        }
+
+        // Validación de 10 días
+        const fechaSeleccionada = new Date(fechaVal + "T00:00:00");
+        const limiteDias = new Date();
+        limiteDias.setDate(limiteDias.getDate() + 9);
+        limiteDias.setHours(0,0,0,0);
+
+        if(fechaSeleccionada <= limiteDias) {
+            alert("Debes apartar la prenda con al menos 10 días de anticipación.");
+            return;
+        }
+
+        if(parseInt(cantVal) < 1 || parseInt(cantVal) > parseInt(cantMax)) {
+            alert("La cantidad seleccionada no es válida o supera el stock disponible.");
+            return;
+        }
+
         const payload = {
             nombre: USUARIO_ACTUAL,
             curso: document.getElementById(`curso-${id}`).value,
             evento: document.getElementById(`evento-${id}`).value,
-            fecha: document.getElementById(`fecha-${id}`).value,
-            cantidad_alquilada: document.getElementById(`cant-${id}`).value,
+            fecha: fechaVal,
+            cantidad_alquilada: cantVal,
             accion: 'apartar'
         };
+
         const res = await fetch(`/api/apartar-prenda/${id}/`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
             body: JSON.stringify(payload)
         });
-        if (res.ok) cargar();
+        
+        if (res.ok) {
+            cargar();
+            alert("Prenda(s) apartada(s) correctamente.");
+        } else {
+            alert("Error al procesar la solicitud.");
+        }
     }
 
     async function liberar(id) {
@@ -231,7 +342,7 @@
     }
 
     async function eliminarPrenda(id) {
-        if (!confirm("¿Eliminar?")) return;
+        if (!confirm("¿Eliminar definitivamente?")) return;
         const res = await fetch(`/api/eliminar-prenda/${id}/`, {
             method: "POST",
             headers: { "X-CSRFToken": "{{ csrf_token }}" }

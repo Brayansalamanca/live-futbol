@@ -24,6 +24,9 @@ from .tokens import account_activation_token
 import socket
 # Forzar a que use IPv4 para evitar el error 101
 socket.getaddrinfo = lambda *args: [(socket.AF_INET, socket.SOCK_STREAM, 6, '', (args[0], args[1]))]
+import requests
+from requests.exceptions import RequestException
+
 
 # ==========================================
 # 🔐 RECUPERACIÓN DE CONTRASEÑA
@@ -202,14 +205,71 @@ def api_eliminar_usuario(request, user_id):
     return JsonResponse({'status': 'error'}, status=405)
 
 # Al final de tasks/views.py
+def lista_profesores(request):
+    import requests
+    from requests.exceptions import RequestException
+
+    url = "https://jsonplaceholder.typicode.com/users"
+    
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        profesores = response.json()
+    except RequestException as e:
+        print(f"Error de conexión: {e}")
+        profesores = []
+
+    return render(request, 'profesores.html', {'profesores': profesores})
 
 @login_required
 def horarios(request):
     return render(request, 'horarios.html')
+    
+# ==========================================
+# 🍽️ MÓDULO ASISTENCIA ALIMENTOS (RADAR)
+# ==========================================
 
-@login_required
-def profesores(request):
-    return render(request, 'profesores.html')
+from .models import AsistenciaAlimento
+
+@user_passes_test(es_asistente)
+def api_guardar_asistencia(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        AsistenciaAlimento.objects.create(
+            nombre=data.get('nombre'),
+            grado=data.get('grado'),
+            seccion=data.get('seccion'),
+            pago=data.get('pago', True),
+            estado=data.get('estado', 'normal')
+        )
+
+        return JsonResponse({"status": "ok"})
+    
+
+
+@user_passes_test(es_asistente)
+def api_listar_asistencia(request):
+    tipo = request.GET.get('tipo')
+
+    if tipo == "no_pagan":
+        personas = AsistenciaAlimento.objects.filter(pago=False)
+    else:
+        personas = AsistenciaAlimento.objects.filter(estado=tipo)
+
+    data = []
+    for p in personas:
+        data.append({
+            "id": p.id,
+            "nombre": p.nombre,
+            "grado": p.grado,
+            "seccion": p.seccion,
+            "estado": p.estado,
+            "pago": p.pago
+        })
+
+    return JsonResponse(data, safe=False)
+
 # ==========================================
 # ⚽ MÓDULO BALONES (SOLO ASISTENTE)
 # ==========================================
@@ -365,6 +425,7 @@ def api_cambiar_estado_usuario(request, user_id):
 def formulario(request): return render(request, 'formulario.html')
 
 @login_required
+@login_required
 def api_apartar_prenda(request, prenda_id):
     prenda = get_object_or_404(PrendaRopa, id=prenda_id)
     if request.method != 'POST': return JsonResponse({'status': 'error'}, status=405)
@@ -374,16 +435,37 @@ def api_apartar_prenda(request, prenda_id):
     if accion == 'apartar':
         cant = int(data.get('cantidad_alquilada', 1))
         if cant > prenda.cantidad: return JsonResponse({'status': 'error'}, status=400)
+        
         prenda.cantidad -= cant
         prenda.cantidad_apartada += cant
         prenda.estado = 'Apartado' if prenda.cantidad == 0 else 'Parcialmente Apartado'
+        
+        # AQUÍ ESTABA EL ERROR: Ahora sí guardamos todos los datos
         prenda.nombre_apartado = data.get('nombre')
+        prenda.curso_apartado = data.get('curso', '')
+        prenda.evento_apartado = data.get('evento', '')
+        
+        # Guardamos la fecha de uso correctamente
+        fecha_str = data.get('fecha')
+        if fecha_str:
+            try:
+                prenda.fecha_uso = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+                
         prenda.save()
+        
     elif accion == 'liberar':
         prenda.cantidad += prenda.cantidad_apartada
         prenda.cantidad_apartada = 0
         prenda.estado = 'Disponible'
+        # Limpiamos los datos para la próxima persona
+        prenda.nombre_apartado = ''
+        prenda.curso_apartado = ''
+        prenda.evento_apartado = ''
+        prenda.fecha_uso = None 
         prenda.save()
+        
     return JsonResponse({'status': 'ok'})
 
 @user_passes_test(es_coordinacion)

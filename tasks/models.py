@@ -80,3 +80,19 @@ class BajaBalon(models.Model):
 
     def __str__(self):
         return f"Baja: {self.tipo_balon} - {self.causa}"
+class AsistenciaAlimento(models.Model):
+    nombre = models.CharField(max_length=100)
+    grado = models.CharField(max_length=20)
+    seccion = models.CharField(max_length=20)
+
+    pago = models.BooleanField(default=True)  # paga o no paga
+    estado = models.CharField(max_length=20, choices=[
+        ('normal', 'Normal'),
+        ('extra', 'Extra'),
+        ('grave', 'Grave')
+    ], default='normal')
+
+    fecha = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.nombre
