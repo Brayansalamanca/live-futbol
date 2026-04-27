@@ -1,232 +1,922 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+{% load static %}
+
 {% block content %}
 
-<style>
-:root {
-    --verde: #22c55e;
-    --rojo: #ef4444;
-    --amarillo: #facc15;
-    --azul: #38bdf8;
-    --dark: #020617;
-}
-
-body {
-    background: var(--dark);
-    color: white;
-}
-
-/* 🔍 PANEL */
-.panel {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    background: rgba(255,255,255,0.05);
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
-.full { grid-column: 1 / -1; }
-
-input, select, button {
-    padding: 8px;
-    border-radius: 6px;
-    border: none;
-}
-
-input, select {
-    background: #1e293b;
-    color: white;
-}
-
-/* 📑 TABS */
-.tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.tabs button {
-    background: #1e293b;
-    color: white;
-    cursor: pointer;
-}
-
-/* 📦 ACORDEÓN */
-.row {
-    background: #1e293b;
-    margin-top: 10px;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    border-left: 4px solid var(--azul);
-}
-
-.detalle {
-    display: none;
-    background: rgba(255,255,255,0.03);
-    padding: 10px;
-    border-radius: 0 0 8px 8px;
-}
-
-/* 📊 TABLA */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-}
-
-th {
-    color: var(--azul);
-    padding: 6px;
-}
-
-td {
-    padding: 5px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-/* ESTADOS */
-.ok { background: var(--verde); }
-.falta { background: var(--rojo); }
-.extra { background: var(--amarillo); }
-</style>
-
-<h2>Radar de Alimentación</h2>
-
-<!-- 🔍 PANEL SUPERIOR -->
-<div class="panel">
-    <input type="text" id="nombre" placeholder="Nombre">
-    <input type="text" id="grado" placeholder="Grado">
-
-    <select id="seccion">
-        <option value="">Sección</option>
-        <option value="masters">Masters</option>
-        <option value="seniors">Seniors</option>
-        <option value="teens">Teens</option>
-    </select>
-
-    <button onclick="buscar()">Buscar</button>
-    <div class="full">Solo necesitas un campo para buscar</div>
-</div>
-
-<!-- 📑 TABS -->
-<div class="tabs">
-    <button onclick="cambiarTab('grave')">Grave</button>
-    <button onclick="cambiarTab('extra')">Extra</button>
-    <button onclick="cambiarTab('normal')">Normal</button>
-    <button onclick="cambiarTab('nopagan')">No pagan</button>
-</div>
-
-<!-- 📊 CONTENIDO -->
-<div id="grave" class="tab"></div>
-<div id="extra" class="tab" style="display:none;"></div>
-<div id="normal" class="tab" style="display:none;"></div>
-<div id="nopagan" class="tab" style="display:none;"></div>
-
-<script>
-
-// 🔁 CAMBIO DE TAB
-function cambiarTab(tab){
-    document.querySelectorAll(".tab").forEach(t => t.style.display="none");
-    document.getElementById(tab).style.display="block";
-}
-
-// 🔽 ACORDEÓN
-function toggle(id){
-    const el = document.getElementById(id);
-    el.style.display = el.style.display === "block" ? "none" : "block";
-}
-
-// 🔍 BUSCAR
-function buscar(){
-    console.log("Buscar...");
-}
-
-// 🧠 CREAR TABLA INTERNA
-function crearTabla(personas, dias){
-    return `
-    <table>
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Grado</th>
-                ${dias.map(d => `<th>${d}</th>`).join("")}
-            </tr>
-        </thead>
-        <tbody>
-            ${personas.map(p => `
-                <tr>
-                    <td>${p.nombre}</td>
-                    <td>${p.grado}</td>
-                    ${dias.map(d => {
-                        let val = p.asistencia[d] || "";
-                        let cls = val === "ok" ? "ok" : val === "falta" ? "falta" : val === "extra" ? "extra" : "";
-                        return `<td class="${cls}">${val}</td>`;
-                    }).join("")}
-                </tr>
-            `).join("")}
-        </tbody>
-    </table>`;
-}
-
-// 🚀 RENDER PRINCIPAL (TIPO EQUIPO / GRUPO)
-function renderTab(id, data){
-    const cont = document.getElementById(id);
-    cont.innerHTML = "";
-
-    data.forEach((grupo, i) => {
-        cont.innerHTML += `
-            <div class="row" onclick="toggle('det-${id}-${i}')">
-                <span><b>${grupo.nombre}</b></span>
-                <span>⬇️</span>
-            </div>
-
-            <div id="det-${id}-${i}" class="detalle">
-                ${crearTabla(grupo.personas, grupo.dias)}
-            </div>
-        `;
-    });
-}
-
-// 🧪 EJEMPLO (SIMULA TU BACKEND)
-function cargarEjemplo(){
-    const dias = [10,11,12,13];
-
-    const data = [
-        {
-            nombre: "Grado 9A",
-            dias: dias,
-            personas: [
-                {nombre:"Juan", grado:"9A", asistencia:{10:"ok",11:"falta"}},
-                {nombre:"Ana", grado:"9A", asistencia:{10:"extra",11:"ok"}}
-            ]
+    <style>
+        
+        /* VARIABLES DE COLOR Y ESTILO */
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --secondary: #06b6d4;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: #334155;
+            --yellow-card: #eab308;
+            --red-card: #ef4444;
+            --success: #22c55e;
         }
-    ];
 
-    renderTab("grave", data);
-    renderTab("extra", data);
-    renderTab("normal", data);
-    renderTab("nopagan", data);
-}
+        /* RESET Y BASE */
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
 
-// 🔥 CUANDO CONECTES DJANGO
-function cargarDatos(){
-    fetch("/api/asistencia/")
-    .then(res => res.json())
-    .then(data => {
-        renderTab("grave", data.grave);
-        renderTab("extra", data.extra);
-        renderTab("normal", data.normal);
-        renderTab("nopagan", data.nopagan);
-    });
-}
+        h1, h2, h3 {
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-cargarEjemplo();
-// cargarDatos();
+        /* NAVEGACIÓN POR TABS */
+        #tabs-torneos {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            padding: 10px;
+            background: var(--bg-card);
+            border-radius: 12px;
+        }
 
-</script>
+        #tabs-torneos button {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
+        #tabs-torneos button:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* PANELES Y CONTENEDORES */
+        #setup-panel, #team-registry-panel, #competition-area, #disciplina-area {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        /* FORMULARIOS E INPUTS */
+        input[type="text"], input[type="number"], input[type="date"], input[type="time"], select {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 5px 0;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, opacity 0.2s;
+            margin: 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* LISTA DE EQUIPOS */
+        #teams-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        #teams-list li {
+            background: var(--bg-dark);
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* TABLA DE PUNTOS */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-dark);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* CALENDARIO Y PARTIDOS */
+        #league-matches-list > div {
+            background: var(--bg-dark);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        /* BRACKET (ELIMINATORIAS) */
+        #bracket-render {
+            display: flex;
+            gap: 30px;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .bracket-match {
+            border: 1px solid var(--primary);
+            background: var(--bg-dark);
+            padding: 10px;
+            border-radius: 8px;
+            min-width: 180px;
+        }
+
+        /* CAMPEÓN */
+        #cuadro-campeon {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(45deg, #1e293b, #3b82f655);
+            border: 3px gold solid;
+            border-radius: 20px;
+            margin: 20px 0;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px gold; }
+            to { box-shadow: 0 0 30px gold; }
+        }
+
+        /* DISCIPLINA (TARJETAS) */
+        .tarjeta-amarilla {
+            color: var(--yellow-card);
+            font-weight: bold;
+        }
+
+        .tarjeta-roja {
+            color: var(--red-card);
+            font-weight: bold;
+        }
+
+        .suspendido {
+            background: rgba(239, 68, 68, 0.1) !important;
+            opacity: 0.7;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            #league-matches-list > div {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+    </style>
+    <div id="tabs-torneos"></div>
+    
+    <div>
+        <h1>Live Futbol Pro Unificado</h1>
+        <div>
+            <button onclick="crearTorneo()">+ Nuevo Torneo</button>
+            <button onclick="iniciarNuevoTorneo()">Reiniciar Todo</button>
+        </div>
+    </div>
+
+    <div id="setup-panel">
+        <h2>1. Configuración del Torneo</h2>
+        <label>Tipo de Torneo: </label>
+        <select id="comp-type" onchange="toggleLeagueInputs()">
+            <option value="liga_finales">Liga + Finales</option>
+            <option value="solo_finales">Solo Eliminatorias</option>
+        </select>
+        <div id="league-controls">
+            <input type="number" id="liga-num" placeholder="Límite Equipos" value="10">
+            <input type="number" id="liga-pass" placeholder="Clasifican a Finales" value="4">
+            <input type="number" id="liga-jornadas" placeholder="Multiplicador Partidos" value="3">
+        </div>
+        <br>
+        <button onclick="iniciarGestionEquipos()">Siguiente</button>
+    </div>
+
+    <div id="team-registry-panel" style="display:none;">
+        <h2>2. Registro de Equipos</h2>
+        <div>
+            <h3>Carga Masiva Excel</h3>
+            <input type="file" id="excel-file" accept=".xlsx, .xls">
+            <input type="text" id="nombre-hoja" placeholder="Hoja (Ej: Hoja1)">
+            <input type="number" id="fila-inicio" placeholder="Fila Inicio">
+            <input type="number" id="fila-fin" placeholder="Fila Fin">
+            <input type="text" id="columnas-usar" placeholder="Cols (Ej: A,B)">
+            <button onclick="cargarEquiposExcel()">Extraer Datos</button>
+        </div>
+        <br>
+        <div>
+            <input type="text" id="new-team-name" placeholder="Nombre Manual">
+            <input type="file" id="new-team-logo" accept="image/*">
+            <button onclick="agregarEquipo()">Guardar Equipo</button>
+        </div>
+        <ul id="teams-list"></ul>
+        <button id="btn-start-comp" onclick="iniciarCompeticion()" disabled>Empezar Torneo</button>
+    </div>
+
+    <div id="competition-area" style="display:none;">
+        
+        <div id="league-area" style="display:none;">
+            <h2>Fase de Liga</h2>
+            <div id="tabla-puntos"></div>
+            <hr>
+            <div>
+                <h2>Calendario</h2>
+                <button onclick="if(confirm('¿Re-mezclar?')) { generarJornadaCompleta(); renderJornadaActual(); }">
+                    Re-Mezclar Aleatorio
+                </button>
+            </div>
+            <div id="league-matches-list"></div>
+            <br>
+            <button onclick="finalizarLiga()">Finalizar Liga y Crear Llaves</button>
+        </div>
+
+        <div id="bracket-area" style="display:none;">
+            <h2>Eliminatorias Finales</h2>
+            <div id="cuadro-campeon" style="display: none;"></div>
+            <div id="bracket-render"></div>
+        </div>
+
+        <hr>
+
+        <div id="disciplina-area">
+            <h2>🛡️ Disciplina de Jugadores</h2>
+            <div>
+                <label>Elegir Equipo:</label>
+                <select id="select-equipo">
+                    <option value="">-- Selecciona un equipo --</option>
+                </select>
+            </div>
+            <br>
+            <div>
+                <h3>Cargar Jugadores Excel</h3>
+                <input type="file" id="excel-jugadores" accept=".xlsx,.xls">
+                <input type="text" id="hoja-jugadores" placeholder="Hoja (Ej: Hoja1)">
+                <input type="number" id="fila-inicio-jugadores" placeholder="Fila Inicio">
+                <input type="number" id="fila-fin-jugadores" placeholder="Fila Fin (Opcional)">
+                <input type="text" id="columna-jugadores" placeholder="Columna Jugadores (Ej: A)">
+                <button onclick="cargarJugadoresExcel()">Importar Jugadores a este Equipo</button>
+            </div>
+            <div id="contenedor-disciplinas"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // ================= BASE DE DATOS Y ESTADO =================
+        let torneos = JSON.parse(localStorage.getItem('live_futbol_db')) || {};
+        let torneoActual = null;
+        let faseActual = "config";
+        let config = { type: 'liga_finales', n: 10, pass: 4, jornadas: 3 };
+        let equipos = [];
+        let torneo = { ligaMatches: [], bracket: [] };
+        let statsEquipos = {};
+        let datosDisciplina = {};
+        let editIndex = null;
+        let archivoExcel = null;
+
+        const excelInput = document.getElementById("excel-file");
+        if(excelInput) excelInput.addEventListener("change", (e) => archivoExcel = e.target.files[0]);
+
+        // ================= SINCRONIZACIÓN Y GESTIÓN =================
+        const datosRecibidos = JSON.parse(localStorage.getItem("datos_calendario"));
+        if (datosRecibidos) {
+            const nombreAuto = "Torneo Importado";
+            torneos[nombreAuto] = {
+                config: { type: 'liga_finales', n: datosRecibidos.equipos.length, pass: 4, jornadas: 3},
+                equipos: datosRecibidos.equipos.map(nombre => ({ name: nombre, logo: "https://cdn-icons-png.flaticon.com/512/33/33736.png" })),
+                torneo: { ligaMatches: [], bracket: []},
+                stats: {},
+                disciplina: {},
+                fase: "equipos",
+                campeon: null
+            };
+            localStorage.removeItem("datos_calendario");
+            localStorage.setItem('live_futbol_db', JSON.stringify(torneos));
+            torneoActual = nombreAuto;
+        }
+
+        let lastSyncData = JSON.stringify(torneos);
+        setInterval(() => {
+            const currentData = localStorage.getItem('live_futbol_db');
+            if (currentData && currentData !== lastSyncData) {
+                lastSyncData = currentData;
+                torneos = JSON.parse(currentData);
+                if (torneoActual && torneos[torneoActual]) {
+                    const data = torneos[torneoActual];
+                    config = data.config;
+                    equipos = data.equipos;
+                    torneo = data.torneo;
+                    statsEquipos = data.stats;
+                    datosDisciplina = data.disciplina || {};
+                    faseActual = data.fase;
+                    const activeTag = document.activeElement.tagName;
+                    if (activeTag !== "INPUT" && activeTag !== "SELECT") {
+                        renderTabs();
+                        renderRegistry();
+                        aplicarVista();
+                        if (data.campeon) mostrarCampeon(data.campeon);
+                    }
+                } else {
+                    renderTabs();
+                }
+            }
+        }, 2000);
+
+        function renderTabs() {
+            const cont = document.getElementById('tabs-torneos');
+            if (!cont) return;
+            cont.innerHTML = Object.keys(torneos).map(nombre =>
+                `<button onclick="cargarTorneo('${nombre}')">
+                    ${nombre === torneoActual ? '>>> ' + nombre : nombre}
+                </button>`
+            ).join(" ");
+        }
+
+        function guardar() {
+            if (!torneoActual) return;
+            torneos[torneoActual] = {
+                config, equipos, torneo, stats: statsEquipos, disciplina: datosDisciplina, fase: faseActual,
+                campeon: torneos[torneoActual]?.campeon || null
+            };
+            const dataString = JSON.stringify(torneos);
+            localStorage.setItem('live_futbol_db', dataString);
+            lastSyncData = dataString;
+        }
+
+        function crearTorneo() {
+            const nombre = prompt("Nombre del nuevo torneo:");
+            if (!nombre) return;
+            if (torneos[nombre]) return alert("Ese torneo ya existe");
+            torneos[nombre] = {
+                config: { type: 'liga_finales', n: 10, pass: 4, jornadas: 3 },
+                equipos: [], torneo: { ligaMatches: [], bracket: [] }, stats: {}, disciplina: {},
+                fase: "config", campeon: null
+            };
+            cargarTorneo(nombre);
+        }
+
+        function cargarTorneo(nombre) {
+            torneoActual = nombre;
+            const data = torneos[nombre];
+            config = data.config || { type: 'liga_finales', n: 10, pass: 4, jornadas: 3};
+            equipos = data.equipos || [];
+            torneo = data.torneo || { ligaMatches: [], bracket: [] };
+            statsEquipos = data.stats || {};
+            datosDisciplina = data.disciplina || {};
+            faseActual = data.fase || "config";
+            
+            renderTabs();
+            renderRegistry();
+            aplicarVista();
+            actualizarSelectEquipos();
+            renderDisciplina();
+            if (data.campeon) mostrarCampeon(data.campeon);
+        }
+
+        function aplicarVista() {
+            const panels = ['setup-panel', 'team-registry-panel', 'competition-area', 'league-area', 'bracket-area'];
+            panels.forEach(p => { const el = document.getElementById(p); if(el) el.style.display = 'none'; });
+            
+            if (faseActual === "config") document.getElementById('setup-panel').style.display = 'block';
+            if (faseActual === "equipos") document.getElementById('team-registry-panel').style.display = 'block';
+            if (faseActual === "liga") {
+                document.getElementById('competition-area').style.display = 'block';
+                document.getElementById('league-area').style.display = 'block';
+                renderTabla();
+                renderJornadaActual();
+            }
+            if (faseActual === "finales") {
+                document.getElementById('competition-area').style.display = 'block';
+                document.getElementById('bracket-area').style.display = 'block';
+                renderBracket();
+            }
+        }
+
+        function toggleLeagueInputs() {
+            const type = document.getElementById('comp-type').value;
+            document.getElementById('league-controls').style.display = type === 'liga_finales' ? 'block' : 'none';
+        }
+
+        function iniciarGestionEquipos() {
+            config.type = document.getElementById('comp-type').value;
+            config.n = parseInt(document.getElementById('liga-num').value) || 8;
+            config.pass = parseInt(document.getElementById('liga-pass').value) || 4;
+            config.jornadas = parseInt(document.getElementById('liga-jornadas').value) || 3;
+            faseActual = "equipos";
+            guardar();
+            aplicarVista();
+        }
+
+        // ================= EXCEL Y EQUIPOS =================
+        function letraAIndice(letra) {
+            let res = 0;
+            letra = letra.trim().toUpperCase();
+            for (let i = 0; i < letra.length; i++) { 
+                res = res * 26 + (letra.charCodeAt(i) - 64); 
+            }
+            return res - 1;
+        }
+
+        function cargarEquiposExcel() {
+            if (!archivoExcel) return alert("Selecciona un archivo Excel.");
+            const hoja = document.getElementById("nombre-hoja").value;
+            const fInicio = parseInt(document.getElementById("fila-inicio").value);
+            const fFin = parseInt(document.getElementById("fila-fin").value);
+            const colsStr = document.getElementById("columnas-usar").value;
+            
+            if (!hoja || isNaN(fInicio) || !colsStr) return alert("Faltan datos de configuración de Excel.");
+            
+            const columnas = colsStr.split(",").map(c => letraAIndice(c));
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
+                const worksheet = workbook.Sheets[hoja];
+                
+                if (!worksheet) return alert("Hoja no encontrada.");
+                
+                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                let count = 0;
+                
+                for (let i = fInicio - 1; i < (fFin || json.length); i++) {
+                    if (json[i]) {
+                        columnas.forEach(colIdx => {
+                            const val = json[i][colIdx];
+                            if (val) {
+                                const name = String(val).trim();
+                                if (!equipos.find(eq => eq.name === name) && equipos.length < config.n) {
+                                    equipos.push({ name: name, logo: "https://cdn-icons-png.flaticon.com/512/33/33736.png" });
+                                    if (!datosDisciplina[name]) datosDisciplina[name] = [];
+                                    count++;
+                                }
+                            }
+                        });
+                    }
+                }
+                guardar(); 
+                renderRegistry();
+                actualizarSelectEquipos();
+                alert("Agregados " + count + " equipos.");
+            };
+            reader.readAsArrayBuffer(archivoExcel);
+        }
+
+        function agregarEquipo() {
+            const nameInput = document.getElementById('new-team-name');
+            const logoInput = document.getElementById('new-team-logo');
+            const name = nameInput.value.trim();
+            if (!name) return;
+            
+            const save = (logo) => {
+                if (editIndex !== null) { 
+                    equipos[editIndex] = { name, logo };
+                    editIndex = null; 
+                } else { 
+                    if (equipos.length < config.n) {
+                        equipos.push({ name, logo }); 
+                        if(!datosDisciplina[name]) datosDisciplina[name] = [];
+                    }
+                }
+                guardar(); 
+                nameInput.value = ""; 
+                logoInput.value = "";
+                renderRegistry();
+                actualizarSelectEquipos();
+            };
+            
+            if (logoInput.files && logoInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => save(e.target.result);
+                reader.readAsDataURL(logoInput.files[0]);
+            } else {
+                save(editIndex !== null ? equipos[editIndex].logo : "https://cdn-icons-png.flaticon.com/512/33/33736.png");
+            }
+        }
+
+        function renderRegistry() {
+            const ul = document.getElementById('teams-list');
+            if(!ul) return;
+            ul.innerHTML = equipos.map((e, i) => `
+                <li>
+                    <span><img src="${e.logo}" width="25"> ${e.name}</span>
+                    <button onclick="editIndex=${i}; document.getElementById('new-team-name').value='${e.name}';">Editar</button>
+                    <button onclick="equipos.splice(${i},1); guardar(); renderRegistry(); actualizarSelectEquipos();">Borrar</button>
+                </li>
+            `).join("");
+            
+            const btnStart = document.getElementById('btn-start-comp');
+            if(btnStart) btnStart.disabled = equipos.length < 2;
+        }
+
+        // ================= LÓGICA DE JORNADAS =================
+        function iniciarCompeticion() {
+            if (config.type === 'liga_finales') {
+                faseActual = "liga";
+                if (!torneo.ligaMatches.length) generarJornadaCompleta();
+            } else {
+                faseActual = "finales";
+                generarBracket(equipos);
+            }
+            guardar(); 
+            aplicarVista();
+        }
+
+        function generarJornadaCompleta() {
+            torneo.ligaMatches = [];
+            statsEquipos = {};
+            const n = equipos.length;
+            const multiplicador = config.jornadas;
+            for (let j = 1; j <= multiplicador; j++) {
+                let equiposMezclados = [...equipos].sort(() => Math.random() - 0.5);
+                for (let i = 0; i < n; i++) {
+                    let t1 = equiposMezclados[i];
+                    let t2 = equiposMezclados[(i + 1) % n];
+                    torneo.ligaMatches.push({ jornada: j, t1: {...t1}, t2: {...t2}, s1: null, s2: null, fin: false, fecha: "", hora: "" });
+                }
+            }
+            guardar();
+        }
+
+        function updateMatchTeam(index, teamNum, newName) {
+            const eq = equipos.find(e => e.name === newName);
+            if (!eq) return;
+            if (teamNum === 1) torneo.ligaMatches[index].t1 = {...eq};
+            else torneo.ligaMatches[index].t2 = {...eq};
+            guardar(); 
+            renderJornadaActual();
+        }
+
+        function updateMatchInfo(index, field, val) {
+            torneo.ligaMatches[index][field] = val;
+            guardar();
+        }
+
+        function renderJornadaActual() {
+            const cont = document.getElementById('league-matches-list');
+            if (!cont) return;
+            let html = "";
+            let jornadas = [...new Set(torneo.ligaMatches.map(m => m.jornada))];
+            
+            jornadas.forEach(j => {
+                html += `<div><strong>Grupo de Partidos ${j}</strong></div>`;
+                torneo.ligaMatches.forEach((m, i) => {
+                    if (m.jornada === j) {
+                        html += `
+                        <div>
+                            <input type="date" value="${m.fecha || ''}" onchange="updateMatchInfo(${i},'fecha',this.value)">
+                            <input type="time" value="${m.hora || ''}" onchange="updateMatchInfo(${i},'hora',this.value)">
+                            <select onchange="updateMatchTeam(${i},1,this.value)">
+                                ${equipos.map(e => `<option ${e.name === m.t1.name ? 'selected' : ''}>${e.name}</option>`).join("")}
+                            </select>
+                            <img src="${m.t1.logo}" width="20">
+                            <input type="number" value="${m.s1??''}" onchange="setScore(${i},1,this.value)" placeholder="L">
+                            -
+                            <input type="number" value="${m.s2??''}" onchange="setScore(${i},2,this.value)" placeholder="V">
+                            <img src="${m.t2.logo}" width="20">
+                            <select onchange="updateMatchTeam(${i},2,this.value)">
+                                ${equipos.map(e => `<option ${e.name === m.t2.name ? 'selected' : ''}>${e.name}</option>`).join("")}
+                            </select>
+                        </div>`;
+                    }
+                });
+            });
+            cont.innerHTML = html;
+        }
+
+        function setScore(i, team, val) {
+            if (val === "") return;
+            const m = torneo.ligaMatches[i];
+            if (m.fin) { 
+                revertirStats(m.t1, m.s1, m.s2); 
+                revertirStats(m.t2, m.s2, m.s1);
+            }
+            if (team === 1) m.s1 = parseInt(val); else m.s2 = parseInt(val);
+            
+            if (m.s1 !== null && m.s2 !== null) {
+                m.fin = true;
+                actualizarStats(m.t1, m.s1, m.s2);
+                actualizarStats(m.t2, m.s2, m.s1);
+                guardar(); 
+                renderTabla();
+            }
+        }
+
+        // ================= STATS =================
+        function actualizarStats(eq, gf, gc) {
+            if (!statsEquipos[eq.name]) statsEquipos[eq.name] = { pj:0, g:0, e:0, p:0, gf:0, gc:0, dg:0, pts:0 };
+            let s = statsEquipos[eq.name];
+            s.pj++; s.gf += gf; s.gc += gc; s.dg = s.gf - s.gc;
+            if (gf > gc) { s.g++; s.pts += 3; } 
+            else if (gf === gc) { s.e++; s.pts += 1; } 
+            else s.p++;
+        }
+
+        function revertirStats(eq, gf, gc) {
+            let s = statsEquipos[eq.name];
+            if (!s) return;
+            s.pj--; s.gf -= gf; s.gc -= gc; s.dg = s.gf - s.gc;
+            if (gf > gc) { s.g--; s.pts -= 3; } 
+            else if (gf === gc) { s.e--; s.pts -= 1; } 
+            else s.p--;
+        }
+
+        function renderTabla() {
+            const cont = document.getElementById('tabla-puntos');
+            if (!cont) return;
+            
+            let data = equipos.map(e => {
+                const stats = statsEquipos[e.name] || { pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0, dg: 0, pts: 0 };
+                return { name: e.name, logo: e.logo, ...stats };
+            });
+            
+            data.sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.dg !== a.dg) return b.dg - a.dg;
+                return b.gf - a.gf;
+            });
+
+            cont.innerHTML = `
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Pos</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map((d, i) => `
+                        <tr>
+                            <td>${i + 1}</td>
+                            <td><img src="${d.logo}" width="20"> ${d.name}</td>
+                            <td>${d.pj}</td><td>${d.g}</td><td>${d.e}</td><td>${d.p}</td>
+                            <td>${d.gf}</td><td>${d.gc}</td><td>${d.dg > 0 ? '+' + d.dg : d.dg}</td>
+                            <td>${d.pts}</td>
+                        </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // ================= FINALES =================
+        function finalizarLiga() {
+            let data = equipos.map(e => ({ name: e.name, logo: e.logo, ...(statsEquipos[e.name] || { pts:0, dg:0 }) }));
+            data.sort((a, b) => b.pts - a.pts || b.dg - a.dg);
+            generarBracket(data.slice(0, config.pass));
+            faseActual = "finales"; 
+            guardar(); 
+            aplicarVista();
+        }
+
+        function generarBracket(teams) {
+            torneo.bracket = [];
+            let currentRonda = [];
+            for (let i = 0; i < teams.length; i += 2) {
+                currentRonda.push({ t1: teams[i], t2: teams[i+1] || null, s1: null, s2: null, ganador: null });
+            }
+            torneo.bracket.push(currentRonda);
+            let n = Math.ceil(currentRonda.length / 2);
+            while (n >= 1 && currentRonda.length > 1) {
+                let proxima = Array.from({ length: n }, () => ({ t1: null, t2: null, s1: null, s2: null, ganador: null }));
+                torneo.bracket.push(proxima);
+                currentRonda = proxima;
+                n = Math.floor(n / 2);
+            }
+            guardar(); 
+            renderBracket();
+        }
+
+        function renderBracket() {
+            const cont = document.getElementById('bracket-render');
+            if (!cont) return;
+            cont.innerHTML = torneo.bracket.map((ronda, r) => `
+                <div>
+                    <strong>Ronda ${r + 1}</strong>
+                    ${ronda.map((m, i) => `
+                        <div style="margin: 10px; border: 1px solid black; padding: 5px;">
+                            <div><span>${m.t1?.name || "TBD"}</span> <input type="number" value="${m.s1??''}" onchange="setFinal(${r},${i},1,this.value)"></div>
+                            <div><span>${m.t2?.name || "TBD"}</span> <input type="number" value="${m.s2??''}" onchange="setFinal(${r},${i},2,this.value)"></div>
+                        </div>
+                    `).join("")}
+                </div>
+            `).join("");
+        }
+
+        function setFinal(r, m, team, val) {
+            if (val === "") return;
+            let p = torneo.bracket[r][m];
+            if (team === 1) p.s1 = parseInt(val); else p.s2 = parseInt(val);
+            
+            if (p.s1 !== null && p.s2 !== null) {
+                p.ganador = p.s1 > p.s2 ? p.t1 : p.t2;
+                if (torneo.bracket[r + 1]) {
+                    let nextMatch = torneo.bracket[r+1][Math.floor(m/2)];
+                    if (m % 2 === 0) nextMatch.t1 = p.ganador; else nextMatch.t2 = p.ganador;
+                } else {
+                    mostrarCampeon(p.ganador);
+                }
+            }
+            guardar(); 
+            renderBracket();
+        }
+
+        function mostrarCampeon(c) {
+            const box = document.getElementById('cuadro-campeon');
+            if (!c || !box) return;
+            box.style.display = "block";
+            box.innerHTML = `<img src="${c.logo}" width="100"><h2>CAMPEÓN</h2><h1>${c.name}</h1>`;
+            torneos[torneoActual].campeon = c; 
+            guardar();
+        }
+
+        function iniciarNuevoTorneo() {
+            if (confirm("¿Borrar datos del torneo actual?")) { 
+                if(torneoActual) delete torneos[torneoActual];
+                localStorage.setItem('live_futbol_db', JSON.stringify(torneos));
+                location.reload();
+            }
+        }
+
+        // ================= DISCIPLINA DE JUGADORES =================
+        function actualizarSelectEquipos() {
+            const select = document.getElementById("select-equipo");
+            if (!select) return;
+            select.innerHTML = `
+                <option value="">-- Selecciona un equipo --</option>
+                ${equipos.map(e => `<option value="${e.name}">${e.name}</option>`).join("")}
+            `;
+        }
+
+        function cargarJugadoresExcel() {
+            const equipo = document.getElementById("select-equipo").value;
+            const file = document.getElementById("excel-jugadores").files[0];
+            const hoja = document.getElementById("hoja-jugadores").value;
+            const fInicio = parseInt(document.getElementById("fila-inicio-jugadores").value);
+            const fFin = parseInt(document.getElementById("fila-fin-jugadores").value);
+            const col = letraAIndice(document.getElementById("columna-jugadores").value);
+
+            if (!equipo || !file || !hoja || isNaN(fInicio)) return alert("Faltan datos para cargar jugadores");
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
+                const worksheet = workbook.Sheets[hoja];
+
+                if (!worksheet) return alert("Hoja no encontrada");
+                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                if (!datosDisciplina[equipo]) datosDisciplina[equipo] = [];
+
+                for (let i = fInicio - 1; i < (fFin || json.length); i++) {
+                    const fila = json[i];
+                    if (fila && fila[col]) {
+                        datosDisciplina[equipo].push({
+                            nombre: String(fila[col]).trim(),
+                            amarillas: 0,
+                            rojas: 0,
+                            suspendido: false
+                        });
+                    }
+                }
+                guardar();
+                renderDisciplina();
+                alert("Jugadores cargados");
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function sancionar(equipo, index, tipo) {
+            const j = datosDisciplina[equipo][index];
+            if (tipo === 'amarilla') {
+                j.amarillas++;
+                if (j.amarillas % 5 === 0) j.suspendido = true;
+            } else {
+                j.rojas++;
+                j.suspendido = true;
+            }
+            guardar();
+            renderDisciplina();
+        }
+
+        function habilitar(equipo, index) {
+            datosDisciplina[equipo][index].suspendido = false;
+            guardar();
+            renderDisciplina();
+        }
+
+        function renderDisciplina() {
+            const contenedor = document.getElementById("contenedor-disciplinas");
+            if (!contenedor) return;
+            contenedor.innerHTML = "";
+
+            Object.keys(datosDisciplina).forEach((equipo, i) => {
+                const jugadores = datosDisciplina[equipo];
+                if (!jugadores || jugadores.length === 0) return;
+
+                const totalA = jugadores.reduce((s, j) => s + j.amarillas, 0);
+                const totalR = jugadores.reduce((s, j) => s + j.rojas, 0);
+
+                contenedor.innerHTML += `
+                    <div>
+                        <div onclick="toggleLista('lista-disciplina-${i}')">
+                            <strong>${equipo}</strong> (Amarillas: ${totalA} | Rojas: ${totalR})
+                            <button>Ver / Ocultar</button>
+                        </div>
+                        <div id="lista-disciplina-${i}" style="display:none;">
+                            <table border="1">
+                                <tr>
+                                    <th>Jugador</th><th>A</th><th>R</th><th>Estado</th><th>Acciones</th>
+                                </tr>
+                                ${jugadores.map((j, idx) => `
+                                    <tr>
+                                        <td>${j.nombre}</td>
+                                        <td>${j.amarillas}</td>
+                                        <td>${j.rojas}</td>
+                                        <td>${j.suspendido ? 'Suspendido' : 'OK'}</td>
+                                        <td>
+                                            <button onclick="sancionar('${equipo}', ${idx}, 'amarilla')">Amarilla</button>
+                                            <button onclick="sancionar('${equipo}', ${idx}, 'roja')">Roja</button>
+                                            ${j.suspendido ? `<button onclick="habilitar('${equipo}', ${idx})">Habilitar</button>` : ''}
+                                        </td>
+                                    </tr>
+                                `).join("")}
+                            </table>
+                        </div>
+                    </div>
+                    <br>
+                `;
+            });
+        }
+
+        function toggleLista(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = el.style.display === "block" ? "none" : "block";
+        }
+
+        // ================= INICIALIZACIÓN =================
+        if (Object.keys(torneos).length > 0) cargarTorneo(Object.keys(torneos)[0]);
+        else renderTabs();
+
+    </script>
 {% endblock %}

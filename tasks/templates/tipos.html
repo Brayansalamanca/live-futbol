@@ -32,10 +32,10 @@
                         <th style="padding: 15px;">Imagen</th>
                         <th>Prenda</th>
                         <th>Talla</th>
-                        <th>Stock</th>
+                        <th>Stock Disp.</th>
                         <th>Reservados</th>
                         <th>Devolución</th>
-                        <th>Estado / Responsable</th>
+                        <th>Estado</th>
                         <th>Acción</th>
                     </tr>
                 </thead>
@@ -56,8 +56,8 @@
                         <tr>
                             <th style="padding: 15px;">Foto</th>
                             <th>Prenda</th>
-                            <th>Quién tiene</th>
-                            <th>Cantidad</th>
+                            <th>Último en apartar</th>
+                            <th>Cant. Total Reservada</th>
                             <th>Curso / Evento</th>
                             <th>Fecha Uso</th>
                             <th>Acción</th>
@@ -76,8 +76,8 @@
                         <tr>
                             <th style="padding: 15px;">Foto</th>
                             <th>Prenda</th>
-                            <th>Quién tiene</th>
-                            <th>Cantidad</th>
+                            <th>Último en apartar</th>
+                            <th>Cant. Total Reservada</th>
                             <th>Curso / Evento</th>
                             <th>Fecha Uso</th>
                             <th>Acción</th>
@@ -123,6 +123,7 @@
     /* Badges de Estado */
     .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; color: white; }
     .badge-ok { background: #27ae60; }
+    .badge-warn { background: #f39c12; }
     .badge-fail { background: #e74c3c; }
 
     /* Admin Section */
@@ -147,7 +148,6 @@
     const USUARIO_ACTUAL = "{{ request.user.username }}";
     let DATOS_PRENDAS = [];
 
-    // Calcular la fecha mínima (10 días de anticipación)
     function obtenerFechaMinima() {
         let d = new Date();
         d.setDate(d.getDate() + 10);
@@ -185,9 +185,18 @@
         hoyObj.setHours(0,0,0,0);
 
         prendas.forEach(p => {
-            const esDisp = p.estado === "Disponible";
+            const hayStock = p.cantidad > 0;
+            const estaReservado = p.cantidad_apartada > 0;
             
-            // Renderizado Catálogo Principal
+            let badgeHtml = "";
+            if (hayStock && !estaReservado) {
+                badgeHtml = `<span class="badge badge-ok">✅ Disponible</span>`;
+            } else if (hayStock && estaReservado) {
+                badgeHtml = `<span class="badge badge-warn">⚠️ Quedan ${p.cantidad}</span>`;
+            } else {
+                badgeHtml = `<span class="badge badge-fail">🚫 No hay más</span>`;
+            }
+
             htmlCat += `
                 <tr>
                     <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" class="img-tabla"></td>
@@ -196,10 +205,10 @@
                     <td class="stock-ok">${p.cantidad}</td>
                     <td class="stock-wait">${p.cantidad_apartada || 0}</td>
                     <td class="fecha-info">${p.fecha_devolucion || '---'}</td>
-                    <td><span class="badge ${esDisp ? 'badge-ok' : 'badge-fail'}">${esDisp ? '✅ Disponible' : '🚩 ' + p.profesor}</span></td>
+                    <td>${badgeHtml}</td>
                     <td>
                         <div style="display: flex; gap: 5px; justify-content: center;">
-                            ${esDisp ? `<button onclick="toggleForm('${p.id}')" style="background:var(--primary); color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Apartar</button>` : `<button disabled style="background:#ccc; color:#666; border:none; padding:6px 12px; border-radius:4px;">Ocupado</button>`}
+                            ${hayStock ? `<button onclick="toggleForm('${p.id}')" style="background:var(--primary); color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Apartar</button>` : `<button disabled style="background:#ccc; color:#666; border:none; padding:6px 12px; border-radius:4px;">Agotado</button>`}
                             ${USUARIO_ACTUAL === 'rosita' ? `<button onclick="eliminarPrenda('${p.id}')" style="background:#e74c3c; color:white; border:none; padding:6px 8px; border-radius:4px;">🗑️</button>` : ''}
                         </div>
                     </td>
@@ -219,32 +228,26 @@
                     </td>
                 </tr>`;
 
-            // Renderizado Admin Devoluciones
-            if (USUARIO_ACTUAL === 'rosita' && !esDisp) {
+            if (USUARIO_ACTUAL === 'rosita' && estaReservado) {
                 let esAtrasado = false;
                 
-                // Procesar la fecha que viene en formato DD/MM/YYYY del backend
                 if (p.fecha_uso) {
                     const partesFecha = p.fecha_uso.split('/');
                     if (partesFecha.length === 3) {
                         const dia = parseInt(partesFecha[0], 10);
-                        const mes = parseInt(partesFecha[1], 10) - 1; // Mes en JS es 0-11
+                        const mes = parseInt(partesFecha[1], 10) - 1; 
                         const anio = parseInt(partesFecha[2], 10);
                         
                         const fechaUsoObj = new Date(anio, mes, dia);
-                        
-                        // Le sumamos 2 días de tolerancia a la fecha de uso
                         const fechaLimite = new Date(fechaUsoObj);
                         fechaLimite.setDate(fechaLimite.getDate() + 2);
                         
-                        // Si hoy es mayor a la fecha límite, entonces está atrasado
                         if (hoyObj > fechaLimite) {
                             esAtrasado = true;
                         }
                     }
                 }
 
-                // Mostrar curso y evento si existen, sino indicar que es antiguo/no guardado
                 const cursoTexto = p.curso ? p.curso : 'Sin curso';
                 const eventoTexto = p.evento ? p.evento : 'Sin evento';
 
@@ -252,11 +255,11 @@
                     <tr>
                         <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" class="img-tabla" style="width:40px; height:40px"></td>
                         <td>${p.nombre}</td>
-                        <td style="color:#d35400; font-weight:bold;">${p.profesor}</td>
+                        <td style="color:#d35400; font-weight:bold;">${p.profesor || 'Varios'}</td>
                         <td>${p.cantidad_apartada}</td>
                         <td>${cursoTexto} / ${eventoTexto}</td>
                         <td style="color: ${esAtrasado ? '#e74c3c' : 'inherit'}; font-weight:bold;">${p.fecha_uso || 'Antiguo / Sin fecha'}</td>
-                        <td><button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Devuelto</button></td>
+                        <td><button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Devuelto Todo</button></td>
                     </tr>`;
 
                 if (esAtrasado) {
@@ -292,7 +295,6 @@
             return;
         }
 
-        // Validación de 10 días
         const fechaSeleccionada = new Date(fechaVal + "T00:00:00");
         const limiteDias = new Date();
         limiteDias.setDate(limiteDias.getDate() + 9);
@@ -332,7 +334,7 @@
     }
 
     async function liberar(id) {
-        if (!confirm("¿Marcar como devuelto?")) return;
+        if (!confirm("¿Marcar TODO el stock apartado como devuelto?")) return;
         const res = await fetch(`/api/apartar-prenda/${id}/`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
