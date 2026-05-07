@@ -16,6 +16,7 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.contrib.sites.shortcuts import get_current_site
+from .models import ReservaPrenda
 
 # Importación de modelos y formularios locales
 from .models import Task, RegistroEntrega, ObjetoPerdido, PrendaRopa, BajaBalon
@@ -361,23 +362,28 @@ def api_guardar_prenda(request):
     return JsonResponse({"status": "error"}, status=405)
     
 
+# === En views.py ===
+
+
+
 @login_required
-def api_obtener_prendas(request):
-    talla_filtro = request.GET.get('talla')
-    prendas = PrendaRopa.objects.filter(talla__iexact=talla_filtro) if talla_filtro else PrendaRopa.objects.all()
-    prendas = prendas.order_by('-fecha_registro')
-    result = []
-    for p in prendas:
-        fecha_devolucion = (p.fecha_uso + timedelta(days=p.dias_alquiler)).strftime('%d/%m/%Y') if (p.fecha_uso and p.dias_alquiler) else ''
-        result.append({
-            'id': p.id, 'nombre': p.objeto, 'cantidad': p.cantidad, 'cantidad_apartada': p.cantidad_apartada,
-            'talla': p.talla, 'estado': p.estado, 'detalle_defecto': p.detalle_defecto,
-            'profesor': p.nombre_apartado or '', 'curso': p.curso_apartado or '',
-            'evento': p.evento_apartado or '', 'dias_alquiler': p.dias_alquiler,
-            'fecha_uso': p.fecha_uso.strftime('%d/%m/%Y') if p.fecha_uso else '',
-            'fecha_devolucion': fecha_devolucion, 'imagen': p.imagen
-        })
-    return JsonResponse(result, safe=False)
+def liberar_reserva(request, reserva_id):
+    reserva = get_object_or_404(ReservaPrenda, id=reserva_id)
+
+    prenda = reserva.prenda
+
+    prenda.cantidad += reserva.cantidad
+    prenda.cantidad_apartada -= reserva.cantidad
+
+    if prenda.cantidad_apartada == 0:
+        prenda.estado = 'Disponible'
+
+    prenda.save()
+
+    reserva.entregado = True
+    reserva.save()
+
+    return JsonResponse({"status": "ok"})
 
 @login_required
 def tasks(request):
@@ -423,28 +429,80 @@ def api_cambiar_estado_usuario(request, user_id):
 
 @user_passes_test(es_coordinacion)
 def formulario(request): return render(request, 'formulario.html')
-
 @login_required
+def api_obtener_prendas(request):
+    prendas = list(PrendaRopa.objects.all())
+    prendas.reverse()
+
+    todas_reservas = list(ReservaPrenda.objects.all())
+
+    result = []
+
+    for p in prendas:
+        reservas = []
+
+        for r in todas_reservas:
+            if str(r.prenda_id) == str(p.id) and r.entregado is False:
+                reservas.append({
+                    "id": r.id,
+                    "nombre": r.nombre,
+                    "curso": r.curso,
+                    "evento": r.evento,
+                    "cantidad": r.cantidad,
+                    "fecha_uso": r.fecha_uso.strftime('%d/%m/%Y')
+                })
+
+        result.append({
+            "id": p.id,
+            "nombre": p.objeto,
+            "cantidad": p.cantidad,
+            "cantidad_apartada": p.cantidad_apartada,
+            "talla": p.talla,
+            "estado": p.estado,
+            "imagen": p.imagen,
+            "reservas": reservas
+        })
+
+    return JsonResponse(result, safe=False)
 @login_required
 def api_apartar_prenda(request, prenda_id):
     prenda = get_object_or_404(PrendaRopa, id=prenda_id)
-    if request.method != 'POST': return JsonResponse({'status': 'error'}, status=405)
-    data = json.loads(request.body)
+    if request.method != 'POST': 
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'JSON inválido'}, status=400)
+        
     accion = data.get('accion', 'apartar')
 
     if accion == 'apartar':
         cant = int(data.get('cantidad_alquilada', 1))
-        if cant > prenda.cantidad: return JsonResponse({'status': 'error'}, status=400)
+        # Usamos el nombre que viene en el payload (o el usuario actual si no viene)
+        nombre_persona = data.get('nombre') or request.user.username
         
+        if cant > prenda.cantidad: 
+            return JsonResponse({'status': 'error', 'message': 'Sin stock suficiente'}, status=400)
+
         prenda.cantidad -= cant
         prenda.cantidad_apartada += cant
-        prenda.estado = 'Apartado' if prenda.cantidad == 0 else 'Parcialmente Apartado'
+        prenda.estado = 'Agotado' if prenda.cantidad == 0 else 'Parcialmente Apartado'
         
-        # AQUÍ ESTABA EL ERROR: Ahora sí guardamos todos los datos
-        prenda.nombre_apartado = data.get('nombre')
+        # Datos de la ÚLTIMA persona que apartó (para compatibilidad con tu código actual)
+        prenda.nombre_apartado = nombre_persona
         prenda.curso_apartado = data.get('curso', '')
         prenda.evento_apartado = data.get('evento', '')
         
+        # AGREGAR AL HISTORIAL PLANO en detalle_defecto
+        # Formato: "Nombre - Cantidad prendas - Curso/Evento;"
+        nuevo_registro_historial = f"{nombre_persona} - {cant} prenda(s) - {data.get('curso', 'S/C')}/{data.get('evento', 'S/E')};"
+        
+        if prenda.detalle_defecto:
+            prenda.detalle_defecto += " " + nuevo_registro_historial
+        else:
+            prenda.detalle_defecto = nuevo_registro_historial
+
         # Guardamos la fecha de uso correctamente
         fecha_str = data.get('fecha')
         if fecha_str:
@@ -452,21 +510,42 @@ def api_apartar_prenda(request, prenda_id):
                 prenda.fecha_uso = datetime.strptime(fecha_str, '%Y-%m-%d').date()
             except ValueError:
                 pass
-                
-        prenda.save()
         
+        prenda.save()
+        return JsonResponse({'status': 'ok', 'message': f'Prenda apartada para {nombre_persona}'})
+
     elif accion == 'liberar':
-        prenda.cantidad += prenda.cantidad_apartada
-        prenda.cantidad_apartada = 0
-        prenda.estado = 'Disponible'
-        # Limpiamos los datos para la próxima persona
-        prenda.nombre_apartado = ''
-        prenda.curso_apartado = ''
-        prenda.evento_apartado = ''
-        prenda.fecha_uso = None 
-        prenda.save()
+        # NUEVO: Rosita especifica cuántas prendas se devuelven
+        cantidad_a_devolver = int(data.get('cantidad_devolucion', 0))
         
-    return JsonResponse({'status': 'ok'})
+        if cantidad_a_devolver <= 0:
+             return JsonResponse({'status': 'error', 'message': 'Cantidad de devolución inválida'}, status=400)
+             
+        if cantidad_a_devolver > prenda.cantidad_apartada:
+             return JsonResponse({'status': 'error', 'message': 'No puedes devolver más prendas de las apartadas'}, status=400)
+
+        # Actualizamos stock
+        prenda.cantidad += cantidad_a_devolver
+        prenda.cantidad_apartada -= cantidad_a_devolver
+        
+        # Si se devolvió TODO, limpiamos todo
+        if prenda.cantidad_apartada == 0:
+            prenda.estado = 'Disponible'
+            prenda.nombre_apartado = ''
+            prenda.curso_apartado = ''
+            prenda.evento_apartado = ''
+            prenda.fecha_uso = None
+            prenda.detalle_defecto = '' # Limpiamos el historial plano
+        else:
+            # Si es devolución parcial, solo actualizamos estado
+            prenda.estado = 'Parcialmente Apartado'
+            # Mantenemos el historial crudo, pero podrías intentar editarlo recursivamente (complejo sin SQL)
+            # Por simplicidad, mantenemos el historial como "quiénes han alquilado históricamente"
+            
+        prenda.save()
+        return JsonResponse({'status': 'ok', 'message': f'Se devolvieron {cantidad_a_devolver} prenda(s)'})
+
+    return JsonResponse({'status': 'error', 'message': 'Acción no reconocida'}, status=400)
 
 @user_passes_test(es_coordinacion)
 def api_eliminar_prenda(request, prenda_id):

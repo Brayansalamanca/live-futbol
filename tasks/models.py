@@ -85,14 +85,41 @@ class AsistenciaAlimento(models.Model):
     grado = models.CharField(max_length=20)
     seccion = models.CharField(max_length=20)
 
-    pago = models.BooleanField(default=True)  # paga o no paga
-    estado = models.CharField(max_length=20, choices=[
-        ('normal', 'Normal'),
-        ('extra', 'Extra'),
-        ('grave', 'Grave')
-    ], default='normal')
+    pago = models.BooleanField(default=True)
+
+    estado = models.CharField(
+        max_length=20,
+        choices=[
+            ('normal', 'Normal'),
+            ('extra', 'Extra'),
+            ('grave', 'Grave')
+        ],
+        default='normal'
+    )
 
     fecha = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.nombre
+
+
+class ReservaPrenda(models.Model):
+    prenda = models.ForeignKey(
+        PrendaRopa,
+        on_delete=models.CASCADE,
+        related_name='reservas'
+    )
+
+    nombre = models.CharField(max_length=100)
+    curso = models.CharField(max_length=50, blank=True)
+    evento = models.CharField(max_length=100, blank=True)
+
+    cantidad = models.IntegerField(default=1)
+
+    fecha_uso = models.DateField()
+    fecha_reserva = models.DateTimeField(auto_now_add=True)
+
+    entregado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.prenda.objeto} - {self.nombre} - {self.fecha_uso}"

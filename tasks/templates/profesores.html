@@ -3,227 +3,158 @@
 {% load static %}
 
 {% block content %}
-
+ <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <style>
         
-        /* VARIABLES DE COLOR Y ESTILO */
-        :root {
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --secondary: #06b6d4;
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-            --border: #334155;
-            --yellow-card: #eab308;
-            --red-card: #ef4444;
-            --success: #22c55e;
-        }
+/* 1. NAVEGACIÓN POR TABS (Ya estaba centrado, se mantiene) */
+#tabs-torneos {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    padding: 15px;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    justify-content: center; /* Centra los botones de las pestañas */
+}
 
-        /* RESET Y BASE */
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            line-height: 1.5;
-        }
+#tabs-torneos button {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
 
-        h1, h2, h3 {
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+#tabs-torneos button:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
 
-        /* NAVEGACIÓN POR TABS */
-        #tabs-torneos {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            padding: 10px;
-            background: var(--bg-card);
-            border-radius: 12px;
-        }
+/* 2. PANELES Y CONTENEDORES DE ACCIÓN (Centrado de texto base) */
+#setup-panel, #team-registry-panel, #competition-area, #disciplina-area {
+    background: var(--card);
+    padding: 30px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    border: 1px solid var(--border);
+    text-align: center; /* Centra el contenido general */
+}
 
-        #tabs-torneos button {
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+/* 3. FORMULARIOS E INPUTS (Centrado de filas) */
+#setup-panel > div, 
+#team-registry-panel > div, 
+#disciplina-area > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center; 
+    justify-content: center; /* CENTRA LOS INPUTS Y BOTONES EN LA FILA */
+    margin-bottom: 15px;
+}
 
-        #tabs-torneos button:hover {
-            background: rgba(59, 130, 246, 0.1);
-        }
+input[type="text"], 
+input[type="number"], 
+input[type="date"], 
+input[type="time"], 
+select {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    outline: none;
+    width: auto; 
+    min-width: 140px; 
+    max-width: 220px; 
+    text-align: center; /* Centra el texto que escribes dentro */
+    transition: all 0.25s ease;
+}
 
-        /* PANELES Y CONTENEDORES */
-        #setup-panel, #team-registry-panel, #competition-area, #disciplina-area {
-            background: var(--bg-card);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-        }
+input:focus {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
 
-        /* FORMULARIOS E INPUTS */
-        input[type="text"], input[type="number"], input[type="date"], input[type="time"], select {
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 5px 0;
-            outline: none;
-        }
+/* 4. BOTONES (Alineación con inputs) */
+#team-registry-panel button, 
+#disciplina-area button,
+#setup-panel button {
+    margin: 0;
+    padding: 8px 20px;
+    height: 42px; /* Ajustado para que coincida visualmente con los inputs */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
-        }
+/* 5. TÍTULOS (Centrados) */
+h3 {
+    width: 100%;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: var(--primary);
+    text-align: center; /* Títulos al centro */
+}
 
-        button {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s, opacity 0.2s;
-            margin: 5px;
-        }
+/* 6. LISTA DE EQUIPOS Y TABLAS (Centrado de elementos internos) */
+#teams-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    /* Cambiamos auto-fill por auto-fit para que el contenedor se ajuste al contenido */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 280px)); 
+    gap: 15px;
+    margin: 20px auto; /* El auto a los lados centra el contenedor mismo */
+    justify-content: center; /* Centra las tarjetas dentro del contenedor */
+    width: 100%;
+    max-width: 1200px; /* Limita el ancho para que no se estiren demasiado en pantallas grandes */
+}
 
-        button:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
+#teams-list li {
+    background: var(--bg);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centra el nombre del equipo en su tarjeta */
+    border-bottom: 4px solid var(--primary); /* Cambiado de lateral a inferior para balance */
+    box-shadow: var(--shadow);
+    gap: 10px;
+}
 
-        button:disabled {
-            background: #475569;
-            cursor: not-allowed;
-            transform: none;
-        }
+/* 7. AJUSTES FINALES PARA TABLAS */
+#tabla-puntos table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+}
 
-        /* LISTA DE EQUIPOS */
-        #teams-list {
-            list-style: none;
-            padding: 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-        }
+#tabla-puntos th, #tabla-puntos td {
+    text-align: center; /* Todo el contenido de la tabla al centro */
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+}
 
-        #teams-list li {
-            background: var(--bg-dark);
-            padding: 12px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-left: 4px solid var(--primary);
-        }
+#tabla-puntos th {
+    background: var(--primary);
+    color: white;
+}
 
-        /* TABLA DE PUNTOS */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: var(--bg-dark);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        th {
-            background: var(--primary);
-            color: white;
-            padding: 12px;
-            text-align: left;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        tr:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* CALENDARIO Y PARTIDOS */
-        #league-matches-list > div {
-            background: var(--bg-dark);
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        /* BRACKET (ELIMINATORIAS) */
-        #bracket-render {
-            display: flex;
-            gap: 30px;
-            overflow-x: auto;
-            padding: 20px 0;
-        }
-
-        .bracket-match {
-            border: 1px solid var(--primary);
-            background: var(--bg-dark);
-            padding: 10px;
-            border-radius: 8px;
-            min-width: 180px;
-        }
-
-        /* CAMPEÓN */
-        #cuadro-campeon {
-            text-align: center;
-            padding: 40px;
-            background: linear-gradient(45deg, #1e293b, #3b82f655);
-            border: 3px gold solid;
-            border-radius: 20px;
-            margin: 20px 0;
-            animation: glow 2s infinite alternate;
-        }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 10px gold; }
-            to { box-shadow: 0 0 30px gold; }
-        }
-
-        /* DISCIPLINA (TARJETAS) */
-        .tarjeta-amarilla {
-            color: var(--yellow-card);
-            font-weight: bold;
-        }
-
-        .tarjeta-roja {
-            color: var(--red-card);
-            font-weight: bold;
-        }
-
-        .suspendido {
-            background: rgba(239, 68, 68, 0.1) !important;
-            opacity: 0.7;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            #league-matches-list > div {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
+/* BRACKETS (Centrado del contenedor de llaves) */
+#bracket-render {
+    display: flex;
+    gap: 40px;
+    overflow-x: auto;
+    padding: 30px 10px;
+    justify-content: center; /* Centra el torneo si hay pocos equipos */
+}
 
     </style>
     <div id="tabs-torneos"></div>
@@ -919,4 +850,5 @@
         else renderTabs();
 
     </script>
+
 {% endblock %}

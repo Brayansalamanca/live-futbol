@@ -6,6 +6,7 @@
     
     <h1 class="titulo-principal">👕 Catálogo de Inventario</h1>
     
+    <!-- Panel de Filtros -->
     <div class="card card-filtros">
         <div class="filtro-item flex-2">
             <label>BUSCAR PRENDA:</label>
@@ -24,6 +25,7 @@
         </div>
     </div>
 
+    <!-- Tabla de Catálogo General -->
     <div class="card card-tabla-inventario">
         <div class="table-responsive">
             <table class="tabla-limpia">
@@ -44,6 +46,7 @@
         </div>
     </div>
 
+    <!-- Sección Administrativa (Solo para 'rosita') -->
     {% if request.user.username == 'rosita' %}
     <div class="admin-section">
         <h2 class="titulo-admin">🛡️ Control de Devoluciones (Admin)</h2>
@@ -57,7 +60,7 @@
                             <th style="padding: 15px;">Foto</th>
                             <th>Prenda</th>
                             <th>Último en apartar</th>
-                            <th>Cant. Total Reservada</th>
+                            <th>Cant. Reservada</th>
                             <th>Curso / Evento</th>
                             <th>Fecha Uso</th>
                             <th>Acción</th>
@@ -77,7 +80,7 @@
                             <th style="padding: 15px;">Foto</th>
                             <th>Prenda</th>
                             <th>Último en apartar</th>
-                            <th>Cant. Total Reservada</th>
+                            <th>Cant. Reservada</th>
                             <th>Curso / Evento</th>
                             <th>Fecha Uso</th>
                             <th>Acción</th>
@@ -91,55 +94,56 @@
     {% endif %}
 </div>
 
+<!-- Visor de Imágenes -->
 <div id="visorImagen" onclick="cerrarVisor()" class="visor-modal">
     <img id="imgGrande" src="" class="img-ampliada">
 </div>
 
 <style>
+    :root {
+        --primary: #2c3e50;
+        --border: #dcdde1;
+        --bg-soft: #f8f9fa;
+        --text: #2f3640;
+        --text-soft: #7f8c8d;
+    }
+
     .seccion-inventario { padding: 80px 20px 50px; min-height: 100vh; max-width: 1200px; margin: 0 auto; }
-    
     .titulo-principal { text-align: center; color: var(--primary); text-transform: uppercase; font-weight: 900; margin-bottom: 30px; }
 
-    /* Estilos de Filtros */
-    .card-filtros { display: flex; gap: 15px; flex-wrap: wrap; padding: 20px; margin-bottom: 30px; border: 1px solid var(--border); }
+    .card { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .card-filtros { display: flex; gap: 15px; flex-wrap: wrap; padding: 20px; border: 1px solid var(--border); }
     .filtro-item { min-width: 150px; }
     .flex-2 { flex: 2; }
     .flex-1 { flex: 1; }
     .filtro-item label { color: var(--primary); font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px; }
 
-    /* Estilos de Tabla */
+    .input-hibrido { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; outline: none; }
+
     .card-tabla-inventario, .card-tabla-admin { padding: 0 !important; overflow: hidden; border: 1px solid var(--border); }
     .table-responsive { overflow-x: auto; }
     .tabla-limpia { width: 100%; border-collapse: collapse; text-align: center; color: var(--text); }
-    
     .tabla-limpia thead { background: var(--primary); color: white; font-size: 12px; text-transform: uppercase; }
     .tabla-limpia td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
-    /* Colores de celdas */
     .stock-ok { color: #27ae60; font-weight: bold; }
     .stock-wait { color: #f39c12; font-weight: bold; }
     .fecha-info { color: var(--text-soft); font-size: 12px; }
 
-    /* Badges de Estado */
     .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; color: white; }
     .badge-ok { background: #27ae60; }
     .badge-warn { background: #f39c12; }
     .badge-fail { background: #e74c3c; }
 
-    /* Admin Section */
     .admin-section { margin-top: 60px; }
     .titulo-admin { color: #d35400; border-left: 5px solid #d35400; padding-left: 15px; font-size: 1.2rem; margin-bottom: 20px; }
     .head-admin { background: #d35400 !important; }
 
-    /* Imágenes */
     .img-tabla { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); cursor: zoom-in; }
-
-    /* Visor */
     .visor-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
-    .img-ampliada { width: auto; max-width: 80%; max-height: 80%; border: 4px solid var(--primary); border-radius: 12px; }
+    .img-ampliada { width: auto; max-width: 80%; max-height: 80%; border: 4px solid white; border-radius: 12px; }
 
-    /* Formulario interno de la tabla */
-    .form-row { background: var(--bg-soft); }
+    .form-row { background: #f1f2f6; }
     .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; padding: 15px; }
     .grid-form label { font-size: 10px; color: var(--primary); font-weight: bold; display: block; }
 </style>
@@ -148,6 +152,7 @@
     const USUARIO_ACTUAL = "{{ request.user.username }}";
     let DATOS_PRENDAS = [];
 
+    // Calcula la fecha mínima permitida (hoy + 10 días)
     function obtenerFechaMinima() {
         let d = new Date();
         d.setDate(d.getDate() + 10);
@@ -165,13 +170,16 @@
             const res = await fetch("{% url 'api_obtener_prendas' %}");
             DATOS_PRENDAS = await res.json();
             filtrarCatalogo();
-        } catch (e) { console.error("Error:", e); }
+        } catch (e) { console.error("Error al cargar datos:", e); }
     }
 
     function filtrarCatalogo() {
         const busqueda = document.getElementById('busquedaNombre').value.toLowerCase();
         const tallaSel = document.getElementById('filtroTalla').value;
-        const filtradas = DATOS_PRENDAS.filter(p => (p.nombre.toLowerCase().includes(busqueda)) && (tallaSel === "" || p.talla === tallaSel));
+        const filtradas = DATOS_PRENDAS.filter(p => 
+            (p.nombre.toLowerCase().includes(busqueda)) && 
+            (tallaSel === "" || p.talla === tallaSel)
+        );
         renderizarTablas(filtradas);
     }
 
@@ -180,7 +188,6 @@
         let htmlDev = "";
         let htmlAtrasados = "";
         const fechaMinima = obtenerFechaMinima();
-        
         const hoyObj = new Date();
         hoyObj.setHours(0,0,0,0);
 
@@ -188,15 +195,17 @@
             const hayStock = p.cantidad > 0;
             const estaReservado = p.cantidad_apartada > 0;
             
+            // Lógica de Badges
             let badgeHtml = "";
             if (hayStock && !estaReservado) {
                 badgeHtml = `<span class="badge badge-ok">✅ Disponible</span>`;
             } else if (hayStock && estaReservado) {
                 badgeHtml = `<span class="badge badge-warn">⚠️ Quedan ${p.cantidad}</span>`;
             } else {
-                badgeHtml = `<span class="badge badge-fail">🚫 No hay más</span>`;
+                badgeHtml = `<span class="badge badge-fail">🚫 Agotado</span>`;
             }
 
+            // Fila de Catálogo
             htmlCat += `
                 <tr>
                     <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" class="img-tabla"></td>
@@ -204,7 +213,13 @@
                     <td>${p.talla || '-'}</td>
                     <td class="stock-ok">${p.cantidad}</td>
                     <td class="stock-wait">${p.cantidad_apartada || 0}</td>
-                    <td class="fecha-info">${p.fecha_devolucion || '---'}</td>
+                    <td class="fecha-info">${p.reservas.length > 0
+? p.reservas.map(r => `
+<div>
+${r.fecha_uso} (${r.cantidad})
+</div>
+`).join('')
+: '---'}</td>
                     <td>${badgeHtml}</td>
                     <td>
                         <div style="display: flex; gap: 5px; justify-content: center;">
@@ -216,10 +231,10 @@
                 <tr id="form-${p.id}" class="form-row" style="display: none;">
                     <td colspan="8">
                         <div class="grid-form">
-                            <div><label>CURSO</label><input type="text" id="curso-${p.id}" class="input-hibrido" style="height:35px"></div>
-                            <div><label>EVENTO</label><input type="text" id="evento-${p.id}" class="input-hibrido" style="height:35px"></div>
-                            <div><label>FECHA EXACTA USO (Min 10 días)</label><input type="date" id="fecha-${p.id}" min="${fechaMinima}" class="input-hibrido" style="height:35px" required></div>
-                            <div><label>CANT. (Máx ${p.cantidad})</label><input type="number" id="cant-${p.id}" value="1" min="1" max="${p.cantidad}" class="input-hibrido" style="height:35px"></div>
+                            <div><label>CURSO</label><input type="text" id="curso-${p.id}" class="input-hibrido"></div>
+                            <div><label>EVENTO</label><input type="text" id="evento-${p.id}" class="input-hibrido"></div>
+                            <div><label>FECHA USO (Min 10 días)</label><input type="date" id="fecha-${p.id}" min="${fechaMinima}" class="input-hibrido" required></div>
+                            <div><label>CANT. (Máx ${p.cantidad})</label><input type="number" id="cant-${p.id}" value="1" min="1" max="${p.cantidad}" class="input-hibrido"></div>
                             <div style="display:flex; gap:5px; align-items:flex-end;">
                                 <button onclick="confirmar('${p.id}')" style="background:#27ae60; color:white; border:none; height:35px; border-radius:4px; flex:1;">OK</button>
                                 <button onclick="toggleForm('${p.id}')" style="background:#95a5a6; color:white; border:none; height:35px; border-radius:4px; padding:0 10px;">X</button>
@@ -228,55 +243,40 @@
                     </td>
                 </tr>`;
 
+            // Lógica de Devoluciones para Admin
             if (USUARIO_ACTUAL === 'rosita' && estaReservado) {
                 let esAtrasado = false;
-                
                 if (p.fecha_uso) {
-                    const partesFecha = p.fecha_uso.split('/');
-                    if (partesFecha.length === 3) {
-                        const dia = parseInt(partesFecha[0], 10);
-                        const mes = parseInt(partesFecha[1], 10) - 1; 
-                        const anio = parseInt(partesFecha[2], 10);
-                        
-                        const fechaUsoObj = new Date(anio, mes, dia);
+                    const partes = p.fecha_uso.split('/');
+                    if (partes.length === 3) {
+                        const fechaUsoObj = new Date(partes[2], partes[1] - 1, partes[0]);
                         const fechaLimite = new Date(fechaUsoObj);
-                        fechaLimite.setDate(fechaLimite.getDate() + 2);
-                        
-                        if (hoyObj > fechaLimite) {
-                            esAtrasado = true;
-                        }
+                        fechaLimite.setDate(fechaLimite.getDate() + 2); // 2 días de gracia
+                        if (hoyObj > fechaLimite) esAtrasado = true;
                     }
                 }
 
-                const cursoTexto = p.curso ? p.curso : 'Sin curso';
-                const eventoTexto = p.evento ? p.evento : 'Sin evento';
-
-                const filaDevolucion = `
+                const filaDev = `
                     <tr>
                         <td><img src="${p.imagen}" onclick="ampliarImagen('${p.imagen}')" class="img-tabla" style="width:40px; height:40px"></td>
                         <td>${p.nombre}</td>
                         <td style="color:#d35400; font-weight:bold;">${p.profesor || 'Varios'}</td>
                         <td>${p.cantidad_apartada}</td>
-                        <td>${cursoTexto} / ${eventoTexto}</td>
-                        <td style="color: ${esAtrasado ? '#e74c3c' : 'inherit'}; font-weight:bold;">${p.fecha_uso || 'Antiguo / Sin fecha'}</td>
-                        <td><button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Devuelto Todo</button></td>
+                        <td>${p.curso || '-'} / ${p.evento || '-'}</td>
+                        <td style="color: ${esAtrasado ? '#e74c3c' : 'inherit'}; font-weight:bold;">${p.fecha_uso || 'Sin fecha'}</td>
+                        <td><button onclick="liberar('${p.id}')" style="background:#27ae60; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Devuelto</button></td>
                     </tr>`;
 
-                if (esAtrasado) {
-                    htmlAtrasados += filaDevolucion;
-                } else {
-                    htmlDev += filaDevolucion;
-                }
+                if (esAtrasado) htmlAtrasados += filaDev;
+                else htmlDev += filaDev;
             }
         });
 
-        document.getElementById('tablaCuerpo').innerHTML = htmlCat || "<tr><td colspan='8'>No hay prendas</td></tr>";
+        document.getElementById('tablaCuerpo').innerHTML = htmlCat || "<tr><td colspan='8'>No hay prendas disponibles</td></tr>";
         
         if (USUARIO_ACTUAL === 'rosita') {
-            const tDev = document.getElementById('tablaDevoluciones');
-            const tAtrasados = document.getElementById('tablaAtrasados');
-            if(tDev) tDev.innerHTML = htmlDev || "<tr><td colspan='7'>Sin entregas pendientes a tiempo</td></tr>";
-            if(tAtrasados) tAtrasados.innerHTML = htmlAtrasados || "<tr><td colspan='7'>No hay devoluciones atrasadas 🎉</td></tr>";
+            document.getElementById('tablaDevoluciones').innerHTML = htmlDev || "<tr><td colspan='7'>Sin entregas pendientes</td></tr>";
+            document.getElementById('tablaAtrasados').innerHTML = htmlAtrasados || "<tr><td colspan='7'>No hay devoluciones atrasadas 🎉</td></tr>";
         }
     }
 
@@ -287,28 +287,18 @@
 
     async function confirmar(id) {
         const fechaVal = document.getElementById(`fecha-${id}`).value;
-        const cantVal = document.getElementById(`cant-${id}`).value;
-        const cantMax = document.getElementById(`cant-${id}`).max;
+        const cantVal = parseInt(document.getElementById(`cant-${id}`).value);
+        const cantMax = parseInt(document.getElementById(`cant-${id}`).max);
         
-        if(!fechaVal) {
-            alert("El día exacto de uso es obligatorio.");
-            return;
-        }
+        if(!fechaVal) return alert("La fecha de uso es obligatoria.");
 
-        const fechaSeleccionada = new Date(fechaVal + "T00:00:00");
-        const limiteDias = new Date();
-        limiteDias.setDate(limiteDias.getDate() + 9);
-        limiteDias.setHours(0,0,0,0);
+        const fechaSel = new Date(fechaVal + "T00:00:00");
+        const limite = new Date();
+        limite.setDate(limite.getDate() + 9);
+        limite.setHours(0,0,0,0);
 
-        if(fechaSeleccionada <= limiteDias) {
-            alert("Debes apartar la prenda con al menos 10 días de anticipación.");
-            return;
-        }
-
-        if(parseInt(cantVal) < 1 || parseInt(cantVal) > parseInt(cantMax)) {
-            alert("La cantidad seleccionada no es válida o supera el stock disponible.");
-            return;
-        }
+        if(fechaSel <= limite) return alert("Debes apartar con al menos 10 días de anticipación.");
+        if(cantVal < 1 || cantVal > cantMax) return alert("Cantidad no válida.");
 
         const payload = {
             nombre: USUARIO_ACTUAL,
@@ -325,26 +315,40 @@
             body: JSON.stringify(payload)
         });
         
-        if (res.ok) {
-            cargar();
-            alert("Prenda(s) apartada(s) correctamente.");
-        } else {
-            alert("Error al procesar la solicitud.");
-        }
+        if (res.ok) { cargar(); alert("Apartado con éxito."); }
+        else alert("Error al procesar.");
     }
 
     async function liberar(id) {
-        if (!confirm("¿Marcar TODO el stock apartado como devuelto?")) return;
-        const res = await fetch(`/api/apartar-prenda/${id}/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-            body: JSON.stringify({ accion: 'liberar' })
-        });
-        if (res.ok) cargar();
+    // Primero buscamos la prenda en nuestros datos locales para saber cuánto hay apartado
+    const prenda = DATOS_PRENDAS.find(p => p.id == id);
+    const cantApartada = prenda ? prenda.cantidad_apartada : 0;
+
+    if (!confirm(`¿Confirmar la devolución de ${cantApartada} prenda(s)?`)) return;
+
+    const res = await fetch(`/api/apartar-prenda/${id}/`, {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json", 
+            "X-CSRFToken": "{{ csrf_token }}" 
+        },
+        // Enviamos la cantidad_devolucion para que el Python no de error
+        body: JSON.stringify({ 
+            accion: 'liberar',
+            cantidad_devolucion: cantApartada 
+        })
+    });
+
+    if (res.ok) {
+        cargar();
+    } else {
+        const errorData = await res.json();
+        alert("Error: " + errorData.message);
     }
+}
 
     async function eliminarPrenda(id) {
-        if (!confirm("¿Eliminar definitivamente?")) return;
+        if (!confirm("¿Eliminar prenda definitivamente?")) return;
         const res = await fetch(`/api/eliminar-prenda/${id}/`, {
             method: "POST",
             headers: { "X-CSRFToken": "{{ csrf_token }}" }
