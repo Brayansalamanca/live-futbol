@@ -52,12 +52,7 @@ class PrendaRopa(models.Model):
     condicion = models.CharField(max_length=20, default='Óptimo')
     detalle_defecto = models.TextField(blank=True, null=True)
     
-    # Datos de apartado
-    nombre_apartado = models.CharField(max_length=100, blank=True, null=True)
-    curso_apartado = models.CharField(max_length=50, blank=True, null=True)
-    evento_apartado = models.CharField(max_length=100, blank=True, null=True)
-    fecha_uso = models.DateField(blank=True, null=True)
-    dias_alquiler = models.IntegerField(blank=True, null=True, default=0)
+    
     
     imagen = models.TextField() # Base64 o URL
     devuelto = models.BooleanField(default=True)

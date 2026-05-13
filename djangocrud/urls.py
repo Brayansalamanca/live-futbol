@@ -55,6 +55,11 @@ urlpatterns = [
     path('tipos/', login_required(views.tipos), name='tipos'), 
     path('api/guardar-prenda/', user_passes_test(es_coordinacion)(views.api_guardar_prenda), name='api_guardar_prenda'),
     path('api/apartar-prenda/<int:prenda_id>/', login_required(views.api_apartar_prenda), name='api_apartar_prenda'),
+    path(
+    'liberar-reserva/<int:reserva_id>/',
+    login_required(views.liberar_reserva),
+    name='liberar_reserva'
+),
     path('api/obtener-prendas/', login_required(views.api_obtener_prendas), name='api_obtener_prendas'),
     path('api/eliminar-prenda/<int:prenda_id>/', user_passes_test(es_coordinacion)(views.api_eliminar_prenda), name='api_eliminar_prenda'),
 

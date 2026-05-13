@@ -1,3 +1,4 @@
+from django.db import transaction
 import json
 from datetime import datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
@@ -6,8 +7,14 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils import timezone, encoding, http
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
+from django.utils.http import (
+    urlsafe_base64_encode,
+    urlsafe_base64_decode
+)
+from django.utils.encoding import (
+    force_bytes,
+    force_str
+)
 from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
@@ -16,45 +23,135 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.contrib.sites.shortcuts import get_current_site
-from .models import ReservaPrenda
+from django.conf import settings
+
+from pymongo import MongoClient
 
 # Importación de modelos y formularios locales
-from .models import Task, RegistroEntrega, ObjetoPerdido, PrendaRopa, BajaBalon
-from .forms import TaskForm, CustomUserCreationForm
+from .models import (
+    Task,
+    RegistroEntrega,
+    ObjetoPerdido,
+    PrendaRopa,
+    BajaBalon,
+    ReservaPrenda
+)
+
+from .forms import (
+    TaskForm,
+    CustomUserCreationForm
+)
+
 from .tokens import account_activation_token
+
 import socket
-# Forzar a que use IPv4 para evitar el error 101
-socket.getaddrinfo = lambda *args: [(socket.AF_INET, socket.SOCK_STREAM, 6, '', (args[0], args[1]))]
+
+# Forzar IPv4
+socket.getaddrinfo = lambda *args: [
+    (socket.AF_INET, socket.SOCK_STREAM, 6, '', (args[0], args[1]))
+]
+
 import requests
 from requests.exceptions import RequestException
+
+from django.contrib.auth.tokens import default_token_generator
+from pymongo import MongoClient
+from django.conf import settings
 
 
 # ==========================================
 # 🔐 RECUPERACIÓN DE CONTRASEÑA
 # ==========================================
-class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
+class CustomPasswordResetView(
+    SuccessMessageMixin,
+    PasswordResetView
+):
+
     template_name = 'recuperar_contraseña.html'
-    email_template_name = 'password_reset_email.html'
-    subject_template_name = 'password_reset_subject.txt'
-    success_message = "Instrucciones enviadas al correo."
     success_url = reverse_lazy('password_reset_done')
 
     def form_valid(self, form):
-        email = form.cleaned_data.get('email')
-        try:
-            usuarios = list(User.objects.filter(email=email, is_active=True))
-            if usuarios:
-                form.save(
-                    email_template_name=self.email_template_name,
-                    subject_template_name=self.subject_template_name,
-                    request=self.request,
-                    use_https=self.request.is_secure(),
-                )
-        except Exception as e:
-            print(f"Error de base de datos ocultado: {e}")
-            
-        return redirect(self.success_url)
 
+        email = form.cleaned_data.get('email')
+
+        try:
+
+            # ==========================================
+            # CONEXIÓN DIRECTA A MONGODB
+            # ==========================================
+            mongo_host = settings.DATABASES['default']['CLIENT']['host']
+
+            client = MongoClient(mongo_host)
+
+            db_name = settings.DATABASES['default']['NAME']
+
+            db = client[db_name]
+
+            usuarios = list(
+                db.auth_user.find({
+                    "email": email,
+                    "is_active": True
+                })
+            )
+
+            print("Usuarios encontrados:", usuarios)
+
+            for user_data in usuarios:
+
+                user = User.objects.get(
+                    pk=user_data['id']
+                )
+
+                uid = urlsafe_base64_encode(
+                    force_bytes(user.pk)
+                )
+
+                token = default_token_generator.make_token(user)
+
+                current_site = get_current_site(self.request)
+
+                context = {
+                    'email': user.email,
+                    'domain': current_site.domain,
+                    'site_name': current_site.name,
+                    'uid': uid,
+                    'user': user,
+                    'token': token,
+                    'protocol': (
+                        'https'
+                        if self.request.is_secure()
+                        else 'http'
+                    ),
+                }
+
+                # Asunto manual
+                asunto = "Recuperación de contraseña - Live Futbol"
+
+                # Template HTML
+                mensaje = render_to_string(
+                    'email_reset_password.html',
+                    context
+                )
+
+                # Enviar correo
+                send_mail(
+                    asunto,
+                    mensaje,
+                    'saebra581@gmail.com',
+                    [user.email],
+                    fail_silently=False,
+                )
+
+                print("Correo enviado:", user.email)
+
+        except Exception as e:
+
+            import traceback
+
+            print("ERROR REAL:")
+            traceback.print_exc()
+
+        return redirect(self.success_url)
 # ==========================================
 # 🔐 FUNCIONES DE VERIFICACIÓN
 # ==========================================
@@ -350,15 +447,19 @@ def api_eliminar_baja(request, baja_id):
 @user_passes_test(es_coordinacion)
 def api_guardar_prenda(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        PrendaRopa.objects.create(
-            objeto=data.get('nombre'),
-            cantidad=int(data.get('cantidad', 1)),
-            talla=data.get('talla', ''),
-            imagen=data.get('imagen', ''),
-            estado='Disponible'
-        )
-        return JsonResponse({"status": "ok"})
+        try:
+            data = json.loads(request.body)
+            PrendaRopa.objects.create(
+                objeto=data.get('nombre'),
+                cantidad=int(data.get('cantidad', 1)),
+                cantidad_apartada=0, # <-- Agregado por seguridad
+                talla=data.get('talla', ''),
+                imagen=data.get('imagen', ''),
+                estado='Disponible'
+            )
+            return JsonResponse({"status": "ok"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
     return JsonResponse({"status": "error"}, status=405)
     
 
@@ -368,22 +469,40 @@ def api_guardar_prenda(request):
 
 @login_required
 def liberar_reserva(request, reserva_id):
-    reserva = get_object_or_404(ReservaPrenda, id=reserva_id)
+    """
+    Libera UNA sola reserva específica basada en su ID (reserva_id).
+    """
+    if request.method == "POST":
+        try:
+            # Buscamos la reserva INDIVIDUAL por su ID
+            reserva = get_object_or_404(ReservaPrenda, id=reserva_id)
 
-    prenda = reserva.prenda
+            if reserva.entregado:
+                return JsonResponse({"status": "error", "message": "Esta reserva ya fue devuelta"}, status=400)
 
-    prenda.cantidad += reserva.cantidad
-    prenda.cantidad_apartada -= reserva.cantidad
+            prenda = reserva.prenda
 
-    if prenda.cantidad_apartada == 0:
-        prenda.estado = 'Disponible'
+            # Devolvemos el stock exacto que se llevó esa persona
+            prenda.cantidad += reserva.cantidad
+            prenda.cantidad_apartada -= reserva.cantidad
 
-    prenda.save()
+            if prenda.cantidad_apartada <= 0:
+                prenda.cantidad_apartada = 0
+                prenda.estado = 'Disponible'
+            else:
+                prenda.estado = 'Parcialmente Apartado'
 
-    reserva.entregado = True
-    reserva.save()
+            prenda.save()
 
-    return JsonResponse({"status": "ok"})
+            # Marcamos esta reserva específica como completada/entregada
+            reserva.entregado = True
+            reserva.save()
+
+            return JsonResponse({"status": "ok", "message": "Prenda devuelta al inventario"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+            
+    return JsonResponse({"status": "error"}, status=405)
 
 @login_required
 def tasks(request):
@@ -433,119 +552,109 @@ def formulario(request): return render(request, 'formulario.html')
 def api_obtener_prendas(request):
     prendas = list(PrendaRopa.objects.all())
     prendas.reverse()
-
     todas_reservas = list(ReservaPrenda.objects.all())
 
     result = []
-
     for p in prendas:
         reservas = []
-
         for r in todas_reservas:
-            if str(r.prenda_id) == str(p.id) and r.entregado is False:
+            # Filtramos las reservas vinculadas
+            if r.prenda_id == p.id and not r.entregado:
                 reservas.append({
                     "id": r.id,
-                    "nombre": r.nombre,
+                    "nombre": r.nombre, 
                     "curso": r.curso,
                     "evento": r.evento,
                     "cantidad": r.cantidad,
-                    "fecha_uso": r.fecha_uso.strftime('%d/%m/%Y')
+                    "fecha_uso": r.fecha_uso.strftime('%d/%m/%Y') if r.fecha_uso else None
                 })
+
+        # Formateo de fecha
+        fecha_uso_formateada = p.fecha_uso.strftime('%d/%m/%Y') if getattr(p, 'fecha_uso', None) else None
 
         result.append({
             "id": p.id,
-            "nombre": p.objeto,
+            "nombre": p.objeto, 
             "cantidad": p.cantidad,
             "cantidad_apartada": p.cantidad_apartada,
             "talla": p.talla,
             "estado": p.estado,
-            "imagen": p.imagen,
+            # ✅ CORRECCIÓN: Quitamos .url porque tu campo 'imagen' ya es un texto/URL
+            "imagen": p.imagen if p.imagen else None,
+            "profesor": getattr(p, 'nombre_apartado', ''), 
+            "curso": getattr(p, 'curso_apartado', ''),
+            "evento": getattr(p, 'evento_apartado', ''),
+            "fecha_uso": fecha_uso_formateada,
             "reservas": reservas
         })
 
     return JsonResponse(result, safe=False)
 @login_required
+@transaction.atomic
 def api_apartar_prenda(request, prenda_id):
-    prenda = get_object_or_404(PrendaRopa, id=prenda_id)
-    if request.method != 'POST': 
+    if request.method != "POST":
         return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
-    
+
     try:
         data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'status': 'error', 'message': 'JSON inválido'}, status=400)
-        
-    accion = data.get('accion', 'apartar')
+        accion = data.get('accion', 'apartar')
+        prenda = get_object_or_404(PrendaRopa, id=prenda_id)
 
-    if accion == 'apartar':
-        cant = int(data.get('cantidad_alquilada', 1))
-        # Usamos el nombre que viene en el payload (o el usuario actual si no viene)
-        nombre_persona = data.get('nombre') or request.user.username
-        
-        if cant > prenda.cantidad: 
-            return JsonResponse({'status': 'error', 'message': 'Sin stock suficiente'}, status=400)
-
-        prenda.cantidad -= cant
-        prenda.cantidad_apartada += cant
-        prenda.estado = 'Agotado' if prenda.cantidad == 0 else 'Parcialmente Apartado'
-        
-        # Datos de la ÚLTIMA persona que apartó (para compatibilidad con tu código actual)
-        prenda.nombre_apartado = nombre_persona
-        prenda.curso_apartado = data.get('curso', '')
-        prenda.evento_apartado = data.get('evento', '')
-        
-        # AGREGAR AL HISTORIAL PLANO en detalle_defecto
-        # Formato: "Nombre - Cantidad prendas - Curso/Evento;"
-        nuevo_registro_historial = f"{nombre_persona} - {cant} prenda(s) - {data.get('curso', 'S/C')}/{data.get('evento', 'S/E')};"
-        
-        if prenda.detalle_defecto:
-            prenda.detalle_defecto += " " + nuevo_registro_historial
-        else:
-            prenda.detalle_defecto = nuevo_registro_historial
-
-        # Guardamos la fecha de uso correctamente
-        fecha_str = data.get('fecha')
-        if fecha_str:
-            try:
-                prenda.fecha_uso = datetime.strptime(fecha_str, '%Y-%m-%d').date()
-            except ValueError:
-                pass
-        
-        prenda.save()
-        return JsonResponse({'status': 'ok', 'message': f'Prenda apartada para {nombre_persona}'})
-
-    elif accion == 'liberar':
-        # NUEVO: Rosita especifica cuántas prendas se devuelven
-        cantidad_a_devolver = int(data.get('cantidad_devolucion', 0))
-        
-        if cantidad_a_devolver <= 0:
-             return JsonResponse({'status': 'error', 'message': 'Cantidad de devolución inválida'}, status=400)
-             
-        if cantidad_a_devolver > prenda.cantidad_apartada:
-             return JsonResponse({'status': 'error', 'message': 'No puedes devolver más prendas de las apartadas'}, status=400)
-
-        # Actualizamos stock
-        prenda.cantidad += cantidad_a_devolver
-        prenda.cantidad_apartada -= cantidad_a_devolver
-        
-        # Si se devolvió TODO, limpiamos todo
-        if prenda.cantidad_apartada == 0:
-            prenda.estado = 'Disponible'
-            prenda.nombre_apartado = ''
-            prenda.curso_apartado = ''
-            prenda.evento_apartado = ''
-            prenda.fecha_uso = None
-            prenda.detalle_defecto = '' # Limpiamos el historial plano
-        else:
-            # Si es devolución parcial, solo actualizamos estado
-            prenda.estado = 'Parcialmente Apartado'
-            # Mantenemos el historial crudo, pero podrías intentar editarlo recursivamente (complejo sin SQL)
-            # Por simplicidad, mantenemos el historial como "quiénes han alquilado históricamente"
+        if accion == 'apartar':
+            cant = int(data.get('cantidad_alquilada', 1))
+            nombre_persona = data.get('nombre') or request.user.username
             
-        prenda.save()
-        return JsonResponse({'status': 'ok', 'message': f'Se devolvieron {cantidad_a_devolver} prenda(s)'})
+            if cant > prenda.cantidad:
+                return JsonResponse({'status': 'error', 'message': 'Sin stock suficiente'}, status=400)
 
-    return JsonResponse({'status': 'error', 'message': 'Acción no reconocida'}, status=400)
+            # 1. ACTUALIZAR SOLO EL STOCK EN LA PRENDA
+            # No guardamos nombre ni fecha aquí para que no se sobreescriba "lo de Rosita"
+            prenda.cantidad -= cant
+            prenda.cantidad_apartada += cant
+            prenda.estado = 'Agotado' if prenda.cantidad == 0 else 'Parcialmente Apartado'
+            prenda.save()
+
+            # 2. PROCESAR FECHA PARA LA RESERVA INDIVIDUAL
+            fecha_str = data.get('fecha')
+            fecha_uso_obj = None
+            if fecha_str:
+                from datetime import datetime
+                try:
+                    fecha_uso_obj = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+                except ValueError:
+                    pass
+
+            # 3. CREAR EL REGISTRO EN LA "HOJA DE ANOTACIÓN" (ReservaPrenda)
+            # Esto es lo que garantiza que Rosita tenga 10 filas si apartó 10 veces
+            ReservaPrenda.objects.create(
+                prenda=prenda,
+                nombre=nombre_persona,
+                curso=data.get('curso', ''),
+                evento=data.get('evento', ''),
+                cantidad=cant,
+                fecha_uso=fecha_uso_obj,
+                entregado=False
+            )
+
+            return JsonResponse({'status': 'ok', 'message': f'Apartado registrado para {nombre_persona}'})
+
+        elif accion == 'liberar':
+            # Para liberar, lo ideal es que mandes el ID de la RESERVA, no de la prenda
+            # Pero si lo haces por prenda, aquí devolvemos el stock general
+            cantidad_a_devolver = int(data.get('cantidad_devolucion', 0))
+
+            if cantidad_a_devolver <= 0 or cantidad_a_devolver > prenda.cantidad_apartada:
+                return JsonResponse({'status': 'error', 'message': 'Cantidad inválida'}, status=400)
+
+            prenda.cantidad += cantidad_a_devolver
+            prenda.cantidad_apartada -= cantidad_a_devolver
+            prenda.estado = 'Disponible' if prenda.cantidad_apartada == 0 else 'Parcialmente Apartado'
+            prenda.save()
+            
+            return JsonResponse({'status': 'ok', 'message': 'Stock actualizado'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 @user_passes_test(es_coordinacion)
 def api_eliminar_prenda(request, prenda_id):
