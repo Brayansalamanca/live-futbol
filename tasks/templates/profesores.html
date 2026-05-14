@@ -966,6 +966,34 @@ h3 {
         // ================= INICIALIZACIÓN =================
         if (Object.keys(torneos).length > 0) cargarTorneo(Object.keys(torneos)[0]);
         else renderTabs();
+    // ==========================================
+    // KEEP ALIVE PARA RENDER
+    // ==========================================
+
+    async function mantenerServidorActivo() {
+        try {
+
+            // Cambia esta URL por una ruta real de tu Django
+            // Ejemplo: /, /ping/, /health/, etc.
+            const response = await fetch("/", {
+                method: "GET",
+                cache: "no-cache"
+            });
+
+            console.log("Servidor activo:", response.status);
+
+        } catch (error) {
+
+            console.log("Error keep-alive:", error);
+
+        }
+    }
+
+    // Ejecutar cada 4 minutos
+    setInterval(mantenerServidorActivo, 240000);
+
+    // Ejecutar una vez al entrar
+    mantenerServidorActivo();
 
     </script>
 
