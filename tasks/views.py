@@ -797,7 +797,102 @@ def buscar_usuario_comedor(request):
 
         })
 # === En views.py ===
+# ==========================================
+# 🏆 API TORNEOS
+# ==========================================
 
+import json
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
+from .models import Torneo
+
+
+# ===============================
+# LISTAR TORNEOS
+# ===============================
+@login_required
+def api_torneos(request):
+
+    torneos = Torneo.objects.all()
+
+    data = {}
+
+    for t in torneos:
+
+        data[t.nombre] = t.datos
+
+    return JsonResponse(data)
+
+
+# ===============================
+# GUARDAR TORNEO
+# ===============================
+@csrf_exempt
+@login_required
+def api_guardar_torneo(request):
+
+    if request.method == "POST":
+
+        try:
+
+            data = json.loads(request.body)
+
+            nombre = data.get("nombre")
+            datos = data.get("datos")
+
+            if not nombre:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Nombre vacío"
+                })
+
+            torneo, created = Torneo.objects.update_or_create(
+                nombre=nombre,
+                defaults={
+                    "datos": datos
+                }
+            )
+
+            return JsonResponse({
+                "success": True,
+                "created": created
+            })
+
+        except Exception as e:
+
+            return JsonResponse({
+                "success": False,
+                "error": str(e)
+            })
+
+    return JsonResponse({
+        "success": False
+    })
+
+
+# ===============================
+# ELIMINAR TORNEO
+# ===============================
+@csrf_exempt
+@login_required
+def api_eliminar_torneo(request, nombre):
+
+    if request.method == "POST":
+
+        Torneo.objects.filter(
+            nombre=nombre
+        ).delete()
+
+        return JsonResponse({
+            "success": True
+        })
+
+    return JsonResponse({
+        "success": False
+    })
 # ==========================================
 # API TORNEOS
 # ==========================================
