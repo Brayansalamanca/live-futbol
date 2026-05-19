@@ -1,0 +1,568 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<style>
+
+:root{
+    --bg:#0f172a;
+    --card:#1e293b;
+    --primary:#2563eb;
+    --green:#10b981;
+    --red:#ef4444;
+    --text:#f8fafc;
+    --border:#334155;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:Arial;
+}
+
+.contenedor{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:var(--card);
+    border-radius:15px;
+    padding:25px;
+    margin-bottom:25px;
+    border:1px solid var(--border);
+}
+
+h1,h2{
+    text-align:center;
+}
+
+input,
+button,
+select{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    margin-top:10px;
+    margin-bottom:10px;
+    font-size:15px;
+}
+
+input{
+    background:#0f172a;
+    color:white;
+    border:1px solid var(--border);
+}
+
+button{
+    background:var(--primary);
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button:hover{
+    opacity:0.9;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.resultado{
+    background:#0f172a;
+    border-radius:12px;
+    padding:20px;
+    margin-top:20px;
+    border:1px solid var(--border);
+}
+
+.ok{
+    color:var(--green);
+}
+
+.error{
+    color:var(--red);
+}
+
+.estado{
+    font-size:20px;
+    font-weight:bold;
+    text-align:center;
+    margin-top:15px;
+}
+
+.uid-box{
+    font-size:18px;
+    text-align:center;
+    padding:10px;
+    background:#020617;
+    border-radius:10px;
+    margin-top:10px;
+}
+
+@media(max-width:700px){
+
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+
+<div class="contenedor">
+
+    <!-- ====================================== -->
+    <!-- SUBIR EXCEL -->
+    <!-- ====================================== -->
+
+    <div class="card">
+
+        <h1>🍽️ Comedor Inteligente NFC</h1>
+
+        <h2>📤 Subir Excel</h2>
+
+        <form id="formExcel">
+
+            <input
+                type="file"
+                id="excel"
+                accept=".xlsx,.xls"
+                required
+            >
+
+            <div class="grid">
+
+                <div>
+                    <label>Nombre Hoja</label>
+
+                    <input
+                        type="text"
+                        id="hoja"
+                        value="Hoja1"
+                    >
+                </div>
+
+                <div>
+                    <label>Fila Inicio</label>
+
+                    <input
+                        type="number"
+                        id="fila_inicio"
+                        value="2"
+                    >
+                </div>
+
+            </div>
+
+            <div class="grid">
+
+                <div>
+                    <label>Columna Nombre</label>
+
+                    <input
+                        type="text"
+                        id="col_nombre"
+                        value="A"
+                    >
+                </div>
+
+                <div>
+                    <label>Columna Documento</label>
+
+                    <input
+                        type="text"
+                        id="col_documento"
+                        value="B"
+                    >
+                </div>
+
+            </div>
+
+            <div>
+
+                <label>Columna UID CHIP</label>
+
+                <input
+                    type="text"
+                    id="col_chip"
+                    value="C"
+                >
+
+            </div>
+
+            <button type="submit">
+
+                📤 Subir Usuarios
+
+            </button>
+
+        </form>
+
+        <div id="estadoExcel"></div>
+
+    </div>
+
+    <!-- ====================================== -->
+    <!-- NFC -->
+    <!-- ====================================== -->
+
+    <div class="card">
+
+        <h2>📡 NFC EN TIEMPO REAL</h2>
+
+        <button onclick="iniciarNFC()">
+
+            📡 Activar NFC REAL
+
+        </button>
+
+        <div class="uid-box" id="uidActual">
+
+            Esperando chip...
+
+        </div>
+
+    </div>
+
+    <!-- ====================================== -->
+    <!-- BUSCADOR -->
+    <!-- ====================================== -->
+
+    <div class="card">
+
+        <h2>🔍 Buscar Usuario</h2>
+
+        <form id="buscarForm">
+
+            <input
+                type="text"
+                id="buscar-input"
+                placeholder="Nombre / Documento / UID"
+            >
+
+            <button type="submit">
+
+                Buscar
+
+            </button>
+
+        </form>
+
+        <button onclick="simularChip()">
+
+            📱 Simular Chip
+
+        </button>
+
+        <div
+            class="resultado"
+            id="resultado"
+            style="display:none;"
+        ></div>
+
+    </div>
+
+</div>
+
+<script>
+
+// ======================================
+// CSRF
+// ======================================
+
+function getCookie(name){
+
+    let cookieValue = null;
+
+    if(document.cookie && document.cookie !== ''){
+
+        const cookies = document.cookie.split(';');
+
+        for(let i=0;i<cookies.length;i++){
+
+            const cookie = cookies[i].trim();
+
+            if(cookie.substring(0,name.length+1) === (name + '=')){
+
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length+1)
+                );
+
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+// ======================================
+// SUBIR EXCEL
+// ======================================
+
+document
+.getElementById("formExcel")
+.addEventListener(
+    "submit",
+    async function(e){
+
+        e.preventDefault();
+
+        const formData = new FormData();
+
+        formData.append(
+            "excel",
+            document.getElementById("excel").files[0]
+        );
+
+        formData.append(
+            "hoja",
+            document.getElementById("hoja").value
+        );
+
+        formData.append(
+            "fila_inicio",
+            document.getElementById("fila_inicio").value
+        );
+
+        formData.append(
+            "columna_nombre",
+            document.getElementById("col_nombre").value
+        );
+
+        formData.append(
+            "columna_documento",
+            document.getElementById("col_documento").value
+        );
+
+        formData.append(
+            "columna_chip",
+            document.getElementById("col_chip").value
+        );
+
+        const response = await fetch(
+
+            "/api/nfc/subir/",
+
+            {
+                method:"POST",
+                headers:{
+                    "X-CSRFToken":csrftoken
+                },
+                body:formData
+            }
+        );
+
+        const data = await response.json();
+
+        const estado = document.getElementById(
+            "estadoExcel"
+        );
+
+        if(data.success){
+
+            estado.innerHTML = `
+                <div class="estado ok">
+                    ${data.mensaje}
+                </div>
+            `;
+
+        }else{
+
+            estado.innerHTML = `
+                <div class="estado error">
+                    ${data.error}
+                </div>
+            `;
+        }
+    }
+);
+
+// ======================================
+// BUSCAR
+// ======================================
+
+document
+.getElementById("buscarForm")
+.addEventListener(
+    "submit",
+    buscarUsuario
+);
+
+async function buscarUsuario(e){
+
+    e.preventDefault();
+
+    const q = document.getElementById(
+        "buscar-input"
+    ).value;
+
+    const response = await fetch(
+
+        `/api/nfc/buscar/?q=${encodeURIComponent(q)}`
+    );
+
+    const data = await response.json();
+
+    const resultado = document.getElementById(
+        "resultado"
+    );
+
+    resultado.style.display = "block";
+
+    if(data.success){
+
+        resultado.innerHTML = `
+
+            <h2 class="ok">
+
+                ✅ Usuario Encontrado
+
+            </h2>
+
+            <hr>
+
+            <p>
+                <strong>Nombre:</strong>
+                ${data.usuario.nombre}
+            </p>
+
+            <p>
+                <strong>Documento:</strong>
+                ${data.usuario.documento}
+            </p>
+
+            <p>
+                <strong>UID NFC:</strong>
+                ${data.usuario.uid_nfc}
+            </p>
+
+            <p>
+                <strong>Entrega:</strong>
+                ${
+                    data.usuario.entregado
+                    ?
+                    'YA ENTREGADO'
+                    :
+                    'PENDIENTE'
+                }
+            </p>
+
+        `;
+
+    }else{
+
+        resultado.innerHTML = `
+
+            <h2 class="error">
+
+                ❌ ${data.error}
+
+            </h2>
+
+        `;
+    }
+}
+
+// ======================================
+// SIMULAR CHIP
+// ======================================
+
+function simularChip(){
+
+    const codigo = prompt(
+        "Ingresa UID del chip"
+    );
+
+    if(!codigo) return;
+
+    document.getElementById(
+        "buscar-input"
+    ).value = codigo;
+
+    buscarUsuario(
+        new Event("submit")
+    );
+}
+
+// ======================================
+// NFC REAL
+// ======================================
+
+async function iniciarNFC(){
+
+    if(!("NDEFReader" in window)){
+
+        alert(
+            "Tu celular no soporta NFC WEB"
+        );
+
+        return;
+    }
+
+    try{
+
+        const nfc = new NDEFReader();
+
+        await nfc.scan();
+
+        alert(
+            "📡 NFC ACTIVADO\n\nAcerca el chip"
+        );
+
+        nfc.addEventListener(
+            "reading",
+            ({serialNumber})=>{
+
+                console.log(
+                    "UID:",
+                    serialNumber
+                );
+
+                document.getElementById(
+                    "uidActual"
+                ).innerHTML = `
+                    UID Detectado:
+                    <br><br>
+                    <strong>${serialNumber}</strong>
+                `;
+
+                document.getElementById(
+                    "buscar-input"
+                ).value = serialNumber;
+
+                buscarUsuario(
+                    new Event("submit")
+                );
+
+                if(navigator.vibrate){
+
+                    navigator.vibrate(300);
+                }
+            }
+        );
+
+    }catch(error){
+
+        console.log(error);
+
+        alert(
+            "Error NFC: " + error
+        );
+    }
+}
+
+</script>
+
+{% endblock %}

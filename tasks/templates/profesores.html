@@ -314,119 +314,246 @@ h3 {
         </div>
 
     </div>
+<script>
+// ================= BASE DE DATOS Y ESTADO =================
+let torneos = {};
+let torneoActual = null;
+let faseActual = "config";
 
-    <script>
-        // ================= BASE DE DATOS Y ESTADO =================
-        let torneos = JSON.parse(localStorage.getItem('live_futbol_db')) || {};
-        let torneoActual = null;
-        let faseActual = "config";
-        let config = { type: 'liga_finales', n: 10, pass: 4, jornadas: 3 };
-        let equipos = [];
-        let torneo = { ligaMatches: [], bracket: [] };
-        let statsEquipos = {};
-        let datosDisciplina = {};
-        let editIndex = null;
-        let archivoExcel = null;
+let config = {
+    type: 'liga_finales',
+    n: 10,
+    pass: 4,
+    jornadas: 3
+};
 
-        const excelInput = document.getElementById("excel-file");
-        if(excelInput) excelInput.addEventListener("change", (e) => archivoExcel = e.target.files[0]);
+let equipos = [];
 
-        // ================= SINCRONIZACIÓN Y GESTIÓN =================
-        const datosRecibidos = JSON.parse(localStorage.getItem("datos_calendario"));
-        if (datosRecibidos) {
-            const nombreAuto = "Torneo Importado";
-            torneos[nombreAuto] = {
-                config: { type: 'liga_finales', n: datosRecibidos.equipos.length, pass: 4, jornadas: 3},
-                equipos: datosRecibidos.equipos.map(nombre => ({ name: nombre, logo: "https://cdn-icons-png.flaticon.com/512/33/33736.png" })),
-                torneo: { ligaMatches: [], bracket: []},
-                stats: {},
-                disciplina: {},
-                fase: "equipos",
-                campeon: null
-            };
-            localStorage.removeItem("datos_calendario");
-            localStorage.setItem('live_futbol_db', JSON.stringify(torneos));
-            torneoActual = nombreAuto;
-        }
+let torneo = {
+    ligaMatches: [],
+    bracket: []
+};
 
-        let lastSyncData = JSON.stringify(torneos);
-        setInterval(() => {
-            const currentData = localStorage.getItem('live_futbol_db');
-            if (currentData && currentData !== lastSyncData) {
-                lastSyncData = currentData;
-                torneos = JSON.parse(currentData);
-                if (torneoActual && torneos[torneoActual]) {
-                    const data = torneos[torneoActual];
-                    config = data.config;
-                    equipos = data.equipos;
-                    torneo = data.torneo;
-                    statsEquipos = data.stats;
-                    datosDisciplina = data.disciplina || {};
-                    faseActual = data.fase;
-                    const activeTag = document.activeElement.tagName;
-                    if (activeTag !== "INPUT" && activeTag !== "SELECT") {
-                        renderTabs();
-                        renderRegistry();
-                        aplicarVista();
-                        if (data.campeon) mostrarCampeon(data.campeon);
-                    }
-                } else {
-                    renderTabs();
-                }
-            }
-        }, 2000);
+let statsEquipos = {};
+let datosDisciplina = {};
 
-        function renderTabs() {
-            const cont = document.getElementById('tabs-torneos');
-            if (!cont) return;
-            cont.innerHTML = Object.keys(torneos).map(nombre =>
-                `<button onclick="cargarTorneo('${nombre}')">
-                    ${nombre === torneoActual ? '>>> ' + nombre : nombre}
-                </button>`
-            ).join(" ");
-        }
+let editIndex = null;
+let archivoExcel = null;
 
-        function guardar() {
-            if (!torneoActual) return;
-            torneos[torneoActual] = {
-                config, equipos, torneo, stats: statsEquipos, disciplina: datosDisciplina, fase: faseActual,
-                campeon: torneos[torneoActual]?.campeon || null
-            };
-            const dataString = JSON.stringify(torneos);
-            localStorage.setItem('live_futbol_db', dataString);
-            lastSyncData = dataString;
-        }
+// ================= INPUT EXCEL =================
+const excelInput = document.getElementById("excel-file");
 
-        function crearTorneo() {
-            const nombre = prompt("Nombre del nuevo torneo:");
-            if (!nombre) return;
-            if (torneos[nombre]) return alert("Ese torneo ya existe");
-            torneos[nombre] = {
-                config: { type: 'liga_finales', n: 10, pass: 4, jornadas: 3 },
-                equipos: [], torneo: { ligaMatches: [], bracket: [] }, stats: {}, disciplina: {},
-                fase: "config", campeon: null
-            };
-            cargarTorneo(nombre);
-        }
-        function eliminarTorneoActual() {
+if (excelInput) {
+
+    excelInput.addEventListener("change", (e) => {
+
+        archivoExcel = e.target.files[0];
+
+    });
+
+}
+
+// ================= SINCRONIZACIÓN =================
+let lastSyncData = JSON.stringify(torneos);
+
+// ================= RENDER TABS =================
+function renderTabs() {
+
+    const cont = document.getElementById("tabs-torneos");
+
+    if (!cont) return;
+
+    cont.innerHTML = "";
+
+    Object.keys(torneos).forEach(nombre => {
+
+        const btn = document.createElement("button");
+
+        btn.innerText =
+            nombre === torneoActual
+                ? `>>> ${nombre}`
+                : nombre;
+
+        btn.onclick = () => cargarTorneo(nombre);
+
+        cont.appendChild(btn);
+
+    });
+
+}
+
+// ================= GUARDAR =================
+async function guardar() {
+
+    if (!torneoActual) return;
+
+    torneos[torneoActual] = {
+
+        config,
+
+        equipos,
+
+        torneo,
+
+        stats: statsEquipos,
+
+        disciplina: datosDisciplina,
+
+        fase: faseActual,
+
+        campeon:
+            torneos[torneoActual]?.campeon || null
+
+    };
+
+    const dataString = JSON.stringify(torneos);
+
+    lastSyncData = dataString;
+
+    try {
+
+        await fetch("/api/torneos/guardar/", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                nombre: torneoActual,
+                datos: torneos[torneoActual]
+            })
+
+        });
+
+    } catch (error) {
+
+        console.log("Error guardando:", error);
+
+    }
+
+    renderTabs();
+
+}
+
+// ================= CREAR TORNEO =================
+async function crearTorneo() {
+
+    let nombre =
+        prompt("Nombre del nuevo torneo:");
+
+    if (!nombre) return;
+
+    nombre = nombre.trim();
+
+    if (nombre === "") {
+
+        alert("Nombre inválido");
+        return;
+
+    }
+
+    if (torneos[nombre]) {
+
+        alert("Ese torneo ya existe");
+        return;
+
+    }
+
+    torneos[nombre] = {
+
+        config: {
+
+            type: 'liga_finales',
+            n: 10,
+            pass: 4,
+            jornadas: 3
+
+        },
+
+        equipos: [],
+
+        torneo: {
+
+            ligaMatches: [],
+            bracket: []
+
+        },
+
+        stats: {},
+
+        disciplina: {},
+
+        fase: "config",
+
+        campeon: null
+
+    };
+
+    torneoActual = nombre;
+
+    config = torneos[nombre].config;
+
+    equipos = torneos[nombre].equipos;
+
+    torneo = torneos[nombre].torneo;
+
+    statsEquipos = torneos[nombre].stats;
+
+    datosDisciplina = torneos[nombre].disciplina;
+
+    faseActual = torneos[nombre].fase;
+
+    await guardar();
+
+    renderTabs();
+
+    aplicarVista();
+
+    actualizarSelectEquipos();
+
+    renderDisciplina();
+
+    alert("Torneo creado correctamente");
+
+}
+
+// ================= ELIMINAR TORNEO =================
+async function eliminarTorneoActual() {
 
     if (!torneoActual) {
+
         alert("No hay torneo seleccionado");
         return;
+
     }
 
     const confirmar = confirm(
-        `¿Seguro que deseas eliminar el torneo "${torneoActual}"?`
+        `¿Seguro que deseas eliminar "${torneoActual}"?`
     );
 
     if (!confirmar) return;
 
-    delete torneos[torneoActual];
+    try {
 
-    localStorage.setItem(
-        'live_futbol_db',
-        JSON.stringify(torneos)
-    );
+        await fetch(
+
+            `/api/torneos/eliminar/${encodeURIComponent(torneoActual)}/`,
+
+            {
+                method: "POST"
+            }
+
+        );
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+
+    delete torneos[torneoActual];
 
     const restantes = Object.keys(torneos);
 
@@ -439,17 +566,21 @@ h3 {
         torneoActual = null;
 
         config = {
+
             type: 'liga_finales',
             n: 10,
             pass: 4,
             jornadas: 3
+
         };
 
         equipos = [];
 
         torneo = {
+
             ligaMatches: [],
             bracket: []
+
         };
 
         statsEquipos = {};
@@ -459,542 +590,1481 @@ h3 {
         faseActual = "config";
 
         renderTabs();
+
         aplicarVista();
+
     }
+
 }
 
-        function cargarTorneo(nombre) {
-            torneoActual = nombre;
-            const data = torneos[nombre];
-            config = data.config || { type: 'liga_finales', n: 10, pass: 4, jornadas: 3};
-            equipos = data.equipos || [];
-            torneo = data.torneo || { ligaMatches: [], bracket: [] };
-            statsEquipos = data.stats || {};
-            datosDisciplina = data.disciplina || {};
-            faseActual = data.fase || "config";
-            
-            renderTabs();
-            renderRegistry();
-            aplicarVista();
-            actualizarSelectEquipos();
-            renderDisciplina();
-            if (data.campeon) mostrarCampeon(data.campeon);
-        }
+// ================= CARGAR TORNEO =================
+function cargarTorneo(nombre) {
 
-        function aplicarVista() {
-            const panels = ['setup-panel', 'team-registry-panel', 'competition-area', 'league-area', 'bracket-area'];
-            panels.forEach(p => { const el = document.getElementById(p); if(el) el.style.display = 'none'; });
-            
-            if (faseActual === "config") document.getElementById('setup-panel').style.display = 'block';
-            if (faseActual === "equipos") document.getElementById('team-registry-panel').style.display = 'block';
-            if (faseActual === "liga") {
-                document.getElementById('competition-area').style.display = 'block';
-                document.getElementById('league-area').style.display = 'block';
-                renderTabla();
-                renderJornadaActual();
-            }
-            if (faseActual === "finales") {
-                document.getElementById('competition-area').style.display = 'block';
-                document.getElementById('bracket-area').style.display = 'block';
-                renderBracket();
-            }
-        }
+    if (!torneos[nombre]) return;
 
-        function toggleLeagueInputs() {
-            const type = document.getElementById('comp-type').value;
-            document.getElementById('league-controls').style.display = type === 'liga_finales' ? 'block' : 'none';
-        }
+    torneoActual = nombre;
 
-        function iniciarGestionEquipos() {
-            config.type = document.getElementById('comp-type').value;
-            config.n = parseInt(document.getElementById('liga-num').value) || 8;
-            config.pass = parseInt(document.getElementById('liga-pass').value) || 4;
-            config.jornadas = parseInt(document.getElementById('liga-jornadas').value) || 3;
-            faseActual = "equipos";
-            guardar();
-            aplicarVista();
-        }
+    const data = torneos[nombre];
 
-        // ================= EXCEL Y EQUIPOS =================
-        function letraAIndice(letra) {
-            let res = 0;
-            letra = letra.trim().toUpperCase();
-            for (let i = 0; i < letra.length; i++) { 
-                res = res * 26 + (letra.charCodeAt(i) - 64); 
-            }
-            return res - 1;
-        }
+    config = data.config || {
 
-        function cargarEquiposExcel() {
-            if (!archivoExcel) return alert("Selecciona un archivo Excel.");
-            const hoja = document.getElementById("nombre-hoja").value;
-            const fInicio = parseInt(document.getElementById("fila-inicio").value);
-            const fFin = parseInt(document.getElementById("fila-fin").value);
-            const colsStr = document.getElementById("columnas-usar").value;
-            
-            if (!hoja || isNaN(fInicio) || !colsStr) return alert("Faltan datos de configuración de Excel.");
-            
-            const columnas = colsStr.split(",").map(c => letraAIndice(c));
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: "array" });
-                const worksheet = workbook.Sheets[hoja];
-                
-                if (!worksheet) return alert("Hoja no encontrada.");
-                
-                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                let count = 0;
-                
-                for (let i = fInicio - 1; i < (fFin || json.length); i++) {
-                    if (json[i]) {
-                        columnas.forEach(colIdx => {
-                            const val = json[i][colIdx];
-                            if (val) {
-                                const name = String(val).trim();
-                                if (!equipos.find(eq => eq.name === name) && equipos.length < config.n) {
-                                    equipos.push({ name: name, logo: "https://cdn-icons-png.flaticon.com/512/33/33736.png" });
-                                    if (!datosDisciplina[name]) datosDisciplina[name] = [];
-                                    count++;
-                                }
-                            }
-                        });
-                    }
-                }
-                guardar(); 
-                renderRegistry();
-                actualizarSelectEquipos();
-                alert("Agregados " + count + " equipos.");
-            };
-            reader.readAsArrayBuffer(archivoExcel);
-        }
+        type: 'liga_finales',
+        n: 10,
+        pass: 4,
+        jornadas: 3
 
-        function agregarEquipo() {
-            const nameInput = document.getElementById('new-team-name');
-            const logoInput = document.getElementById('new-team-logo');
-            const name = nameInput.value.trim();
-            if (!name) return;
-            
-            const save = (logo) => {
-                if (editIndex !== null) { 
-                    equipos[editIndex] = { name, logo };
-                    editIndex = null; 
-                } else { 
-                    if (equipos.length < config.n) {
-                        equipos.push({ name, logo }); 
-                        if(!datosDisciplina[name]) datosDisciplina[name] = [];
-                    }
-                }
-                guardar(); 
-                nameInput.value = ""; 
-                logoInput.value = "";
-                renderRegistry();
-                actualizarSelectEquipos();
-            };
-            
-            if (logoInput.files && logoInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => save(e.target.result);
-                reader.readAsDataURL(logoInput.files[0]);
-            } else {
-                save(editIndex !== null ? equipos[editIndex].logo : "https://cdn-icons-png.flaticon.com/512/33/33736.png");
-            }
-        }
+    };
 
-        function renderRegistry() {
-            const ul = document.getElementById('teams-list');
-            if(!ul) return;
-            ul.innerHTML = equipos.map((e, i) => `
-                <li>
-                    <span><img src="${e.logo}" width="25"> ${e.name}</span>
-                    <button onclick="editIndex=${i}; document.getElementById('new-team-name').value='${e.name}';">Editar</button>
-                    <button onclick="equipos.splice(${i},1); guardar(); renderRegistry(); actualizarSelectEquipos();">Borrar</button>
-                </li>
-            `).join("");
-            
-            const btnStart = document.getElementById('btn-start-comp');
-            if(btnStart) btnStart.disabled = equipos.length < 2;
-        }
+    equipos = data.equipos || [];
 
-        // ================= LÓGICA DE JORNADAS =================
-        function iniciarCompeticion() {
-            if (config.type === 'liga_finales') {
-                faseActual = "liga";
-                if (!torneo.ligaMatches.length) generarJornadaCompleta();
-            } else {
-                faseActual = "finales";
-                generarBracket(equipos);
-            }
-            guardar(); 
-            aplicarVista();
-        }
+    torneo = data.torneo || {
 
-        function generarJornadaCompleta() {
-            torneo.ligaMatches = [];
-            statsEquipos = {};
-            const n = equipos.length;
-            const multiplicador = config.jornadas;
-            for (let j = 1; j <= multiplicador; j++) {
-                let equiposMezclados = [...equipos].sort(() => Math.random() - 0.5);
-                for (let i = 0; i < n; i++) {
-                    let t1 = equiposMezclados[i];
-                    let t2 = equiposMezclados[(i + 1) % n];
-                    torneo.ligaMatches.push({ jornada: j, t1: {...t1}, t2: {...t2}, s1: null, s2: null, fin: false, fecha: "", hora: "" });
-                }
-            }
-            guardar();
-        }
+        ligaMatches: [],
+        bracket: []
 
-        function updateMatchTeam(index, teamNum, newName) {
-            const eq = equipos.find(e => e.name === newName);
-            if (!eq) return;
-            if (teamNum === 1) torneo.ligaMatches[index].t1 = {...eq};
-            else torneo.ligaMatches[index].t2 = {...eq};
-            guardar(); 
-            renderJornadaActual();
-        }
+    };
 
-        function updateMatchInfo(index, field, val) {
-            torneo.ligaMatches[index][field] = val;
-            guardar();
-        }
+    statsEquipos = data.stats || {};
 
-        function renderJornadaActual() {
-            const cont = document.getElementById('league-matches-list');
-            if (!cont) return;
-            let html = "";
-            let jornadas = [...new Set(torneo.ligaMatches.map(m => m.jornada))];
-            
-            jornadas.forEach(j => {
-                html += `<div><strong>Grupo de Partidos ${j}</strong></div>`;
-                torneo.ligaMatches.forEach((m, i) => {
-                    if (m.jornada === j) {
-                        html += `
-                        <div>
-                            <input type="date" value="${m.fecha || ''}" onchange="updateMatchInfo(${i},'fecha',this.value)">
-                            <input type="time" value="${m.hora || ''}" onchange="updateMatchInfo(${i},'hora',this.value)">
-                            
-                            <select onchange="updateMatchTeam(${i},1,this.value)">
-                                ${equipos.map(e => `<option ${e.name === m.t1.name ? 'selected' : ''}>${e.name}</option>`).join("")}
-                            </select>
-                            <img src="${m.t1.logo}" width="20">
-                            <input type="number" value="${m.s1??''}" onchange="setScore(${i},1,this.value)" placeholder="L">
-                            -
-                            <input type="number" value="${m.s2??''}" onchange="setScore(${i},2,this.value)" placeholder="V">
-                            <img src="${m.t2.logo}" width="20">
-                            <select onchange="updateMatchTeam(${i},2,this.value)">
-                                ${equipos.map(e => `<option ${e.name === m.t2.name ? 'selected' : ''}>${e.name}</option>`).join("")}
-                            </select>
-                        </div>`;
-                    }
-                });
-            });
-            cont.innerHTML = html;
-        }
+    datosDisciplina = data.disciplina || {};
 
-        function setScore(i, team, val) {
-            if (val === "") return;
-            const m = torneo.ligaMatches[i];
-            if (m.fin) { 
-                revertirStats(m.t1, m.s1, m.s2); 
-                revertirStats(m.t2, m.s2, m.s1);
-            }
-            if (team === 1) m.s1 = parseInt(val); else m.s2 = parseInt(val);
-            
-            if (m.s1 !== null && m.s2 !== null) {
-                m.fin = true;
-                actualizarStats(m.t1, m.s1, m.s2);
-                actualizarStats(m.t2, m.s2, m.s1);
-                guardar(); 
-                renderTabla();
-            }
-        }
+    faseActual = data.fase || "config";
 
-        // ================= STATS =================
-        function actualizarStats(eq, gf, gc) {
-            if (!statsEquipos[eq.name]) statsEquipos[eq.name] = { pj:0, g:0, e:0, p:0, gf:0, gc:0, dg:0, pts:0 };
-            let s = statsEquipos[eq.name];
-            s.pj++; s.gf += gf; s.gc += gc; s.dg = s.gf - s.gc;
-            if (gf > gc) { s.g++; s.pts += 3; } 
-            else if (gf === gc) { s.e++; s.pts += 1; } 
-            else s.p++;
-        }
+    renderTabs();
 
-        function revertirStats(eq, gf, gc) {
-            let s = statsEquipos[eq.name];
-            if (!s) return;
-            s.pj--; s.gf -= gf; s.gc -= gc; s.dg = s.gf - s.gc;
-            if (gf > gc) { s.g--; s.pts -= 3; } 
-            else if (gf === gc) { s.e--; s.pts -= 1; } 
-            else s.p--;
-        }
+    renderRegistry();
 
-        function renderTabla() {
-            const cont = document.getElementById('tabla-puntos');
-            if (!cont) return;
-            
-            let data = equipos.map(e => {
-                const stats = statsEquipos[e.name] || { pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0, dg: 0, pts: 0 };
-                return { name: e.name, logo: e.logo, ...stats };
-            });
-            
-            data.sort((a, b) => {
-                if (b.pts !== a.pts) return b.pts - a.pts;
-                if (b.dg !== a.dg) return b.dg - a.dg;
-                return b.gf - a.gf;
-            });
+    actualizarSelectEquipos();
 
-            cont.innerHTML = `
-                <table border="1">
-                    <thead>
-                        <tr>
-                            <th>Pos</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.map((d, i) => `
-                        <tr>
-                            <td>${i + 1}</td>
-                            <td><img src="${d.logo}" width="20"> ${d.name}</td>
-                            <td>${d.pj}</td><td>${d.g}</td><td>${d.e}</td><td>${d.p}</td>
-                            <td>${d.gf}</td><td>${d.gc}</td><td>${d.dg > 0 ? '+' + d.dg : d.dg}</td>
-                            <td>${d.pts}</td>
-                        </tr>
-                        `).join("")}
-                    </tbody>
-                </table>
-            `;
-        }
+    renderDisciplina();
 
-        // ================= FINALES =================
-        function finalizarLiga() {
-            let data = equipos.map(e => ({ name: e.name, logo: e.logo, ...(statsEquipos[e.name] || { pts:0, dg:0 }) }));
-            data.sort((a, b) => b.pts - a.pts || b.dg - a.dg);
-            generarBracket(data.slice(0, config.pass));
-            faseActual = "finales"; 
-            guardar(); 
-            aplicarVista();
-        }
+    aplicarVista();
 
-        function generarBracket(teams) {
-            torneo.bracket = [];
-            let currentRonda = [];
-            for (let i = 0; i < teams.length; i += 2) {
-                currentRonda.push({ t1: teams[i], t2: teams[i+1] || null, s1: null, s2: null, ganador: null });
-            }
-            torneo.bracket.push(currentRonda);
-            let n = Math.ceil(currentRonda.length / 2);
-            while (n >= 1 && currentRonda.length > 1) {
-                let proxima = Array.from({ length: n }, () => ({ t1: null, t2: null, s1: null, s2: null, ganador: null }));
-                torneo.bracket.push(proxima);
-                currentRonda = proxima;
-                n = Math.floor(n / 2);
-            }
-            guardar(); 
-            renderBracket();
-        }
+    if (data.campeon) {
 
-        function renderBracket() {
-            const cont = document.getElementById('bracket-render');
-            if (!cont) return;
-            cont.innerHTML = torneo.bracket.map((ronda, r) => `
-                <div>
-                    <strong>Ronda ${r + 1}</strong>
-                    ${ronda.map((m, i) => `
-                        <div style="margin: 10px; border: 1px solid black; padding: 5px;">
-                            <div><span>${m.t1?.name || "TBD"}</span> <input type="number" value="${m.s1??''}" onchange="setFinal(${r},${i},1,this.value)"></div>
-                            <div><span>${m.t2?.name || "TBD"}</span> <input type="number" value="${m.s2??''}" onchange="setFinal(${r},${i},2,this.value)"></div>
-                        </div>
-                    `).join("")}
-                </div>
-            `).join("");
-        }
+        mostrarCampeon(data.campeon);
 
-        function setFinal(r, m, team, val) {
-            if (val === "") return;
-            let p = torneo.bracket[r][m];
-            if (team === 1) p.s1 = parseInt(val); else p.s2 = parseInt(val);
-            
-            if (p.s1 !== null && p.s2 !== null) {
-                p.ganador = p.s1 > p.s2 ? p.t1 : p.t2;
-                if (torneo.bracket[r + 1]) {
-                    let nextMatch = torneo.bracket[r+1][Math.floor(m/2)];
-                    if (m % 2 === 0) nextMatch.t1 = p.ganador; else nextMatch.t2 = p.ganador;
-                } else {
-                    mostrarCampeon(p.ganador);
-                }
-            }
-            guardar(); 
-            renderBracket();
-        }
-
-        function mostrarCampeon(c) {
-            const box = document.getElementById('cuadro-campeon');
-            if (!c || !box) return;
-            box.style.display = "block";
-            box.innerHTML = `<img src="${c.logo}" width="100"><h2>CAMPEÓN</h2><h1>${c.name}</h1>`;
-            torneos[torneoActual].campeon = c; 
-            guardar();
-        }
-
-        function iniciarNuevoTorneo() {
-            if (confirm("¿Borrar datos del torneo actual?")) { 
-                if(torneoActual) delete torneos[torneoActual];
-                localStorage.setItem('live_futbol_db', JSON.stringify(torneos));
-                location.reload();
-            }
-        }
-
-        // ================= DISCIPLINA DE JUGADORES =================
-        function actualizarSelectEquipos() {
-            const select = document.getElementById("select-equipo");
-            if (!select) return;
-            select.innerHTML = `
-                <option value="">-- Selecciona un equipo --</option>
-                ${equipos.map(e => `<option value="${e.name}">${e.name}</option>`).join("")}
-            `;
-        }
-
-        function cargarJugadoresExcel() {
-            const equipo = document.getElementById("select-equipo").value;
-            const file = document.getElementById("excel-jugadores").files[0];
-            const hoja = document.getElementById("hoja-jugadores").value;
-            const fInicio = parseInt(document.getElementById("fila-inicio-jugadores").value);
-            const fFin = parseInt(document.getElementById("fila-fin-jugadores").value);
-            const col = letraAIndice(document.getElementById("columna-jugadores").value);
-
-            if (!equipo || !file || !hoja || isNaN(fInicio)) return alert("Faltan datos para cargar jugadores");
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: "array" });
-                const worksheet = workbook.Sheets[hoja];
-
-                if (!worksheet) return alert("Hoja no encontrada");
-                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                if (!datosDisciplina[equipo]) datosDisciplina[equipo] = [];
-
-                for (let i = fInicio - 1; i < (fFin || json.length); i++) {
-                    const fila = json[i];
-                    if (fila && fila[col]) {
-                        datosDisciplina[equipo].push({
-                            nombre: String(fila[col]).trim(),
-                            amarillas: 0,
-                            rojas: 0,
-                            suspendido: false
-                        });
-                    }
-                }
-                guardar();
-                renderDisciplina();
-                alert("Jugadores cargados");
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function sancionar(equipo, index, tipo) {
-            const j = datosDisciplina[equipo][index];
-            if (tipo === 'amarilla') {
-                j.amarillas++;
-                if (j.amarillas % 5 === 0) j.suspendido = true;
-            } else {
-                j.rojas++;
-                j.suspendido = true;
-            }
-            guardar();
-            renderDisciplina();
-        }
-
-        function habilitar(equipo, index) {
-            datosDisciplina[equipo][index].suspendido = false;
-            guardar();
-            renderDisciplina();
-        }
-
-        function renderDisciplina() {
-            const contenedor = document.getElementById("contenedor-disciplinas");
-            if (!contenedor) return;
-            contenedor.innerHTML = "";
-
-            Object.keys(datosDisciplina).forEach((equipo, i) => {
-                const jugadores = datosDisciplina[equipo];
-                if (!jugadores || jugadores.length === 0) return;
-
-                const totalA = jugadores.reduce((s, j) => s + j.amarillas, 0);
-                const totalR = jugadores.reduce((s, j) => s + j.rojas, 0);
-
-                contenedor.innerHTML += `
-                    <div>
-                        <div onclick="toggleLista('lista-disciplina-${i}')">
-                            <strong>${equipo}</strong> (Amarillas: ${totalA} | Rojas: ${totalR})
-                            <button>Ver / Ocultar</button>
-                        </div>
-                        <div id="lista-disciplina-${i}" style="display:none;">
-                            <table border="1">
-                                <tr>
-                                    <th>Jugador</th><th>A</th><th>R</th><th>Estado</th><th>Acciones</th>
-                                </tr>
-                                ${jugadores.map((j, idx) => `
-                                    <tr>
-                                        <td>${j.nombre}</td>
-                                        <td>${j.amarillas}</td>
-                                        <td>${j.rojas}</td>
-                                        <td>${j.suspendido ? 'Suspendido' : 'OK'}</td>
-                                        <td>
-                                            <button onclick="sancionar('${equipo}', ${idx}, 'amarilla')">Amarilla</button>
-                                            <button onclick="sancionar('${equipo}', ${idx}, 'roja')">Roja</button>
-                                            ${j.suspendido ? `<button onclick="habilitar('${equipo}', ${idx})">Habilitar</button>` : ''}
-                                        </td>
-                                    </tr>
-                                `).join("")}
-                            </table>
-                        </div>
-                    </div>
-                    <br>
-                `;
-            });
-        }
-
-        function toggleLista(id) {
-            const el = document.getElementById(id);
-            if (el) el.style.display = el.style.display === "block" ? "none" : "block";
-        }
-
-        // ================= INICIALIZACIÓN =================
-        if (Object.keys(torneos).length > 0) cargarTorneo(Object.keys(torneos)[0]);
-        else renderTabs();
-    // ==========================================
-    // KEEP ALIVE PARA RENDER
-    // ==========================================
-
-    async function mantenerServidorActivo() {
-        try {
-
-            // Cambia esta URL por una ruta real de tu Django
-            // Ejemplo: /, /ping/, /health/, etc.
-            const response = await fetch("/", {
-                method: "GET",
-                cache: "no-cache"
-            });
-
-            console.log("Servidor activo:", response.status);
-
-        } catch (error) {
-
-            console.log("Error keep-alive:", error);
-
-        }
     }
 
-    // Ejecutar cada 4 minutos
-    setInterval(mantenerServidorActivo, 240000);
+}
 
-    // Ejecutar una vez al entrar
-    mantenerServidorActivo();
+// ================= APLICAR VISTA =================
+function aplicarVista() {
 
-    </script>
+    const panels = [
+
+        "setup-panel",
+        "team-registry-panel",
+        "competition-area",
+        "league-area",
+        "bracket-area"
+
+    ];
+
+    panels.forEach(id => {
+
+        const el = document.getElementById(id);
+
+        if (el) {
+
+            el.style.display = "none";
+
+        }
+
+    });
+
+    if (faseActual === "config") {
+
+        document.getElementById(
+            "setup-panel"
+        ).style.display = "block";
+
+    }
+
+    if (faseActual === "equipos") {
+
+        document.getElementById(
+            "team-registry-panel"
+        ).style.display = "block";
+
+    }
+
+    if (faseActual === "liga") {
+
+        document.getElementById(
+            "competition-area"
+        ).style.display = "block";
+
+        document.getElementById(
+            "league-area"
+        ).style.display = "block";
+
+        renderTabla();
+
+        renderJornadaActual();
+
+    }
+
+    if (faseActual === "finales") {
+
+        document.getElementById(
+            "competition-area"
+        ).style.display = "block";
+
+        document.getElementById(
+            "bracket-area"
+        ).style.display = "block";
+
+        renderBracket();
+
+    }
+
+}
+
+// ================= TOGGLE LIGA =================
+function toggleLeagueInputs() {
+
+    const type =
+        document.getElementById("comp-type").value;
+
+    document.getElementById(
+        "league-controls"
+    ).style.display =
+
+        type === "liga_finales"
+            ? "block"
+            : "none";
+
+}
+
+// ================= INICIAR GESTIÓN =================
+function iniciarGestionEquipos() {
+
+    config.type =
+        document.getElementById("comp-type").value;
+
+    config.n =
+        parseInt(
+            document.getElementById("liga-num").value
+        ) || 10;
+
+    config.pass =
+        parseInt(
+            document.getElementById("liga-pass").value
+        ) || 4;
+
+    config.jornadas =
+        parseInt(
+            document.getElementById("liga-jornadas").value
+        ) || 3;
+
+    faseActual = "equipos";
+
+    guardar();
+
+    aplicarVista();
+
+}
+
+// ================= LETRA A INDICE =================
+function letraAIndice(letra) {
+
+    let res = 0;
+
+    letra = letra.trim().toUpperCase();
+
+    for (let i = 0; i < letra.length; i++) {
+
+        res =
+            res * 26 +
+            (letra.charCodeAt(i) - 64);
+
+    }
+
+    return res - 1;
+
+}
+
+// ================= CARGAR EQUIPOS EXCEL =================
+function cargarEquiposExcel() {
+
+    if (!archivoExcel) {
+
+        alert("Selecciona un archivo Excel");
+        return;
+
+    }
+
+    const hoja =
+        document.getElementById("nombre-hoja").value;
+
+    const fInicio =
+        parseInt(
+            document.getElementById("fila-inicio").value
+        );
+
+    const fFin =
+        parseInt(
+            document.getElementById("fila-fin").value
+        );
+
+    const colsStr =
+        document.getElementById("columnas-usar").value;
+
+    if (!hoja || isNaN(fInicio) || !colsStr) {
+
+        alert("Faltan datos");
+        return;
+
+    }
+
+    const columnas =
+        colsStr.split(",").map(c =>
+            letraAIndice(c)
+        );
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+
+        const data =
+            new Uint8Array(e.target.result);
+
+        const workbook =
+            XLSX.read(data, {
+                type: "array"
+            });
+
+        const worksheet =
+            workbook.Sheets[hoja];
+
+        if (!worksheet) {
+
+            alert("Hoja no encontrada");
+            return;
+
+        }
+
+        const json =
+            XLSX.utils.sheet_to_json(
+                worksheet,
+                { header: 1 }
+            );
+
+        let count = 0;
+
+        for (
+
+            let i = fInicio - 1;
+
+            i < (fFin || json.length);
+
+            i++
+
+        ) {
+
+            if (!json[i]) continue;
+
+            columnas.forEach(colIdx => {
+
+                const val = json[i][colIdx];
+
+                if (!val) return;
+
+                const name =
+                    String(val).trim();
+
+                const existe =
+                    equipos.find(
+                        eq =>
+                            eq.name.toLowerCase() ===
+                            name.toLowerCase()
+                    );
+
+                if (
+
+                    !existe &&
+                    equipos.length < config.n
+
+                ) {
+
+                    equipos.push({
+
+                        name,
+                        logo:
+                            "https://cdn-icons-png.flaticon.com/512/33/33736.png"
+
+                    });
+
+                    if (!datosDisciplina[name]) {
+
+                        datosDisciplina[name] = [];
+
+                    }
+
+                    count++;
+
+                }
+
+            });
+
+        }
+
+        guardar();
+
+        renderRegistry();
+
+        actualizarSelectEquipos();
+
+        alert(`Se agregaron ${count} equipos`);
+
+    };
+
+    reader.readAsArrayBuffer(archivoExcel);
+
+}
+
+// ================= AGREGAR EQUIPO =================
+function agregarEquipo() {
+
+    const nameInput =
+        document.getElementById("new-team-name");
+
+    const logoInput =
+        document.getElementById("new-team-logo");
+
+    const name =
+        nameInput.value.trim();
+
+    if (!name) {
+
+        alert("Escribe un nombre");
+        return;
+
+    }
+
+    const existe =
+        equipos.find(
+            e =>
+                e.name.toLowerCase() ===
+                name.toLowerCase()
+        );
+
+    if (existe && editIndex === null) {
+
+        alert("Ese equipo ya existe");
+        return;
+
+    }
+
+    const guardarEquipo = (logo) => {
+
+        if (editIndex !== null) {
+
+            equipos[editIndex] = {
+                name,
+                logo
+            };
+
+            editIndex = null;
+
+        } else {
+
+            if (equipos.length >= config.n) {
+
+                alert("Límite alcanzado");
+                return;
+
+            }
+
+            equipos.push({
+                name,
+                logo
+            });
+
+        }
+
+        if (!datosDisciplina[name]) {
+
+            datosDisciplina[name] = [];
+
+        }
+
+        guardar();
+
+        renderRegistry();
+
+        actualizarSelectEquipos();
+
+        nameInput.value = "";
+
+        logoInput.value = "";
+
+    };
+
+    if (
+
+        logoInput.files &&
+        logoInput.files[0]
+
+    ) {
+
+        const reader = new FileReader();
+
+        reader.onload = e => {
+
+            guardarEquipo(
+                e.target.result
+            );
+
+        };
+
+        reader.readAsDataURL(
+            logoInput.files[0]
+        );
+
+    } else {
+
+        guardarEquipo(
+
+            editIndex !== null
+                ? equipos[editIndex].logo
+                : "https://cdn-icons-png.flaticon.com/512/33/33736.png"
+
+        );
+
+    }
+
+}
+
+// ================= RENDER EQUIPOS =================
+function renderRegistry() {
+
+    const ul =
+        document.getElementById("teams-list");
+
+    if (!ul) return;
+
+    ul.innerHTML = "";
+
+    equipos.forEach((e, i) => {
+
+        ul.innerHTML += `
+
+            <li>
+
+                <span>
+
+                    <img src="${e.logo}" width="25">
+
+                    ${e.name}
+
+                </span>
+
+                <button onclick="editarEquipo(${i})">
+
+                    Editar
+
+                </button>
+
+                <button onclick="borrarEquipo(${i})">
+
+                    Borrar
+
+                </button>
+
+            </li>
+
+        `;
+
+    });
+
+    const btn =
+        document.getElementById(
+            "btn-start-comp"
+        );
+
+    if (btn) {
+
+        btn.disabled =
+            equipos.length < 2;
+
+    }
+
+}
+
+// ================= EDITAR =================
+function editarEquipo(i) {
+
+    editIndex = i;
+
+    document.getElementById(
+        "new-team-name"
+    ).value = equipos[i].name;
+
+}
+
+// ================= BORRAR =================
+function borrarEquipo(i) {
+
+    if (!confirm("¿Eliminar equipo?"))
+        return;
+
+    equipos.splice(i, 1);
+
+    guardar();
+
+    renderRegistry();
+
+    actualizarSelectEquipos();
+
+}
+// ================= LÓGICA DE JORNADAS =================
+function iniciarCompeticion() {
+
+    if (equipos.length < 2) {
+        alert("Debes agregar mínimo 2 equipos");
+        return;
+    }
+
+    if (config.type === 'liga_finales') {
+
+        faseActual = "liga";
+
+        if (!torneo.ligaMatches.length) {
+            generarJornadaCompleta();
+        }
+
+    } else {
+
+        faseActual = "finales";
+
+        generarBracket(equipos);
+
+    }
+
+    guardar();
+    aplicarVista();
+
+}
+
+function generarJornadaCompleta() {
+
+    torneo.ligaMatches = [];
+    statsEquipos = {};
+
+    const listaBase = [...equipos];
+
+    for (let j = 1; j <= config.jornadas; j++) {
+
+        const lista = [...listaBase].sort(() => Math.random() - 0.5);
+
+        for (let i = 0; i < lista.length; i += 2) {
+
+            if (!lista[i + 1]) continue;
+
+            torneo.ligaMatches.push({
+
+                jornada: j,
+
+                t1: { ...lista[i] },
+                t2: { ...lista[i + 1] },
+
+                s1: null,
+                s2: null,
+
+                fin: false,
+
+                fecha: "",
+                hora: ""
+
+            });
+
+        }
+
+    }
+
+    guardar();
+
+}
+
+function updateMatchInfo(index, field, value) {
+
+    torneo.ligaMatches[index][field] = value;
+
+    guardar();
+
+}
+
+function updateMatchTeam(index, teamNum, newName) {
+
+    const eq = equipos.find(e => e.name === newName);
+
+    if (!eq) return;
+
+    if (teamNum === 1) {
+        torneo.ligaMatches[index].t1 = { ...eq };
+    } else {
+        torneo.ligaMatches[index].t2 = { ...eq };
+    }
+
+    guardar();
+
+    renderJornadaActual();
+
+}
+
+function renderJornadaActual() {
+
+    const cont =
+        document.getElementById("league-matches-list");
+
+    if (!cont) return;
+
+    let html = "";
+
+    const jornadas = [
+        ...new Set(
+            torneo.ligaMatches.map(m => m.jornada)
+        )
+    ];
+
+    jornadas.forEach(j => {
+
+        html += `
+            <div style="margin-top:20px;">
+                <h3>Jornada ${j}</h3>
+            </div>
+        `;
+
+        torneo.ligaMatches.forEach((m, i) => {
+
+            if (m.jornada !== j) return;
+
+            html += `
+                <div style="
+                    display:flex;
+                    flex-wrap:wrap;
+                    align-items:center;
+                    justify-content:center;
+                    gap:10px;
+                    margin-bottom:15px;
+                    padding:12px;
+                    border:1px solid var(--border);
+                    border-radius:10px;
+                ">
+
+                    <input
+                        type="date"
+                        value="${m.fecha || ''}"
+                        onchange="updateMatchInfo(${i}, 'fecha', this.value)"
+                    >
+
+                    <input
+                        type="time"
+                        value="${m.hora || ''}"
+                        onchange="updateMatchInfo(${i}, 'hora', this.value)"
+                    >
+
+                    <select onchange="updateMatchTeam(${i},1,this.value)">
+                        ${equipos.map(e => `
+                            <option
+                                value="${e.name}"
+                                ${e.name === m.t1.name ? 'selected' : ''}
+                            >
+                                ${e.name}
+                            </option>
+                        `).join("")}
+                    </select>
+
+                    <img src="${m.t1.logo}" width="25">
+
+                    <input
+                        type="number"
+                        value="${m.s1 ?? ''}"
+                        onchange="setScore(${i},1,this.value)"
+                        style="width:70px;"
+                    >
+
+                    <strong>VS</strong>
+
+                    <input
+                        type="number"
+                        value="${m.s2 ?? ''}"
+                        onchange="setScore(${i},2,this.value)"
+                        style="width:70px;"
+                    >
+
+                    <img src="${m.t2.logo}" width="25">
+
+                    <select onchange="updateMatchTeam(${i},2,this.value)">
+                        ${equipos.map(e => `
+                            <option
+                                value="${e.name}"
+                                ${e.name === m.t2.name ? 'selected' : ''}
+                            >
+                                ${e.name}
+                            </option>
+                        `).join("")}
+                    </select>
+
+                </div>
+            `;
+
+        });
+
+    });
+
+    cont.innerHTML = html;
+
+}
+
+function setScore(index, team, value) {
+
+    if (value === "") return;
+
+    const match = torneo.ligaMatches[index];
+
+    if (match.fin) {
+
+        revertirStats(match.t1, match.s1, match.s2);
+        revertirStats(match.t2, match.s2, match.s1);
+
+    }
+
+    if (team === 1) {
+        match.s1 = parseInt(value);
+    } else {
+        match.s2 = parseInt(value);
+    }
+
+    if (match.s1 !== null && match.s2 !== null) {
+
+        match.fin = true;
+
+        actualizarStats(match.t1, match.s1, match.s2);
+        actualizarStats(match.t2, match.s2, match.s1);
+
+    }
+
+    guardar();
+
+    renderTabla();
+
+}
+
+// ================= STATS =================
+function actualizarStats(eq, gf, gc) {
+
+    if (!statsEquipos[eq.name]) {
+
+        statsEquipos[eq.name] = {
+
+            pj: 0,
+            g: 0,
+            e: 0,
+            p: 0,
+            gf: 0,
+            gc: 0,
+            dg: 0,
+            pts: 0
+
+        };
+
+    }
+
+    const s = statsEquipos[eq.name];
+
+    s.pj++;
+
+    s.gf += gf;
+    s.gc += gc;
+
+    s.dg = s.gf - s.gc;
+
+    if (gf > gc) {
+
+        s.g++;
+        s.pts += 3;
+
+    } else if (gf === gc) {
+
+        s.e++;
+        s.pts += 1;
+
+    } else {
+
+        s.p++;
+
+    }
+
+}
+
+function revertirStats(eq, gf, gc) {
+
+    const s = statsEquipos[eq.name];
+
+    if (!s) return;
+
+    s.pj--;
+
+    s.gf -= gf;
+    s.gc -= gc;
+
+    s.dg = s.gf - s.gc;
+
+    if (gf > gc) {
+
+        s.g--;
+        s.pts -= 3;
+
+    } else if (gf === gc) {
+
+        s.e--;
+        s.pts -= 1;
+
+    } else {
+
+        s.p--;
+
+    }
+
+}
+
+function renderTabla() {
+
+    const cont =
+        document.getElementById("tabla-puntos");
+
+    if (!cont) return;
+
+    let data = equipos.map(e => {
+
+        const stats =
+            statsEquipos[e.name] || {
+
+                pj: 0,
+                g: 0,
+                e: 0,
+                p: 0,
+                gf: 0,
+                gc: 0,
+                dg: 0,
+                pts: 0
+
+            };
+
+        return {
+            name: e.name,
+            logo: e.logo,
+            ...stats
+        };
+
+    });
+
+    data.sort((a, b) => {
+
+        if (b.pts !== a.pts)
+            return b.pts - a.pts;
+
+        if (b.dg !== a.dg)
+            return b.dg - a.dg;
+
+        return b.gf - a.gf;
+
+    });
+
+    cont.innerHTML = `
+        <table>
+
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Equipo</th>
+                    <th>PJ</th>
+                    <th>G</th>
+                    <th>E</th>
+                    <th>P</th>
+                    <th>GF</th>
+                    <th>GC</th>
+                    <th>DG</th>
+                    <th>PTS</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                ${data.map((d, i) => `
+                    <tr>
+
+                        <td>${i + 1}</td>
+
+                        <td>
+                            <img src="${d.logo}" width="20">
+                            ${d.name}
+                        </td>
+
+                        <td>${d.pj}</td>
+                        <td>${d.g}</td>
+                        <td>${d.e}</td>
+                        <td>${d.p}</td>
+                        <td>${d.gf}</td>
+                        <td>${d.gc}</td>
+                        <td>${d.dg}</td>
+                        <td>${d.pts}</td>
+
+                    </tr>
+                `).join("")}
+
+            </tbody>
+
+        </table>
+    `;
+
+}
+
+// ================= FINALES =================
+function finalizarLiga() {
+
+    let data = equipos.map(e => {
+
+        return {
+
+            name: e.name,
+            logo: e.logo,
+
+            ...(statsEquipos[e.name] || {
+                pts: 0,
+                dg: 0
+            })
+
+        };
+
+    });
+
+    data.sort((a, b) => {
+
+        if (b.pts !== a.pts)
+            return b.pts - a.pts;
+
+        return b.dg - a.dg;
+
+    });
+
+    generarBracket(
+        data.slice(0, config.pass)
+    );
+
+    faseActual = "finales";
+
+    guardar();
+
+    aplicarVista();
+
+}
+
+function generarBracket(teams) {
+
+    torneo.bracket = [];
+
+    let rondaActual = [];
+
+    for (let i = 0; i < teams.length; i += 2) {
+
+        rondaActual.push({
+
+            t1: teams[i],
+            t2: teams[i + 1] || null,
+
+            s1: null,
+            s2: null,
+
+            ganador: null
+
+        });
+
+    }
+
+    torneo.bracket.push(rondaActual);
+
+    let n = Math.ceil(rondaActual.length / 2);
+
+    while (n >= 1 && rondaActual.length > 1) {
+
+        const nueva = Array.from(
+            { length: n },
+            () => ({
+                t1: null,
+                t2: null,
+                s1: null,
+                s2: null,
+                ganador: null
+            })
+        );
+
+        torneo.bracket.push(nueva);
+
+        rondaActual = nueva;
+
+        n = Math.floor(n / 2);
+
+    }
+
+    guardar();
+
+    renderBracket();
+
+}
+
+function renderBracket() {
+
+    const cont =
+        document.getElementById("bracket-render");
+
+    if (!cont) return;
+
+    cont.innerHTML = torneo.bracket.map((ronda, r) => `
+
+        <div>
+
+            <h3>Ronda ${r + 1}</h3>
+
+            ${ronda.map((m, i) => `
+
+                <div style="
+                    margin:15px;
+                    padding:10px;
+                    border:1px solid var(--border);
+                    border-radius:10px;
+                ">
+
+                    <div>
+                        ${m.t1?.name || "TBD"}
+
+                        <input
+                            type="number"
+                            value="${m.s1 ?? ''}"
+                            onchange="setFinal(${r},${i},1,this.value)"
+                        >
+                    </div>
+
+                    <div>
+                        ${m.t2?.name || "TBD"}
+
+                        <input
+                            type="number"
+                            value="${m.s2 ?? ''}"
+                            onchange="setFinal(${r},${i},2,this.value)"
+                        >
+                    </div>
+
+                </div>
+
+            `).join("")}
+
+        </div>
+
+    `).join("");
+
+}
+
+function setFinal(r, m, team, value) {
+
+    if (value === "") return;
+
+    const partido = torneo.bracket[r][m];
+
+    if (team === 1) {
+        partido.s1 = parseInt(value);
+    } else {
+        partido.s2 = parseInt(value);
+    }
+
+    if (
+        partido.s1 !== null &&
+        partido.s2 !== null
+    ) {
+
+        partido.ganador =
+            partido.s1 > partido.s2
+                ? partido.t1
+                : partido.t2;
+
+        if (torneo.bracket[r + 1]) {
+
+            const siguiente =
+                torneo.bracket[r + 1][
+                    Math.floor(m / 2)
+                ];
+
+            if (m % 2 === 0) {
+                siguiente.t1 = partido.ganador;
+            } else {
+                siguiente.t2 = partido.ganador;
+            }
+
+        } else {
+
+            mostrarCampeon(partido.ganador);
+
+        }
+
+    }
+
+    guardar();
+
+    renderBracket();
+
+}
+
+function mostrarCampeon(campeon) {
+
+    const box =
+        document.getElementById("cuadro-campeon");
+
+    if (!box || !campeon) return;
+
+    box.style.display = "block";
+
+    box.innerHTML = `
+        <div style="
+            padding:30px;
+            text-align:center;
+        ">
+
+            <img src="${campeon.logo}" width="120">
+
+            <h1>🏆 CAMPEÓN 🏆</h1>
+
+            <h2>${campeon.name}</h2>
+
+        </div>
+    `;
+
+    torneos[torneoActual].campeon = campeon;
+
+    guardar();
+
+}
+
+// ================= DISCIPLINA =================
+function cargarJugadoresExcel() {
+
+    const equipo =
+        document.getElementById("select-equipo").value;
+
+    const file =
+        document.getElementById("excel-jugadores").files[0];
+
+    const hoja =
+        document.getElementById("hoja-jugadores").value;
+
+    const fInicio =
+        parseInt(
+            document.getElementById("fila-inicio-jugadores").value
+        );
+
+    const fFin =
+        parseInt(
+            document.getElementById("fila-fin-jugadores").value
+        );
+
+    const col =
+        letraAIndice(
+            document.getElementById("columna-jugadores").value
+        );
+
+    if (!equipo || !file || !hoja || isNaN(fInicio)) {
+
+        alert("Faltan datos");
+
+        return;
+
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+
+        const data =
+            new Uint8Array(e.target.result);
+
+        const workbook =
+            XLSX.read(data, {
+                type: "array"
+            });
+
+        const worksheet =
+            workbook.Sheets[hoja];
+
+        if (!worksheet) {
+            alert("Hoja no encontrada");
+            return;
+        }
+
+        const json =
+            XLSX.utils.sheet_to_json(
+                worksheet,
+                { header: 1 }
+            );
+
+        if (!datosDisciplina[equipo]) {
+            datosDisciplina[equipo] = [];
+        }
+
+        for (
+            let i = fInicio - 1;
+            i < (fFin || json.length);
+            i++
+        ) {
+
+            const fila = json[i];
+
+            if (fila && fila[col]) {
+
+                datosDisciplina[equipo].push({
+
+                    nombre: String(fila[col]).trim(),
+
+                    amarillas: 0,
+                    rojas: 0,
+
+                    suspendido: false
+
+                });
+
+            }
+
+        }
+
+        guardar();
+
+        renderDisciplina();
+
+        alert("Jugadores cargados");
+
+    };
+
+    reader.readAsArrayBuffer(file);
+
+}
+
+function sancionar(equipo, index, tipo) {
+
+    const j =
+        datosDisciplina[equipo][index];
+
+    if (tipo === "amarilla") {
+
+        j.amarillas++;
+
+        if (j.amarillas % 5 === 0) {
+            j.suspendido = true;
+        }
+
+    } else {
+
+        j.rojas++;
+        j.suspendido = true;
+
+    }
+
+    guardar();
+
+    renderDisciplina();
+
+}
+
+function habilitar(equipo, index) {
+
+    datosDisciplina[equipo][index]
+        .suspendido = false;
+
+    guardar();
+
+    renderDisciplina();
+
+}
+
+function toggleLista(id) {
+
+    const el =
+        document.getElementById(id);
+
+    if (!el) return;
+
+    el.style.display =
+        el.style.display === "block"
+            ? "none"
+            : "block";
+
+}
+
+function renderDisciplina() {
+
+    const contenedor =
+        document.getElementById(
+            "contenedor-disciplinas"
+        );
+
+    if (!contenedor) return;
+
+    contenedor.innerHTML = "";
+
+    Object.keys(datosDisciplina).forEach((equipo, i) => {
+
+        const jugadores =
+            datosDisciplina[equipo];
+
+        if (!jugadores?.length) return;
+
+        const totalA =
+            jugadores.reduce(
+                (s, j) => s + j.amarillas,
+                0
+            );
+
+        const totalR =
+            jugadores.reduce(
+                (s, j) => s + j.rojas,
+                0
+            );
+
+        contenedor.innerHTML += `
+
+            <div style="
+                margin-bottom:20px;
+                border:1px solid var(--border);
+                border-radius:10px;
+                padding:10px;
+            ">
+
+                <div
+                    onclick="toggleLista('lista-${i}')"
+                    style="
+                        cursor:pointer;
+                        display:flex;
+                        justify-content:center;
+                        gap:15px;
+                        align-items:center;
+                    "
+                >
+
+                    <strong>${equipo}</strong>
+
+                    <span>
+                        🟨 ${totalA}
+                    </span>
+
+                    <span>
+                        🟥 ${totalR}
+                    </span>
+
+                </div>
+
+                <div
+                    id="lista-${i}"
+                    style="display:none;"
+                >
+
+                    <table border="1">
+
+                        <tr>
+                            <th>Jugador</th>
+                            <th>A</th>
+                            <th>R</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+
+                        ${jugadores.map((j, idx) => `
+
+                            <tr>
+
+                                <td>${j.nombre}</td>
+
+                                <td>${j.amarillas}</td>
+
+                                <td>${j.rojas}</td>
+
+                                <td>
+                                    ${j.suspendido
+                                        ? 'Suspendido'
+                                        : 'OK'}
+                                </td>
+
+                                <td>
+
+                                    <button
+                                        onclick="sancionar('${equipo}',${idx},'amarilla')"
+                                    >
+                                        🟨
+                                    </button>
+
+                                    <button
+                                        onclick="sancionar('${equipo}',${idx},'roja')"
+                                    >
+                                        🟥
+                                    </button>
+
+                                    ${j.suspendido
+                                        ? `
+                                            <button
+                                                onclick="habilitar('${equipo}',${idx})"
+                                            >
+                                                Habilitar
+                                            </button>
+                                        `
+                                        : ''
+                                    }
+
+                                </td>
+
+                            </tr>
+
+                        `).join("")}
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+// ================= KEEP ALIVE =================
+async function mantenerServidorActivo() {
+
+    try {
+
+        await fetch("/", {
+            method: "GET",
+            cache: "no-cache"
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+
+}
+
+setInterval(
+    mantenerServidorActivo,
+    240000
+);
+
+mantenerServidorActivo();
+
+// ================= INICIAL =================
+cargarBaseDatos();
+
+
+</script>
 
 {% endblock %}

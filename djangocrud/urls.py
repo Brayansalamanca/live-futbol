@@ -43,6 +43,65 @@ urlpatterns = [
     path('condiciones/', views.condiciones, name='condiciones'),
     path('soporte/', views.soporte, name='soporte'),
 
+   # ==========================================
+# 🍽️ URLS NFC / COMEDOR
+# ==========================================
+
+# ==========================================
+# PÁGINAS HTML
+# ==========================================
+
+path(
+    'mis_suscripciones/',
+    login_required(
+        views.mis_suscripciones
+    ),
+    name='mis_suscripciones'
+),
+
+path(
+    'subir_excel_comedor/',
+    login_required(
+        views.subir_excel_comedor
+    ),
+    name='subir_excel_comedor'
+),
+
+path(
+    'registrar_entrega_comedor/',
+    login_required(
+        views.registrar_entrega_comedor
+    ),
+    name='registrar_entrega_comedor'
+),
+
+# ==========================================
+# API NFC
+# ==========================================
+
+path(
+    'api/nfc/subir/',
+    login_required(
+        views.api_nfc_subir
+    ),
+    name='api_nfc_subir'
+),
+
+path(
+    'api/nfc/buscar/',
+    login_required(
+        views.api_nfc_buscar
+    ),
+    name='api_nfc_buscar'
+),
+
+path(
+    'api/nfc/entrega/',
+    login_required(
+        views.buscar_usuario_comedor
+    ),
+    name='buscar_usuario_comedor'
+), 
     # --- 🏆 GESTIÓN DE USUARIOS (RANKING) ---
     # Solo Rosita gestiona quién entra a la plataforma
     path('ranking/', user_passes_test(es_coordinacion)(views.ranking), name='ranking'),
@@ -120,4 +179,21 @@ urlpatterns = [
     path('recuperar/completo/', auth_views.PasswordResetCompleteView.as_view(
         template_name='password_reset_complete.html'
     ), name='password_reset_complete'),
+    path(
+    'api/torneos/',
+    views.api_obtener_torneos,
+    name='api_obtener_torneos'
+),
+
+path(
+    'api/torneos/guardar/',
+    views.api_guardar_torneo,
+    name='api_guardar_torneo'
+),
+
+path(
+    'api/torneos/eliminar/<str:nombre>/',
+    views.api_eliminar_torneo,
+    name='api_eliminar_torneo'
+),
 ] 

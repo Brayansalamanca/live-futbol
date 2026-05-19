@@ -395,7 +395,8 @@ def api_obtener_entregas(request):
 @user_passes_test(es_asistente)
 def api_eliminar_entrega(request, entrega_id):
     if request.method == "POST":
-        get_object_or_404(RegistroEntrega, pk=entrega_id).delete()
+        from .models import HistorialEntrega
+        from django.utils import timezone
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=405)
 
@@ -462,10 +463,413 @@ def api_guardar_prenda(request):
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     return JsonResponse({"status": "error"}, status=405)
     
+# ==========================================
+# 🍽️ COMEDOR NFC - VIEWS COMPLETOS
+# ==========================================
 
+import json
+import pandas as pd
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
+from .models import UsuarioComedor
+
+
+# ==========================================
+# 🏠 PÁGINAS HTML
+# ==========================================
+
+@login_required
+def mis_suscripciones(request):
+
+    return render(
+        request,
+        'mis_suscripciones.html'
+    )
+
+
+@login_required
+def subir_excel_comedor(request):
+
+    return render(
+        request,
+        'subir_excel_comedor.html'
+    )
+
+
+@login_required
+def registrar_entrega_comedor(request):
+
+    return render(
+        request,
+        'registrar_entrega_comedor.html'
+    )
+
+
+# ==========================================
+# 📤 SUBIR EXCEL
+# ==========================================
+
+@csrf_exempt
+@login_required
+def api_nfc_subir(request):
+
+    if request.method != "POST":
+
+        return JsonResponse({
+            "success": False,
+            "error": "Método inválido"
+        })
+
+    try:
+
+        archivo = request.FILES.get("excel")
+
+        if not archivo:
+
+            return JsonResponse({
+                "success": False,
+                "error": "No se envió archivo"
+            })
+
+        hoja = request.POST.get("hoja")
+
+        fila_inicio = int(
+            request.POST.get("fila_inicio", 2)
+        )
+
+        columna_nombre = request.POST.get(
+            "columna_nombre",
+            "A"
+        )
+
+        columna_documento = request.POST.get(
+            "columna_documento",
+            "B"
+        )
+
+        columna_chip = request.POST.get(
+            "columna_chip",
+            "C"
+        )
+
+        # ======================================
+        # LEER EXCEL
+        # ======================================
+
+        df = pd.read_excel(
+            archivo,
+            sheet_name=hoja
+        )
+
+        # ======================================
+        # LETRAS -> INDICES
+        # ======================================
+
+        def letra_a_indice(letra):
+
+            letra = letra.upper()
+
+            resultado = 0
+
+            for char in letra:
+
+                resultado = (
+                    resultado * 26
+                    + ord(char)
+                    - ord('A')
+                    + 1
+                )
+
+            return resultado - 1
+
+        idx_nombre = letra_a_indice(
+            columna_nombre
+        )
+
+        idx_documento = letra_a_indice(
+            columna_documento
+        )
+
+        idx_chip = letra_a_indice(
+            columna_chip
+        )
+
+        # ======================================
+        # RECORRER FILAS
+        # ======================================
+
+        agregados = 0
+
+        for i in range(fila_inicio - 1, len(df)):
+
+            fila = df.iloc[i]
+
+            nombre = str(
+                fila.iloc[idx_nombre]
+            ).strip()
+
+            documento = str(
+                fila.iloc[idx_documento]
+            ).strip()
+
+            chip = str(
+                fila.iloc[idx_chip]
+            ).strip()
+
+            if nombre == "nan":
+
+                continue
+
+            UsuarioComedor.objects.update_or_create(
+
+                documento=documento,
+
+                defaults={
+
+                    "nombre": nombre,
+                    "uid_nfc": chip
+                }
+            )
+
+            agregados += 1
+
+        return JsonResponse({
+
+            "success": True,
+            "mensaje": f"{agregados} usuarios cargados"
+
+        })
+
+    except Exception as e:
+
+        return JsonResponse({
+
+            "success": False,
+            "error": str(e)
+
+        })
+
+
+# ==========================================
+# 🔍 BUSCAR USUARIO
+# ==========================================
+
+@login_required
+def api_nfc_buscar(request):
+
+    q = request.GET.get("q", "").strip()
+
+    if not q:
+
+        return JsonResponse({
+
+            "success": False,
+            "error": "Sin búsqueda"
+
+        })
+
+    try:
+
+        usuario = UsuarioComedor.objects.filter(
+            documento=q
+        ).first()
+
+        if not usuario:
+
+            usuario = UsuarioComedor.objects.filter(
+                nombre__icontains=q
+            ).first()
+
+        if not usuario:
+
+            usuario = UsuarioComedor.objects.filter(
+                uid_nfc=q
+            ).first()
+
+        if not usuario:
+
+            return JsonResponse({
+
+                "success": False,
+                "error": "No encontrado"
+
+            })
+
+        return JsonResponse({
+
+            "success": True,
+
+            "usuario": {
+
+                "nombre": usuario.nombre,
+                "documento": usuario.documento,
+                "uid_nfc": usuario.uid_nfc,
+                "entregado": usuario.entregado_hoy
+
+            }
+
+        })
+
+    except Exception as e:
+
+        return JsonResponse({
+
+            "success": False,
+            "error": str(e)
+
+        })
+
+
+# ==========================================
+# 🍽️ REGISTRAR ENTREGA
+# ==========================================
+
+@csrf_exempt
+@login_required
+def buscar_usuario_comedor(request):
+
+    if request.method != "POST":
+
+        return JsonResponse({
+
+            "success": False
+
+        })
+
+    try:
+
+        data = json.loads(
+            request.body
+        )
+
+        uid = data.get("uid")
+
+        usuario = UsuarioComedor.objects.filter(
+            uid_nfc=uid
+        ).first()
+
+        if not usuario:
+
+            return JsonResponse({
+
+                "success": False,
+                "error": "Chip no registrado"
+
+            })
+
+        if usuario.entregado_hoy:
+
+            return JsonResponse({
+
+                "success": False,
+                "error": "Ya reclamó alimento"
+
+            })
+
+        usuario.entregado_hoy = True
+
+        usuario.save()
+
+        return JsonResponse({
+
+            "success": True,
+
+            "usuario": {
+
+                "nombre": usuario.nombre,
+                "documento": usuario.documento,
+                "uid_nfc": usuario.uid_nfc
+
+            }
+
+        })
+
+    except Exception as e:
+
+        return JsonResponse({
+
+            "success": False,
+            "error": str(e)
+
+        })
 # === En views.py ===
 
+# ==========================================
+# API TORNEOS
+# ==========================================
 
+from .models import Torneo
+from django.views.decorators.csrf import csrf_exempt
+
+
+@login_required
+def api_obtener_torneos(request):
+
+    torneos = Torneo.objects.all()
+
+    data = {}
+
+    for t in torneos:
+
+        data[t.nombre] = t.datos
+
+    return JsonResponse(data)
+
+
+@csrf_exempt
+@login_required
+def api_guardar_torneo(request):
+
+    if request.method == "POST":
+
+        data = json.loads(request.body)
+
+        nombre = data.get("nombre")
+        datos = data.get("datos")
+
+        if not nombre:
+            return JsonResponse({
+                "success": False,
+                "error": "Nombre requerido"
+            })
+
+        Torneo.objects.update_or_create(
+            nombre=nombre,
+            defaults={
+                "datos": datos
+            }
+        )
+
+        return JsonResponse({
+            "success": True
+        })
+
+    return JsonResponse({
+        "success": False
+    })
+
+
+@csrf_exempt
+@login_required
+def api_eliminar_torneo(request, nombre):
+
+    if request.method == "POST":
+
+        Torneo.objects.filter(
+            nombre=nombre
+        ).delete()
+
+        return JsonResponse({
+            "success": True
+        })
+
+    return JsonResponse({
+        "success": False
+    })
 
 @login_required
 def liberar_reserva(request, reserva_id):

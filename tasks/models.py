@@ -118,3 +118,73 @@ class ReservaPrenda(models.Model):
 
     def __str__(self):
         return f"{self.prenda.objeto} - {self.nombre} - {self.fecha_uso}"
+    # ==========================================
+# HISTORIAL SEMANAL DE ENTREGAS
+# ==========================================
+
+class HistorialEntrega(models.Model):
+    nombre = models.CharField(max_length=100)
+    curso = models.CharField(max_length=20)
+    objeto = models.CharField(max_length=50)
+    lugar = models.CharField(max_length=100)
+
+    fecha_entrega = models.DateTimeField()
+    fecha_devolucion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nombre} - {self.objeto}"
+    
+
+    from django.db import models
+
+
+class UsuarioComedor(models.Model):
+
+    nombre = models.CharField(
+        max_length=255
+    )
+
+    documento = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    uid_nfc = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    entregado_hoy = models.BooleanField(
+        default=False
+    )
+
+    fecha_actualizacion = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+
+        return f"{self.nombre} - {self.documento}"
+
+        # ==========================================
+# 🏆 TORNEOS LIVE FUTBOL
+# ==========================================
+
+class Torneo(models.Model):
+
+    nombre = models.CharField(
+        max_length=200,
+        unique=True
+    )
+
+    datos = models.JSONField(
+        default=dict
+    )
+
+    fecha = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return self.nombre
