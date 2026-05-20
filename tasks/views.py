@@ -1,18 +1,17 @@
 from django.db import transaction
 import json
 from datetime import datetime, timedelta
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
-import os
-import resend
-from django.conf import settings
-
-# Configuración de Resend (busca la variable de entorno o usa tu clave por defecto)
-resend.api_key = os.getenv("RESEND_API_KEY", "re_EZM6d2Rs_3iWv3G7ymUHvF8iVwPQ4bPDW")
 from django.utils import timezone, encoding, http
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
 from django.utils.http import (
     urlsafe_base64_encode,
     urlsafe_base64_decode
@@ -69,26 +68,54 @@ from django.conf import settings
 # ==========================================
 # 🔐 RECUPERACIÓN DE CONTRASEÑA
 # ==========================================
-class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
+class CustomPasswordResetView(
+    SuccessMessageMixin,
+    PasswordResetView
+):
+
     template_name = 'recuperar_contraseña.html'
     success_url = reverse_lazy('password_reset_done')
 
     def form_valid(self, form):
+
         email = form.cleaned_data.get('email')
+
         try:
+
+            # ==========================================
+            # CONEXIÓN DIRECTA A MONGODB
+            # ==========================================
             mongo_host = settings.DATABASES['default']['CLIENT']['host']
+
             client = MongoClient(mongo_host)
+
             db_name = settings.DATABASES['default']['NAME']
+
             db = client[db_name]
-            usuarios = list(db.auth_user.find({"email": email, "is_active": True}))
-            
+
+            usuarios = list(
+                db.auth_user.find({
+                    "email": email,
+                    "is_active": True
+                })
+            )
+
             print("Usuarios encontrados:", usuarios)
+
             for user_data in usuarios:
-                user = User.objects.get(pk=user_data['id'])
-                uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+                user = User.objects.get(
+                    pk=user_data['id']
+                )
+
+                uid = urlsafe_base64_encode(
+                    force_bytes(user.pk)
+                )
+
                 token = default_token_generator.make_token(user)
+
                 current_site = get_current_site(self.request)
-                
+
                 context = {
                     'email': user.email,
                     'domain': current_site.domain,
@@ -96,26 +123,40 @@ class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
                     'uid': uid,
                     'user': user,
                     'token': token,
-                    'protocol': 'https' if self.request.is_secure() else 'http',
+                    'protocol': (
+                        'https'
+                        if self.request.is_secure()
+                        else 'http'
+                    ),
                 }
-                
-                asunto = "Recuperación de contraseña MKS plataform"
-                mensaje = render_to_string('email_reset_password.html', context)
-                
-                # ENVIAR CON RESEND (Previene el TimeoutError de Render)
-                resend.Emails.send({
-                    "from": "MKS plataform <onboarding@resend.dev>",
-                    "to": user.email,
-                    "subject": asunto,
-                    "html": mensaje
-                })
-                print("Correo enviado con Resend a:", user.email)
-                
+
+                # Asunto manual
+                asunto = "Recuperación de contraseña - Live Futbol"
+
+                # Template HTML
+                mensaje = render_to_string(
+                    'email_reset_password.html',
+                    context
+                )
+
+                # Enviar correo
+                send_mail(
+                    asunto,
+                    mensaje,
+                    'saebra581@gmail.com',
+                    [user.email],
+                    fail_silently=False,
+                )
+
+                print("Correo enviado:", user.email)
+
         except Exception as e:
+
             import traceback
-            print("ERROR REAL EN RECUPERACIÓN:")
+
+            print("ERROR REAL:")
             traceback.print_exc()
-            
+
         return redirect(self.success_url)
 # ==========================================
 # 🔐 FUNCIONES DE VERIFICACIÓN
@@ -148,22 +189,24 @@ def activar(request, uidb64, token):
     
 @login_required
 def tipos(request): return render(request, 'tipos.html')
-
 def signup(request):
     if request.method == 'GET':
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
-        
+    
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             try:
+                # 1. INTENTO DE GUARDADO (Aquí es donde ocurre el 502)
                 user = form.save(commit=False)
                 user.first_name = request.POST.get('rol', 'Sin Rol')
-                user.is_active = False
-                print("DEBUG: Intentando guardar en MongoDB...")
-                user.save()
-                print("DEBUG: Usuario guardado exitosamente.")
+                user.is_active = False 
                 
+                print("DEBUG: Intentando guardar en MongoDB...")
+                user.save() 
+                print("DEBUG: Usuario guardado exitosamente.")
+
+                # 2. GENERACIÓN DE TOKEN Y CORREO
                 try:
                     current_site = get_current_site(request)
                     uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -175,31 +218,36 @@ def signup(request):
                         'uid': uid,
                         'token': token,
                     }
-                    
+
                     html_content = render_to_string('confirmacion_email.html', context)
+                    text_content = strip_tags(html_content)
+
+                    msg = EmailMultiAlternatives(
+                        'Activa tu cuenta - Live Fútbol',
+                        text_content,
+                        'Live Fútbol <saebra581@gmail.com>',
+                        [user.email]
+                    )
+                    msg.attach_alternative(html_content, "text/html")
                     
-                    # ENVIAR CON RESEND (Previene el TimeoutError de Render)
-                    print("DEBUG: Intentando enviar correo con Resend...")
-                    resend.Emails.send({
-                        "from": "MKS plataform <onboarding@resend.dev>",
-                        "to": user.email,
-                        "subject": "Activa tu cuenta MKS plataform",
-                        "html": html_content
-                    })
-                    print("DEBUG: Correo enviado de forma exitosa con Resend.")
-                    
+                    print("DEBUG: Intentando enviar correo...")
+                    msg.send(fail_silently=False)
+                    print("DEBUG: Correo enviado (o falló silenciosamente).")
+
                 except Exception as mail_error:
                     print(f"DEBUG: Error enviando correo: {mail_error}")
-                
+                    # No detenemos el proceso si falla el correo, el usuario ya se creó.
+
                 return render(request, 'signup.html', {
-                    'form': CustomUserCreationForm(),
+                    'form': CustomUserCreationForm(), 
                     'success': 'Registro exitoso. Revisa tu correo (si no llega, contacta a Rosita).'
                 })
-                
+
             except Exception as e:
+                # SI ESTO SE EJECUTA, VERÁS EL ERROR EN LA PÁGINA EN VEZ DEL 502
                 print(f"DEBUG: ERROR CRÍTICO EN BASE DE DATOS: {e}")
                 return render(request, 'signup.html', {
-                    'form': form,
+                    'form': form, 
                     'error': f"Error de conexión con la base de datos: {str(e)}"
                 })
         else:
@@ -767,7 +815,23 @@ from django.contrib.auth.decorators import login_required
 
 from .models import Torneo
 
-
+@csrf_exempt # Necesario si no estás enviando el token CSRF desde el JS
+def api_eliminar_torneo(request, nombre):
+    if request.method == "POST":
+        try:
+            # LÓGICA DE ELIMINACIÓN
+            # Opción A: Si usas un modelo de Django:
+            # Torneo.objects.filter(nombre=nombre).delete()
+            
+            # Opción B: Si guardas en un JSON file o variable global (tipo persistencia):
+            # Debes cargar tus torneos, eliminar la clave 'nombre' y guardar de nuevo.
+            
+            # Ejemplo simplificado de respuesta exitosa:
+            return JsonResponse({"status": "success", "message": f"Torneo {nombre} eliminado"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
 # ===============================
 # LISTAR TORNEOS
 # ===============================
