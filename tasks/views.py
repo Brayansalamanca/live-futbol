@@ -15,6 +15,7 @@ from django.utils.encoding import (
     force_bytes,
     force_str
 )
+from .models import ObjetoPerdido
 from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
@@ -1023,10 +1024,15 @@ def api_obtener_objetos(request):
 
 @login_required
 def api_eliminar_objeto(request, obj_id):
-    if request.method == "POST":
-        get_object_or_404(ObjetoPerdido, pk=obj_id).delete()
-        return JsonResponse({"status": "success"})
-    return JsonResponse({"status": "error"}, status=405)
+    if request.method == 'DELETE':
+        try:
+            objeto = get_object_or_404(ObjetoPerdido, id=obj_id)
+            objeto.delete()
+            return JsonResponse({'message': 'Eliminado con éxito'}, status=200)
+        except Exception as e:
+            # ESTO MOSTRARÁ EL ERROR REAL EN LA RESPUESTA JSON
+            return JsonResponse({'error_detalle': str(e)}, status=500)
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 @user_passes_test(es_coordinacion)
 def api_cambiar_estado_usuario(request, user_id):
@@ -1214,6 +1220,7 @@ def hallazgo_v2_guardar(request):
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     return JsonResponse({"status": "error"}, status=405)
+    
 
 @login_required
 def hallazgo_v2_listar(request):
@@ -1247,3 +1254,37 @@ def hallazgo_v2_eliminar(request, item_id):
         objeto.delete()
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=405)
+
+from django.http import JsonResponse
+# Si tienes un modelo para las solicitudes, impórtalo aquí arriba. Ejemplo:
+# from .models import Solicitud
+
+def api_obtener_solicitudes(request):
+    """
+    Endpoint para proveer los datos de solicitudes requeridos por el radar.
+    Evita el error de sintaxis JSON y el 404 en el frontend.
+    """
+    try:
+        # --- CONFIGURACIÓN CUANDO TENGAS EL MODELO ---
+        # Si ya usas un modelo (por ejemplo, 'Solicitud'), descomenta las líneas de abajo
+        # y ajusta los campos ('nombre', 'descripcion', etc.) a tu base de datos:
+        
+        # solicitudes = Solicitud.objects.all().order_by('-id')
+        # data = [
+        #     {
+        #         'id': s.id,
+        #         'usuario': s.usuario.username if s.usuario else "Anónimo",
+        #         'descripcion': s.descripcion,
+        #         'fecha': s.fecha.strftime('%Y-%m-%d') if s.fecha else ""
+        #     }
+        #     for s in solicitudes
+        # ]
+        # return JsonResponse(data, safe=False)
+
+        # --- RETORNO TEMPORAL SEGURO ---
+        # Mientras mapeas tus modelos, devolvemos un array vacío para que el JS no se rompa
+        return JsonResponse([], safe=False)
+
+    except Exception as e:
+        # En caso de cualquier fallo en la consulta, responde con un JSON vacío limpio
+        return JsonResponse([], safe=False)

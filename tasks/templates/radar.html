@@ -105,7 +105,8 @@ const API_URLS = {
     solicitudes: '/api/obtener-solicitudes/',
     guardarH: '/api/guardar-objeto/',
     guardarS: '/api/guardar-solicitud/',
-    eliminar: '/api/eliminar-item/' // Centralizado
+    eliminarObjeto: '/api/eliminar-objeto/',
+eliminarSolicitud: '/api/v2/hallazgos/eliminar/'// Centralizado
 };
 
 async function fetchDataTable() {
@@ -159,12 +160,31 @@ function renderSolicitudes(data) {
 
 async function resolverItem(id, tipo) {
     if(!confirm("¿Deseas marcar este registro como resuelto/entregado?")) return;
-    
-    await fetch(`${API_URLS.eliminar}${id}/`, { 
+
+    // Determinamos la URL según el tipo
+    let urlEliminar = '';
+    if (tipo === 'hallazgo') {
+        // Ajusta esto si usas la V1 o la V2
+        urlEliminar = `/api/eliminar-objeto/${id}/`; 
+    } else if (tipo === 'solicitud') {
+        // Asegúrate de tener una ruta para eliminar solicitudes en tu urls.py
+        urlEliminar = `/api/eliminar-solicitud/${id}/`; 
+    }
+
+    const response = await fetch(urlEliminar, { 
         method: 'DELETE',
-        headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
     });
-    fetchDataTable();
+
+    if (response.ok) {
+        fetchDataTable(); // Recargar datos solo si el borrado fue exitoso
+    } else {
+        console.error("Error al eliminar el registro");
+        alert("No se pudo eliminar, revisa la consola.");
+    }
 }
 
 async function guardarHallazgo() {
