@@ -179,22 +179,15 @@ path(
     path('recuperar/completo/', auth_views.PasswordResetCompleteView.as_view(
         template_name='password_reset_complete.html'
     ), name='password_reset_complete'),
-    path(
-    'api/torneos/',
-    views.api_obtener_torneos,
+  path(
+    'api/torneos/listar/', 
+    login_required(views.api_obtener_torneos), 
     name='api_obtener_torneos'
 ),
-
 path(
-    'api/torneos/guardar/',
-    views.api_guardar_torneo,
+    'api/torneos/guardar/', 
+    login_required(views.api_guardar_torneo), 
     name='api_guardar_torneo'
-),
-
-path(
-    'api/torneos/eliminar/<str:nombre>/',
-    views.api_eliminar_torneo,
-    name='api_eliminar_torneo'
 ),
 
 ] 
