@@ -260,6 +260,7 @@ function iniciarGestionEquipos(){
   config.pass=parseInt($id("liga-pass").value)||4;
   config.jornadas=parseInt($id("liga-jornadas").value)||3;
   faseActual="equipos"; guardar(); aplicarVista();
+
 }
 
 // ===== EQUIPOS =====
@@ -326,17 +327,69 @@ function iniciarCompeticion(){
   guardar(); aplicarVista();
 }
 
-function generarJornadaCompleta(){
-  torneo.ligaMatches=[]; statsEquipos={};
-  const base=[...equipos];
-  for(let j=1;j<=config.jornadas;j++){
-    const lista=[...base].sort(()=>Math.random()-.5);
-    for(let i=0;i<lista.length;i+=2){
-      if(!lista[i+1]) continue;
-      torneo.ligaMatches.push({jornada:j,t1:{...lista[i]},t2:{...lista[i+1]},s1:null,s2:null,fin:false,fecha:"",hora:""});
+function generarJornadaCompleta() {
+
+    torneo.ligaMatches = [];
+
+    statsEquipos = {};
+
+    let enfrentamientos = [];
+
+    // GENERAR TODOS LOS PARTIDOS POSIBLES
+    for (let i = 0; i < equipos.length; i++) {
+
+        for (let j = i + 1; j < equipos.length; j++) {
+
+            enfrentamientos.push({
+
+                t1: equipos[i],
+                t2: equipos[j]
+
+            });
+
+        }
+
     }
-  }
-  guardar();
+
+    // MEZCLAR ALEATORIAMENTE
+    enfrentamientos.sort(() => Math.random() - 0.5);
+
+    // CUÁNTOS PARTIDOS POR JORNADA
+    const ppj = config.partidosPorJornada || 2;
+
+    let jornada = 1;
+
+    for (let i = 0; i < enfrentamientos.length; i += ppj) {
+
+        const bloque = enfrentamientos.slice(i, i + ppj);
+
+        bloque.forEach(partido => {
+
+            torneo.ligaMatches.push({
+
+                jornada: jornada,
+
+                t1: partido.t1,
+                t2: partido.t2,
+
+                s1: null,
+                s2: null,
+
+                fin: false,
+
+                fecha: "",
+                hora: ""
+
+            });
+
+        });
+
+        jornada++;
+
+    }
+
+    guardar();
+
 }
 
 function updateMatchInfo(i,field,val){torneo.ligaMatches[i][field]=val;guardar()}
