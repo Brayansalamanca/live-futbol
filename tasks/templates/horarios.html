@@ -141,187 +141,754 @@
     </div>
 
     <script>
-        const HORAS = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
-        const DIAS_IDS = [1, 2, 3, 4, 5, 6];
-        let datosTemporales = {}; // Lo que se está dibujando en "Asignar"
-        let celdaActiva = null;
-        let modoLista = "profesores";
-        let intervalSync = null;
+        // ======================================
+// CONFIGURACIÓN GLOBAL
+// ======================================
 
-        // --- LÓGICA DE VISTAS ---
-        function cambiarVista(vista) {
-            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('vista-' + vista).classList.add('active');
-            document.getElementById('btn-' + vista).classList.add('active');
+const HORAS = [
+    "07:00","08:00","09:00","10:00",
+    "11:00","12:00","13:00","14:00",
+    "15:00","16:00"
+];
 
-            if (vista === 'panel') {
+const DIAS = [1,2,3,4,5,6];
+
+const STORAGE_KEY = "cal_db_v3";
+
+let datosTemporales = {};
+let celdaActiva = null;
+let modoLista = "profesores";
+let intervalSync = null;
+let ultimoGuardado = "";
+
+// ======================================
+// COLORES POR MATERIA
+// ======================================
+
+const coloresMaterias = {
+    "Futbol": "#10b981",
+    "Natacion": "#3b82f6",
+    "Voleibol": "#f59e0b",
+    "Baloncesto": "#ef4444",
+    "Atletismo": "#8b5cf6"
+};
+
+// ======================================
+// NOTIFICACIONES
+// ======================================
+
+function toast(msg,color="#10b981"){
+
+    let div = document.createElement("div");
+
+    div.innerText = msg;
+
+    div.style.position = "fixed";
+    div.style.bottom = "20px";
+    div.style.right = "20px";
+    div.style.background = color;
+    div.style.color = "white";
+    div.style.padding = "12px 18px";
+    div.style.borderRadius = "10px";
+    div.style.zIndex = "99999";
+    div.style.fontWeight = "bold";
+    div.style.boxShadow = "0 5px 15px rgba(0,0,0,0.2)";
+
+    document.body.appendChild(div);
+
+    setTimeout(()=>{
+        div.remove();
+    },3000);
+}
+
+// ======================================
+// BASE DE DATOS
+// ======================================
+
+function obtenerDB(){
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+}
+
+function guardarDB(data){
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+}
+
+// ======================================
+// VISTAS
+// ======================================
+
+function cambiarVista(vista){
+
+    document.querySelectorAll('.view-section')
+    .forEach(v=>v.classList.remove('active'));
+
+    document.querySelectorAll('.nav-btn')
+    .forEach(v=>v.classList.remove('active'));
+
+    document
+    .getElementById("vista-"+vista)
+    .classList.add("active");
+
+    document
+    .getElementById("btn-"+vista)
+    .classList.add("active");
+
+    if(vista === "panel"){
+
+        renderizarLista();
+
+        clearInterval(intervalSync);
+
+        intervalSync = setInterval(()=>{
+
+            const actual = localStorage.getItem(STORAGE_KEY);
+
+            if(actual !== ultimoGuardado){
+
+                ultimoGuardado = actual;
+
                 renderizarLista();
-                intervalSync = setInterval(renderizarLista, 2000);
-            } else {
-                clearInterval(intervalSync);
-                generarGridAsignar();
-            }
-        }
 
-        // --- LÓGICA DE ASIGNACIÓN (EL CALENDARIO) ---
-        function generarGridAsignar() {
-            const body = document.getElementById("gridAsignar");
-            let html = "";
-            HORAS.forEach(hora => {
-                html += `<tr><td class="hora-col">${hora}</td>`;
-                DIAS_IDS.forEach(dia => {
-                    const id = `cell-${hora}-${dia}`;
-                    const data = datosTemporales[id];
-                    html += `<td onclick="abrirModal('${id}', '${hora}')" style="cursor:pointer">`;
-                    if(data) {
-                        html += `<div class="info-card tipo-${data.tipo}"><b>${data.materia}</b>${data.curso} - ${data.salon}</div>`;
-                    }
-                    html += `</td>`;
-                });
-                html += `</tr>`;
-            });
-            body.innerHTML = html;
-        }
-
-        function abrirModal(id, hora) {
-            celdaActiva = id;
-            document.getElementById("modalTitle").innerText = "Hora: " + hora;
-            document.getElementById("modal").style.display = "block";
-            document.getElementById("overlay").style.display = "block";
-        }
-
-        function cerrarModal() {
-            document.getElementById("modal").style.display = "none";
-            document.getElementById("overlay").style.display = "none";
-        }
-
-        function confirmarCelda() {
-            const materia = document.getElementById("m_materia").value;
-            const curso = document.getElementById("m_curso").value;
-            const salon = document.getElementById("m_salon").value;
-            if(!materia || !curso) return alert("Materia y Curso son obligatorios");
-
-            datosTemporales[celdaActiva] = {
-                tipo: document.getElementById("m_tipo").value,
-                materia, curso, salon
-            };
-            cerrarModal();
-            generarGridAsignar();
-        }
-
-        function borrarCelda() {
-            delete datosTemporales[celdaActiva];
-            cerrarModal();
-            generarGridAsignar();
-        }
-
-        function guardarHorarioDB() {
-            const profe = document.getElementById("nombreProfesor").value.trim();
-            if(!profe) return alert("Ingresa el nombre del profesor");
-            if(Object.keys(datosTemporales).length === 0) return alert("El horario está vacío");
-
-            let db = JSON.parse(localStorage.getItem("cal_db_v2")) || [];
-            
-            for (let cellId in datosTemporales) {
-                const item = datosTemporales[cellId];
-                db.push({
-                    id: Date.now() + Math.random(),
-                    cellId,
-                    profesor: profe,
-                    ...item
-                });
             }
 
-            localStorage.setItem("cal_db_v2", JSON.stringify(db));
-            alert("✅ Horario guardado y sincronizado");
-            datosTemporales = {};
-            document.getElementById("nombreProfesor").value = "";
-            generarGridAsignar();
-        }
+        },2000);
 
-        // --- LÓGICA DEL PANEL (LISTADO Y VISTA DETALLE) ---
-        function cambiarModoLista(modo) {
-            modoLista = modo;
-            document.getElementById("btn-view-profe").classList.toggle("active", modo === "profesores");
-            document.getElementById("btn-view-curso").classList.toggle("active", modo === "cursos");
-            renderizarLista();
-        }
+    }else{
 
-        function renderizarLista() {
-            const db = JSON.parse(localStorage.getItem("cal_db_v2")) || [];
-            const search = document.getElementById("searchBar").value.toLowerCase();
-            const body = document.getElementById("bodyPanel");
-            const head = document.getElementById("headPanel");
-            
-            let html = "";
-            if (modoLista === "profesores") {
-                head.innerHTML = "<tr><th>NOMBRE DEL PROFESOR</th><th>CLASES ASIGNADAS</th></tr>";
-                const unicos = [...new Set(db.map(x => x.profesor))];
-                unicos.forEach(p => {
-                    if(p.toLowerCase().includes(search)) {
-                        const cant = db.filter(x => x.profesor === p).length;
-                        html += `<tr class="row-link" onclick="verDetalle('${p}', 'profesor')"><td>👤 ${p}</td><td>${cant} bloques</td></tr>`;
-                    }
-                });
-            } else {
-                head.innerHTML = "<tr><th>CURSO / SALÓN</th><th>PROFESOR A CARGO</th></tr>";
-                const cursos = [...new Set(db.map(x => x.curso))];
-                cursos.forEach(c => {
-                    if(c.toLowerCase().includes(search)) {
-                        const profe = db.find(x => x.curso === c).profesor;
-                        html += `<tr class="row-link" onclick="verDetalle('${c}', 'curso')"><td>🏫 ${c}</td><td>${profe}</td></tr>`;
-                    }
-                });
+        clearInterval(intervalSync);
+
+        generarGridAsignar();
+
+    }
+}
+
+// ======================================
+// GRID
+// ======================================
+
+function generarGridAsignar(){
+
+    const body = document.getElementById("gridAsignar");
+
+    let html = "";
+
+    HORAS.forEach(hora=>{
+
+        html += `<tr>`;
+
+        html += `<td class="hora-col">${hora}</td>`;
+
+        DIAS.forEach(dia=>{
+
+            const id = `cell-${hora}-${dia}`;
+
+            const data = datosTemporales[id];
+
+            html += `
+            <td onclick="abrirModal('${id}','${hora}')">
+            `;
+
+            if(data){
+
+                const color =
+                coloresMaterias[data.materia] || "#187f4a";
+
+                html += `
+                <div
+                    class="info-card"
+                    style="
+                        background:${color};
+                        color:white;
+                    "
+                >
+                    <b>${data.materia}</b>
+                    ${data.curso}
+                    <br>
+                    ${data.salon}
+                </div>
+                `;
             }
-            body.innerHTML = html || "<tr><td colspan='2'>No hay datos</td></tr>";
+
+            html += `</td>`;
+
+        });
+
+        html += `</tr>`;
+
+    });
+
+    body.innerHTML = html;
+}
+
+// ======================================
+// MODAL
+// ======================================
+
+function abrirModal(id,hora){
+
+    celdaActiva = id;
+
+    document.getElementById("modalTitle")
+    .innerText = "Hora: " + hora;
+
+    const actual = datosTemporales[id];
+
+    document.getElementById("m_tipo").value =
+    actual?.tipo || "clase";
+
+    document.getElementById("m_materia").value =
+    actual?.materia || "";
+
+    document.getElementById("m_salon").value =
+    actual?.salon || "";
+
+    document.getElementById("m_curso").value =
+    actual?.curso || "";
+
+    document.getElementById("modal").style.display = "block";
+
+    document.getElementById("overlay").style.display = "block";
+}
+
+function cerrarModal(){
+
+    document.getElementById("modal").style.display = "none";
+
+    document.getElementById("overlay").style.display = "none";
+}
+
+// ======================================
+// VALIDAR CHOQUES
+// ======================================
+
+function existeChoque(curso,salon){
+
+    // OBTENER DIA Y HORA ACTUAL
+
+    const partes = celdaActiva.split("-");
+
+    const horaActual = partes[1];
+
+    const diaActual = partes[2];
+
+    // BASE DE DATOS COMPLETA
+
+    const db =
+    JSON.parse(
+        localStorage.getItem(STORAGE_KEY)
+    ) || [];
+
+    // REVISAR TODOS LOS PROFESORES
+
+    for(let item of db){
+
+        const partesDB =
+        item.cellId.split("-");
+
+        const horaDB =
+        partesDB[1];
+
+        const diaDB =
+        partesDB[2];
+
+        const mismaHora =
+        horaDB === horaActual;
+
+        const mismoDia =
+        diaDB === diaActual;
+
+        // SOLO SI COINCIDE DIA Y HORA
+
+        if(mismaHora && mismoDia){
+
+            // SALON OCUPADO
+
+            if(item.salon === salon){
+
+                toast(
+                    `El salón ${salon} ya está ocupado`,
+                    "#ef4444"
+                );
+
+                return true;
+            }
+
+            // CURSO OCUPADO
+
+            if(item.curso === curso){
+
+                toast(
+                    `El curso ${curso} ya tiene clase`,
+                    "#ef4444"
+                );
+
+                return true;
+            }
+
         }
 
-        // ESTA ES LA MAGIA: Al dar clic, se reconstruye el calendario solo para ese profesor/curso
-        function verDetalle(valor, tipo) {
-            const db = JSON.parse(localStorage.getItem("cal_db_v2")) || [];
-            const filtrados = db.filter(x => tipo === 'profesor' ? x.profesor === valor : x.curso === valor);
-            
-            const panelBody = document.getElementById("bodyPanel");
-            const panelHead = document.getElementById("headPanel");
-            
-            document.getElementById("panelTitle").innerHTML = `📅 Horario Detallado: ${valor} <button onclick="renderizarLista()" style="font-size:12px; cursor:pointer;">(Volver)</button>`;
-            
-            panelHead.innerHTML = "<tr><th>HORA</th><th>LUN</th><th>MAR</th><th>MIE</th><th>JUE</th><th>VIE</th><th>SAB</th></tr>";
-            
-            let html = "";
-            HORAS.forEach(hora => {
-                html += `<tr><td class="hora-col">${hora}</td>`;
-                DIAS_IDS.forEach(dia => {
-                    const id = `cell-${hora}-${dia}`;
-                    const reg = filtrados.find(f => f.cellId === id);
-                    html += `<td>`;
-                    if(reg) {
-                        html += `<div class="info-card tipo-${reg.tipo}">
-                                    <b>${reg.materia}</b>
-                                    <small>${reg.salon} ${tipo === 'profesor' ? '' : '('+reg.profesor+')'}</small>
-                                    <button onclick="eliminarRegistro(${reg.id})" style="display:block; border:none; background:none; color:red; cursor:pointer; font-size:9px;">[X]</button>
-                                 </div>`;
-                    }
-                    html += `</td>`;
-                });
-                html += `</tr>`;
-            });
-            panelBody.innerHTML = html;
-            // Detener el polling mientras se ve el detalle para que no se borre la vista
-            clearInterval(intervalSync);
-        }
+    }
 
-        function eliminarRegistro(id) {
-            if(!confirm("¿Eliminar bloque?")) return;
-            let db = JSON.parse(localStorage.getItem("cal_db_v2")) || [];
-            db = db.filter(x => x.id !== id);
-            localStorage.setItem("cal_db_v2", JSON.stringify(db));
-            cambiarVista('panel'); // Refrescar
-        }
+    return false;
+}
+// ======================================
+// GUARDAR CELDA
+// ======================================
 
-        window.onload = () => generarGridAsignar();
+function confirmarCelda(){
+
+    const materia =
+    document.getElementById("m_materia")
+    .value.trim();
+
+    const curso =
+    document.getElementById("m_curso")
+    .value.trim();
+
+    const salon =
+    document.getElementById("m_salon")
+    .value.trim();
+
+    const tipo =
+    document.getElementById("m_tipo")
+    .value;
+
+    if(!materia || !curso){
+
+        toast(
+            "Completa los campos",
+            "#ef4444"
+        );
+
+        return;
+    }
+
+    if(existeChoque(curso,salon)) return;
+
+    datosTemporales[celdaActiva] = {
+        tipo,
+        materia,
+        curso,
+        salon
+    };
+
+    cerrarModal();
+
+    generarGridAsignar();
+
+    toast("Bloque agregado");
+}
+
+// ======================================
+// ELIMINAR
+// ======================================
+
+function borrarCelda(){
+
+    delete datosTemporales[celdaActiva];
+
+    cerrarModal();
+
+    generarGridAsignar();
+
+    toast("Bloque eliminado","#ef4444");
+}
+
+// ======================================
+// GUARDAR HORARIO
+// ======================================
+
+function guardarHorarioDB(){
+
+    const profesor =
+    document.getElementById("nombreProfesor")
+    .value.trim();
+
+    if(!profesor){
+
+        toast(
+            "Ingresa profesor",
+            "#ef4444"
+        );
+
+        return;
+    }
+
+    if(
+        Object.keys(datosTemporales).length === 0
+    ){
+
+        toast(
+            "Horario vacío",
+            "#ef4444"
+        );
+
+        return;
+    }
+
+    let db = obtenerDB();
+
+    // ELIMINAR HORARIO ANTERIOR DEL PROFESOR
+
+    db = db.filter(x=>x.profesor !== profesor);
+
+    // INSERTAR NUEVO
+
+    Object.keys(datosTemporales)
+    .forEach(cellId=>{
+
+        db.push({
+
+            id:
+            Date.now() + Math.random(),
+
+            profesor,
+
+            cellId,
+
+            ...datosTemporales[cellId]
+
+        });
+
+    });
+
+    guardarDB(db);
+
+    ultimoGuardado =
+    JSON.stringify(db);
+
+    toast("Horario guardado");
+
+    datosTemporales = {};
+
+    document
+    .getElementById("nombreProfesor")
+    .value = "";
+
+    generarGridAsignar();
+}
+
+// ======================================
+// LISTA
+// ======================================
+
+function cambiarModoLista(modo){
+
+    modoLista = modo;
+
+    document
+    .getElementById("btn-view-profe")
+    .classList.toggle(
+        "active",
+        modo==="profesores"
+    );
+
+    document
+    .getElementById("btn-view-curso")
+    .classList.toggle(
+        "active",
+        modo==="cursos"
+    );
+
+    renderizarLista();
+}
+
+// ======================================
+// PANEL
+// ======================================
+
+function renderizarLista(){
+
+    const db = obtenerDB();
+
+    const search =
+    document.getElementById("searchBar")
+    .value
+    .toLowerCase();
+
+    const body =
+    document.getElementById("bodyPanel");
+
+    const head =
+    document.getElementById("headPanel");
+
+    let html = "";
+
+    if(modoLista === "profesores"){
+
+        head.innerHTML = `
+        <tr>
+            <th>Profesor</th>
+            <th>Bloques</th>
+        </tr>
+        `;
+
+        const profesores =
+        [...new Set(db.map(x=>x.profesor))];
+
+        profesores.forEach(p=>{
+
+            if(
+                p.toLowerCase()
+                .includes(search)
+            ){
+
+                const cant =
+                db.filter(x=>
+                    x.profesor===p
+                ).length;
+
+                html += `
+                <tr
+                    class="row-link"
+                    onclick="verDetalle('${p}','profesor')"
+                >
+                    <td>${p}</td>
+                    <td>${cant}</td>
+                </tr>
+                `;
+            }
+
+        });
+
+    }else{
+
+        head.innerHTML = `
+        <tr>
+            <th>Curso</th>
+            <th>Profesor</th>
+        </tr>
+        `;
+
+        const cursos =
+        [...new Set(db.map(x=>x.curso))];
+
+        cursos.forEach(c=>{
+
+            if(
+                c.toLowerCase()
+                .includes(search)
+            ){
+
+                const profe =
+                db.find(x=>
+                    x.curso===c
+                )?.profesor || "";
+
+                html += `
+                <tr
+                    class="row-link"
+                    onclick="verDetalle('${c}','curso')"
+                >
+                    <td>${c}</td>
+                    <td>${profe}</td>
+                </tr>
+                `;
+            }
+
+        });
+
+    }
+
+    body.innerHTML =
+    html ||
+    `
+    <tr>
+        <td colspan="2">
+            No hay datos
+        </td>
+    </tr>
+    `;
+}
+
+// ======================================
+// DETALLE
+// ======================================
+
+function verDetalle(valor,tipo){
+
+    clearInterval(intervalSync);
+
+    const db = obtenerDB();
+
+    const filtrados =
+    db.filter(x=>
+        tipo==="profesor"
+        ? x.profesor===valor
+        : x.curso===valor
+    );
+
+    document
+    .getElementById("panelTitle")
+    .innerHTML = `
+    ${valor}
+    <button onclick="renderizarLista()">
+        Volver
+    </button>
+    `;
+
+    document
+    .getElementById("headPanel")
+    .innerHTML = `
+    <tr>
+        <th>Hora</th>
+        <th>L</th>
+        <th>M</th>
+        <th>X</th>
+        <th>J</th>
+        <th>V</th>
+        <th>S</th>
+    </tr>
+    `;
+
+    let html = "";
+
+    HORAS.forEach(hora=>{
+
+        html += `<tr>`;
+
+        html += `
+        <td class="hora-col">
+            ${hora}
+        </td>
+        `;
+
+        DIAS.forEach(dia=>{
+
+            const id =
+            `cell-${hora}-${dia}`;
+
+            const reg =
+            filtrados.find(
+                f=>f.cellId===id
+            );
+
+            html += `<td>`;
+
+            if(reg){
+
+                const color =
+                coloresMaterias[
+                    reg.materia
+                ] || "#187f4a";
+
+                html += `
+                <div
+                    class="info-card"
+                    style="
+                        background:${color};
+                        color:white;
+                    "
+                >
+                    <b>${reg.materia}</b>
+
+                    ${reg.curso}
+
+                    <br>
+
+                    ${reg.salon}
+
+                    <br>
+
+                    <small>
+                    ${reg.profesor}
+                    </small>
+
+                    <br>
+
+                    <button
+                        onclick="
+                        eliminarRegistro(${reg.id})
+                        "
+                    >
+                        Eliminar
+                    </button>
+
+                </div>
+                `;
+            }
+
+            html += `</td>`;
+
+        });
+
+        html += `</tr>`;
+
+    });
+
+    document
+    .getElementById("bodyPanel")
+    .innerHTML = html;
+}
+
+// ======================================
+// ELIMINAR REGISTRO
+// ======================================
+
+function eliminarRegistro(id){
+
+    if(
+        !confirm(
+            "¿Eliminar bloque?"
+        )
+    ) return;
+
+    let db = obtenerDB();
+
+    db = db.filter(x=>x.id !== id);
+
+    guardarDB(db);
+
+    toast(
+        "Bloque eliminado",
+        "#ef4444"
+    );
+
+    renderizarLista();
+}
+
+// ======================================
+// AUTO SAVE
+// ======================================
+
+setInterval(()=>{
+
+    if(
+        Object.keys(datosTemporales)
+        .length > 0
+    ){
+
+        localStorage.setItem(
+            "temp_horario",
+            JSON.stringify(
+                datosTemporales
+            )
+        );
+
+    }
+
+},3000);
+
+// ======================================
+// RECUPERAR
+// ======================================
+
+window.onload = ()=>{
+
+    const temp =
+    localStorage.getItem(
+        "temp_horario"
+    );
+
+    if(temp){
+
+        datosTemporales =
+        JSON.parse(temp);
+
+    }
+
+    generarGridAsignar();
+
+};
     </script>
-</body>
-</html>
 {% endblock %}
