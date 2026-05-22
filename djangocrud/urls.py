@@ -26,6 +26,9 @@ def es_asistente(user):
 def es_profesor_inventario(user):
     return user.is_authenticated and user.groups.filter(name='profesor_inventario').exists()
 
+def es_administracion(user):
+    return user.is_authenticated and user.groups.filter(name='administracion').exists()
+
 # ==========================================
 # 📌 CONFIGURACIÓN DE RUTAS (URLS)
 # ==========================================
@@ -53,7 +56,7 @@ urlpatterns = [
     path('api/nfc/entrega/', login_required(views.buscar_usuario_comedor), name='buscar_usuario_comedor'), 
 
     # --- 🏆 GESTIÓN DE USUARIOS (RANKING) ---
-    path('ranking/', user_passes_test(es_coordinacion)(views.ranking), name='ranking'),
+    path('ranking/', user_passes_test(es_administracion)(views.ranking), name='ranking'),
     path('permiso-prendas/<int:user_id>/', views.cambiar_permiso_prendas, name='permiso_prendas'),
     path('api/usuarios/', user_passes_test(es_coordinacion)(views.api_obtener_usuarios_gestion), name='api_obtener_usuarios_gestion'),
     path('api/usuarios/estado/<int:user_id>/', user_passes_test(es_coordinacion)(views.api_cambiar_estado_usuario), name='api_cambiar_estado_usuario'),
