@@ -77,10 +77,10 @@ nav {
 }
 
 .logo-container img {
-    height: 10px;
-    width: 20px;
+    height: 40px;
+    width: 70px;
     display: block;
-    border-radius: 50%;
+    border-radius: 60%;
     background: white; 
     padding: 3px;
     box-shadow: var(--shadow);
