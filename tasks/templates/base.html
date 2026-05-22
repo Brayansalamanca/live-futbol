@@ -1,135 +1,334 @@
 <!DOCTYPE html>
-{% load static %} 
+{% load static %}
 <html lang="es">
 
 <head>
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MKS plataform</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{% static 'base.css' %}">
 
     <script src="{% static 'js/chart.umd.min.js' %}"></script>
-    
+
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
     <script>
         window.OneSignalDeferred = window.OneSignalDeferred || [];
-        OneSignalDeferred.push(async function(OneSignal) {
+
+        OneSignalDeferred.push(async function (OneSignal) {
+
             await OneSignal.init({
                 appId: "43623638-2360-4a76-927d-9953b3364482",
                 allowLocalhostAsSecureOrigin: true,
             });
+
         });
     </script>
+
 </head>
 
 <body>
- 
 
+    <nav>
 
-  <nav>
-        <button class="menu-toggle" aria-label="Abrir Menú">☰</button>
+        <button class="menu-toggle" aria-label="Abrir Menú">
+            ☰
+        </button>
 
         <ul id="nav-menu">
+
+            <!-- LOGO -->
             <li class="logo-item">
+
                 <div class="logo-container">
+
                     <a href="{% url 'home' %}">
                         <img src="{% static '1.webp' %}" alt="Logo Live Futbol">
                     </a>
+
                 </div>
+
             </li>
 
             {% if user.is_authenticated %}
-                {% if user.groups.all.0.name == 'coordinacion' %}
-                    <li><a href="{% url 'formulario' %}">inventario</a></li>
 
-                    <li><a href="{% url 'tipos' %}">Control Inventario</a></li>
+                <!-- ====================================== -->
+                <!-- ADMINISTRACION -->
+                <!-- ====================================== -->
 
-                    <li><a href="{% url 'ranking' %}">Aprobar Usuarios</a></li>
+                {% if user.groups.all.0.name == 'administracion' %}
 
-                    <li><a href="{% url 'videos' %}">vista de balones</a></li>
+                    <li>
+                        <a href="{% url 'formulario' %}">
+                            Inventario
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'tipos' %}">
+                            Control Inventario
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'ranking' %}">
+                            Aprobar Usuarios
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'soporte' %}">
+                            Soporte
+                        </a>
+                    </li>
+
+                <!-- ====================================== -->
+                <!-- COORDINACION -->
+                <!-- ====================================== -->
+
+                {% elif user.groups.all.0.name == 'coordinacion' %}
+
+                    <li>
+                        <a href="{% url 'tipos' %}">
+                            Control Inventario
+                        </a>
+                    </li>
+
+
+                    <li>
+                        <a href="{% url 'videos' %}">
+                            Vista de Balones
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'signup' %}">
+                            Registrar Usuario
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'soporte' %}">
+                            Soporte
+                        </a>
+                    </li>
+
+                <!-- ====================================== -->
+                <!-- PROFESOR INVENTARIO -->
+                <!-- ====================================== -->
+
+                {% elif user.groups.all.0.name == 'profesor_inventario' %}
+
+                    <li>
+                        <a href="{% url 'tipos' %}">
+                            Control Inventario
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'horarios' %}">
+                            Horario
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'profesores' %}">
+                            Torneos
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'soporte' %}">
+                            Soporte
+                        </a>
+                    </li>
+
+                <!-- ====================================== -->
+                <!-- ASISTENTE -->
+                <!-- ====================================== -->
 
                 {% elif user.groups.all.0.name == 'asistente bienestar' %}
 
-                    <li><a href="{% url 'radar' %}">Inventario Balones</a></li>
+                    <li>
+                        <a href="{% url 'radar' %}">
+                            Inventario Balones
+                        </a>
+                    </li>
 
-                    <li><a href="{% url 'videos' %}">Renta Balones</a></li>
+                    <li>
+                        <a href="{% url 'videos' %}">
+                            Renta Balones
+                        </a>
+                    </li>
 
-                    <li><a href="{% url 'voz' %}">Bajas Balones</a></li>
+                    <li>
+                        <a href="{% url 'voz' %}">
+                            Bajas Balones
+                        </a>
+                    </li>
 
-                    <li><a href="{% url 'profesores' %}">Torneos</a></li>
+                    <li>
+                        <a href="{% url 'profesores' %}">
+                            Torneos
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'soporte' %}">
+                            Soporte
+                        </a>
+                    </li>
+
+                <!-- ====================================== -->
+                <!-- PROFESOR NORMAL -->
+                <!-- ====================================== -->
 
                 {% else %}
-                    <li><a href="{% url 'tipos' %}">Catálogo Ropa</a></li>
-                    <li><a href="{% url 'horarios' %}">Horario</a></li>
-                    <li><a href="{% url 'profesores' %}">Profesores</a></li>
-                    <li><a href="{% url 'videos' %}">Renta Balones</a></li>
+
+                    
+
+                    <li>
+                        <a href="{% url 'horarios' %}">
+                            Horario
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'profesores' %}">
+                            Torneos
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'soporte' %}">
+                            Soporte
+                        </a>
+                    </li>
 
                 {% endif %}
-                <li><a href="{% url 'logout' %}" class="logout">Salir</a></li>
+
+                <!-- ====================================== -->
+                <!-- LOGOUT -->
+                <!-- ====================================== -->
+
+                <li>
+                    <a href="{% url 'logout' %}" class="logout">
+                        Salir
+                    </a>
+                </li>
+
             {% else %}
-                <li><a href="{% url 'home' %}">Inicio</a></li>
-                <li><a href="{% url 'signup' %}">Registrarse</a></li>
-                <li><a href="{% url 'signin' %}">Iniciar Sesión</a></li>
-                <li><a href="{% url 'soporte' %}">Soporte</a></li>
+
+                <li>
+                    <a href="{% url 'home' %}">
+                        Inicio
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'signin' %}">
+                        Iniciar Sesión
+                    </a>
+                </li>
+
             {% endif %}
+
         </ul>
 
-        <button id="theme-toggle" title="Cambiar tema">🌙</button>
+        <button id="theme-toggle" title="Cambiar tema">
+            🌙
+        </button>
+
     </nav>
+
     <br>
     <br>
-    
 
     <main>
-        {% block content %}{% endblock %}
+        {% block content %}
+        {% endblock %}
     </main>
 
+    <script>
 
+        // =========================
+        // MENU RESPONSIVE
+        // =========================
 
-<script>
-        // Lógica del Menú Responsive
         const toggleButton = document.querySelector('.menu-toggle');
+
         const navMenu = document.getElementById('nav-menu');
 
-        toggleButton.addEventListener('click', function() {
+        toggleButton.addEventListener('click', function () {
+
             navMenu.classList.toggle('active');
-            this.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+
+            this.textContent = navMenu.classList.contains('active')
+                ? '✕'
+                : '☰';
+
         });
 
-        // Cerrar menú móvil al hacer clic en un enlace
+        // =========================
+        // CERRAR MENU MOVIL
+        // =========================
+
         document.querySelectorAll('#nav-menu a').forEach(link => {
+
             link.addEventListener('click', () => {
+
                 navMenu.classList.remove('active');
+
                 toggleButton.textContent = '☰';
+
             });
+
         });
 
-        // Lógica de Persistencia del Modo Día/Noche
+        // =========================
+        // MODO OSCURO / CLARO
+        // =========================
+
         const btn = document.getElementById("theme-toggle");
 
-        // Al cargar la página, verificamos si el usuario guardó el modo "light"
-        // (Porque el oscuro es nuestro default)
+        // CARGAR TEMA
         if (localStorage.getItem("theme") === "light") {
+
             document.body.classList.add("light-mode");
-            btn.textContent = "🌙"; // Muestra la luna porque está en modo día
+
+            btn.textContent = "🌙";
+
         } else {
-            btn.textContent = "☀️"; // Muestra el sol porque está en modo noche
+
+            btn.textContent = "☀️";
+
         }
 
+        // CAMBIAR TEMA
         btn.addEventListener("click", () => {
+
             document.body.classList.toggle("light-mode");
 
             if (document.body.classList.contains("light-mode")) {
+
                 localStorage.setItem("theme", "light");
-                btn.textContent = "🌙"; // Cambiar icono
+
+                btn.textContent = "🌙";
+
             } else {
+
                 localStorage.setItem("theme", "dark");
-                btn.textContent = "☀️"; // Cambiar icono
+
+                btn.textContent = "☀️";
+
             }
+
         });
+
     </script>
 
 </body>

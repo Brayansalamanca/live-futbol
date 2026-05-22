@@ -23,9 +23,8 @@ def es_asistente(user):
     """Permite el acceso a usuarios del grupo 'asistente bienestar'"""
     return user.is_authenticated and user.groups.filter(name='asistente bienestar').exists()
 
-def es_profesor(user):
-    """Permite el acceso a usuarios del grupo 'profesores'"""
-    return user.is_authenticated and user.groups.filter(name='profesores').exists()
+def es_profesor_inventario(user):
+    return user.is_authenticated and user.groups.filter(name='profesor_inventario').exists()
 
 # ==========================================
 # 📌 CONFIGURACIÓN DE RUTAS (URLS)
@@ -35,13 +34,13 @@ urlpatterns = [
     # --- GESTIÓN DE CUENTA Y BASE ---
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
-    path('signup/', views.signup, name='signup'),
+    path('signup/',login_required(views.signup), name='signup'),
     path('signin/', views.signin, name='signin'),
     path('logout/', views.signout, name='logout'),
     path('activar/<uidb64>/<token>/', views.activar, name='activar'),
-    path('restablecer_/', views.signup, name='signup'),
+    path('restablecer_/', login_required(views.signup), name='signup'),
     path('condiciones/', views.condiciones, name='condiciones'),
-    path('soporte/', views.soporte, name='soporte'),
+    path('soporte/',login_required(views.soporte), name='soporte'),
 
     # --- 🍽️ URLS NFC / COMEDOR (PÁGINAS HTML) ---
     path('mis_suscripciones/', login_required(views.mis_suscripciones), name='mis_suscripciones'),
@@ -55,9 +54,15 @@ urlpatterns = [
 
     # --- 🏆 GESTIÓN DE USUARIOS (RANKING) ---
     path('ranking/', user_passes_test(es_coordinacion)(views.ranking), name='ranking'),
+    path('permiso-prendas/<int:user_id>/', views.cambiar_permiso_prendas, name='permiso_prendas'),
     path('api/usuarios/', user_passes_test(es_coordinacion)(views.api_obtener_usuarios_gestion), name='api_obtener_usuarios_gestion'),
     path('api/usuarios/estado/<int:user_id>/', user_passes_test(es_coordinacion)(views.api_cambiar_estado_usuario), name='api_cambiar_estado_usuario'),
     path('api/usuarios/eliminar/<int:user_id>/', user_passes_test(es_coordinacion)(views.api_eliminar_usuario), name='api_eliminar_usuario'),
+    path(
+    'toggle-permiso-prendas/<int:id>/',
+    views.toggle_permiso_prendas,
+    name='toggle_permiso_prendas'
+),
 
     # --- 👕 MÓDULO ROPA ---
     path('formulario/', user_passes_test(es_coordinacion)(views.formulario), name='formulario'),

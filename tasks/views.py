@@ -186,9 +186,45 @@ def activar(request, uidb64, token):
         # El usuario sigue inactivo, pero el token ya fue validado.
         return render(request, 'confirmar_cuenta.html') # Este HTML debe decir "Correo verificado, espera a Rosita"
     return render(request, 'confirmar_fallido.html')
-    
+
 @login_required
-def tipos(request): return render(request, 'tipos.html')
+def tipos(request):
+
+    # ADMINISTRACION
+    if request.user.groups.filter(name='administracion').exists():
+        return render(request, 'tipos.html')
+
+    # COORDINACION
+    if request.user.groups.filter(name='coordinacion').exists():
+        return render(request, 'tipos.html')
+
+    # PERMISO TEMPORAL
+    if request.user.groups.filter(name='inventario_temporal').exists():
+        return render(request, 'tipos.html')
+
+    return redirect('home')
+
+def toggle_permiso_prendas(request, id):
+
+    if request.method == "POST":
+
+        usuario = User.objects.get(id=id)
+
+        perfil = usuario.perfil
+
+        perfil.puede_apartar_prendas = not perfil.puede_apartar_prendas
+
+        perfil.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Permiso actualizado correctamente'
+        })
+
+    return JsonResponse({
+        'success': False
+    })
+
 def signup(request):
     if request.method == 'GET':
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
@@ -279,8 +315,36 @@ def signout(request):
 # ==========================================
 # 🏆 GESTIÓN (RANKING)
 # ==========================================
-@user_passes_test(es_coordinacion)
-def ranking(request): return render(request, 'ranking.html')
+@login_required
+def ranking(request):
+
+    usuarios = User.objects.all()
+
+    return render(request, 'ranking.html', {
+        'usuarios': usuarios
+    })
+
+
+
+
+@login_required
+def cambiar_permiso_prendas(request, user_id):
+
+    grupo, created = Group.objects.get_or_create(
+        name='inventario_temporal'
+    )
+
+    usuario = get_object_or_404(User, id=user_id)
+
+    if usuario.groups.filter(name='inventario_temporal').exists():
+
+        usuario.groups.remove(grupo)
+
+    else:
+
+        usuario.groups.add(grupo)
+
+    return redirect('ranking')
 
 @user_passes_test(es_coordinacion)
 def api_obtener_usuarios_gestion(request):

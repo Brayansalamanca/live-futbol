@@ -2,190 +2,148 @@
 {% load static %}
 
 {% block content %}
-<div class="seccion-usuarios">
-    
-    <h2 class="titulo-principal">🏆 Gestión de Usuarios y Permisos</h2>
 
-    <div class="card card-busqueda">
-        <input type="text" id="buscadorUsuarios" onkeyup="filtrarUsuarios()" 
-               placeholder="🔍 Buscar por nombre, usuario o email..." class="input-hibrido">
-    </div>
+<div class="contenedor-ranking">
 
-    <div class="seccion-grupo">
-        <h3 class="label-profesor"> PROFESORES</h3>
-        <div class="card card-tabla-hibrida">
-            <div class="table-responsive">
-                <table class="tabla-gestion">
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Email</th>
-                            <th>Rol Solicitado</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-profesores"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <h1>Permisos de Inventario</h1>
 
-    <div class="seccion-grupo">
-        <h3 class="label-coord"> COORDINACIÓN</h3>
-        <div class="card card-tabla-hibrida color-coord">
-            <div class="table-responsive">
-                <table class="tabla-gestion">
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Email</th>
-                            <th>Rol Solicitado</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-coordinacion"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <table class="tabla">
 
-    <div class="seccion-grupo">
-        <h3 class="label-asist">ASISTENTE BIENESTAR</h3>
-        <div class="card card-tabla-hibrida color-asist">
-            <div class="table-responsive">
-                <table class="tabla-gestion">
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Email</th>
-                            <th>Rol Solicitado</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-asistente"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Grupo</th>
+                <th>Permiso Inventario</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for usuario in usuarios %}
+
+            <tr>
+
+                <td>{{ usuario.username }}</td>
+
+                <td>{{ usuario.email }}</td>
+
+                <td>
+                    {% if usuario.groups.all %}
+                        {{ usuario.groups.all.0.name }}
+                    {% else %}
+                        Sin grupo
+                    {% endif %}
+                </td>
+
+               <td>
+
+    {% for grupo in usuario.groups.all %}
+
+        {% if grupo.name == 'inventario_temporal' %}
+
+            ✅ ACTIVADO
+
+        {% endif %}
+
+    {% empty %}
+
+        ❌ DESACTIVADO
+
+    {% endfor %}
+
+                </td>
+
+            
+
+                <td>
+
+                    <a href="{% url 'permiso_prendas' usuario.id %}">
+
+                        {% if usuario.perfil.puede_apartar_prendas %}
+
+                            <button class="btn-quitar">
+                                Quitar permiso
+                            </button>
+
+                        {% else %}
+
+                            <button class="btn-dar">
+                                Dar permiso
+                            </button>
+
+                        {% endif %}
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
 </div>
 
 <style>
-    .seccion-usuarios { padding: 80px 20px 50px; min-height: 100vh; max-width: 1100px; margin: 0 auto; }
-    .titulo-principal { text-align: center; color: var(--primary); text-transform: uppercase; font-weight: 900; margin-bottom: 30px; }
 
-    /* Buscador */
-    .card-busqueda { max-width: 600px; margin: 0 auto 40px; padding: 15px !important; border: 1px solid var(--border); }
+.contenedor-ranking{
+    width:95%;
+    margin:auto;
+    padding:40px;
+    color:white;
+}
 
-    /* Secciones */
-    .seccion-grupo { margin-bottom: 40px; }
-    .seccion-grupo h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 15px; padding-left: 15px; }
-    
-    .label-profesor { color: #007bff; border-left: 5px solid #007bff; }
-    .label-coord { color: #d35400; border-left: 5px solid #d35400; }
-    .label-asist { color: #28a745; border-left: 5px solid #28a745; }
+.tabla{
+    width:100%;
+    border-collapse:collapse;
+    background:#111;
+    color: aliceblue;
+}
 
-    /* Tablas Híbridas */
-    .card-tabla-hibrida { padding: 0 !important; overflow: hidden; border: 1px solid var(--border); }
-    .tabla-gestion { width: 100%; border-collapse: collapse; text-align: center; color: var(--text); }
-    
-    .tabla-gestion thead { background: #007bff; color: white; font-size: 12px; text-transform: uppercase; }
-    .color-coord thead { background: #d35400 !important; }
-    .color-asist thead { background: #28a745 !important; }
+.tabla th{
+    background:#1f1f1f;
+    padding:15px;
+}
 
-    .tabla-gestion td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
-    .fila-dato:hover { background: var(--bg-soft); }
+.tabla td{
+    padding:15px;
+    border-bottom:1px solid #333;
+    text-align:center;
+}
 
-    /* Badges y Botones */
-    .badge-status { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
-    .bg-activo { background: #e8f5e9; color: #2e7d32; }
-    .bg-pendiente { background: #fff3e0; color: #ef6c00; }
+.activo{
+    color:#00ff88;
+    font-weight:bold;
+}
 
-    .btn-aprobar { background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-    .btn-desactivar { background: none; color: #d35400; border: 1px solid #d35400; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-    .btn-eliminar { background: none; border: none; font-size: 18px; cursor: pointer; margin-left: 10px; }
+.inactivo{
+    color:#ff4d4d;
+    font-weight:bold;
+}
 
-    .table-responsive { overflow-x: auto; }
+.btn-dar{
+    background:#00aa55;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.btn-quitar{
+    background:#cc3333;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:10px;
+    cursor:pointer;
+}
+
 </style>
 
-<script>
-    async function cargarUsuarios() {
-        try {
-            const response = await fetch('/api/usuarios/');
-            const usuarios = await response.json();
-
-            const tablas = {
-                profesores: document.getElementById('tabla-profesores'),
-                coordinacion: document.getElementById('tabla-coordinacion'),
-                asistente: document.getElementById('tabla-asistente')
-            };
-
-            Object.values(tablas).forEach(t => t.innerHTML = '');
-
-            usuarios.forEach(u => {
-                const fila = document.createElement('tr');
-                fila.className = 'fila-dato';
-                
-                const badgeClass = u.estado === 'activo' ? 'bg-activo' : 'bg-pendiente';
-                const badgeText = u.estado === 'activo' ? 'Activo' : 'Pendiente';
-
-                fila.innerHTML = `
-                    <td style="font-weight: bold; color: var(--primary);">@${u.nombre}</td>
-                    <td>${u.email}</td>
-                    <td style="font-weight: bold;">${u.rol}</td>
-                    <td><span class="badge-status ${badgeClass}">${badgeText}</span></td>
-                    <td>
-                        <div style="display: flex; justify-content: center; align-items: center;">
-                            <button onclick="cambiarEstado(${u.id})" class="${u.estado === 'activo' ? 'btn-desactivar' : 'btn-aprobar'}">
-                                ${u.estado === 'activo' ? 'Desactivar' : 'Aprobar'}
-                            </button>
-                            <button onclick="eliminarUsuario(${u.id})" class="btn-eliminar">🗑️</button>
-                        </div>
-                    </td>
-                `;
-
-                const rolLower = u.rol.toLowerCase();
-                if (rolLower.includes('profesor')) {
-                    tablas.profesores.appendChild(fila);
-                } else if (rolLower.includes('coordinacion')) {
-                    tablas.coordinacion.appendChild(fila);
-                } else if (rolLower.includes('asistente')) {
-                    tablas.asistente.appendChild(fila);
-                }
-            });
-
-        } catch (error) { console.error("Error:", error); }
-    }
-
-    function filtrarUsuarios() {
-        const busqueda = document.getElementById('buscadorUsuarios').value.toLowerCase();
-        const filas = document.querySelectorAll('.fila-dato');
-        filas.forEach(fila => {
-            const texto = fila.innerText.toLowerCase();
-            fila.style.display = texto.includes(busqueda) ? "" : "none";
-        });
-    }
-
-    async function cambiarEstado(id) {
-        if (!confirm("¿Deseas cambiar el acceso de este usuario?")) return;
-        const response = await fetch(`/api/usuarios/estado/${id}/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-        });
-        if (response.ok) cargarUsuarios();
-    }
-
-    async function eliminarUsuario(id) {
-        if (!confirm("¿Eliminar permanentemente?")) return;
-        const response = await fetch(`/api/usuarios/eliminar/${id}/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-        });
-        if (response.ok) cargarUsuarios();
-    }
-
-    document.addEventListener('DOMContentLoaded', cargarUsuarios);
-</script>
 {% endblock %}
