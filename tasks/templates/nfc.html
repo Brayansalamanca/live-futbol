@@ -1,0 +1,654 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="contenedor-principal" style="
+    padding-top: 100px;
+    max-width: 1500px;
+    margin: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 40px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+">
+
+    <!-- ========================================== -->
+    <!-- HEADER -->
+    <!-- ========================================== -->
+
+    <header style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:30px;
+        flex-wrap:wrap;
+        gap:15px;
+    ">
+
+        <div>
+
+            <h1 style="margin:0;">
+                ⚽ Historial Inteligente de Balones
+            </h1>
+
+            <p style="
+                margin-top:8px;
+                color:#94a3b8;
+                font-size:14px;
+            ">
+                Historial automático sincronizado con el sistema principal.
+            </p>
+
+        </div>
+
+        <div id="estadoConexion" style="
+            background:#0f172a;
+            color:white;
+            padding:10px 15px;
+            border-radius:12px;
+            font-size:13px;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        ">
+
+            <span style="
+                width:10px;
+                height:10px;
+                background:#22c55e;
+                border-radius:50%;
+                display:inline-block;
+            "></span>
+
+            Historial sincronizado
+
+        </div>
+
+    </header>
+
+    <!-- ========================================== -->
+    <!-- FILTRO -->
+    <!-- ========================================== -->
+
+    <section style="
+        margin-bottom:25px;
+        background:white;
+        padding:18px;
+        border-radius:18px;
+        box-shadow:0 4px 10px rgba(0,0,0,.08);
+    ">
+
+        <input
+            type="text"
+            id="inputBusqueda"
+            placeholder="Buscar estudiante, curso, ciclo o balón..."
+            style="
+                width:100%;
+                padding:15px;
+                border-radius:12px;
+                border:1px solid #cbd5e1;
+                font-size:15px;
+                outline:none;
+            "
+        >
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SENIORS -->
+    <!-- ========================================== -->
+
+    <section style="
+        background:white;
+        border-radius:20px;
+        overflow:hidden;
+        box-shadow:0 4px 10px rgba(0,0,0,.08);
+        margin-bottom:25px;
+    ">
+
+        <button onclick="togglePanel('panelSeniors')" style="
+            width:100%;
+            border:none;
+            background:#2563eb;
+            color:white;
+            padding:20px;
+            cursor:pointer;
+            font-size:22px;
+            font-weight:bold;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        ">
+
+            <span>🔵 Seniors</span>
+
+            <span id="contadorSeniors">
+                0 registros
+            </span>
+
+        </button>
+
+        <div id="panelSeniors" style="display:none;overflow:auto;">
+
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                min-width:900px;
+            ">
+
+                <thead style="background:#f8fafc;">
+
+                    <tr>
+
+                        <th style="padding:16px;text-align:left;">Balón</th>
+                        <th style="padding:16px;text-align:left;">Estudiante</th>
+                        <th style="padding:16px;text-align:left;">Curso</th>
+                        <th style="padding:16px;text-align:left;">Ciclo</th>
+                        <th style="padding:16px;text-align:left;">Tipo</th>
+                        <th style="padding:16px;text-align:left;">Fecha</th>
+                        <th style="padding:16px;text-align:left;">Estado</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="tablaSeniors"></tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TEENS -->
+    <!-- ========================================== -->
+
+    <section style="
+        background:white;
+        border-radius:20px;
+        overflow:hidden;
+        box-shadow:0 4px 10px rgba(0,0,0,.08);
+        margin-bottom:25px;
+    ">
+
+        <button onclick="togglePanel('panelTeens')" style="
+            width:100%;
+            border:none;
+            background:#16a34a;
+            color:white;
+            padding:20px;
+            cursor:pointer;
+            font-size:22px;
+            font-weight:bold;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        ">
+
+            <span>🟢 Teens</span>
+
+            <span id="contadorTeens">
+                0 registros
+            </span>
+
+        </button>
+
+        <div id="panelTeens" style="display:none;overflow:auto;">
+
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                min-width:900px;
+            ">
+
+                <thead style="background:#f8fafc;">
+
+                    <tr>
+
+                        <th style="padding:16px;text-align:left;">Balón</th>
+                        <th style="padding:16px;text-align:left;">Estudiante</th>
+                        <th style="padding:16px;text-align:left;">Curso</th>
+                        <th style="padding:16px;text-align:left;">Ciclo</th>
+                        <th style="padding:16px;text-align:left;">Tipo</th>
+                        <th style="padding:16px;text-align:left;">Fecha</th>
+                        <th style="padding:16px;text-align:left;">Estado</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="tablaTeens"></tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- MASTERS -->
+    <!-- ========================================== -->
+
+    <section style="
+        background:white;
+        border-radius:20px;
+        overflow:hidden;
+        box-shadow:0 4px 10px rgba(0,0,0,.08);
+        margin-bottom:25px;
+    ">
+
+        <button onclick="togglePanel('panelMasters')" style="
+            width:100%;
+            border:none;
+            background:#9333ea;
+            color:white;
+            padding:20px;
+            cursor:pointer;
+            font-size:22px;
+            font-weight:bold;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        ">
+
+            <span>🟣 Masters</span>
+
+            <span id="contadorMasters">
+                0 registros
+            </span>
+
+        </button>
+
+        <div id="panelMasters" style="display:none;overflow:auto;">
+
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                min-width:900px;
+            ">
+
+                <thead style="background:#f8fafc;">
+
+                    <tr>
+
+                        <th style="padding:16px;text-align:left;">Balón</th>
+                        <th style="padding:16px;text-align:left;">Estudiante</th>
+                        <th style="padding:16px;text-align:left;">Curso</th>
+                        <th style="padding:16px;text-align:left;">Ciclo</th>
+                        <th style="padding:16px;text-align:left;">Tipo</th>
+                        <th style="padding:16px;text-align:left;">Fecha</th>
+                        <th style="padding:16px;text-align:left;">Estado</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="tablaMasters"></tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+
+// ==========================================
+// API
+// ==========================================
+
+const API = {
+
+    obtenerEntregas: "/api/obtener-entregas/"
+};
+
+// ==========================================
+// TOGGLE
+// ==========================================
+
+function togglePanel(id){
+
+    const panel = document.getElementById(id);
+
+    if(panel.style.display === "none" || panel.style.display === ""){
+
+        panel.style.display = "block";
+
+    }else{
+
+        panel.style.display = "none";
+    }
+}
+
+// ==========================================
+// STORAGE
+// ==========================================
+
+const STORAGE_KEY = "historial_balones";
+
+// ==========================================
+// CARGAR
+// ==========================================
+
+async function cargarEntregas(){
+
+    try{
+
+        const response = await fetch(API.obtenerEntregas);
+
+        const entregasActuales = await response.json();
+
+        sincronizarHistorial(entregasActuales);
+
+    }catch(error){
+
+        console.error(error);
+    }
+}
+
+// ==========================================
+// SINCRONIZAR
+// ==========================================
+
+function sincronizarHistorial(entregasActuales){
+
+    let historial = JSON.parse(
+        localStorage.getItem(STORAGE_KEY)
+    ) || [];
+
+    entregasActuales.forEach(entregaActual => {
+
+        const existe = historial.find(h =>
+            h.id === entregaActual.id
+        );
+
+        if(!existe){
+
+            historial.unshift({
+
+                ...entregaActual,
+
+                eliminadoPrincipal:false,
+
+                fechaHistorial:new Date().toISOString()
+            });
+        }
+    });
+
+    historial.forEach(item => {
+
+        const existeEnPrincipal = entregasActuales.find(
+            e => e.id === item.id
+        );
+
+        if(!existeEnPrincipal){
+
+            item.eliminadoPrincipal = true;
+        }
+    });
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(historial)
+    );
+
+    renderizarTablas(historial);
+}
+
+// ==========================================
+// OBTENER CICLO
+// ==========================================
+
+function obtenerCiclo(curso){
+
+    if(!curso) return "Sin ciclo";
+
+    const grado = parseInt(curso);
+
+    if([6,7,8].includes(grado)){
+
+        return "Seniors";
+    }
+
+    if([3,4,5].includes(grado)){
+
+        return "Teens";
+    }
+
+    if([9,10,11].includes(grado)){
+
+        return "Masters";
+    }
+
+    return "Sin ciclo";
+}
+
+// ==========================================
+// CREAR FILA
+// ==========================================
+
+function crearFila(entrega){
+
+    const fecha = new Date(entrega.fecha);
+
+    const fechaFormateada =
+        fecha.toLocaleDateString() + " " +
+        fecha.toLocaleTimeString();
+
+    let emoji = "⚽";
+
+    const objeto = entrega.objeto || "";
+
+    if(objeto.toLowerCase().includes("basket")){
+
+        emoji = "🏀";
+    }
+
+    if(objeto.toLowerCase().includes("volley")){
+
+        emoji = "🏐";
+    }
+
+    const estado = entrega.eliminadoPrincipal
+
+    ? `
+        <span style="
+            background:#fee2e2;
+            color:#b91c1c;
+            padding:6px 12px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:bold;
+        ">
+            Eliminado
+        </span>
+    `
+
+    : `
+        <span style="
+            background:#dcfce7;
+            color:#166534;
+            padding:6px 12px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:bold;
+        ">
+            Activo
+        </span>
+    `;
+
+    return `
+
+        <tr style="border-bottom:1px solid #e2e8f0;">
+
+            <td style="padding:15px;">
+
+                <div style="
+                    display:flex;
+                    align-items:center;
+                    gap:10px;
+                ">
+
+                    <div style="
+                        width:50px;
+                        height:50px;
+                        border-radius:12px;
+                        background:#f1f5f9;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        font-size:25px;
+                    ">
+                        ${emoji}
+                    </div>
+
+                    <strong>
+                        ${entrega.objeto}
+                    </strong>
+
+                </div>
+
+            </td>
+
+            <td style="padding:15px;">
+                <strong>${entrega.nombre}</strong>
+            </td>
+
+            <td style="padding:15px;">
+                ${entrega.curso}
+            </td>
+
+            <td style="padding:15px;">
+                ${obtenerCiclo(entrega.curso)}
+            </td>
+
+            <td style="padding:15px;">
+                ${entrega.objeto}
+            </td>
+
+            <td style="padding:15px;">
+                ${fechaFormateada}
+            </td>
+
+            <td style="padding:15px;">
+                ${estado}
+            </td>
+
+        </tr>
+    `;
+}
+
+// ==========================================
+// RENDER
+// ==========================================
+
+function renderizarTablas(entregas){
+
+    const tablaSeniors =
+        document.getElementById("tablaSeniors");
+
+    const tablaTeens =
+        document.getElementById("tablaTeens");
+
+    const tablaMasters =
+        document.getElementById("tablaMasters");
+
+    tablaSeniors.innerHTML = "";
+    tablaTeens.innerHTML = "";
+    tablaMasters.innerHTML = "";
+
+    let totalSeniors = 0;
+    let totalTeens = 0;
+    let totalMasters = 0;
+
+    entregas.forEach(entrega => {
+
+        const ciclo = obtenerCiclo(entrega.curso);
+
+        if(ciclo === "Seniors"){
+
+            tablaSeniors.innerHTML += crearFila(entrega);
+
+            totalSeniors++;
+        }
+
+        if(ciclo === "Teens"){
+
+            tablaTeens.innerHTML += crearFila(entrega);
+
+            totalTeens++;
+        }
+
+        if(ciclo === "Masters"){
+
+            tablaMasters.innerHTML += crearFila(entrega);
+
+            totalMasters++;
+        }
+    });
+
+    document.getElementById(
+        "contadorSeniors"
+    ).innerText = `${totalSeniors} registros`;
+
+    document.getElementById(
+        "contadorTeens"
+    ).innerText = `${totalTeens} registros`;
+
+    document.getElementById(
+        "contadorMasters"
+    ).innerText = `${totalMasters} registros`;
+}
+
+// ==========================================
+// FILTRO
+// ==========================================
+
+document.getElementById('inputBusqueda')
+.addEventListener('keyup', filtrarTabla);
+
+function filtrarTabla(){
+
+    const texto = document.getElementById(
+        'inputBusqueda'
+    ).value.toLowerCase();
+
+    const filas = document.querySelectorAll(
+        'tbody tr'
+    );
+
+    filas.forEach(fila => {
+
+        fila.style.display = fila.innerText
+        .toLowerCase()
+        .includes(texto)
+
+        ? ''
+
+        : 'none';
+    });
+}
+
+// ==========================================
+// AUTO REFRESH
+// ==========================================
+
+setInterval(() => {
+
+    cargarEntregas();
+
+}, 4000);
+
+// ==========================================
+// INICIO
+// ==========================================
+
+cargarEntregas();
+
+</script>
+
+{% endblock %}

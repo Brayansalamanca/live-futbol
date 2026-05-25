@@ -314,7 +314,7 @@ button:not(#theme-toggle):not(.menu-toggle):hover {
 
 /* 7. Logos pequeños en tablas y brackets */
 .logo-tabla, .logo-bracket {
-    width: 24px;
+    width: 14px;
     height: 24px;
     object-fit: contain;
     vertical-align: middle;

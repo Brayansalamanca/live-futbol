@@ -46,14 +46,40 @@ urlpatterns = [
     path('soporte/',login_required(views.soporte), name='soporte'),
 
     # --- 🍽️ URLS NFC / COMEDOR (PÁGINAS HTML) ---
-    path('mis_suscripciones/', login_required(views.mis_suscripciones), name='mis_suscripciones'),
-    path('subir_excel_comedor/', login_required(views.subir_excel_comedor), name='subir_excel_comedor'),
-    path('registrar_entrega_comedor/', login_required(views.registrar_entrega_comedor), name='registrar_entrega_comedor'),
+    path('mis_suscripciones/',  (views.mis_suscripciones), name='mis_suscripciones'),
+    path('subir_excel_comedor/',    (views.subir_excel_comedor), name='subir_excel_comedor'),
+    path('registrar_entrega_comedor/',  (views.registrar_entrega_comedor), name='registrar_entrega_comedor'),
 
     # --- 🍽️ API NFC ---
-    path('api/nfc/subir/', login_required(views.api_nfc_subir), name='api_nfc_subir'),
-    path('api/nfc/buscar/', login_required(views.api_nfc_buscar), name='api_nfc_buscar'),
-    path('api/nfc/entrega/', login_required(views.buscar_usuario_comedor), name='buscar_usuario_comedor'), 
+    path(
+    'nfc/',
+    views.nfc,
+    name='nfc'
+),
+
+path(
+    'api/subir-balones-excel/',
+    views.api_subir_balones_excel,
+    name='api_subir_balones_excel'
+),
+
+path(
+    'api/registrar-entrega-nfc/',
+    views.api_registrar_entrega_nfc,
+    name='api_registrar_entrega_nfc'
+),
+
+path(
+    'api/devolver-balon/',
+    views.api_devolver_balon,
+    name='api_devolver_balon'
+),
+
+path(
+    'api/listar-entregas-nfc/',
+    views.api_listar_entregas_nfc,
+    name='api_listar_entregas_nfc'
+),
 
     # --- 🏆 GESTIÓN DE USUARIOS (RANKING) ---
     path('ranking/', user_passes_test(es_administracion)(views.ranking), name='ranking'),
@@ -68,7 +94,7 @@ urlpatterns = [
 ),
 
     # --- 👕 MÓDULO ROPA ---
-    path('formulario/', user_passes_test(es_coordinacion)(views.formulario), name='formulario'),
+    path('formulario/', user_passes_test(es_administracion)(views.formulario), name='formulario'),
     path('tipos/', login_required(views.tipos), name='tipos'), 
     path('api/guardar-prenda/', user_passes_test(es_coordinacion)(views.api_guardar_prenda), name='api_guardar_prenda'),
     path('api/apartar-prenda/<int:prenda_id>/', login_required(views.api_apartar_prenda), name='api_apartar_prenda'),
@@ -89,7 +115,107 @@ urlpatterns = [
     path('api/guardar-baja/', user_passes_test(es_asistente)(views.api_guardar_baja), name='api_guardar_baja'),
     path('api/obtener-bajas/', login_required(views.api_obtener_bajas), name='api_obtener_bajas'),
     path('api/eliminar-baja/<int:baja_id>/', user_passes_test(es_asistente)(views.api_eliminar_baja), name='api_eliminar_baja'),
-    path('api/obtener-solicitudes/', user_passes_test(es_asistente)(views.api_obtener_solicitudes), name='api_obtener_solicitudes'),
+   
+    # ==========================================
+# 📊 APIS DEL MÓDULO BALONES
+# ==========================================
+
+path(
+    'api/guardar-entrega/',
+    user_passes_test(es_asistente)(views.api_guardar_entrega),
+    name='api_guardar_entrega'
+),
+
+path(
+    'api/obtener-entregas/',
+    login_required(views.api_obtener_entregas),
+    name='api_obtener_entregas'
+),
+
+path(
+    'api/eliminar-entrega/<int:entrega_id>/',
+    user_passes_test(es_asistente)(views.api_eliminar_entrega),
+    name='api_eliminar_entrega'
+),
+
+path(
+    'api/guardar-baja/',
+    user_passes_test(es_asistente)(views.api_guardar_baja),
+    name='api_guardar_baja'
+),
+
+path(
+    'api/obtener-bajas/',
+    login_required(views.api_obtener_bajas),
+    name='api_obtener_bajas'
+),
+
+path(
+    'api/eliminar-baja/<int:baja_id>/',
+    user_passes_test(es_asistente)(views.api_eliminar_baja),
+    name='api_eliminar_baja'
+),
+
+# ==========================================
+# 📝 SOLICITUDES
+# ==========================================
+
+path(
+    'api/obtener-solicitudes/',
+    user_passes_test(es_asistente)(views.api_obtener_solicitudes),
+    name='api_obtener_solicitudes'
+),
+
+path(
+    'api/guardar-solicitud/',
+    user_passes_test(es_asistente)(views.api_guardar_solicitud),
+    name='api_guardar_solicitud'
+),
+
+# ==========================================
+# 🔍 OBJETOS PERDIDOS
+# ==========================================
+
+path(
+    'api/obtener-objetos/',
+    login_required(views.api_obtener_objetos),
+    name='api_obtener_objetos'
+),
+
+path(
+    'api/guardar-objeto/',
+    login_required(views.api_guardar_objeto),
+    name='api_guardar_objeto'
+),
+
+path(
+    'api/eliminar-objeto/<int:obj_id>/',
+    login_required(views.api_eliminar_objeto),
+    name='api_eliminar_objeto'
+),
+
+# ==========================================
+# 🔍 HALLAZGOS V2
+# ==========================================
+
+path(
+    'api/v2/hallazgos/guardar/',
+    login_required(views.hallazgo_v2_guardar),
+    name='hallazgo_v2_guardar'
+),
+
+path(
+    'api/v2/hallazgos/listar/',
+    login_required(views.hallazgo_v2_listar),
+    name='hallazgo_v2_listar'
+),
+
+path(
+    'api/v2/hallazgos/eliminar/<int:item_id>/',
+    login_required(views.hallazgo_v2_eliminar),
+    name='hallazgo_v2_eliminar'
+),
+
 
     # --- 📅 MÓDULO INFORMACIÓN (Horarios y Profesores) ---
     path('horarios/', login_required(views.horarios), name='horarios'),
@@ -104,6 +230,11 @@ urlpatterns = [
     path('api/v2/hallazgos/guardar/', login_required(views.hallazgo_v2_guardar), name='hallazgo_v2_guardar'),
     path('api/v2/hallazgos/listar/', login_required(views.hallazgo_v2_listar), name='hallazgo_v2_listar'),
     path('api/v2/hallazgos/eliminar/<int:item_id>/', login_required(views.hallazgo_v2_eliminar), name='hallazgo_v2_eliminar'),
+    path(
+    'api/eliminar-solicitud/<int:solicitud_id>/',
+    views.api_eliminar_solicitud,
+    name='api_eliminar_solicitud'
+),
 
     # --- ✅ TAREAS ---
     path('tasks/', login_required(views.tasks), name='tasks'),
@@ -118,6 +249,8 @@ urlpatterns = [
     path('recuperar/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='restablecer_password.html'), name='password_reset_confirm'),
     path('recuperar/completo/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
 
+
+    
     # --- ⚽ TORNEOS ---
     path('api/torneos/listar/', login_required(views.api_obtener_torneos), name='api_obtener_torneos'),
     path('api/torneos/guardar/', login_required(views.api_guardar_torneo), name='api_guardar_torneo'),

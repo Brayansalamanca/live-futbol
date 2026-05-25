@@ -3,21 +3,23 @@
 
 {% block content %}
 
-<!-- =========================
-ESTILOS
-========================= -->
+<link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+>
+
 <style>
 
 :root{
-    --bg:#f4f7f6;
+    --bg:#f3f4f6;
     --card:#ffffff;
-    --primary:#187f4a;
+    --primary:#15803d;
     --secondary:#2563eb;
     --danger:#dc2626;
-    --warning:#f59e0b;
-    --border:#dcdcdc;
-    --text:#222;
-    --shadow:0 5px 15px rgba(0,0,0,.08);
+    --warning:#ea580c;
+    --border:#d1d5db;
+    --text:#111827;
+    --shadow:0 8px 25px rgba(0,0,0,.08);
 }
 
 *{
@@ -29,95 +31,47 @@ ESTILOS
 body{
     background:var(--bg);
     font-family:'Poppins',sans-serif;
-    color:var(--text);
 }
 
-/* =========================
+/* =====================================
 NAVBAR
-========================= */
+===================================== */
 
 .navbar{
     width:100%;
-    background:#1f2937;
+    background:#111827;
+    padding:15px 25px;
     display:flex;
-    justify-content:center;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
     gap:15px;
-    padding:15px;
-    position:sticky;
-    top:0;
-    z-index:1000;
     box-shadow:var(--shadow);
 }
 
-.nav-btn{
-    border:none;
-    background:transparent;
+.navbar h1{
     color:white;
-    padding:10px 18px;
-    border-radius:10px;
-    cursor:pointer;
-    font-weight:600;
-    transition:.25s;
+    font-size:1.4rem;
 }
 
-.nav-btn:hover{
-    background:rgba(255,255,255,.1);
-}
-
-.nav-btn.active{
-    background:var(--primary);
-}
-
-/* =========================
-SECCIONES
-========================= */
-
-.view-section{
-    display:none;
-    max-width:1600px;
-    margin:auto;
-    padding:20px;
-}
-
-.view-section.active{
-    display:block;
-}
-
-/* =========================
-CONFIG PANEL
-========================= */
-
-.config-panel{
-    background:var(--card);
-    padding:20px;
-    border-radius:16px;
-    box-shadow:var(--shadow);
-    margin-bottom:20px;
+.nav-right{
     display:flex;
     gap:10px;
     flex-wrap:wrap;
     align-items:center;
 }
 
-.config-panel input,
-.config-panel select{
-    padding:10px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    min-width:180px;
-}
-
-/* =========================
+/* =====================================
 BOTONES
-========================= */
+===================================== */
 
 .btn{
     border:none;
-    padding:10px 18px;
-    border-radius:8px;
+    padding:12px 18px;
+    border-radius:12px;
     cursor:pointer;
-    font-weight:bold;
-    transition:.25s;
+    font-weight:600;
+    transition:.2s;
 }
 
 .btn:hover{
@@ -129,25 +83,107 @@ BOTONES
     color:white;
 }
 
-.btn-danger{
-    background:var(--danger);
-    color:white;
-}
-
 .btn-secondary{
     background:var(--secondary);
     color:white;
 }
 
-/* =========================
-TABLAS
-========================= */
+.btn-danger{
+    background:var(--danger);
+    color:white;
+}
+
+/* =====================================
+CONTENEDOR
+===================================== */
+
+.container{
+    max-width:1850px;
+    margin:auto;
+    padding:25px;
+}
+
+/* =====================================
+PANELES
+===================================== */
+
+.panel{
+    background:white;
+    border-radius:20px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:var(--shadow);
+}
+
+/* =====================================
+CONFIGURACIÓN
+===================================== */
+
+.config-grid{
+    display:grid;
+    grid-template-columns:
+        repeat(auto-fit,minmax(220px,1fr));
+
+    gap:15px;
+}
+
+.config-grid input,
+.config-grid select{
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    outline:none;
+    font-size:.95rem;
+}
+
+/* =====================================
+SEMANA
+===================================== */
+
+.calendar-controls{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.calendar-controls h2{
+    font-size:1.1rem;
+}
+
+/* =====================================
+HORARIO ACTUAL
+===================================== */
+
+.current-info{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.current-info strong{
+    color:var(--primary);
+}
+
+/* =====================================
+TABLA
+===================================== */
+
+.table-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
 
 table{
     width:100%;
+    min-width:1400px;
     border-collapse:collapse;
     background:white;
-    border-radius:15px;
+    border-radius:20px;
     overflow:hidden;
     box-shadow:var(--shadow);
 }
@@ -155,32 +191,34 @@ table{
 th{
     background:var(--primary);
     color:white;
-    padding:12px;
-    font-size:.9rem;
+    padding:15px;
+    font-size:.95rem;
 }
 
 td{
-    border:1px solid var(--border);
-    height:90px;
+    border:1px solid #e5e7eb;
+    height:140px;
+    min-width:200px;
     vertical-align:top;
     padding:5px;
 }
 
 .hora-col{
-    width:90px;
-    background:#eef2ff;
-    font-weight:bold;
+    width:120px;
     text-align:center;
     vertical-align:middle;
+    background:#eff6ff;
+    font-weight:700;
 }
 
-/* =========================
+/* =====================================
 CELDAS
-========================= */
+===================================== */
 
 .cell{
     width:100%;
     height:100%;
+    border-radius:12px;
     cursor:pointer;
     transition:.2s;
 }
@@ -189,185 +227,185 @@ CELDAS
     background:#f0fdf4;
 }
 
-.card-horario{
-    border-left:5px solid var(--primary);
-    background:#ecfdf5;
-    border-radius:8px;
-    padding:5px;
-    margin-bottom:4px;
-    font-size:.75rem;
-    text-align:left;
-}
+/* =====================================
+CARDS
+===================================== */
 
-.card-relevo{
-    background:#fff7ed;
-    border-left-color:#ea580c;
+.card-horario{
+    background:#ecfdf5;
+    border-left:6px solid var(--primary);
+    border-radius:12px;
+    padding:10px;
+    margin-bottom:5px;
+    font-size:.8rem;
+    line-height:1.5;
 }
 
 .card-horario strong{
     display:block;
+    margin-bottom:5px;
 }
 
-/* =========================
-PANEL
-========================= */
-
-.controls{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:10px;
-    background:white;
-    padding:15px;
-    border-radius:15px;
-    box-shadow:var(--shadow);
-    margin-bottom:20px;
+.card-relevo{
+    background:#fff7ed;
+    border-left-color:var(--warning);
 }
 
-.controls input{
-    padding:10px;
-    border:1px solid var(--border);
-    border-radius:8px;
-}
-
-.row-link{
-    cursor:pointer;
-    transition:.2s;
-}
-
-.row-link:hover{
-    background:#f0fdf4;
-}
-
-/* =========================
+/* =====================================
 MODAL
-========================= */
+===================================== */
 
 .overlay{
-    display:none;
     position:fixed;
     inset:0;
     background:rgba(0,0,0,.5);
+    display:none;
     z-index:999;
 }
 
 .modal{
-    display:none;
     position:fixed;
     top:50%;
     left:50%;
     transform:translate(-50%,-50%);
-    width:350px;
+    width:420px;
+    max-width:95%;
     background:white;
-    border-radius:16px;
+    border-radius:20px;
     padding:25px;
+    display:none;
     z-index:1000;
-    box-shadow:var(--shadow);
+    box-shadow:0 20px 60px rgba(0,0,0,.2);
 }
 
-.modal h3{
+.modal h2{
     margin-bottom:15px;
 }
 
 .modal-body{
     display:flex;
     flex-direction:column;
-    gap:10px;
+    gap:12px;
 }
 
-.modal input,
-.modal select{
-    padding:10px;
-    border:1px solid var(--border);
-    border-radius:8px;
-}
+/* =====================================
+RESPONSIVE
+===================================== */
 
-/* =========================
-CALENDARIO
-========================= */
+@media(max-width:900px){
 
-.calendar-controls{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    margin-bottom:15px;
-    flex-wrap:wrap;
-}
+    .navbar{
+        justify-content:center;
+    }
 
-.calendar-controls button{
-    padding:10px 15px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    background:var(--secondary);
-    color:white;
-}
+    .current-info{
+        flex-direction:column;
+        align-items:flex-start;
+    }
 
-.calendar-box{
-    background:white;
-    padding:15px;
-    border-radius:15px;
-    box-shadow:var(--shadow);
-    margin-bottom:20px;
-}
-
-.sync{
-    font-size:.8rem;
-    color:#10b981;
-    font-weight:bold;
 }
 
 </style>
 
-<!-- =========================
+<!-- =====================================
 NAVBAR
-========================= -->
+===================================== -->
 
 <nav class="navbar">
 
-    <button 
-        class="nav-btn active"
-        id="btn-asignar"
-        onclick="cambiarVista('asignar')"
-    >
-        ✏️ Asignación
-    </button>
+    <h1>
+        📚 Gestión de Horarios
+    </h1>
 
-    <button 
-        class="nav-btn"
-        id="btn-panel"
-        onclick="cambiarVista('panel')"
-    >
-        📊 Panel
-    </button>
+    <div class="nav-right">
+
+        <button
+            class="btn btn-secondary"
+            onclick="limpiarTodo()"
+        >
+            🗑 Limpiar Todo
+        </button>
+
+    </div>
 
 </nav>
 
-<!-- =========================
-VISTA ASIGNAR
-========================= -->
+<!-- =====================================
+CONTENEDOR
+===================================== -->
 
-<section 
-    id="vista-asignar"
-    class="view-section active"
->
+<div class="container">
 
-    <!-- CALENDARIO -->
+    <!-- CONFIG -->
 
-    <div class="calendar-box">
+    <div class="panel">
+
+        <div class="config-grid">
+
+            <!-- CATEGORÍA -->
+
+            <select id="categoriaCurso">
+
+                <option value="">
+                    Seleccionar categoría
+                </option>
+
+                <option value="Seniors">
+                    Seniors
+                </option>
+
+                <option value="Teens">
+                    Teens
+                </option>
+
+                <option value="Masters">
+                    Masters
+                </option>
+
+            </select>
+
+            <!-- GRADO -->
+
+            <input
+                type="text"
+                id="gradoInput"
+                placeholder="Ejemplo: 3A"
+            >
+
+            <!-- BOTÓN -->
+
+            <button
+                class="btn btn-primary"
+                onclick="cargarHorario()"
+            >
+                📂 Cargar Horario
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- SEMANA -->
+
+    <div class="panel">
 
         <div class="calendar-controls">
 
-            <button onclick="cambiarSemana(-1)">
+            <button
+                class="btn btn-secondary"
+                onclick="cambiarSemana(-1)"
+            >
                 ⬅ Semana
             </button>
 
             <h2 id="tituloSemana">
-                Semana Actual
+                Semana
             </h2>
 
-            <button onclick="cambiarSemana(1)">
+            <button
+                class="btn btn-secondary"
+                onclick="cambiarSemana(1)"
+            >
                 Semana ➡
             </button>
 
@@ -375,199 +413,913 @@ VISTA ASIGNAR
 
     </div>
 
-    <!-- PANEL CONFIG -->
+    <!-- HORARIO ACTUAL -->
 
-    <div class="config-panel">
+    <div class="panel">
 
-        <strong>Profesor:</strong>
+        <div class="current-info">
 
-        <input 
-            type="text"
-            id="nombreProfesor"
-            placeholder="Nombre del profesor"
-        >
+            <div>
 
-        <select id="tipoBloque">
+                📂 Horario Actual:
 
-            <option value="clase">
-                📚 Clase
-            </option>
+                <strong id="nombreHorarioActual">
+                    Sin horario cargado
+                </strong>
 
-            <option value="relevo">
-                🔄 Relevo
-            </option>
+            </div>
 
-        </select>
+            <div>
 
-        <button 
-            class="btn btn-primary"
-            onclick="guardarHorario()"
-        >
-            💾 Guardar Horario
-        </button>
+                ✅ Los cambios se guardan automáticamente
 
-        <button 
-            class="btn btn-danger"
-            onclick="limpiarTemporal()"
-        >
-            🗑 Limpiar
-        </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CONFIG BLOQUES -->
+
+    <div class="panel">
+
+        <div class="config-grid">
+
+            <!-- PROFESOR -->
+
+            <select id="profesorSelect">
+
+                <option value="">
+                    Seleccionar profesor
+                </option>
+
+            </select>
+
+            <!-- MATERIA -->
+
+            <input
+                type="text"
+                id="materiaInput"
+                placeholder="Materia"
+            >
+
+            <!-- SALÓN -->
+
+            <input
+                type="text"
+                id="salonInput"
+                placeholder="Salón"
+            >
+
+            <!-- TIPO -->
+
+            <select id="tipoBloque">
+
+                <option value="clase">
+                    📚 Clase
+                </option>
+
+                <option value="relevo">
+                    🔄 Relevo
+                </option>
+
+            </select>
+
+        </div>
 
     </div>
 
     <!-- TABLA -->
 
-    <table>
+    <div class="table-wrapper">
 
-        <thead>
+        <table>
 
-            <tr>
+            <thead>
 
-                <th class="hora-col">
-                    Hora
-                </th>
+                <tr>
 
-                <th>Lunes</th>
-                <th>Martes</th>
-                <th>Miércoles</th>
-                <th>Jueves</th>
-                <th>Viernes</th>
-                <th>Sábado</th>
+                    <th class="hora-col">
+                        Hora
+                    </th>
 
-            </tr>
+                    <th>Lunes</th>
+                    <th>Martes</th>
+                    <th>Miércoles</th>
+                    <th>Jueves</th>
+                    <th>Viernes</th>
 
-        </thead>
+                </tr>
 
-        <tbody id="gridAsignar">
+            </thead>
 
-        </tbody>
+            <tbody id="gridAsignar">
 
-    </table>
+            </tbody>
 
-</section>
-
-<!-- =========================
-VISTA PANEL
-========================= -->
-
-<section 
-    id="vista-panel"
-    class="view-section"
->
-
-    <div class="controls">
-
-        <div style="display:flex; gap:10px;">
-
-            <button 
-                class="btn btn-primary"
-                onclick="cambiarModoLista('profesores')"
-            >
-                Profesores
-            </button>
-
-            <button 
-                class="btn btn-secondary"
-                onclick="cambiarModoLista('cursos')"
-            >
-                Cursos
-            </button>
-
-        </div>
-
-        <input 
-            type="text"
-            id="searchBar"
-            placeholder="Buscar..."
-            oninput="renderizarLista()"
-        >
-
-        <div class="sync">
-            ● Sincronizado
-        </div>
+        </table>
 
     </div>
 
-    <h2 
-        id="panelTitle"
-        style="margin-bottom:15px;"
-    >
-        Panel General
-    </h2>
+</div>
 
-    <table>
-
-        <thead id="headPanel">
-
-        </thead>
-
-        <tbody id="bodyPanel">
-
-        </tbody>
-
-    </table>
-
-</section>
-
-<!-- =========================
+<!-- =====================================
 OVERLAY
-========================= -->
+===================================== -->
 
-<div 
+<div
     class="overlay"
     id="overlay"
     onclick="cerrarModal()"
 ></div>
 
-<!-- =========================
+<!-- =====================================
 MODAL
-========================= -->
+===================================== -->
 
-<div 
+<div
     class="modal"
     id="modal"
 >
 
-    <h3 id="modalTitle">
-        Nuevo Bloque
-    </h3>
+    <h2>
+        Gestión del Bloque
+    </h2>
 
     <div class="modal-body">
 
-        <input 
-            type="text"
-            id="m_materia"
-            placeholder="Materia"
-        >
-
-        <input 
-            type="text"
-            id="m_curso"
-            placeholder="Curso"
-        >
-
-        <input 
-            type="text"
-            id="m_salon"
-            placeholder="Salón"
-        >
-
-        <button 
+        <button
             class="btn btn-primary"
-            onclick="confirmarCelda()"
+            onclick="guardarBloque()"
         >
-            Guardar
+            💾 Guardar Bloque
         </button>
 
-        <button 
+        <button
             class="btn btn-danger"
-            onclick="eliminarCelda()"
+            onclick="eliminarBloque()"
         >
-            Eliminar
+            🗑 Eliminar Bloque
         </button>
 
     </div>
 
 </div>
 
+<!-- =====================================
+JS
+===================================== -->
+
+<script>
+    /* =========================================
+CONFIGURACIÓN
+========================================= */
+
+const dias = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes"
+];
+
+const horas = [
+    "06:00 - 07:00",
+    "07:00 - 08:00",
+    "08:00 - 09:00",
+    "09:00 - 10:00",
+    "10:00 - 11:00",
+    "11:00 - 12:00",
+    "12:00 - 13:00",
+    "13:00 - 14:00",
+    "14:00 - 15:00",
+    "15:00 - 16:00"
+];
+
+/* =========================================
+USUARIOS REGISTRADOS
+DESPUÉS ESTO VENDRÁ DE DJANGO
+========================================= */
+
+const usuariosRegistrados = [
+
+    {
+        nombre: "Salamanca",
+        tipo: "Seniors"
+    },
+
+    {
+        nombre: "Carlos",
+        tipo: "Teens"
+    },
+
+    {
+        nombre: "Andrea",
+        tipo: "Masters"
+    },
+
+    {
+        nombre: "Fernanda",
+        tipo: "Seniors"
+    },
+
+    {
+        nombre: "Mateo",
+        tipo: "Teens"
+    }
+
+];
+
+/* =========================================
+VARIABLES
+========================================= */
+
+let horarios = JSON.parse(
+    localStorage.getItem("horariosGrados")
+) || {};
+
+let horarioActual = null;
+
+let gradoActual = null;
+
+let categoriaActual = null;
+
+let celdaActual = null;
+
+let fechaActual = new Date();
+
+/* =========================================
+INICIO
+========================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    crearGrid();
+
+    cargarProfesores();
+
+    actualizarSemana();
+
+});
+
+/* =========================================
+CREAR GRID
+========================================= */
+
+function crearGrid(){
+
+    const tbody = document.getElementById(
+        "gridAsignar"
+    );
+
+    tbody.innerHTML = "";
+
+    horas.forEach((hora, fila) => {
+
+        const tr =
+            document.createElement("tr");
+
+        let html = `
+            <td class="hora-col">
+                ${hora}
+            </td>
+        `;
+
+        dias.forEach((dia, col) => {
+
+            html += `
+                <td>
+
+                    <div
+                        class="cell"
+                        id="cell-${fila}-${col}"
+                        onclick="
+                            abrirModal(
+                                ${fila},
+                                ${col}
+                            )
+                        "
+                    ></div>
+
+                </td>
+            `;
+
+        });
+
+        tr.innerHTML = html;
+
+        tbody.appendChild(tr);
+
+    });
+
+}
+
+/* =========================================
+CARGAR PROFESORES
+========================================= */
+
+function cargarProfesores(){
+
+    const select =
+    document.getElementById(
+        "profesorSelect"
+    );
+
+    select.innerHTML = `
+        <option value="">
+            Seleccionar profesor
+        </option>
+    `;
+
+    usuariosRegistrados.forEach(usuario => {
+
+        select.innerHTML += `
+            <option value="${usuario.nombre}">
+                ${usuario.nombre}
+                (${usuario.tipo})
+            </option>
+        `;
+
+    });
+
+}
+
+/* =========================================
+CREAR O CARGAR HORARIO
+========================================= */
+
+function cargarHorario(){
+
+    const categoria = document
+    .getElementById("categoriaCurso")
+    .value;
+
+    const grado = document
+    .getElementById("gradoInput")
+    .value
+    .trim();
+
+    if(grado === ""){
+
+        alert(
+            "Escribe un grado"
+        );
+
+        return;
+
+    }
+
+    if(categoria === ""){
+
+        alert(
+            "Selecciona categoría"
+        );
+
+        return;
+
+    }
+
+    categoriaActual = categoria;
+
+    gradoActual = grado;
+
+    const clave =
+        `${categoria}-${grado}`;
+
+    /* =====================================
+    EXISTE
+    ===================================== */
+
+    if(horarios[clave]){
+
+        horarioActual =
+            horarios[clave];
+
+    }
+
+    /* =====================================
+    NUEVO
+    ===================================== */
+
+    else{
+
+        horarioActual = {
+
+            categoria,
+            grado,
+
+            bloques: [],
+
+            excepciones: []
+
+        };
+
+        horarios[clave] =
+            horarioActual;
+
+        guardarSistema();
+
+    }
+
+    document.getElementById(
+        "nombreHorarioActual"
+    ).innerText = `
+        ${categoria} - ${grado}
+    `;
+
+    renderizarHorario();
+
+}
+
+/* =========================================
+GUARDAR
+========================================= */
+
+function guardarSistema(){
+
+    localStorage.setItem(
+        "horariosGrados",
+        JSON.stringify(horarios)
+    );
+
+}
+
+/* =========================================
+SEMANA
+========================================= */
+
+function obtenerLunes(fecha){
+
+    const copia = new Date(fecha);
+
+    const dia = copia.getDay();
+
+    const diferencia =
+        dia === 0 ? -6 : 1 - dia;
+
+    copia.setDate(
+        copia.getDate() + diferencia
+    );
+
+    return copia;
+
+}
+
+function actualizarSemana(){
+
+    const lunes =
+        obtenerLunes(fechaActual);
+
+    const viernes =
+        new Date(lunes);
+
+    viernes.setDate(
+        viernes.getDate() + 4
+    );
+
+    const opciones = {
+
+        day:'numeric',
+
+        month:'long'
+
+    };
+
+    document.getElementById(
+        "tituloSemana"
+    ).innerText = `
+        ${lunes.toLocaleDateString(
+            'es-CO',
+            opciones
+        )}
+
+        -
+
+        ${viernes.toLocaleDateString(
+            'es-CO',
+            opciones
+        )}
+    `;
+
+}
+
+function cambiarSemana(valor){
+
+    fechaActual.setDate(
+        fechaActual.getDate() + (7 * valor)
+    );
+
+    actualizarSemana();
+
+    renderizarHorario();
+
+}
+
+/* =========================================
+MODAL
+========================================= */
+
+function abrirModal(fila, col){
+
+    if(!horarioActual){
+
+        alert(
+            "Primero carga un horario"
+        );
+
+        return;
+
+    }
+
+    celdaActual = {
+        fila,
+        col
+    };
+
+    document.getElementById(
+        "overlay"
+    ).style.display = "block";
+
+    document.getElementById(
+        "modal"
+    ).style.display = "block";
+
+}
+
+function cerrarModal(){
+
+    document.getElementById(
+        "overlay"
+    ).style.display = "none";
+
+    document.getElementById(
+        "modal"
+    ).style.display = "none";
+
+}
+
+/* =========================================
+GUARDAR BLOQUE
+========================================= */
+
+function guardarBloque(){
+
+    if(!horarioActual) return;
+
+    const profesor = document
+    .getElementById(
+        "profesorSelect"
+    )
+    .value;
+
+    const materia = document
+    .getElementById(
+        "materiaInput"
+    )
+    .value
+    .trim();
+
+    const salon = document
+    .getElementById(
+        "salonInput"
+    )
+    .value
+    .trim();
+
+    const tipo = document
+    .getElementById(
+        "tipoBloque"
+    )
+    .value;
+
+    if(
+        !profesor ||
+        !materia ||
+        !salon
+    ){
+
+        alert(
+            "Completa todos los campos"
+        );
+
+        return;
+
+    }
+
+    /* =====================================
+    RELEVO
+    ===================================== */
+
+    if(tipo === "relevo"){
+
+        horarioActual.excepciones.push({
+
+            fecha:
+                obtenerFechaCelda(),
+
+            fila:
+                celdaActual.fila,
+
+            col:
+                celdaActual.col,
+
+            profesor,
+            materia,
+            salon,
+            tipo
+
+        });
+
+    }
+
+    /* =====================================
+    CLASE NORMAL
+    ===================================== */
+
+    else{
+
+        horarioActual.bloques =
+        horarioActual.bloques.filter(b => {
+
+            return !(
+                b.fila === celdaActual.fila &&
+                b.col === celdaActual.col
+            );
+
+        });
+
+        horarioActual.bloques.push({
+
+            fila:
+                celdaActual.fila,
+
+            col:
+                celdaActual.col,
+
+            profesor,
+            materia,
+            salon,
+            tipo
+
+        });
+
+    }
+
+    guardarSistema();
+
+    renderizarHorario();
+
+    cerrarModal();
+
+}
+
+/* =========================================
+RENDER
+========================================= */
+
+function renderizarHorario(){
+
+    document.querySelectorAll(".cell")
+    .forEach(cell => {
+
+        cell.innerHTML = "";
+
+    });
+
+    if(!horarioActual) return;
+
+    horarioActual.bloques.forEach(bloque => {
+
+        const cell = document.getElementById(
+            `cell-${bloque.fila}-${bloque.col}`
+        );
+
+        if(!cell) return;
+
+        const excepcion =
+        horarioActual.excepciones.find(e => {
+
+            return (
+
+                e.fecha ===
+                obtenerFechaRender(
+                    bloque.col
+                )
+
+                &&
+
+                e.fila === bloque.fila
+
+                &&
+
+                e.col === bloque.col
+
+            );
+
+        });
+
+        /* =================================
+        RELEVO
+        ================================= */
+
+        if(excepcion){
+
+            cell.innerHTML = `
+
+                <div class="
+                    card-horario
+                    card-relevo
+                ">
+
+                    <strong>
+                        🔄 RELEVO
+                    </strong>
+
+                    👨‍🏫
+                    ${excepcion.profesor}
+                    <br>
+
+                    📚
+                    ${excepcion.materia}
+                    <br>
+
+                    🏫
+                    ${excepcion.salon}
+
+                </div>
+
+            `;
+
+        }
+
+        /* =================================
+        NORMAL
+        ================================= */
+
+        else{
+
+            cell.innerHTML = `
+
+                <div class="card-horario">
+
+                    <strong>
+                        ${bloque.materia}
+                    </strong>
+
+                    👨‍🏫
+                    ${bloque.profesor}
+                    <br>
+
+                    🏫
+                    ${bloque.salon}
+
+                </div>
+
+            `;
+
+        }
+
+    });
+
+}
+
+/* =========================================
+FECHA
+========================================= */
+
+function obtenerFechaCelda(){
+
+    const lunes =
+        obtenerLunes(fechaActual);
+
+    const fecha =
+        new Date(lunes);
+
+    fecha.setDate(
+        fecha.getDate() +
+        celdaActual.col
+    );
+
+    return fecha
+    .toISOString()
+    .split("T")[0];
+
+}
+
+function obtenerFechaRender(col){
+
+    const lunes =
+        obtenerLunes(fechaActual);
+
+    const fecha =
+        new Date(lunes);
+
+    fecha.setDate(
+        fecha.getDate() + col
+    );
+
+    return fecha
+    .toISOString()
+    .split("T")[0];
+
+}
+
+/* =========================================
+ELIMINAR
+========================================= */
+
+function eliminarBloque(){
+
+    if(!horarioActual) return;
+
+    horarioActual.bloques =
+    horarioActual.bloques.filter(b => {
+
+        return !(
+
+            b.fila ===
+            celdaActual.fila
+
+            &&
+
+            b.col ===
+            celdaActual.col
+
+        );
+
+    });
+
+    guardarSistema();
+
+    renderizarHorario();
+
+    cerrarModal();
+
+}
+
+/* =========================================
+LIMPIAR
+========================================= */
+
+function limpiarTodo(){
+
+    if(!confirm(
+        "¿Seguro?"
+    )) return;
+
+    localStorage.removeItem(
+        "horariosGrados"
+    );
+
+    horarios = {};
+
+    horarioActual = null;
+
+    renderizarHorario();
+
+    document.getElementById(
+        "nombreHorarioActual"
+    ).innerText =
+    "Sin horario cargado";
+
+}
+
+/* =========================================
+MIS SUSCRIPCIONES.HTML
+========================================= */
+
+/*
+
+==========================================
+OTRO HTML:
+==========================================
+
+const horarios = JSON.parse(
+    localStorage.getItem(
+        "horariosGrados"
+    )
+);
+
+==========================================
+BUSCAR PROFESOR:
+==========================================
+
+Object.values(horarios)
+.forEach(horario => {
+
+    horario.bloques.forEach(b => {
+
+        console.log(
+            b.profesor
+        );
+
+    });
+
+});
+
+==========================================
+
+*/
+
+</script>
 {% endblock %}

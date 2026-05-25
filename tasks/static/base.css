@@ -80,7 +80,7 @@ nav {
     height: 40px;
     width: 70px;
     display: block;
-    border-radius: 60%;
+    border-radius: 50%;
     background: white; 
     padding: 3px;
     box-shadow: var(--shadow);
@@ -313,7 +313,7 @@ button:not(#theme-toggle):not(.menu-toggle):hover {
 
 /* 7. Logos pequeños en tablas y brackets */
 .logo-tabla, .logo-bracket {
-    width: 24px;
+    width: 14px;
     height: 24px;
     object-fit: contain;
     vertical-align: middle;

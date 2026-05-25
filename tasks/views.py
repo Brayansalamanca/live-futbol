@@ -12,6 +12,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
+
 from django.utils.http import (
     urlsafe_base64_encode,
     urlsafe_base64_decode
@@ -40,7 +41,8 @@ from .models import (
     ObjetoPerdido,
     PrendaRopa,
     BajaBalon,
-    ReservaPrenda
+    ReservaPrenda,
+    BalonNFC
 )
 
 from .forms import (
@@ -161,12 +163,294 @@ class CustomPasswordResetView(
 # ==========================================
 # 🔐 FUNCIONES DE VERIFICACIÓN
 # ==========================================
+
 def es_coordinacion(user):
     return user.is_authenticated and (user.groups.filter(name='coordinacion').exists() or user.username in ['rosita', 'rosita1'])
 
 def es_asistente(user):
     return user.is_authenticated and user.groups.filter(name='asistente bienestar').exists()
 
+def es_asistente_o_coordinacion(user):
+    return (
+        es_asistente(user)
+        or es_coordinacion(user)
+    )
+
+@user_passes_test(es_asistente_o_coordinacion)
+def nfc(request):
+
+    return render(
+        request,
+        'nfc.html'
+    )
+
+
+
+def es_administracion(user):
+    return user.is_authenticated and user.groups.filter(name='administracion').exists()
+
+
+# ==========================================
+# ⚽ SUBIR EXCEL BALONES NFC
+# ==========================================
+
+@csrf_exempt
+@login_required
+def api_subir_balones_excel(request):
+
+    if request.method != "POST":
+
+        return JsonResponse({
+            "success": False,
+            "error": "Método inválido"
+        })
+
+    try:
+
+        archivo = request.FILES.get("excel")
+
+        if not archivo:
+
+            return JsonResponse({
+                "success": False,
+                "error": "No se envió archivo"
+            })
+
+        hoja = request.POST.get(
+            "hoja",
+            0
+        )
+
+        df = pd.read_excel(
+            archivo,
+            sheet_name=hoja
+        )
+
+        agregados = 0
+
+        for _, fila in df.iterrows():
+
+            nombre = str(
+                fila.get("nombre_balon", "")
+            ).strip()
+
+            tipo = str(
+                fila.get("tipo", "")
+            ).strip()
+
+            codigo = str(
+                fila.get("codigo_nfc", "")
+            ).strip()
+
+            imagen = str(
+                fila.get("imagen", "")
+            ).strip()
+
+            if not nombre or not codigo:
+
+                continue
+
+            BalonNFC.objects.update_or_create(
+
+                codigo_nfc=codigo,
+
+                defaults={
+
+                    "nombre_balon": nombre,
+                    "tipo": tipo,
+                    "imagen": imagen,
+                    "disponible": True
+                }
+            )
+
+            agregados += 1
+
+        return JsonResponse({
+
+            "success": True,
+            "mensaje": f"{agregados} balones cargados"
+
+        })
+
+    except Exception as e:
+
+        return JsonResponse({
+
+            "success": False,
+            "error": str(e)
+
+        })
+    
+    # ==========================================
+# ⚽ REGISTRAR ENTREGA NFC
+# ==========================================
+
+@csrf_exempt
+@login_required
+def api_registrar_entrega_nfc(request):
+
+    if request.method != "POST":
+
+        return JsonResponse({
+            "success": False
+        })
+
+    try:
+
+        data = json.loads(request.body)
+
+        nombre = data.get("nombre")
+        curso = data.get("curso")
+        ciclo = data.get("ciclo")
+        codigo_nfc = data.get("codigo_nfc")
+
+        balon = BalonNFC.objects.filter(
+            codigo_nfc=codigo_nfc
+        ).first()
+
+        if not balon:
+
+            return JsonResponse({
+                "success": False,
+                "error": "Balón no encontrado"
+            })
+
+        if not balon.disponible:
+
+            return JsonResponse({
+                "success": False,
+                "error": "Balón no disponible"
+            })
+
+        RegistroEntrega.objects.create(
+
+            nombre=nombre,
+
+            curso=f"{curso} - {ciclo}",
+
+            objeto=balon.nombre_balon,
+
+            lugar=balon.tipo
+        )
+
+        balon.disponible = False
+
+        balon.save()
+
+        return JsonResponse({
+
+            "success": True,
+
+            "balon": {
+
+                "nombre": balon.nombre_balon,
+                "tipo": balon.tipo,
+                "imagen": balon.imagen
+            }
+        })
+
+    except Exception as e:
+
+        return JsonResponse({
+
+            "success": False,
+            "error": str(e)
+
+        })
+    # ==========================================
+# ⚽ DEVOLVER BALÓN
+# ==========================================
+
+@csrf_exempt
+@login_required
+def api_devolver_balon(request):
+
+    if request.method != "POST":
+
+        return JsonResponse({
+            "success": False
+        })
+
+    try:
+
+        data = json.loads(request.body)
+
+        codigo_nfc = data.get(
+            "codigo_nfc"
+        )
+
+        balon = BalonNFC.objects.filter(
+            codigo_nfc=codigo_nfc
+        ).first()
+
+        if not balon:
+
+            return JsonResponse({
+                "success": False,
+                "error": "Balón no encontrado"
+            })
+
+        balon.disponible = True
+
+        balon.save()
+
+        return JsonResponse({
+
+            "success": True
+
+        })
+
+    except Exception as e:
+
+        return JsonResponse({
+
+            "success": False,
+            "error": str(e)
+
+        })
+    
+    # ==========================================
+# ⚽ LISTAR ENTREGAS NFC
+# ==========================================
+
+@login_required
+def api_listar_entregas_nfc(request):
+
+    entregas = RegistroEntrega.objects.all().order_by(
+        '-fecha'
+    )
+
+    data = []
+
+    for e in entregas:
+
+        balon = BalonNFC.objects.filter(
+            nombre_balon=e.objeto
+        ).first()
+
+        data.append({
+
+            "id": e.id,
+
+            "nombre": e.nombre,
+
+            "curso": e.curso,
+
+            "balon": e.objeto,
+
+            "tipo": e.lugar,
+
+            "imagen": balon.imagen if balon else "",
+
+            "fecha": e.fecha.strftime(
+                "%d/%m/%Y %H:%M"
+            )
+        })
+
+    return JsonResponse(
+        data,
+        safe=False
+    )
 # ==========================================
 # 🏠 VISTAS PÚBLICAS Y AUTENTICACIÓN
 # ==========================================
@@ -302,8 +586,9 @@ def signin(request):
             return render(request, 'signin.html', {'form': AuthenticationForm(), 'error': 'Cuenta pendiente de activación.'})
         
         login(request, user)
-        if es_coordinacion(user): return redirect('formulario')
+        if es_coordinacion(user): return redirect('tipos')
         if es_asistente(user): return redirect('radar')
+        if es_administracion(user): return redirect('formulario')
         return redirect('tipos')
         
     return render(request, 'signin.html', {'form': AuthenticationForm(), 'error': 'Credenciales incorrectas'})
@@ -462,13 +747,34 @@ def api_obtener_entregas(request):
     data = [{"id": e.id, "nombre": e.nombre, "objeto": e.objeto, "curso": e.curso, "lugar": e.lugar, "fecha": e.fecha.isoformat()} for e in entregas]
     return JsonResponse(data, safe=False)
 
-@user_passes_test(es_asistente)
+@user_passes_test(es_asistente_o_coordinacion)
 def api_eliminar_entrega(request, entrega_id):
+
     if request.method == "POST":
-        from .models import HistorialEntrega
-        from django.utils import timezone
-        return JsonResponse({"status": "success"})
-    return JsonResponse({"status": "error"}, status=405)
+
+        try:
+
+            entrega = get_object_or_404(
+                RegistroEntrega,
+                id=entrega_id
+            )
+
+            entrega.delete()
+
+            return JsonResponse({
+                "status": "success"
+            })
+
+        except Exception as e:
+
+            return JsonResponse({
+                "status": "error",
+                "message": str(e)
+            })
+
+    return JsonResponse({
+        "status": "error"
+    }, status=405)
 
 @user_passes_test(es_asistente)
 def api_editar_entrega(request, entrega_id):
@@ -515,7 +821,7 @@ def api_eliminar_baja(request, baja_id):
 # ==========================================
 # 👗 MÓDULO ROPA Y OTROS
 # ==========================================
-@user_passes_test(es_coordinacion)
+@user_passes_test(es_administracion)
 def api_guardar_prenda(request):
     if request.method == "POST":
         try:
@@ -1290,45 +1596,70 @@ def eliminar_tarea(request, task_id):
 
 @login_required
 def hallazgo_v2_guardar(request):
-    """ Guarda objetos encontrados con nombres de función únicos """
+
     if request.method == "POST":
+
         try:
+
             data = json.loads(request.body)
-            # Usamos los campos exactos de tu modelo ObjetoPerdido
+
             ObjetoPerdido.objects.create(
+
                 nombre_reporta=data.get('nombre', 'Anónimo'),
+
+                curso=data.get('curso', ''),
+
                 tipo_objeto=data.get('tipo', 'Sin especificar'),
-                descripcion=data.get('color', 'Sin descripción'),
-                entregado=False
+
+                color=data.get('color', ''),
+
+                descripcion=data.get('descripcion', '')
+
             )
-            return JsonResponse({"status": "success", "message": "Objeto registrado en V2"})
+
+            return JsonResponse({
+                "status": "success"
+            })
+
         except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
-    return JsonResponse({"status": "error"}, status=405)
+
+            return JsonResponse({
+                "status": "error",
+                "message": str(e)
+            })
+
+    return JsonResponse({
+        "status": "error"
+    })
     
 
 @login_required
 def hallazgo_v2_listar(request):
-    """ Lista objetos no entregados sin interferir con otras APIs """
-    # Intentamos usar el campo de fecha que tengas disponible
-    objetos = ObjetoPerdido.objects.filter(entregado=False).order_by('-id')
-    
+
+    objetos = ObjetoPerdido.objects.all().order_by('-fecha')
+
     data = []
+
     for o in objetos:
-        # Formateo de fecha seguro
-        fecha_txt = "S/F"
-        if hasattr(o, 'fecha_registro') and o.fecha_registro:
-            fecha_txt = o.fecha_registro.strftime('%d/%m/%Y')
-        elif hasattr(o, 'fecha') and o.fecha:
-            fecha_txt = o.fecha.strftime('%d/%m/%Y')
 
         data.append({
+
             "id": o.id,
+
             "nombre": o.nombre_reporta,
+
+            "curso": o.curso,
+
             "tipo": o.tipo_objeto,
-            "color": o.descripcion,
-            "fecha": fecha_txt
+
+            "color": o.color,
+
+            "descripcion": o.descripcion,
+
+            "fecha": o.fecha.strftime('%d/%m/%Y')
+
         })
+
     return JsonResponse(data, safe=False)
 
 
@@ -1347,32 +1678,88 @@ from django.http import JsonResponse
 
 
 
+# ==========================================
+# 📝 SOLICITUDES TEMPORALES
+# ==========================================
+
+solicitudes_temporales = []
+
+
+# ==========================================
+# 📥 OBTENER SOLICITUDES
+# ==========================================
+
+@login_required
 def api_obtener_solicitudes(request):
-    """
-    Endpoint para proveer los datos de solicitudes requeridos por el radar.
-    Evita el error de sintaxis JSON y el 404 en el frontend.
-    """
-    try:
-        # --- CONFIGURACIÓN CUANDO TENGAS EL MODELO ---
-        # Si ya usas un modelo (por ejemplo, 'Solicitud'), descomenta las líneas de abajo
-        # y ajusta los campos ('nombre', 'descripcion', etc.) a tu base de datos:
-        
-        # solicitudes = Solicitud.objects.all().order_by('-id')
-        # data = [
-        #     {
-        #         'id': s.id,
-        #         'usuario': s.usuario.username if s.usuario else "Anónimo",
-        #         'descripcion': s.descripcion,
-        #         'fecha': s.fecha.strftime('%Y-%m-%d') if s.fecha else ""
-        #     }
-        #     for s in solicitudes
-        # ]
-        # return JsonResponse(data, safe=False)
 
-        # --- RETORNO TEMPORAL SEGURO ---
-        # Mientras mapeas tus modelos, devolvemos un array vacío para que el JS no se rompa
-        return JsonResponse([], safe=False)
+    global solicitudes_temporales
 
-    except Exception as e:
-        # En caso de cualquier fallo en la consulta, responde con un JSON vacío limpio
-        return JsonResponse([], safe=False)
+    return JsonResponse(
+        solicitudes_temporales,
+        safe=False
+    )
+
+
+# ==========================================
+# 📝 GUARDAR SOLICITUDES
+# ==========================================
+
+@csrf_exempt
+@login_required
+def api_guardar_solicitud(request):
+
+    global solicitudes_temporales
+
+    if request.method == "POST":
+
+        try:
+
+            data = json.loads(request.body)
+
+            nueva = {
+                "id": len(solicitudes_temporales) + 1,
+                "nombre": data.get("nombre", ""),
+                "curso": data.get("curso", ""),
+                "descripcion": data.get("descripcion", ""),
+                "fecha": timezone.now().strftime("%d/%m/%Y %H:%M")
+            }
+
+            solicitudes_temporales.append(nueva)
+
+            return JsonResponse({
+                "success": True,
+                "solicitud": nueva
+            })
+
+        except Exception as e:
+
+            return JsonResponse({
+                "success": False,
+                "error": str(e)
+            })
+
+    return JsonResponse({
+        "success": False
+    })
+@login_required
+def api_eliminar_solicitud(request, solicitud_id):
+
+    global solicitudes_temporales
+
+    if request.method == "DELETE":
+
+        solicitudes_temporales = [
+
+            s for s in solicitudes_temporales
+
+            if str(s["id"]) != str(solicitud_id)
+
+        ]
+
+        return JsonResponse({
+            "success": True
+        })
+
+    return JsonResponse({
+        "success": False
+    }, status=405)
