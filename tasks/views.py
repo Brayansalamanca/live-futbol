@@ -193,6 +193,42 @@ def es_administracion(user):
 # ==========================================
 # ⚽ SUBIR EXCEL BALONES NFC
 # ==========================================
+from django.views.decorators.http import require_POST
+
+@require_POST
+def borrar_registros_antiguos(request):
+
+    ahora = timezone.now()
+
+    eliminados = 0
+
+    registros = RegistroEntrega.objects.all()
+
+    for r in registros:
+
+        try:
+
+            if not r.fecha:
+                continue
+
+            # Diferencia de tiempo real
+            diferencia = ahora - r.fecha
+
+            # SOLO borrar si tiene más de 1 día
+            if diferencia >= timedelta(days=1):
+
+                r.delete()
+
+                eliminados += 1
+
+        except Exception as e:
+
+            print("Error borrando:", e)
+
+    return JsonResponse({
+        "ok": True,
+        "eliminados": eliminados
+    })
 
 @csrf_exempt
 @login_required

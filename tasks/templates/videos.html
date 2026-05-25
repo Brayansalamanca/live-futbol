@@ -164,6 +164,21 @@
             <tbody id="tabla"></tbody>
         </table>
     </div>
+    <button onclick="borrarNoHoy()" style="
+    background-color:#e74c3c;
+    padding:15px 40px;
+    font-weight:bold;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:18px;
+    width:100%;
+    max-width:400px;
+    margin-top:10px;
+">
+    🗑️ Borrar registros que NO son de hoy
+</button>
 
     <div style="margin-top: 30px;">
         <h2>📌 Faltan por entregar</h2>
@@ -180,7 +195,13 @@
                 </thead>
                 <tbody id="tablaVencidos"></tbody>
             </table>
+
         </div>
+        <button style="background-color: #000000;">
+       <a href="{% url 'nfc' %}">
+                            Histórico de entregas
+                        </a>
+                        </button>
     </div>
 </div>
 
@@ -389,6 +410,37 @@
             }
         }
     }
+    async function borrarNoHoy() {
+
+    if (!confirm("⚠️ Se eliminarán TODOS los registros que no sean de hoy. ¿Continuar?")) {
+        return;
+    }
+
+    try {
+
+        const res = await fetch("/api/borrar-registros-antiguos/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}"
+            }
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+
+            alert(`✅ ${data.eliminados} registros eliminados`);
+
+            await cargarDatos();
+
+        } else {
+            alert("❌ Error al borrar registros");
+        }
+
+    } catch (error) {
+        alert("❌ Error de conexión");
+    }
+}
 
     async function editarEntrega(id, nombre, curso, objeto, lugar) {
         const newNombre = prompt('Editar nombre', nombre);

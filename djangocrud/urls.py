@@ -67,8 +67,13 @@ path(
     'api/registrar-entrega-nfc/',
     views.api_registrar_entrega_nfc,
     name='api_registrar_entrega_nfc'
-),
 
+),
+path(
+    'api/borrar-registros-antiguos/',
+    views.borrar_registros_antiguos,
+    name='borrar_registros_antiguos'
+),
 path(
     'api/devolver-balon/',
     views.api_devolver_balon,
