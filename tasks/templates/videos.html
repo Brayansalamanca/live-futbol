@@ -207,395 +207,932 @@
 
 <script>
     let registros = [];
-    let objetoActual = "";
-    let gradoActual = "";
-    let letraActual = "";
+let objetoActual = "";
+let gradoActual = "";
+let letraActual = "";
 
-    // --- LISTA DE VETADOS ---
-    const VETADOS = [
-        "pepito perez",
-        "fulano de tal"
-    ];
+// =========================================
+// LISTA DE VETADOS
+// =========================================
+const VETADOS = [
+    "pepito perez",
+    "fulano de tal"
+];
 
-    // CARGAR DATOS DESDE EL SERVIDOR
-    async function cargarDatos() {
-        try {
-            // Usamos una estampa de tiempo (?t=) para evitar que el navegador guarde cache viejo
-            const res = await fetch("{% url 'api_obtener_entregas' %}?t=" + Date.now());
-            if (!res.ok) return;
-            
-            const nuevosRegistros = await res.json();
-            
-            // Solo redibujamos si los datos realmente cambiaron
-            if (JSON.stringify(nuevosRegistros) !== JSON.stringify(registros)) {
-                registros = nuevosRegistros;
-                dibujar();
-            }
-        } catch (e) { 
-            console.warn("Error de conexión con el servidor. Reintentando..."); 
-        }
+// =========================================
+// NORMALIZAR NOMBRES
+// =========================================
+function normalizarNombre(nombre) {
+
+    if (!nombre) return "";
+
+    return nombre
+        .toLowerCase()
+
+        // quitar tildes
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+
+        // quitar # y numeros
+        .replace(/#\d+/g, "")
+        .replace(/\b\d+\b/g, "")
+
+        // quitar textos molestos
+        .replace(/alquilo:/g, "")
+        .replace(/boto:/g, "")
+
+        // quitar símbolos
+        .replace(/[^\w\s]/g, "")
+
+        // quitar espacios dobles
+        .replace(/\s+/g, " ")
+        .trim();
+
+}
+
+// =========================================
+// COMPARAR NOMBRES FLEXIBLE
+// =========================================
+function nombresParecidos(nombre1, nombre2) {
+
+    const n1 = normalizarNombre(nombre1);
+    const n2 = normalizarNombre(nombre2);
+
+    if (!n1 || !n2) return false;
+
+    // exacto
+    if (n1 === n2) return true;
+
+    // uno contiene al otro
+    if (n1.includes(n2) || n2.includes(n1)) {
+        return true;
     }
 
-    // REGISTRAR NUEVA ENTREGA
-    async function registrarEnNube() {
-        const nombreInput = document.getElementById("textoVoz").value.trim();
-        const lugarInput = document.getElementById("lugarSelect").value || "Sin lugar";
-        const cursoCompleto = gradoActual + (letraActual || "");
+    // comparar palabras
+    const palabras1 = n1.split(" ");
+    const palabras2 = n2.split(" ");
 
-        if (!nombreInput || !objetoActual || !gradoActual) {
-            alert("⚠️ Completa los campos: Nombre, Grado y Objeto");
-            return;
+    let coincidencias = 0;
+
+    palabras1.forEach(p1 => {
+
+        if (palabras2.includes(p1)) {
+            coincidencias++;
         }
 
-        if (VETADOS.includes(nombreInput.toLowerCase())) {
-            alert("❌ ESTUDIANTE VETADO: No se permite el préstamo.");
-            return;
+    });
+
+    return coincidencias >= 2;
+}
+
+// =========================================
+// CARGAR DATOS
+// =========================================
+async function cargarDatos() {
+
+    try {
+
+        const res = await fetch(
+            "{% url 'api_obtener_entregas' %}?t=" + Date.now()
+        );
+
+        if (!res.ok) return;
+
+        const nuevosRegistros = await res.json();
+
+        if (
+            JSON.stringify(nuevosRegistros) !==
+            JSON.stringify(registros)
+        ) {
+
+            registros = nuevosRegistros;
+
+            dibujar();
+
         }
 
-        const datos = {
-            recibido_por: nombreInput,
-            curso: cursoCompleto,
-            balon: objetoActual,
-            lugar: lugarInput
-        };
+    } catch (e) {
 
-        try {
-            const res = await fetch("{% url 'api_guardar_entrega' %}", {
+        console.warn("Error de conexión");
+
+    }
+
+}
+
+// =========================================
+// REGISTRAR ENTREGA
+// =========================================
+async function registrarEnNube() {
+
+    const nombreInput =
+        document.getElementById("textoVoz").value.trim();
+
+    const lugarInput =
+        document.getElementById("lugarSelect").value ||
+        "Sin lugar";
+
+    const cursoCompleto =
+        gradoActual + (letraActual || "");
+
+    // VALIDACIONES
+    if (!nombreInput || !objetoActual || !gradoActual) {
+
+        alert("⚠️ Completa Nombre, Curso y Objeto");
+
+        return;
+
+    }
+
+    if (VETADOS.includes(nombreInput.toLowerCase())) {
+
+        alert("❌ ESTUDIANTE VETADO");
+
+        return;
+
+    }
+
+    // =========================================
+    // VERIFICAR BAJAS
+    // =========================================
+    try {
+
+        const resBajas = await fetch(
+            "{% url 'api_obtener_bajas' %}?t=" + Date.now()
+        );
+
+        const bajas = await resBajas.json();
+
+        const suspendido = bajas.some(b => {
+
+            const nombreBaja =
+                b.usuario ||
+                b.nombre ||
+                b.responsable ||
+                b.estudiante ||
+                "";
+
+            return nombresParecidos(
+                nombreInput,
+                nombreBaja
+            );
+
+        });
+
+        if (suspendido) {
+
+            alert(
+                "❌ ESTE ESTUDIANTE ESTÁ SUSPENDIDO"
+            );
+
+            return;
+
+        }
+
+    } catch (e) {
+
+        alert("❌ Error verificando bajas");
+
+        return;
+
+    }
+
+    // =========================================
+    // GUARDAR
+    // =========================================
+    const datos = {
+
+        recibido_por: nombreInput,
+        curso: cursoCompleto,
+        balon: objetoActual,
+        lugar: lugarInput
+
+    };
+
+    try {
+
+        const res = await fetch(
+            "{% url 'api_guardar_entrega' %}",
+            {
+
                 method: "POST",
-                headers: { 
-                    "Content-Type": "application/json", 
-                    "X-CSRFToken": "{{ csrf_token }}" 
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
                 },
+
                 body: JSON.stringify(datos)
-            });
-            
-            if (res.ok) {
-                resetearFormulario();
-                await cargarDatos(); // Recargar tabla inmediatamente
-            } else {
-                alert("Error al guardar en el servidor.");
+
             }
-        } catch (error) { 
-            alert("Error de conexión. Revisa tu internet."); 
+        );
+
+        if (res.ok) {
+
+            resetearFormulario();
+
+            await cargarDatos();
+
+        } else {
+
+            alert("❌ Error al guardar");
+
         }
+
+    } catch (error) {
+
+        alert("❌ Error de conexión");
+
     }
 
-    // DIBUJAR LA TABLA (EL CORAZÓN DEL SCRIPT)
-    function dibujar() {
-        let html = "";
-        const filtro = document.getElementById("buscador").value.toLowerCase();
-        document.getElementById('tablaVencidos').innerHTML = '';
+}
 
-        if (!registros || registros.length === 0) {
-            document.getElementById("tabla").innerHTML = "<tr><td colspan='7'>No hay préstamos activos.</td></tr>";
-            document.getElementById('tablaVencidos').innerHTML = '<tr><td colspan="5">No hay devoluciones vencidas.</td></tr>';
-            return;
-        }
+// =========================================
+// DIBUJAR TABLA
+// =========================================
+function dibujar() {
 
-        registros.forEach((r) => {
-            // MAPEO FLEXIBLE: Busca el dato en cualquier nombre de variable posible
-            const nombre = r.nombre || r.recibido_por || r.usuario || r.estudiante || "---";
-            const objeto = r.objeto || r.balon || r.tipo || "---";
-            const curso = r.curso || r.grado || "N/A";
-            const lugar = r.lugar || r.ubicacion || "Cancha";
-            const id = r.id || r._id; // Por si usas MongoDB (_id)
+    let html = "";
 
-            if ((nombre + curso + objeto).toLowerCase().includes(filtro)) {
-                
-                // Formateo de fecha con AM/PM + vena de entrega a 1 hora
-                let fechaTexto = "Pendiente";
-                let venceTexto = "Pendiente";
-                let estado = "🟡 Sin hora registrada";
-                let isVencido = false;
-                let retrasoMinutos = 0;
+    const filtro =
+        document.getElementById("buscador")
+        .value
+        .toLowerCase();
 
-                if (r.fecha) {
-                    let d = new Date(r.fecha);
-                    if (isNaN(d.getTime())) {
-                        const fallback = r.fecha.replace(/\//g,'-').replace(' ','T');
-                        d = new Date(fallback);
+    document.getElementById(
+        "tablaVencidos"
+    ).innerHTML = "";
+
+    if (!registros || registros.length === 0) {
+
+        document.getElementById("tabla").innerHTML =
+            "<tr><td colspan='7'>No hay préstamos activos.</td></tr>";
+
+        return;
+
+    }
+
+    registros.forEach((r) => {
+
+        const nombre =
+            r.nombre ||
+            r.recibido_por ||
+            r.usuario ||
+            r.estudiante ||
+            "---";
+
+        const objeto =
+            r.objeto ||
+            r.balon ||
+            r.tipo ||
+            "---";
+
+        const curso =
+            r.curso ||
+            r.grado ||
+            "N/A";
+
+        const lugar =
+            r.lugar ||
+            r.ubicacion ||
+            "Cancha";
+
+        const id = r.id || r._id;
+
+        if (
+            (nombre + curso + objeto)
+            .toLowerCase()
+            .includes(filtro)
+        ) {
+
+            let fechaTexto = "Pendiente";
+            let venceTexto = "Pendiente";
+            let estado = "🟡";
+            let isVencido = false;
+            let retrasoMinutos = 0;
+
+            if (r.fecha) {
+
+                let d = new Date(r.fecha);
+
+                if (isNaN(d.getTime())) {
+
+                    const fallback =
+                        r.fecha
+                        .replace(/\//g, "-")
+                        .replace(" ", "T");
+
+                    d = new Date(fallback);
+
+                }
+
+                if (!isNaN(d.getTime())) {
+
+                    fechaTexto =
+                        d.toLocaleDateString("es-CO") +
+                        " " +
+                        d.toLocaleTimeString("es-CO", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true
+                        });
+
+                    const vencimiento =
+                        obtenerSiguienteDescanso(d);
+
+                    venceTexto =
+                        vencimiento.toLocaleDateString("es-CO") +
+                        " " +
+                        vencimiento.toLocaleTimeString("es-CO", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true
+                        });
+
+                    const ahora = new Date();
+
+                    if (ahora > vencimiento) {
+
+                        isVencido = true;
+
+                        estado = "⛔ Vencido";
+
+                        retrasoMinutos = Math.floor(
+                            (ahora - vencimiento) /
+                            (1000 * 60)
+                        );
+
+                    } else {
+
+                        estado = "✅ En tiempo";
+
                     }
 
-                    if (!isNaN(d.getTime())) {
-    fechaTexto = d.toLocaleDateString('es-CO', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    }) + " " + d.toLocaleTimeString('es-CO', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-    });
-
-    const vencimiento = obtenerSiguienteDescanso(d);
-
-    venceTexto = vencimiento.toLocaleDateString('es-CO', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    }) + " " + vencimiento.toLocaleTimeString('es-CO', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-    });
-
-    const ahora = new Date();
-
-    if (ahora > vencimiento) {
-        isVencido = true;
-        estado = '⛔ Vencido';
-        retrasoMinutos = Math.floor((ahora - vencimiento) / (1000 * 60));
-    } else {
-        estado = '✅ En tiempo';
-    }
-} else {
-    estado = '⚠️ Fecha inválida';
-}}
-
-                html += `
-                <tr>
-                    <td><strong>${nombre}</strong><br><small>${curso}</small></td>
-                    <td>${objeto}</td>
-                    <td>${lugar}</td>
-                    <td>${fechaTexto}</td>
-                    <td>${venceTexto}</td>
-                    <td style="color: ${isVencido ? '#ff4444':'#27ae60'}; font-weight:bold;">${estado}</td>
-                    <td>
-                        <button class="btn-entregado" onclick="editarEntrega('${id}', '${nombre}', '${curso}', '${objeto}', '${lugar}')">✏️ Editar</button>
-                        <button class="btn-entregado" onclick="marcarEntregado('${id}')">✅ Finalizar</button>
-                    </td>
-                </tr>`;
-
-                if (isVencido) {
-                    const tbodyVencidos = document.getElementById('tablaVencidos');
-                    const row = `
-                        <tr>
-                            <td><strong>${nombre}</strong><br><small>${curso}</small></td>
-                            <td>${objeto}</td>
-                            <td>${fechaTexto}</td>
-                            <td>${venceTexto}</td>
-                            <td>${retrasoMinutos} min</td>
-                        </tr>`;
-                    tbodyVencidos.insertAdjacentHTML('beforeend', row);
                 }
 
             }
-        });
-        document.getElementById("tabla").innerHTML = html || "<tr><td colspan='7'>Sin resultados.</td></tr>";
 
-        const tbodyVencidos = document.getElementById('tablaVencidos');
-        if (!tbodyVencidos.innerHTML.trim()) {
-            tbodyVencidos.innerHTML = '<tr><td colspan="5" style="padding:12px; color:#666;">No hay entregas vencidas. Todo al día.</td></tr>';
-        }
-    }
+            html += `
+            <tr>
 
-    // FINALIZAR PRÉSTAMO (ELIMINAR)
-    async function marcarEntregado(id) {
-        if(confirm("¿Confirmas la devolución de este objeto?")) {
-            try {
-                const res = await fetch(`/api/eliminar-entrega/${id}/`, { 
-                    method: "POST", 
-                    headers: { "X-CSRFToken": "{{ csrf_token }}" } 
-                });
-                
-                if (res.ok) {
-                    // Borrado visual instantáneo para que se sienta rápido
-                    registros = registros.filter(r => (r.id || r._id) != id);
-                    dibujar();
-                } else {
-                    alert("No se pudo procesar la devolución.");
-                }
-            } catch (e) { 
-                alert("Error de red al intentar eliminar."); 
+                <td>
+                    <strong>${nombre}</strong>
+                    <br>
+                    <small>${curso}</small>
+                </td>
+
+                <td>${objeto}</td>
+
+                <td>${lugar}</td>
+
+                <td>${fechaTexto}</td>
+
+                <td>${venceTexto}</td>
+
+                <td style="
+                    color:${isVencido ? '#ff4444' : '#27ae60'};
+                    font-weight:bold;
+                ">
+                    ${estado}
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn-entregado"
+                        onclick="editarEntrega(
+                            '${id}',
+                            '${nombre}',
+                            '${curso}',
+                            '${objeto}',
+                            '${lugar}'
+                        )"
+                    >
+                        ✏️ Editar
+                    </button>
+
+                    <button
+                        class="btn-entregado"
+                        onclick="marcarEntregado('${id}')"
+                    >
+                        ✅ Finalizar
+                    </button>
+
+                </td>
+
+            </tr>
+            `;
+
+            if (isVencido) {
+
+                const tbodyVencidos =
+                    document.getElementById(
+                        "tablaVencidos"
+                    );
+
+                tbodyVencidos.insertAdjacentHTML(
+                    "beforeend",
+                    `
+                    <tr>
+
+                        <td>
+                            <strong>${nombre}</strong>
+                            <br>
+                            <small>${curso}</small>
+                        </td>
+
+                        <td>${objeto}</td>
+
+                        <td>${fechaTexto}</td>
+
+                        <td>${venceTexto}</td>
+
+                        <td>${retrasoMinutos} min</td>
+
+                    </tr>
+                    `
+                );
+
             }
-        }
-    }
-    async function borrarNoHoy() {
 
-    if (!confirm("⚠️ Se eliminarán TODOS los registros que no sean de hoy. ¿Continuar?")) {
+        }
+
+    });
+
+    document.getElementById("tabla").innerHTML =
+        html ||
+        "<tr><td colspan='7'>Sin resultados</td></tr>";
+
+}
+
+// =========================================
+// FINALIZAR
+// =========================================
+async function marcarEntregado(id) {
+
+    if (!confirm("¿Confirmas la devolución?")) {
         return;
     }
 
     try {
 
-        const res = await fetch("/api/borrar-registros-antiguos/", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": "{{ csrf_token }}"
+        const res = await fetch(
+            `/api/eliminar-entrega/${id}/`,
+            {
+
+                method: "POST",
+
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+
             }
-        });
+        );
+
+        if (res.ok) {
+
+            registros = registros.filter(
+                r => (r.id || r._id) != id
+            );
+
+            dibujar();
+
+        }
+
+    } catch (e) {
+
+        alert("❌ Error eliminando");
+
+    }
+
+}
+
+// =========================================
+// EDITAR
+// =========================================
+async function editarEntrega(
+    id,
+    nombre,
+    curso,
+    objeto,
+    lugar
+) {
+
+    const newNombre =
+        prompt("Editar nombre", nombre);
+
+    if (newNombre === null) return;
+
+    const newCurso =
+        prompt("Editar curso", curso);
+
+    if (newCurso === null) return;
+
+    const newObjeto =
+        prompt("Editar objeto", objeto);
+
+    if (newObjeto === null) return;
+
+    const newLugar =
+        prompt("Editar lugar", lugar);
+
+    if (newLugar === null) return;
+
+    try {
+
+        const res = await fetch(
+            `/api/editar-entrega/${id}/`,
+            {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+
+                body: JSON.stringify({
+
+                    nombre: newNombre,
+                    curso: newCurso,
+                    objeto: newObjeto,
+                    lugar: newLugar
+
+                })
+
+            }
+        );
+
+        if (res.ok) {
+
+            await cargarDatos();
+
+        }
+
+    } catch (error) {
+
+        alert("❌ Error actualizando");
+
+    }
+
+}
+
+// =========================================
+// BORRAR NO HOY
+// =========================================
+async function borrarNoHoy() {
+
+    if (
+        !confirm(
+            "⚠️ Se eliminarán TODOS los registros que NO son de hoy"
+        )
+    ) {
+        return;
+    }
+
+    try {
+
+        const res = await fetch(
+            "/api/borrar-registros-antiguos/",
+            {
+
+                method: "POST",
+
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+
+            }
+        );
 
         const data = await res.json();
 
         if (res.ok) {
 
-            alert(`✅ ${data.eliminados} registros eliminados`);
+            alert(
+                `✅ ${data.eliminados} eliminados`
+            );
 
             await cargarDatos();
 
-        } else {
-            alert("❌ Error al borrar registros");
         }
 
-    } catch (error) {
-        alert("❌ Error de conexión");
+    } catch (e) {
+
+        alert("❌ Error");
+
     }
+
 }
 
-    async function editarEntrega(id, nombre, curso, objeto, lugar) {
-        const newNombre = prompt('Editar nombre', nombre);
-        if (newNombre === null) return;
-        const newCurso = prompt('Editar curso', curso);
-        if (newCurso === null) return;
-        const newObjeto = prompt('Editar objeto', objeto);
-        if (newObjeto === null) return;
-        const newLugar = prompt('Editar lugar', lugar);
-        if (newLugar === null) return;
+// =========================================
+// BOTONES
+// =========================================
+function seleccionarObjeto(btn, obj) {
 
-        try {
-            const res = await fetch(`/api/editar-entrega/${id}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    nombre: newNombre,
-                    curso: newCurso,
-                    objeto: newObjeto,
-                    lugar: newLugar
-                })
-            });
-            if (res.ok) {
-                await cargarDatos();
-            } else {
-                alert('Error al actualizar el registro.');
-            }
-        } catch (error) {
-            alert('Error de red al actualizar.');
-        }
+    objetoActual = obj;
+
+    document
+        .querySelectorAll(".btn-objeto")
+        .forEach(b => b.classList.remove("activo"));
+
+    btn.classList.add("activo");
+
+}
+
+function seleccionarGrado(btn, grado) {
+
+    gradoActual = grado;
+
+    document
+        .querySelectorAll(
+            "#gradosContenedor .btn-curso"
+        )
+        .forEach(b => b.classList.remove("activo"));
+
+    btn.classList.add("activo");
+
+    generarLetras(grado);
+
+}
+
+function seleccionarLetra(btn, letra) {
+
+    letraActual = letra;
+
+    document
+        .querySelectorAll(
+            "#letrasContenedor .btn-curso"
+        )
+        .forEach(b => b.classList.remove("activo"));
+
+    btn.classList.add("activo");
+
+}
+
+// =========================================
+// LETRAS
+// =========================================
+function generarLetras(grado) {
+
+    let letras = ["A", "B", "C", "D", "E"];
+
+    let limite = (grado <= 9) ? 4 : 5;
+
+    let html = "";
+
+    for (let i = 0; i < limite; i++) {
+
+        html += `
+        <button
+            class="btn-curso"
+            onclick="seleccionarLetra(this, '${letras[i]}')"
+        >
+            ${letras[i]}
+        </button>
+        `;
+
     }
 
-    // FUNCIONES DE INTERFAZ (BOTONES)
-    function seleccionarObjeto(btn, obj) {
-        objetoActual = obj;
-        document.querySelectorAll(".btn-objeto").forEach(b => b.classList.remove("activo"));
-        btn.classList.add("activo");
-    }
+    document.getElementById(
+        "letrasContenedor"
+    ).innerHTML = html;
 
-    function seleccionarGrado(btn, grado) {
-        gradoActual = grado;
-        document.querySelectorAll("#gradosContenedor .btn-curso").forEach(b => b.classList.remove("activo"));
-        btn.classList.add("activo");
-        generarLetras(grado);
-    }
+    letraActual = "";
 
-    function seleccionarLetra(btn, letra) {
-        letraActual = letra;
-        document.querySelectorAll("#letrasContenedor .btn-curso").forEach(b => b.classList.remove("activo"));
-        btn.classList.add("activo");
-    }
+}
 
-    function generarLetras(grado) {
-        let letras = ['A', 'B', 'C', 'D', 'E'];
-        let limite = (grado <= 9) ? 4 : 5;
-        let html = "";
-        for(let i = 0; i < limite; i++) {
-            html += `<button class="btn-curso" onclick="seleccionarLetra(this, '${letras[i]}')">${letras[i]}</button>`;
-        }
-        document.getElementById("letrasContenedor").innerHTML = html;
-        letraActual = ""; 
-    }
+// =========================================
+// CURSOS DINÁMICOS
+// =========================================
+function obtenerPeriodoActual(fecha) {
 
-    function obtenerPeriodoActual(fecha) {
-        // Periodos establecidos y rotativos
-        const periodoData = [
-            {start: '08:00', end: '09:40', grades: [6,7,8], label: 'Seniors'},
-            {start: '10:00', end: '10:50', grades: [3,4,5], label: 'Teens'},
-            {start: '10:51', end: '11:45', grades: [9,10,11], label: 'Masters'},
-            {start: '11:46', end: '12:40', grades: [6,7,8], label: 'Seniors'},
-            {start: '12:41', end: '13:35', grades: [3,4,5], label: 'Teens'},
-            {start: '13:36', end: '14:15', grades: [9,10,11], label: 'Masters'}
-        ];
+    const periodoData = [
 
-        const minutos = fecha.getHours() * 60 + fecha.getMinutes();
-        for(const p of periodoData) {
-            const [hs, ms] = p.start.split(':').map(Number);
-            const [he, me] = p.end.split(':').map(Number);
-            const minStart = hs * 60 + ms;
-            const minEnd = he * 60 + me;
-            if (minutos >= minStart && minutos < minEnd) return p;
-        }
-        return null;
-    }
+        {
+            start: '08:00',
+            end: '09:40',
+            grades: [6,7,8],
+            label: 'Seniors'
+        },
 
-    function obtenerSiguienteDescanso(fecha) {
-        const periodoData = [
-            {start: '09:05', end: '09:45'},
-            {start: '10:00', end: '10:50'},
-            {start: '10:55', end: '11:45'},
-            {start: '11:46', end: '12:40'},
-            {start: '12:41', end: '13:35'},
-            {start: '13:36', end: '14:15'}
-        ];
+        {
+            start: '10:00',
+            end: '10:50',
+            grades: [3,4,5],
+            label: 'Teens'
+        },
 
-        const minutos = fecha.getHours() * 60 + fecha.getMinutes();
-        for(const p of periodoData) {
-            const [he, me] = p.end.split(':').map(Number);
-            const minEnd = he * 60 + me;
-            if (minutos < minEnd) {
-                const next = new Date(fecha);
-                next.setHours(he, me, 0, 0);
-                return next;
-            }
-        }
+        {
+            start: '10:51',
+            end: '11:45',
+            grades: [9,10,11],
+            label: 'Masters'
+        },
 
-        // Fuera de horarios -> siguiente día 09:05
-        const next = new Date(fecha);
-        next.setDate(next.getDate() + 1);
-        next.setHours(9, 5, 0, 0);
-        return next;
-    }
+        {
+            start: '11:46',
+            end: '12:40',
+            grades: [6,7,8],
+            label: 'Seniors'
+        },
 
-    function cargarBotonesCursos() {
-        const now = new Date();
-        const periodo = obtenerPeriodoActual(now);
-        let buttons = [];
-        let label = 'Sin periodo activo';
+        {
+            start: '12:41',
+            end: '13:35',
+            grades: [3,4,5],
+            label: 'Teens'
+        },
 
-        if (periodo) {
-            label = `${periodo.label} (${periodo.start} - ${periodo.end})`;
-            buttons = periodo.grades;
-        } else {
-            // Si no está en un periodo, mostrar acceso básico, pero sugerir horario.
-            buttons = [6,7,8,3,4,5,9,10,11];
+        {
+            start: '13:36',
+            end: '14:15',
+            grades: [9,10,11],
+            label: 'Masters'
         }
 
-        document.getElementById('gradosContenedor').innerHTML = `<div style="margin-bottom: 8px; color:red;font-weight:bold;">${label}</div>`;
+    ];
 
-        let html = "";
-        buttons.forEach((g) => {
-            html += `<button class="btn-curso" onclick="seleccionarGrado(this, ${g})">${g}°</button>`;
-        });
-        document.getElementById("gradosContenedor").innerHTML += html;
+    const minutos =
+        fecha.getHours() * 60 +
+        fecha.getMinutes();
+
+    for (const p of periodoData) {
+
+        const [hs, ms] =
+            p.start.split(':').map(Number);
+
+        const [he, me] =
+            p.end.split(':').map(Number);
+
+        const minStart = hs * 60 + ms;
+        const minEnd = he * 60 + me;
+
+        if (
+            minutos >= minStart &&
+            minutos < minEnd
+        ) {
+            return p;
+        }
+
     }
 
-    function resetearFormulario() {
-        document.getElementById("textoVoz").value = "";
-        document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
-        objetoActual = ""; gradoActual = ""; letraActual = "";
-        document.getElementById("letrasContenedor").innerHTML = "";
-        document.getElementById("lugarSelect").selectedIndex = 0;
+    return null;
+}
+
+function cargarBotonesCursos() {
+
+    const now = new Date();
+
+    const periodo =
+        obtenerPeriodoActual(now);
+
+    let buttons = [];
+
+    let label = "Sin periodo activo";
+
+    if (periodo) {
+
+        label =
+            `${periodo.label} (${periodo.start} - ${periodo.end})`;
+
+        buttons = periodo.grades;
+
+    } else {
+
+        buttons = [6,7,8,3,4,5,9,10,11];
+
     }
 
-    // INICIO
-    document.addEventListener("DOMContentLoaded", () => {
-        cargarBotonesCursos();
-        cargarDatos();
-        // Sincronización automática cada 8 segundos
-        setInterval(cargarDatos, 8000);
-        // Autoactualizar ciclo de cursos cada 30 segundos para mostrar cambio de periodo en tiempo real
-        setInterval(cargarBotonesCursos, 30000);
+    document.getElementById(
+        "gradosContenedor"
+    ).innerHTML = `
+        <div style="
+            margin-bottom:8px;
+            color:red;
+            font-weight:bold;
+        ">
+            ${label}
+        </div>
+    `;
+
+    let html = "";
+
+    buttons.forEach((g) => {
+
+        html += `
+        <button
+            class="btn-curso"
+            onclick="seleccionarGrado(this, ${g})"
+        >
+            ${g}°
+        </button>
+        `;
+
     });
+
+    document.getElementById(
+        "gradosContenedor"
+    ).innerHTML += html;
+
+}
+
+// =========================================
+// RESET
+// =========================================
+function resetearFormulario() {
+
+    document.getElementById(
+        "textoVoz"
+    ).value = "";
+
+    document
+        .querySelectorAll(
+            ".btn-objeto, .btn-curso"
+        )
+        .forEach(b => b.classList.remove("activo"));
+
+    objetoActual = "";
+    gradoActual = "";
+    letraActual = "";
+
+    document.getElementById(
+        "letrasContenedor"
+    ).innerHTML = "";
+
+    document.getElementById(
+        "lugarSelect"
+    ).selectedIndex = 0;
+
+}
+
+// =========================================
+// HORARIO
+// =========================================
+function obtenerSiguienteDescanso(fecha) {
+
+    const periodoData = [
+
+        {start: '09:05', end: '09:45'},
+        {start: '10:00', end: '10:50'},
+        {start: '10:55', end: '11:45'},
+        {start: '11:46', end: '12:40'},
+        {start: '12:41', end: '13:35'},
+        {start: '13:36', end: '14:15'}
+
+    ];
+
+    const minutos =
+        fecha.getHours() * 60 +
+        fecha.getMinutes();
+
+    for (const p of periodoData) {
+
+        const [he, me] =
+            p.end.split(':').map(Number);
+
+        const minEnd = he * 60 + me;
+
+        if (minutos < minEnd) {
+
+            const next = new Date(fecha);
+
+            next.setHours(he, me, 0, 0);
+
+            return next;
+
+        }
+
+    }
+
+    const next = new Date(fecha);
+
+    next.setDate(next.getDate() + 1);
+
+    next.setHours(9, 5, 0, 0);
+
+    return next;
+
+}
+
+// =========================================
+// INICIO
+// =========================================
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        cargarBotonesCursos();
+
+        cargarDatos();
+
+        setInterval(cargarDatos, 4000);
+
+        setInterval(
+            cargarBotonesCursos,
+            30000
+        );
+
+    }
+);
 </script>
 {% endblock %}

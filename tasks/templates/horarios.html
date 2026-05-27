@@ -5,22 +5,10 @@
 
 <link
     rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
 >
 
 <style>
-
-:root{
-    --bg:#f3f4f6;
-    --card:#ffffff;
-    --primary:#15803d;
-    --secondary:#2563eb;
-    --danger:#dc2626;
-    --warning:#ea580c;
-    --border:#d1d5db;
-    --text:#111827;
-    --shadow:0 8px 25px rgba(0,0,0,.08);
-}
 
 *{
     margin:0;
@@ -29,196 +17,204 @@
 }
 
 body{
-    background:var(--bg);
+    background:#f3f4f6;
     font-family:'Poppins',sans-serif;
 }
 
-/* =====================================
-NAVBAR
-===================================== */
+.container{
+    max-width:1400px;
+    margin:auto;
+    padding:15px;
+}
 
-.navbar{
-    width:100%;
+/* =========================
+HEADER
+========================= */
+
+.topbar{
     background:#111827;
-    padding:15px 25px;
+    color:white;
+    padding:14px 18px;
+    border-radius:14px;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    flex-wrap:wrap;
-    gap:15px;
-    box-shadow:var(--shadow);
+    margin-bottom:15px;
 }
 
-.navbar h1{
-    color:white;
-    font-size:1.4rem;
+.topbar h1{
+    font-size:1.2rem;
 }
-
-.nav-right{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    align-items:center;
-}
-
-/* =====================================
-BOTONES
-===================================== */
 
 .btn{
     border:none;
-    padding:12px 18px;
-    border-radius:12px;
+    border-radius:10px;
+    padding:10px 14px;
     cursor:pointer;
     font-weight:600;
-    transition:.2s;
-}
-
-.btn:hover{
-    transform:translateY(-2px);
 }
 
 .btn-primary{
-    background:var(--primary);
-    color:white;
-}
-
-.btn-secondary{
-    background:var(--secondary);
+    background:#15803d;
     color:white;
 }
 
 .btn-danger{
-    background:var(--danger);
+    background:#dc2626;
     color:white;
 }
 
-/* =====================================
-CONTENEDOR
-===================================== */
-
-.container{
-    max-width:1850px;
-    margin:auto;
-    padding:25px;
+.btn-secondary{
+    background:#2563eb;
+    color:white;
 }
 
-/* =====================================
-PANELES
-===================================== */
+/* =========================
+PANEL
+========================= */
 
 .panel{
     background:white;
-    border-radius:20px;
-    padding:20px;
-    margin-bottom:20px;
-    box-shadow:var(--shadow);
+    border-radius:14px;
+    padding:15px;
+    margin-bottom:15px;
+    box-shadow:0 4px 10px rgba(0,0,0,.05);
 }
 
-/* =====================================
-CONFIGURACIÓN
-===================================== */
+/* =========================
+BUSQUEDAS
+========================= */
+
+.search-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.search-box{
+    position:relative;
+}
+
+.search-box input{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    outline:none;
+}
+
+.sugerencias{
+    position:absolute;
+    width:100%;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 5px 20px rgba(0,0,0,.12);
+    top:105%;
+    left:0;
+    z-index:100;
+    display:none;
+    max-height:250px;
+    overflow:auto;
+}
+
+.sugerencia-item{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    cursor:pointer;
+}
+
+.sugerencia-item:hover{
+    background:#f0fdf4;
+}
+
+.curso-actions{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+}
+
+/* =========================
+INFO
+========================= */
+
+.info-actual{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.info-box{
+    background:#f9fafb;
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:.92rem;
+}
+
+/* =========================
+CONFIG
+========================= */
 
 .config-grid{
     display:grid;
     grid-template-columns:
-        repeat(auto-fit,minmax(220px,1fr));
-
-    gap:15px;
+        repeat(auto-fit,minmax(180px,1fr));
+    gap:10px;
 }
 
 .config-grid input,
 .config-grid select{
     width:100%;
-    padding:12px;
-    border-radius:12px;
-    border:1px solid var(--border);
-    outline:none;
-    font-size:.95rem;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
 }
 
-/* =====================================
-SEMANA
-===================================== */
-
-.calendar-controls{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:15px;
-    flex-wrap:wrap;
-}
-
-.calendar-controls h2{
-    font-size:1.1rem;
-}
-
-/* =====================================
-HORARIO ACTUAL
-===================================== */
-
-.current-info{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:10px;
-}
-
-.current-info strong{
-    color:var(--primary);
-}
-
-/* =====================================
+/* =========================
 TABLA
-===================================== */
+========================= */
 
 .table-wrapper{
-    width:100%;
-    overflow-x:auto;
+    overflow:auto;
 }
 
 table{
     width:100%;
-    min-width:1400px;
+    min-width:1200px;
     border-collapse:collapse;
     background:white;
-    border-radius:20px;
+    border-radius:14px;
     overflow:hidden;
-    box-shadow:var(--shadow);
 }
 
 th{
-    background:var(--primary);
+    background:#15803d;
     color:white;
-    padding:15px;
-    font-size:.95rem;
+    padding:12px;
+    font-size:.9rem;
 }
 
 td{
     border:1px solid #e5e7eb;
-    height:140px;
-    min-width:200px;
+    height:90px;
+    padding:4px;
     vertical-align:top;
-    padding:5px;
 }
 
 .hora-col{
-    width:120px;
+    width:110px;
     text-align:center;
-    vertical-align:middle;
     background:#eff6ff;
-    font-weight:700;
+    font-weight:600;
+    font-size:.8rem;
+    color:#ffffff;
 }
-
-/* =====================================
-CELDAS
-===================================== */
 
 .cell{
     width:100%;
     height:100%;
-    border-radius:12px;
+    border-radius:8px;
     cursor:pointer;
     transition:.2s;
 }
@@ -227,33 +223,50 @@ CELDAS
     background:#f0fdf4;
 }
 
-/* =====================================
+/* =========================
 CARDS
-===================================== */
+========================= */
 
-.card-horario{
-    background:#ecfdf5;
-    border-left:6px solid var(--primary);
-    border-radius:12px;
-    padding:10px;
-    margin-bottom:5px;
-    font-size:.8rem;
-    line-height:1.5;
+.card{
+    border-radius:8px;
+    padding:6px;
+    font-size:.72rem;
+    line-height:1.4;
+    height:100%;
 }
 
-.card-horario strong{
+.card strong{
     display:block;
-    margin-bottom:5px;
+    margin-bottom:4px;
+}
+
+.card-clase{
+    background:#ecfdf5;
+    border-left:5px solid #15803d;
 }
 
 .card-relevo{
     background:#fff7ed;
-    border-left-color:var(--warning);
+    border-left:5px solid #ea580c;
 }
 
-/* =====================================
+.card-descanso{
+    background:#eff6ff;
+    border-left:5px solid #2563eb;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    font-weight:700;
+}
+
+.filtro-activo{
+    outline:3px solid #2563eb;
+}
+
+/* =========================
 MODAL
-===================================== */
+========================= */
 
 .overlay{
     position:fixed;
@@ -268,18 +281,744 @@ MODAL
     top:50%;
     left:50%;
     transform:translate(-50%,-50%);
-    width:420px;
-    max-width:95%;
     background:white;
-    border-radius:20px;
-    padding:25px;
+    width:95%;
+    max-width:400px;
+    border-radius:14px;
+    padding:20px;
     display:none;
     z-index:1000;
-    box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+
+.modal-body{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+@media(max-width:900px){
+
+    .search-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+:root{
+    --bg:#eef2ff;
+    --card:#ffffff;
+    --primary:#2563eb;
+    --primary2:#1d4ed8;
+    --success:#16a34a;
+    --danger:#dc2626;
+    --warning:#ea580c;
+    --text:#0f172a;
+    --text2:#475569;
+    --border:#dbe4ff;
+
+    --shadow:
+    0 10px 30px rgba(37,99,235,.10);
+
+    --radius:18px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:
+    linear-gradient(
+        135deg,
+        #dbeafe 0%,
+        #eef2ff 50%,
+        #f8fafc 100%
+    );
+
+    font-family:'Poppins',sans-serif;
+    color:var(--text);
+    min-height:100vh;
+}
+
+/* =========================================
+SCROLL
+========================================= */
+
+::-webkit-scrollbar{
+    width:10px;
+    height:10px;
+}
+
+::-webkit-scrollbar-track{
+    background:#dbeafe;
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#3b82f6;
+    border-radius:20px;
+}
+
+/* =========================================
+NAVBAR
+========================================= */
+
+.navbar{
+    width:100%;
+    padding:18px 25px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    flex-wrap:wrap;
+
+    background:
+    rgba(255,255,255,.75);
+
+    backdrop-filter:blur(12px);
+
+    border-bottom:
+    1px solid rgba(255,255,255,.4);
+
+    position:sticky;
+    top:0;
+    z-index:100;
+
+    box-shadow:var(--shadow);
+}
+
+.navbar h1{
+    font-size:1.5rem;
+    font-weight:700;
+    color:#1e293b;
+}
+
+.nav-right{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+/* =========================================
+BOTONES
+========================================= */
+
+.btn{
+    border:none;
+    border-radius:14px;
+    padding:12px 18px;
+
+    font-size:.92rem;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+
+.btn:hover{
+    transform:
+    translateY(-2px)
+    scale(1.02);
+}
+
+.btn-primary{
+    background:
+    linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+
+    color:white;
+
+    box-shadow:
+    0 8px 20px rgba(37,99,235,.25);
+}
+
+.btn-secondary{
+    background:
+    linear-gradient(
+        135deg,
+        #475569,
+        #334155
+    );
+
+    color:white;
+}
+
+.btn-danger{
+    background:
+    linear-gradient(
+        135deg,
+        #ef4444,
+        #dc2626
+    );
+
+    color:white;
+}
+
+/* =========================================
+CONTENEDOR
+========================================= */
+
+.container{
+    max-width:1450px;
+    margin:auto;
+    padding:20px;
+}
+
+/* =========================================
+PANEL GENERAL
+========================================= */
+
+.panel{
+    background:
+    rgba(255,255,255,.82);
+
+    backdrop-filter:blur(10px);
+
+    border:
+    1px solid rgba(255,255,255,.5);
+
+    border-radius:24px;
+
+    padding:18px;
+
+    margin-bottom:18px;
+
+    box-shadow:var(--shadow);
+}
+
+/* =========================================
+TOP GRID
+========================================= */
+
+.top-grid{
+    display:grid;
+
+    grid-template-columns:
+    1.3fr
+    .8fr
+    auto;
+
+    gap:14px;
+
+    align-items:end;
+}
+
+@media(max-width:900px){
+
+    .top-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+/* =========================================
+TITULOS
+========================================= */
+
+.title-box{
+    margin-bottom:12px;
+}
+
+.title-box h2{
+    font-size:1.1rem;
+    font-weight:700;
+}
+
+.title-box p{
+    font-size:.88rem;
+    color:var(--text2);
+    margin-top:4px;
+}
+
+/* =========================================
+INPUTS
+========================================= */
+
+.input-group{
+    position:relative;
+}
+
+.input-group input,
+.input-group select{
+    width:100%;
+
+    border:
+    1px solid var(--border);
+
+    background:white;
+
+    border-radius:16px;
+
+    padding:
+    14px 15px;
+
+    font-size:.95rem;
+
+    outline:none;
+
+    transition:.2s;
+}
+
+.input-group input:focus,
+.input-group select:focus{
+
+    border-color:#3b82f6;
+
+    box-shadow:
+    0 0 0 4px
+    rgba(59,130,246,.12);
+
+}
+
+/* =========================================
+SUGERENCIAS
+========================================= */
+
+.sugerencias{
+    position:absolute;
+
+    top:105%;
+    left:0;
+
+    width:100%;
+
+    background:white;
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    display:none;
+
+    max-height:320px;
+    overflow-y:auto;
+
+    z-index:50;
+
+    box-shadow:
+    0 15px 35px rgba(0,0,0,.12);
+}
+
+.sugerencia-item{
+    padding:14px;
+
+    cursor:pointer;
+
+    border-bottom:
+    1px solid #f1f5f9;
+
+    transition:.2s;
+}
+
+.sugerencia-item:hover{
+    background:#eff6ff;
+}
+
+.sugerencia-item strong{
+    color:#1d4ed8;
+}
+
+/* =========================================
+HORARIO INFO
+========================================= */
+
+.current-info{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.info-card{
+    flex:1;
+
+    min-width:220px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #eff6ff,
+        #dbeafe
+    );
+
+    border-radius:18px;
+
+    padding:16px;
+
+    border:
+    1px solid #bfdbfe;
+}
+
+.info-label{
+    font-size:.8rem;
+    color:#475569;
+    margin-bottom:5px;
+}
+
+.info-value{
+    font-size:1.1rem;
+    font-weight:700;
+    color:#1e3a8a;
+}
+
+/* =========================================
+SEMANA
+========================================= */
+
+.calendar-controls{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+#tituloSemana{
+    background:white;
+
+    padding:
+    22px 38px;
+
+    border-radius:14px;
+
+    font-size:1rem;
+
+    box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================================
+CONFIG GRID
+========================================= */
+
+.config-grid{
+    display:grid;
+
+    grid-template-columns:
+    repeat(
+        auto-fit,
+        minmax(180px,1fr)
+    );
+
+    gap:12px;
+}
+
+/* =========================================
+TABLA
+========================================= */
+
+.table-wrapper{
+    overflow:auto;
+
+    border-radius:24px;
+
+    box-shadow:
+    0 15px 35px rgba(0,0,0,.08);
+}
+
+table{
+    width:100%;
+
+    min-width:1250px;
+
+    border-collapse:collapse;
+
+    background:white;
+}
+
+/* =========================================
+HEADERS
+========================================= */
+
+th{
+    background:
+    linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+
+    color:white;
+
+    padding:15px;
+
+    font-size:.92rem;
+
+    position:sticky;
+    top:0;
+    z-index:5;
+}
+
+.hora-col{
+    min-width:120px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #0f172a,
+        #1e293b
+    ) !important;
+}
+
+/* =========================================
+CELDAS
+========================================= */
+
+td{
+    border:
+    1px solid #e2e8f0;
+
+    height:105px;
+
+    padding:5px;
+
+    background:#f8fafc;
+}
+
+.cell{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    border-radius:14px;
+    transition:.2s;
+    cursor:pointer;
+    position:relative;
+}
+
+.cell:hover{
+    background:#e0f2fe;
+    transform:scale(1.01);
+}
+
+/* =========================================
+CARD HORARIO
+========================================= */
+
+.card-horario{
+    width:100%;
+    height:100%;
+
+    border-radius:14px;
+
+    padding:8px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:center;
+
+    overflow:hidden;
+
+    background:
+    linear-gradient(
+        135deg,
+        #ecfeff,
+        #dbeafe
+    );
+
+    border-left:5px solid #2563eb;
+
+    transition:.2s;
+}
+
+.card-horario:hover{
+    transform:scale(1.02);
+}
+
+.card-horario strong{
+    font-size:.9rem;
+    color:#1d4ed8;
+    margin-bottom:4px;
+}
+
+/*========================*/
+.card-title{
+    width:100%;
+
+    font-size:.95rem;
+    font-weight:700;
+
+    color:#1d4ed8;
+
+    text-align:center;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+
+    margin-bottom:6px;
+}
+
+.card-mini{
+    width:100%;
+
+    font-size:.72rem;
+
+    color:#334155;
+
+    text-align:center;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+
+    line-height:1.3;
+}
+/* =========================================
+RELEVO
+========================================= */
+
+.card-relevo{
+    background:
+    linear-gradient(
+        135deg,
+        #fff7ed,
+        #ffedd5
+    );
+
+    border-left:
+    6px solid #f97316;
+}
+
+/* =========================================
+DESCANSO
+========================================= */
+
+.card-descanso{
+    width:100%;
+    height:100%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+
+    font-weight:700;
+
+    border-radius:16px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #dcfce7,
+        #bbf7d0
+    );
+
+    color:#166534;
+
+    font-size:.9rem;
+}
+
+/* =========================================
+FILTRO ACTIVO
+========================================= */
+
+.filtro-activo{
+
+    animation:
+    pulse 1.2s infinite;
+
+    outline:
+    4px solid #3b82f6;
+
+    z-index:2;
+}
+
+@keyframes pulse{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.04);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+
+}
+
+/* =========================================
+MODAL
+========================================= */
+
+.overlay{
+    position:fixed;
+    inset:0;
+
+    background:
+    rgba(15,23,42,.55);
+
+    display:none;
+
+    z-index:999;
+
+    backdrop-filter:blur(5px);
+}
+
+.modal{
+    position:fixed;
+
+    top:50%;
+    left:50%;
+
+    transform:
+    translate(-50%,-50%);
+
+    width:420px;
+    max-width:94%;
+
+    background:white;
+
+    border-radius:28px;
+
+    padding:22px;
+
+    display:none;
+
+    z-index:1000;
+
+    box-shadow:
+    0 30px 80px rgba(0,0,0,.25);
+
+    animation:
+    aparecer .25s ease;
+}
+
+@keyframes aparecer{
+
+    from{
+        opacity:0;
+        transform:
+        translate(-50%,-45%);
+    }
+
+    to{
+        opacity:1;
+        transform:
+        translate(-50%,-50%);
+    }
+
 }
 
 .modal h2{
-    margin-bottom:15px;
+    margin-bottom:18px;
+    font-size:1.2rem;
 }
 
 .modal-body{
@@ -288,39 +1027,93 @@ MODAL
     gap:12px;
 }
 
-/* =====================================
-RESPONSIVE
-===================================== */
+/* =========================================
+BADGES
+========================================= */
 
-@media(max-width:900px){
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+
+    padding:
+    7px 12px;
+
+    border-radius:999px;
+
+    font-size:.75rem;
+    font-weight:600;
+}
+
+.badge-success{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-warning{
+    background:#ffedd5;
+    color:#9a3412;
+}
+
+.badge-primary{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+/* =========================================
+RESPONSIVE
+========================================= */
+
+@media(max-width:700px){
 
     .navbar{
         justify-content:center;
     }
 
-    .current-info{
-        flex-direction:column;
-        align-items:flex-start;
+    .navbar h1{
+        font-size:1.2rem;
+        text-align:center;
+    }
+
+    .btn{
+        width:100%;
+    }
+
+    td{
+    border:1px solid #e2e8f0;
+    height:110px;
+    min-height:110px;
+    max-height:110px;
+    padding:4px;
+    background:#f8fafc;
+    vertical-align:top;
+    
+    }
+
+    .card-horario{
+        font-size:.7rem;
+        padding:7px;
+    }
+
+    .card-horario strong{
+        font-size:.78rem;
     }
 
 }
-
 </style>
 
-<!-- =====================================
-NAVBAR
-===================================== -->
+<div class="container">
 
-<nav class="navbar">
+    <!-- TOP -->
 
-    <h1>
-        📚 Gestión de Horarios
-    </h1>
+    <div class="topbar">
 
-    <div class="nav-right">
+        <h1>
+            📚 Gestión de Horarios
+        </h1>
 
         <button
-            class="btn btn-secondary"
+            class="btn btn-danger"
             onclick="limpiarTodo()"
         >
             🗑 Limpiar Todo
@@ -328,13 +1121,137 @@ NAVBAR
 
     </div>
 
-</nav>
+    <!-- BUSQUEDAS -->
 
-<!-- =====================================
-CONTENEDOR
-===================================== -->
+    <div class="panel">
 
-<div class="container">
+        <div class="search-grid">
+
+            <!-- PROFESORES -->
+
+            <div>
+
+                <h3 style="margin-bottom:10px;">
+                    🔍 Buscar Profesor
+                </h3>
+
+                <div class="search-box">
+
+                    <input
+                        type="text"
+                        id="busquedaHorario"
+                        placeholder="Profesor, materia o salón..."
+                        oninput="buscarHorarioInteligente()"
+                        autocomplete="off"
+                    >
+
+                    <div
+                        class="sugerencias"
+                        id="sugerenciasBusqueda"
+                    ></div>
+
+                </div>
+
+                <button
+                    class="btn btn-primary"
+                    style="margin-top:10px;"
+                    onclick="verProfesorActual()"
+                >
+                    📍 ¿Dónde está ahora?
+                </button>
+
+            </div>
+
+            <!-- CURSOS -->
+
+            <div>
+
+                <h3 style="margin-bottom:10px;">
+                    📚 Buscar Curso Completo
+                </h3>
+
+                <div class="search-box">
+
+                    <input
+                        type="text"
+                        id="busquedaCurso"
+                        placeholder="Ej: 6A"
+                        oninput="buscarCurso()"
+                        autocomplete="off"
+                    >
+
+                    <div
+                        class="sugerencias"
+                        id="sugerenciasCurso"
+                    ></div>
+
+                </div>
+
+                <div class="curso-actions">
+
+                    <button
+                        class="btn btn-secondary"
+                        onclick="buscarCursoManual()"
+                    >
+                        🔎 Buscar
+                    </button>
+
+                    <button
+                        class="btn btn-danger"
+                        onclick="eliminarHorarioCurso()"
+                    >
+                        🗑 Eliminar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- INFO -->
+
+    <div class="panel">
+
+        <div class="info-actual">
+
+            <div class="info-box">
+
+                📂 Mostrando:
+
+                <strong id="nombreHorarioActual">
+                    Ningún horario seleccionado
+                </strong>
+
+            </div>
+
+            <div class="semana-control">
+
+    <button
+        class="btn btn-secondary semana-btn"
+        onclick="cambiarSemana(-1)"
+    >
+        ⬅
+    </button>
+
+    <div id="tituloSemana">
+        Semana
+    </div>
+
+    <button
+        class="btn btn-secondary semana-btn"
+        onclick="cambiarSemana(1)"
+    >
+        ➡
+    </button>
+
+</div>
+
+        </div>
+
+    </div>
 
     <!-- CONFIG -->
 
@@ -342,12 +1259,10 @@ CONTENEDOR
 
         <div class="config-grid">
 
-            <!-- CATEGORÍA -->
-
             <select id="categoriaCurso">
 
                 <option value="">
-                    Seleccionar categoría
+                    Categoría
                 </option>
 
                 <option value="Seniors">
@@ -364,98 +1279,19 @@ CONTENEDOR
 
             </select>
 
-            <!-- GRADO -->
-
             <input
                 type="text"
                 id="gradoInput"
-                placeholder="Ejemplo: 3A"
+                placeholder="Curso"
             >
-
-            <!-- BOTÓN -->
-
-            <button
-                class="btn btn-primary"
-                onclick="cargarHorario()"
-            >
-                📂 Cargar Horario
-            </button>
-
-        </div>
-
-    </div>
-
-    <!-- SEMANA -->
-
-    <div class="panel">
-
-        <div class="calendar-controls">
-
-            <button
-                class="btn btn-secondary"
-                onclick="cambiarSemana(-1)"
-            >
-                ⬅ Semana
-            </button>
-
-            <h2 id="tituloSemana">
-                Semana
-            </h2>
-
-            <button
-                class="btn btn-secondary"
-                onclick="cambiarSemana(1)"
-            >
-                Semana ➡
-            </button>
-
-        </div>
-
-    </div>
-
-    <!-- HORARIO ACTUAL -->
-
-    <div class="panel">
-
-        <div class="current-info">
-
-            <div>
-
-                📂 Horario Actual:
-
-                <strong id="nombreHorarioActual">
-                    Sin horario cargado
-                </strong>
-
-            </div>
-
-            <div>
-
-                ✅ Los cambios se guardan automáticamente
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- CONFIG BLOQUES -->
-
-    <div class="panel">
-
-        <div class="config-grid">
-
-            <!-- PROFESOR -->
 
             <select id="profesorSelect">
 
                 <option value="">
-                    Seleccionar profesor
+                    Profesor
                 </option>
 
             </select>
-
-            <!-- MATERIA -->
 
             <input
                 type="text"
@@ -463,15 +1299,11 @@ CONTENEDOR
                 placeholder="Materia"
             >
 
-            <!-- SALÓN -->
-
             <input
                 type="text"
                 id="salonInput"
                 placeholder="Salón"
             >
-
-            <!-- TIPO -->
 
             <select id="tipoBloque">
 
@@ -483,6 +1315,10 @@ CONTENEDOR
                     🔄 Relevo
                 </option>
 
+                <option value="descanso">
+                    ☕ Descanso
+                </option>
+
             </select>
 
         </div>
@@ -491,7 +1327,7 @@ CONTENEDOR
 
     <!-- TABLA -->
 
-    <div class="table-wrapper">
+    <div class="panel table-wrapper">
 
         <table>
 
@@ -508,6 +1344,8 @@ CONTENEDOR
                     <th>Miércoles</th>
                     <th>Jueves</th>
                     <th>Viernes</th>
+                    <th>Sábado</th>
+                    <th>Domingo</th>
 
                 </tr>
 
@@ -523,9 +1361,7 @@ CONTENEDOR
 
 </div>
 
-<!-- =====================================
-OVERLAY
-===================================== -->
+<!-- MODAL -->
 
 <div
     class="overlay"
@@ -533,16 +1369,12 @@ OVERLAY
     onclick="cerrarModal()"
 ></div>
 
-<!-- =====================================
-MODAL
-===================================== -->
-
 <div
     class="modal"
     id="modal"
 >
 
-    <h2>
+    <h2 style="margin-bottom:15px;">
         Gestión del Bloque
     </h2>
 
@@ -562,14 +1394,16 @@ MODAL
             🗑 Eliminar Bloque
         </button>
 
+        <button
+            class="btn btn-danger"
+            onclick="eliminarHorarioProfesor()"
+        >
+            🗑 Eliminar Horario Profesor
+        </button>
+
     </div>
 
 </div>
-
-<!-- =====================================
-JS
-===================================== -->
-
 <script>
     /* =========================================
 CONFIGURACIÓN
@@ -580,7 +1414,9 @@ const dias = [
     "Martes",
     "Miércoles",
     "Jueves",
-    "Viernes"
+    "Viernes",
+    "Sábado",
+    "Domingo"
 ];
 
 const horas = [
@@ -597,35 +1433,39 @@ const horas = [
 ];
 
 /* =========================================
-USUARIOS REGISTRADOS
-DESPUÉS ESTO VENDRÁ DE DJANGO
+USUARIOS
 ========================================= */
 
 const usuariosRegistrados = [
 
     {
-        nombre: "Salamanca",
+        nombre: "Salamanca Lopez",
         tipo: "Seniors"
     },
 
     {
-        nombre: "Carlos",
+        nombre: "Carlos Perez",
         tipo: "Teens"
     },
 
     {
-        nombre: "Andrea",
+        nombre: "Andrea Ruiz",
         tipo: "Masters"
     },
 
     {
-        nombre: "Fernanda",
+        nombre: "Fernanda Gomez",
         tipo: "Seniors"
     },
 
     {
-        nombre: "Mateo",
+        nombre: "Mateo Ramirez",
         tipo: "Teens"
+    },
+
+    {
+        nombre: "Mateo Torres",
+        tipo: "Masters"
     }
 
 ];
@@ -640,10 +1480,6 @@ let horarios = JSON.parse(
 
 let horarioActual = null;
 
-let gradoActual = null;
-
-let categoriaActual = null;
-
 let celdaActual = null;
 
 let fechaActual = new Date();
@@ -652,42 +1488,49 @@ let fechaActual = new Date();
 INICIO
 ========================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    crearGrid();
+        crearGrid();
 
-    cargarProfesores();
+        cargarProfesores();
 
-    actualizarSemana();
+        actualizarSemana();
 
-});
+    }
+);
 
 /* =========================================
-CREAR GRID
+GRID
 ========================================= */
 
 function crearGrid(){
 
-    const tbody = document.getElementById(
+    const tbody =
+    document.getElementById(
         "gridAsignar"
     );
 
     tbody.innerHTML = "";
 
-    horas.forEach((hora, fila) => {
+    horas.forEach((hora,fila)=>{
 
         const tr =
-            document.createElement("tr");
+        document.createElement("tr");
 
         let html = `
+
             <td class="hora-col">
                 ${hora}
             </td>
+
         `;
 
-        dias.forEach((dia, col) => {
+        dias.forEach((dia,col)=>{
 
             html += `
+
                 <td>
 
                     <div
@@ -702,6 +1545,7 @@ function crearGrid(){
                     ></div>
 
                 </td>
+
             `;
 
         });
@@ -715,7 +1559,7 @@ function crearGrid(){
 }
 
 /* =========================================
-CARGAR PROFESORES
+PROFESORES
 ========================================= */
 
 function cargarProfesores(){
@@ -726,108 +1570,24 @@ function cargarProfesores(){
     );
 
     select.innerHTML = `
+
         <option value="">
             Seleccionar profesor
         </option>
+
     `;
 
-    usuariosRegistrados.forEach(usuario => {
+    usuariosRegistrados.forEach(usuario=>{
 
         select.innerHTML += `
+
             <option value="${usuario.nombre}">
                 ${usuario.nombre}
-                (${usuario.tipo})
             </option>
+
         `;
 
     });
-
-}
-
-/* =========================================
-CREAR O CARGAR HORARIO
-========================================= */
-
-function cargarHorario(){
-
-    const categoria = document
-    .getElementById("categoriaCurso")
-    .value;
-
-    const grado = document
-    .getElementById("gradoInput")
-    .value
-    .trim();
-
-    if(grado === ""){
-
-        alert(
-            "Escribe un grado"
-        );
-
-        return;
-
-    }
-
-    if(categoria === ""){
-
-        alert(
-            "Selecciona categoría"
-        );
-
-        return;
-
-    }
-
-    categoriaActual = categoria;
-
-    gradoActual = grado;
-
-    const clave =
-        `${categoria}-${grado}`;
-
-    /* =====================================
-    EXISTE
-    ===================================== */
-
-    if(horarios[clave]){
-
-        horarioActual =
-            horarios[clave];
-
-    }
-
-    /* =====================================
-    NUEVO
-    ===================================== */
-
-    else{
-
-        horarioActual = {
-
-            categoria,
-            grado,
-
-            bloques: [],
-
-            excepciones: []
-
-        };
-
-        horarios[clave] =
-            horarioActual;
-
-        guardarSistema();
-
-    }
-
-    document.getElementById(
-        "nombreHorarioActual"
-    ).innerText = `
-        ${categoria} - ${grado}
-    `;
-
-    renderizarHorario();
 
 }
 
@@ -850,15 +1610,20 @@ SEMANA
 
 function obtenerLunes(fecha){
 
-    const copia = new Date(fecha);
+    const copia =
+    new Date(fecha);
 
-    const dia = copia.getDay();
+    const dia =
+    copia.getDay();
 
     const diferencia =
-        dia === 0 ? -6 : 1 - dia;
+    dia === 0
+    ? -6
+    : 1 - dia;
 
     copia.setDate(
-        copia.getDate() + diferencia
+        copia.getDate()
+        + diferencia
     );
 
     return copia;
@@ -868,37 +1633,38 @@ function obtenerLunes(fecha){
 function actualizarSemana(){
 
     const lunes =
-        obtenerLunes(fechaActual);
+    obtenerLunes(fechaActual);
 
-    const viernes =
-        new Date(lunes);
+    const domingo =
+    new Date(lunes);
 
-    viernes.setDate(
-        viernes.getDate() + 4
+    domingo.setDate(
+        domingo.getDate() + 6
     );
 
     const opciones = {
 
-        day:'numeric',
-
-        month:'long'
+        day:"numeric",
+        month:"long"
 
     };
 
     document.getElementById(
         "tituloSemana"
     ).innerText = `
+
         ${lunes.toLocaleDateString(
-            'es-CO',
+            "es-CO",
             opciones
         )}
 
         -
 
-        ${viernes.toLocaleDateString(
-            'es-CO',
+        ${domingo.toLocaleDateString(
+            "es-CO",
             opciones
         )}
+
     `;
 
 }
@@ -906,12 +1672,11 @@ function actualizarSemana(){
 function cambiarSemana(valor){
 
     fechaActual.setDate(
-        fechaActual.getDate() + (7 * valor)
+        fechaActual.getDate()
+        + (7 * valor)
     );
 
     actualizarSemana();
-
-    renderizarHorario();
 
 }
 
@@ -919,12 +1684,12 @@ function cambiarSemana(valor){
 MODAL
 ========================================= */
 
-function abrirModal(fila, col){
+function abrirModal(fila,col){
 
     if(!horarioActual){
 
         alert(
-            "Primero carga un horario"
+            "Busca un curso primero"
         );
 
         return;
@@ -964,106 +1729,89 @@ GUARDAR BLOQUE
 
 function guardarBloque(){
 
-    if(!horarioActual) return;
-
-    const profesor = document
-    .getElementById(
+    const profesor =
+    document.getElementById(
         "profesorSelect"
-    )
-    .value;
+    ).value;
 
-    const materia = document
-    .getElementById(
+    const materia =
+    document.getElementById(
         "materiaInput"
-    )
-    .value
-    .trim();
+    ).value.trim();
 
-    const salon = document
-    .getElementById(
+    const salon =
+    document.getElementById(
         "salonInput"
-    )
-    .value
-    .trim();
+    ).value.trim();
 
-    const tipo = document
-    .getElementById(
+    const tipo =
+    document.getElementById(
         "tipoBloque"
-    )
-    .value;
+    ).value;
 
-    if(
-        !profesor ||
-        !materia ||
-        !salon
-    ){
+    if(tipo !== "descanso"){
 
-        alert(
-            "Completa todos los campos"
-        );
+        if(
+            !profesor
+            ||
+            !materia
+            ||
+            !salon
+        ){
 
-        return;
-
-    }
-
-    /* =====================================
-    RELEVO
-    ===================================== */
-
-    if(tipo === "relevo"){
-
-        horarioActual.excepciones.push({
-
-            fecha:
-                obtenerFechaCelda(),
-
-            fila:
-                celdaActual.fila,
-
-            col:
-                celdaActual.col,
-
-            profesor,
-            materia,
-            salon,
-            tipo
-
-        });
-
-    }
-
-    /* =====================================
-    CLASE NORMAL
-    ===================================== */
-
-    else{
-
-        horarioActual.bloques =
-        horarioActual.bloques.filter(b => {
-
-            return !(
-                b.fila === celdaActual.fila &&
-                b.col === celdaActual.col
+            alert(
+                "Completa todos los campos"
             );
 
-        });
+            return;
 
-        horarioActual.bloques.push({
-
-            fila:
-                celdaActual.fila,
-
-            col:
-                celdaActual.col,
-
-            profesor,
-            materia,
-            salon,
-            tipo
-
-        });
+        }
 
     }
+
+    horarioActual.bloques =
+    horarioActual.bloques.filter(b=>{
+
+        return !(
+
+            b.fila ===
+            celdaActual.fila
+
+            &&
+
+            b.col ===
+            celdaActual.col
+
+        );
+
+    });
+
+    horarioActual.bloques.push({
+
+        fila:
+        celdaActual.fila,
+
+        col:
+        celdaActual.col,
+
+        profesor:
+        tipo === "descanso"
+        ? "DESCANSO"
+        : profesor,
+
+        materia:
+        tipo === "descanso"
+        ? "DESCANSO"
+        : materia,
+
+        salon:
+        tipo === "descanso"
+        ? "-"
+        : salon,
+
+        tipo
+
+    });
 
     guardarSistema();
 
@@ -1074,166 +1822,13 @@ function guardarBloque(){
 }
 
 /* =========================================
-RENDER
-========================================= */
-
-function renderizarHorario(){
-
-    document.querySelectorAll(".cell")
-    .forEach(cell => {
-
-        cell.innerHTML = "";
-
-    });
-
-    if(!horarioActual) return;
-
-    horarioActual.bloques.forEach(bloque => {
-
-        const cell = document.getElementById(
-            `cell-${bloque.fila}-${bloque.col}`
-        );
-
-        if(!cell) return;
-
-        const excepcion =
-        horarioActual.excepciones.find(e => {
-
-            return (
-
-                e.fecha ===
-                obtenerFechaRender(
-                    bloque.col
-                )
-
-                &&
-
-                e.fila === bloque.fila
-
-                &&
-
-                e.col === bloque.col
-
-            );
-
-        });
-
-        /* =================================
-        RELEVO
-        ================================= */
-
-        if(excepcion){
-
-            cell.innerHTML = `
-
-                <div class="
-                    card-horario
-                    card-relevo
-                ">
-
-                    <strong>
-                        🔄 RELEVO
-                    </strong>
-
-                    👨‍🏫
-                    ${excepcion.profesor}
-                    <br>
-
-                    📚
-                    ${excepcion.materia}
-                    <br>
-
-                    🏫
-                    ${excepcion.salon}
-
-                </div>
-
-            `;
-
-        }
-
-        /* =================================
-        NORMAL
-        ================================= */
-
-        else{
-
-            cell.innerHTML = `
-
-                <div class="card-horario">
-
-                    <strong>
-                        ${bloque.materia}
-                    </strong>
-
-                    👨‍🏫
-                    ${bloque.profesor}
-                    <br>
-
-                    🏫
-                    ${bloque.salon}
-
-                </div>
-
-            `;
-
-        }
-
-    });
-
-}
-
-/* =========================================
-FECHA
-========================================= */
-
-function obtenerFechaCelda(){
-
-    const lunes =
-        obtenerLunes(fechaActual);
-
-    const fecha =
-        new Date(lunes);
-
-    fecha.setDate(
-        fecha.getDate() +
-        celdaActual.col
-    );
-
-    return fecha
-    .toISOString()
-    .split("T")[0];
-
-}
-
-function obtenerFechaRender(col){
-
-    const lunes =
-        obtenerLunes(fechaActual);
-
-    const fecha =
-        new Date(lunes);
-
-    fecha.setDate(
-        fecha.getDate() + col
-    );
-
-    return fecha
-    .toISOString()
-    .split("T")[0];
-
-}
-
-/* =========================================
-ELIMINAR
+ELIMINAR BLOQUE
 ========================================= */
 
 function eliminarBloque(){
 
-    if(!horarioActual) return;
-
     horarioActual.bloques =
-    horarioActual.bloques.filter(b => {
+    horarioActual.bloques.filter(b=>{
 
         return !(
 
@@ -1258,14 +1853,594 @@ function eliminarBloque(){
 }
 
 /* =========================================
-LIMPIAR
+ELIMINAR HORARIO
+========================================= */
+
+function eliminarHorarioActual(){
+
+    if(!horarioActual){
+
+        alert(
+            "No hay horario cargado"
+        );
+
+        return;
+
+    }
+
+    const confirmar =
+    confirm(
+        "¿Eliminar este horario?"
+    );
+
+    if(!confirmar) return;
+
+    delete horarios[
+        horarioActual.clave
+    ];
+
+    guardarSistema();
+
+    horarioActual = null;
+
+    renderizarHorario();
+
+    document.getElementById(
+        "nombreHorarioActual"
+    ).innerText =
+    "Sin horario";
+
+}
+
+/* =========================================
+RENDER
+========================================= */
+
+function renderizarHorario(){
+
+    document
+    .querySelectorAll(".cell")
+    .forEach(cell=>{
+
+        cell.innerHTML = "";
+
+        cell.classList.remove(
+            "filtro-activo"
+        );
+
+    });
+
+    if(!horarioActual) return;
+
+    horarioActual.bloques.forEach(bloque=>{
+
+        const cell =
+        document.getElementById(
+            `cell-${bloque.fila}-${bloque.col}`
+        );
+
+        if(!cell) return;
+
+        if(
+            bloque.tipo === "descanso"
+        ){
+
+            cell.innerHTML = `
+
+                <div class="card-descanso">
+                    ☕ Descanso
+                </div>
+
+            `;
+
+        }
+
+        else{
+
+            let claseExtra = "";
+
+            if(
+                bloque.tipo === "relevo"
+            ){
+
+                claseExtra =
+                "card-relevo";
+
+            }
+
+            cell.innerHTML = `
+
+    <div
+        class="
+            card-horario
+            ${claseExtra}
+        "
+    >
+
+        <div class="card-title">
+            ${bloque.materia}
+        </div>
+
+        <div class="card-mini">
+            👨‍🏫 ${bloque.profesor}
+        </div>
+
+        <div class="card-mini">
+            🏫 ${bloque.salon}
+        </div>
+
+        <div class="card-mini">
+            🔖 ${bloque.tipo}
+        </div>
+
+    </div>
+
+`;
+
+        }
+
+    });
+
+}
+
+/* =========================================
+BUSCAR PROFESOR
+========================================= */
+
+function buscarHorarioInteligente(){
+
+    const texto =
+    document.getElementById(
+        "busquedaHorario"
+    )
+    .value
+    .toLowerCase()
+    .trim();
+
+    const sugerencias =
+    document.getElementById(
+        "sugerenciasBusqueda"
+    );
+
+    sugerencias.innerHTML = "";
+
+    if(texto === ""){
+
+        sugerencias.style.display =
+        "none";
+
+        return;
+
+    }
+
+    let resultados = [];
+
+    Object.entries(horarios)
+    .forEach(([clave,horario])=>{
+
+        horario.bloques.forEach(bloque=>{
+
+            const combinado = `
+
+                ${bloque.profesor}
+                ${bloque.materia}
+                ${bloque.salon}
+
+            `
+            .toLowerCase();
+
+            if(
+                combinado.includes(texto)
+            ){
+
+                resultados.push({
+
+                    profesor:
+                    bloque.profesor,
+
+                    materia:
+                    bloque.materia,
+
+                    salon:
+                    bloque.salon,
+
+                    fila:
+                    bloque.fila,
+
+                    col:
+                    bloque.col,
+
+                    clave
+
+                });
+
+            }
+
+        });
+
+    });
+
+    resultados.forEach(resultado=>{
+
+        const item =
+        document.createElement("div");
+
+        item.className =
+        "sugerencia-item";
+
+        item.innerHTML = `
+
+            <strong>
+                👨‍🏫
+                ${resultado.profesor}
+            </strong>
+
+            <br>
+
+            📚
+            ${resultado.materia}
+
+            <br>
+
+            🏫
+            ${resultado.salon}
+
+        `;
+
+        item.onclick = ()=>{
+
+            abrirResultadoBusqueda(
+                resultado
+            );
+
+            sugerencias.style.display =
+            "none";
+
+        };
+
+        sugerencias.appendChild(item);
+
+    });
+
+    sugerencias.style.display =
+
+        resultados.length > 0
+        ? "block"
+        : "none";
+
+}
+
+/* =========================================
+BUSCAR CURSO
+========================================= */
+
+function buscarCurso(){
+
+    const texto =
+    document.getElementById(
+        "busquedaCurso"
+    )
+    .value
+    .toLowerCase()
+    .trim();
+
+    const sugerencias =
+    document.getElementById(
+        "sugerenciasCurso"
+    );
+
+    sugerencias.innerHTML = "";
+
+    if(texto === ""){
+
+        sugerencias.style.display =
+        "none";
+
+        return;
+
+    }
+
+    let resultados = [];
+
+    Object.entries(horarios)
+    .forEach(([clave,horario])=>{
+
+        if(
+            clave.toLowerCase()
+            .includes(texto)
+        ){
+
+            resultados.push({
+                clave,
+                horario
+            });
+
+        }
+
+    });
+
+    resultados.forEach(resultado=>{
+
+        const item =
+        document.createElement("div");
+
+        item.className =
+        "sugerencia-item";
+
+        item.innerHTML = `
+
+            📚
+            ${resultado.clave}
+
+        `;
+
+        item.onclick = ()=>{
+
+            horarioActual =
+            resultado.horario;
+
+            horarioActual.clave =
+            resultado.clave;
+
+            document.getElementById(
+                "nombreHorarioActual"
+            ).innerText =
+            resultado.clave;
+
+            renderizarHorario();
+
+            sugerencias.style.display =
+            "none";
+
+        };
+
+        sugerencias.appendChild(item);
+
+    });
+
+    sugerencias.style.display =
+
+        resultados.length > 0
+        ? "block"
+        : "none";
+
+}
+
+/* =========================================
+ABRIR RESULTADO
+========================================= */
+
+function abrirResultadoBusqueda(
+    resultado
+){
+
+    horarioActual =
+    horarios[resultado.clave];
+
+    horarioActual.clave =
+    resultado.clave;
+
+    document.getElementById(
+        "nombreHorarioActual"
+    ).innerText =
+    resultado.clave;
+
+    renderizarHorario();
+
+    setTimeout(()=>{
+
+        const cell =
+        document.getElementById(
+            `cell-${resultado.fila}-${resultado.col}`
+        );
+
+        if(cell){
+
+            cell.classList.add(
+                "filtro-activo"
+            );
+
+            cell.scrollIntoView({
+
+                behavior:"smooth",
+
+                block:"center",
+
+                inline:"center"
+
+            });
+
+        }
+
+    },100);
+
+}
+
+/* =========================================
+VER PROFESOR ACTUAL
+========================================= */
+
+function verProfesorActual(){
+
+    const texto =
+    document.getElementById(
+        "busquedaHorario"
+    )
+    .value
+    .trim()
+    .toLowerCase();
+
+    if(texto === ""){
+
+        alert(
+            "Escribe un profesor"
+        );
+
+        return;
+
+    }
+
+    const ahora =
+    new Date();
+
+    let diaActual =
+    ahora.getDay();
+
+    if(diaActual === 0){
+
+        diaActual = 6;
+
+    }
+
+    else{
+
+        diaActual--;
+
+    }
+
+    const horaActual =
+    ahora.getHours();
+
+    let filaActual = -1;
+
+    horas.forEach((hora,index)=>{
+
+        const partes =
+        hora.split(" - ");
+
+        const inicio =
+        parseInt(
+            partes[0]
+            .split(":")[0]
+        );
+
+        const fin =
+        parseInt(
+            partes[1]
+            .split(":")[0]
+        );
+
+        if(
+            horaActual >= inicio
+            &&
+            horaActual < fin
+        ){
+
+            filaActual = index;
+
+        }
+
+    });
+
+    if(filaActual === -1){
+
+        alert(
+            "No hay clases ahora"
+        );
+
+        return;
+
+    }
+
+    let encontrado = null;
+
+    Object.entries(horarios)
+    .forEach(([clave,horario])=>{
+
+        horario.bloques.forEach(bloque=>{
+
+            if(
+
+                bloque.profesor
+                .toLowerCase()
+                .includes(texto)
+
+                &&
+
+                bloque.fila === filaActual
+
+                &&
+
+                bloque.col === diaActual
+
+            ){
+
+                encontrado = {
+
+                    bloque,
+                    horario,
+                    clave
+
+                };
+
+            }
+
+        });
+
+    });
+
+    if(!encontrado){
+
+        alert(
+            "No encontrado"
+        );
+
+        return;
+
+    }
+
+    horarioActual =
+    encontrado.horario;
+
+    horarioActual.clave =
+    encontrado.clave;
+
+    document.getElementById(
+        "nombreHorarioActual"
+    ).innerText =
+    encontrado.clave;
+
+    renderizarHorario();
+
+    setTimeout(()=>{
+
+        const cell =
+        document.getElementById(
+            `cell-${encontrado.bloque.fila}-${encontrado.bloque.col}`
+        );
+
+        if(cell){
+
+            cell.classList.add(
+                "filtro-activo"
+            );
+
+            cell.scrollIntoView({
+
+                behavior:"smooth",
+
+                block:"center"
+
+            });
+
+        }
+
+    },100);
+
+}
+
+/* =========================================
+LIMPIAR TODO
 ========================================= */
 
 function limpiarTodo(){
 
-    if(!confirm(
-        "¿Seguro?"
-    )) return;
+    const confirmar =
+    confirm(
+        "¿Eliminar todos los horarios?"
+    );
+
+    if(!confirmar) return;
 
     localStorage.removeItem(
         "horariosGrados"
@@ -1280,46 +2455,9 @@ function limpiarTodo(){
     document.getElementById(
         "nombreHorarioActual"
     ).innerText =
-    "Sin horario cargado";
+    "Sin horario";
 
 }
-
-/* =========================================
-MIS SUSCRIPCIONES.HTML
-========================================= */
-
-/*
-
-==========================================
-OTRO HTML:
-==========================================
-
-const horarios = JSON.parse(
-    localStorage.getItem(
-        "horariosGrados"
-    )
-);
-
-==========================================
-BUSCAR PROFESOR:
-==========================================
-
-Object.values(horarios)
-.forEach(horario => {
-
-    horario.bloques.forEach(b => {
-
-        console.log(
-            b.profesor
-        );
-
-    });
-
-});
-
-==========================================
-
-*/
-
 </script>
+
 {% endblock %}
