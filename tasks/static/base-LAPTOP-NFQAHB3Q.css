@@ -1,310 +1,977 @@
 /* ==========================================================================
-   LIVE FUTBOL - ESTILO HÍBRIDO (PRO DARK & SANDY LIGHT)
+   MKS PLATFORM - PROFESSIONAL DASHBOARD UI
    ========================================================================== */
 
 :root {
-    /* 🌙 MODO NOCHE POR DEFECTO (Pro Dark Navy) */
-      --bg: #ffffffcc;           /* Fondo beige cálido muy suave (como en tu captura) */
-    --bg-soft: #c0ebff;      /* Beige ligeramente más oscuro para el gradiente */
-    --nav: rgba(24, 127, 74, 0.98); /* Navbar blanco limpio */
-    --card: #ffffff;         /* Tarjetas blancas para que resalten suavemente */
-    --text: #000000;         /* Azul pizarra/petróleo para los textos principales */
-    --text-soft: #0c0d0d;    /* Gris azulado para textos secundarios */
-    --primary: #070708;      /* Azul "denim" de los botones (Fútbol, Básquet) */
-     --secondary: #000000; /* Azul pizarra más oscuro para contrastes */
-    --shadow: 0 8px 20px rgba(69, 130, 187, 0.352); /* Sombra azulada muy sutil */
+
+    /* =========================
+       COLORES PRINCIPALES
+    ========================== */
+
+    --bg: #edf3f8;
+    --bg-soft: #dbeafe;
+
+    --sidebar:
+linear-gradient(
+    180deg,
+    #0b3b2e,
+    #14532d
+);
+
+    --topbar:
+        rgba(255,255,255,0.72);
+
+    --card:
+        rgba(255,255,255,0.72);
+
+    --card-solid:
+        #ffffff;
+
+    --card-border:
+        rgba(255,255,255,0.3);
+
+    --primary:
+        #2563eb;
+
+    --secondary:
+        #10b981;
+
+    --accent:
+        #38bdf8;
+
+    --text:
+        #0f172a;
+
+    --text-soft:
+        #64748b;
+
+    --danger:
+        #ef4444;
+
+    --warning:
+        #f59e0b;
+
+    --success:
+        #10b981;
+
+    --shadow:
+        0 10px 35px rgba(15,23,42,0.08);
+
+    --radius:
+        24px;
+
+    --blur:
+        blur(18px);
 
 }
 
-/*  Modo noche  */
+/* ==========================================================================
+   DARK MODE
+   ========================================================================== */
+
 body.light-mode {
 
-      --bg: #0f172a;
-    --bg-soft: #162032;
-    --nav: rgba(15, 23, 42, 0.98);
-    --card: #1e293b;
-    --text: #f8fafc;
-    --text-soft: #000000;
-    --primary: #3b82f6; 
-    --secondary: #10b981;
-    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    --border: rgba(255, 255, 255, 0.05);
-    --radius: 12px;
-}
-   
+    --bg: #0b1220;
 
-/* ================= BASE ================= */
-* {
-    box-sizing: border-box;
-    transition: all 0.25s ease;
-}
+    --bg-soft: #111827;
 
-body {
-    margin: 0;
-    padding-top: 100px; /* Espacio para que el navbar no tape el contenido */
-    font-family: 'Poppins', sans-serif;
-    /* Degradado vertical para que el color cálido fluya natural */
-    background: linear-gradient(to bottom, var(--bg), var(--bg-soft));
-    color: var(--text);
-    min-height: 100vh;
-    text-align: center;
-}
+    --topbar:
+        rgba(15,23,42,0.78);
 
-/* ================= NAVBAR MAESTRO ================= */
-nav {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 4rem;
-    height: 80px;
-    background: var(--nav);
-    backdrop-filter: blur(12px);
-    box-shadow: var(--shadow);
-    border-bottom: 1px solid var(--border);
+    --card:
+        rgba(15,23,42,0.72);
+
+    --card-solid:
+        #1e293b;
+
+    --card-border:
+        rgba(255,255,255,0.05);
+
+    --text:
+        #f8fafc;
+
+    --text-soft:
+        #cbd5e1;
+
+    --shadow:
+        0 15px 35px rgba(0,0,0,0.35);
+        --sidebar:
+linear-gradient(
+    180deg,
+    #0f172a,
+    #1e293b
+);
 }
 
-/* Bloque Izquierda: Logo */
-.logo-container {
-    display: flex;
-    align-items: center;
-    margin: 0;
+.sidebar.closed .logo-text{
+    opacity:0;
+    width:0;
 }
 
-.logo-container img {
-    height: 40px;
-    width: 70px;
-    display: block;
-    border-radius: 50%;
-    background: white; 
-    padding: 3px;
-    box-shadow: var(--shadow);
+.sidebar.closed .sidebar-links a{
+
+    justify-content:center;
+
+    padding:16px 0;
 }
 
-/* Bloque Centro: Menú */
-#nav-menu {
-    display: flex;
-    align-items: center;
-    list-style: none;
-    gap: 30px;
-    margin: 0;
-    padding: 0;
-    flex: 1; 
-    justify-content: center;
+
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-#nav-menu a {
-    text-decoration: none;
-    color: var(--text);
-    font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 10px;
+html{
+    scroll-behavior:smooth;
 }
 
-#nav-menu a:hover {
-    background: var(--primary);
-    color: white;
-    transform: translateY(-2px);
+body{
+
+    font-family:'Poppins',sans-serif;
+
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(59,130,246,0.18),
+            transparent 30%
+        ),
+
+        radial-gradient(
+            circle at bottom right,
+            rgba(16,185,129,0.18),
+            transparent 30%
+        ),
+
+        linear-gradient(
+            to bottom,
+            var(--bg),
+            var(--bg-soft)
+        );
+
+    color:var(--text);
+
+    min-height:100vh;
+
+    overflow-x:hidden;
 }
 
-/* Bloque Derecha: Botón Luna/Sol */
-#theme-toggle {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* ==========================================================================
+   DASHBOARD LAYOUT
+   ========================================================================== */
+
+.layout{
+    display:flex;
+    min-height:100vh;
 }
 
-#theme-toggle:hover {
-    transform: scale(1.1);
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+
+.sidebar{
+
+    position:fixed;
+
+    top:0;
+    left:0;
+
+    width:290px;
+
+    height:100vh;
+
+    background:var(--sidebar);
+
+    padding:20px;
+
+    z-index:1000;
+
+    overflow:hidden;
+
+    transition:0.3s ease;
+
+    box-shadow:
+        0 0 40px rgba(0,0,0,0.15);
 }
 
-/* Botón Hamburguesa Móvil */
-.menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    color: var(--text);
-    font-size: 28px;
-    cursor: pointer;
+/* SIDEBAR CLOSED */
+
+.sidebar.closed{
+    width:95px;
 }
 
-/* ================= RESPONSIVE ================= */
-@media (max-width: 768px) {
-    nav {
-        padding: 0 2rem;
-        justify-content: space-between;
+/* ==========================================================================
+   SIDEBAR HEADER
+   ========================================================================== */
+
+.sidebar-top{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-bottom:35px;
+}
+
+/* ==========================================================================
+   LOGO
+   ========================================================================== */
+
+.logo-box{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    width:100%;
+}
+
+.logo-box img{
+
+    width:58px;
+    height:58px;
+
+    border-radius:18px;
+
+    object-fit:cover;
+
+    background:white;
+
+    padding:4px;
+
+    box-shadow:var(--shadow);
+}
+
+.logo-text{
+
+    display:flex;
+
+    flex-direction:column;
+
+    white-space:nowrap;
+
+    transition:0.3s;
+}
+
+.logo-text h2{
+
+    color:white;
+
+    font-size:20px;
+
+    font-weight:700;
+}
+
+.logo-text span{
+
+    color:rgba(255,255,255,0.7);
+
+    font-size:13px;
+}
+
+/* ==========================================================================
+   SIDEBAR LINKS
+   ========================================================================== */
+
+.sidebar-links{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+}
+
+.sidebar-links a{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:16px 18px;
+
+    border-radius:18px;
+
+    text-decoration:none;
+
+    color:white;
+
+    font-weight:600;
+
+    transition:0.3s;
+}
+/* ==========================================================================
+   ICONOS SIDEBAR
+   ========================================================================== */
+
+.sidebar-links a .icon{
+
+    min-width:28px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:22px;
+
+    flex-shrink:0;
+}
+
+/* ==========================================================================
+   TEXTO SIDEBAR
+   ========================================================================== */
+
+.sidebar-links a .link-text{
+
+    white-space:nowrap;
+
+    transition:0.25s ease;
+}
+
+/* ==========================================================================
+   SIDEBAR CERRADO
+   ========================================================================== */
+
+.sidebar.closed .sidebar-links a{
+
+    justify-content:center;
+
+    padding:16px 0;
+}
+
+.sidebar.closed .sidebar-links a .link-text{
+
+    opacity:0;
+
+    width:0;
+
+    overflow:hidden;
+}
+
+/* EL ICONO SIEMPRE VISIBLE */
+
+.sidebar.closed .sidebar-links a .icon{
+
+    margin:0;
+}
+
+/* ==========================================================================
+   HOVER
+   ========================================================================== */
+
+.sidebar-links a:hover{
+
+    background:
+        rgba(255,255,255,0.12);
+
+    transform:translateX(4px);
+}
+
+/* ==========================================================================
+   ACTIVE
+   ========================================================================== */
+
+.sidebar-links a.active{
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--secondary),
+            var(--primary)
+        );
+
+    box-shadow:
+        0 10px 25px rgba(37,99,235,0.25);
+}
+
+.sidebar-links a:hover{
+
+    background:
+        rgba(255,255,255,0.12);
+
+    transform:translateX(4px);
+}
+
+.sidebar-links a.active{
+
+    background:
+    linear-gradient(
+        135deg,
+        var(--secondary),
+        var(--primary)
+    );
+
+    color:white;
+
+    box-shadow:
+        0 10px 25px rgba(37,99,235,0.25);
+}
+
+/* ==========================================================================
+   MAIN CONTENT
+   ========================================================================== */
+
+.main{
+
+    margin-left:290px;
+
+    width:100%;
+
+    transition:0.3s ease;
+}
+
+.main.expanded{
+    margin-left:95px;
+}
+
+/* ==========================================================================
+   TOPBAR
+   ========================================================================== */
+
+.topbar{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:900;
+
+    height:85px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 30px;
+
+    background:var(--topbar);
+
+    backdrop-filter:var(--blur);
+
+    border-bottom:
+        1px solid var(--card-border);
+}
+
+/* ==========================================================================
+   TOPBAR LEFT
+   ========================================================================== */
+
+.topbar-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+}
+
+/* ==========================================================================
+   MENU BUTTON
+   ========================================================================== */
+
+#toggleSidebar{
+
+    width:50px;
+    height:50px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:var(--card-solid);
+
+    color:var(--text);
+
+    cursor:pointer;
+
+    font-size:22px;
+
+    box-shadow:var(--shadow);
+}
+
+#toggleSidebar:hover{
+
+    transform:translateY(-2px);
+}
+
+/* ==========================================================================
+   SEARCH BAR
+   ========================================================================== */
+
+.search-box{
+
+    position:relative;
+}
+
+.search-box input{
+
+    width:380px;
+
+    height:50px;
+
+    border:none;
+
+    border-radius:18px;
+
+    padding:0 20px;
+
+    background:var(--card-solid);
+
+    color:var(--text);
+
+    outline:none;
+
+    font-size:15px;
+
+    box-shadow:var(--shadow);
+}
+
+/* ==========================================================================
+   TOPBAR RIGHT
+   ========================================================================== */
+
+.topbar-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+}
+
+/* ==========================================================================
+   ICON BUTTONS
+   ========================================================================== */
+
+.icon-btn{
+
+    width:48px;
+    height:48px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:var(--card-solid);
+
+    color:var(--text);
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    position:relative;
+
+    box-shadow:var(--shadow);
+
+    transition:0.3s;
+}
+
+.icon-btn:hover{
+
+    transform:translateY(-3px);
+}
+
+/* ==========================================================================
+   ALERT DOT
+   ========================================================================== */
+
+.notification-dot{
+
+    position:absolute;
+
+    top:8px;
+    right:8px;
+
+    width:10px;
+    height:10px;
+
+    border-radius:50%;
+
+    background:red;
+}
+
+/* ==========================================================================
+   USER BOX
+   ========================================================================== */
+
+.user-box{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    background:var(--card-solid);
+
+    padding:10px 16px;
+
+    border-radius:18px;
+
+    box-shadow:var(--shadow);
+}
+
+/* ==========================================================================
+   USER AVATAR
+   ========================================================================== */
+
+.avatar{
+
+    width:48px;
+    height:48px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-weight:700;
+
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            var(--secondary)
+        );
+}
+
+/* ==========================================================================
+   USER INFO
+   ========================================================================== */
+
+.user-info{
+
+    display:flex;
+
+    flex-direction:column;
+}
+
+.user-info strong{
+
+    font-size:15px;
+
+    color:var(--text);
+}
+
+.user-info span{
+
+    font-size:12px;
+
+    color:var(--text-soft);
+}
+
+/* ==========================================================================
+   CONTENT
+   ========================================================================== */
+
+.content{
+
+    padding:35px;
+}
+
+/* ==========================================================================
+   CARDS
+   ========================================================================== */
+
+.card,
+.video,
+.estadisticas,
+.jugadores,
+.task-item{
+
+    background:var(--card);
+
+    backdrop-filter:var(--blur);
+
+    border:
+        1px solid var(--card-border);
+
+    border-radius:var(--radius);
+
+    padding:28px;
+
+    box-shadow:var(--shadow);
+
+    transition:0.3s;
+}
+
+.card:hover,
+.video:hover,
+.estadisticas:hover,
+.jugadores:hover,
+.task-item:hover{
+
+    transform:translateY(-5px);
+
+    box-shadow:
+        0 20px 40px rgba(15,23,42,0.12);
+}
+
+/* ==========================================================================
+   TITLES
+   ========================================================================== */
+
+h1,h2,h3{
+
+    color:var(--text);
+
+    font-weight:800;
+
+    letter-spacing:-1px;
+
+    margin-bottom:15px;
+}
+
+h1{
+
+    font-size:42px;
+}
+
+/* ==========================================================================
+   TABLES
+   ========================================================================== */
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    overflow:hidden;
+
+    background:var(--card);
+
+    border-radius:24px;
+
+    backdrop-filter:var(--blur);
+
+    box-shadow:var(--shadow);
+
+    margin-top:25px;
+}
+
+th{
+
+    background:
+        linear-gradient(
+            135deg,
+            #0f172a,
+            #1e293b
+        );
+
+    color:white;
+
+    font-size:14px;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+    padding:18px;
+}
+
+td{
+
+    padding:18px;
+
+    border-bottom:
+        1px solid rgba(148,163,184,0.1);
+
+    color:var(--text);
+}
+
+/* ==========================================================================
+   INPUTS
+   ========================================================================== */
+
+input,
+textarea,
+select{
+
+    width:100%;
+
+    padding:14px 18px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:var(--card-solid);
+
+    color:var(--text);
+
+    font-size:15px;
+
+    outline:none;
+
+    box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.04);
+}
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+button{
+
+    border:none;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+button:not(.icon-btn):not(#toggleSidebar){
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            var(--secondary)
+        );
+
+    color:white;
+
+    padding:14px 26px;
+
+    border-radius:18px;
+
+    font-weight:700;
+
+    font-size:15px;
+
+    box-shadow:
+        0 12px 25px rgba(37,99,235,0.25);
+}
+
+button:not(.icon-btn):not(#toggleSidebar):hover{
+
+    transform:
+        translateY(-3px)
+        scale(1.02);
+
+    box-shadow:
+        0 18px 35px rgba(37,99,235,0.35);
+}
+
+/* ==========================================================================
+   SELECTED BUTTON
+   ========================================================================== */
+
+.btn-seleccionado{
+
+    background:
+        linear-gradient(
+            135deg,
+            #10b981,
+            #059669
+        ) !important;
+
+    color:white !important;
+}
+
+/* ==========================================================================
+   SECTIONS
+   ========================================================================== */
+
+.seccion{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(280px,1fr));
+
+    gap:25px;
+}
+
+/* ==========================================================================
+   SCORE INPUT
+   ========================================================================== */
+
+.score-input{
+
+    width:55px;
+
+    height:40px;
+
+    text-align:center;
+
+    border-radius:12px;
+
+    background:#000 !important;
+
+    color:#00ffcc !important;
+
+    font-weight:bold;
+
+    border:2px solid var(--primary) !important;
+}
+
+/* ==========================================================================
+   PARAGRAPHS
+   ========================================================================== */
+
+p{
+
+    color:var(--text-soft);
+
+    line-height:1.7;
+}
+
+/* ==========================================================================
+   MOBILE
+   ========================================================================== */
+
+@media(max-width:900px){
+
+    .sidebar{
+
+        transform:translateX(-100%);
     }
 
-    .menu-toggle {
-        display: block;
-        z-index: 1001;
+    .sidebar.active{
+
+        transform:translateX(0);
     }
 
-    .logo-item {
-        display: none;
+    .main{
+
+        margin-left:0;
     }
 
-    #nav-menu {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 80px; 
-        left: 0;
-        width: 100%;
-        background: var(--nav);
-        padding: 20px 0;
-        box-shadow: var(--shadow);
+    .topbar{
+
+        padding:0 15px;
     }
 
-    #nav-menu.active {
-        display: flex;
+    .search-box input{
+
+        width:180px;
     }
 
-    #nav-menu a {
-        width: 80%;
-        margin: 5px auto;
+    .user-info{
+
+        display:none;
     }
-}
-
-/* ================= SECCIONES Y TARJETAS ================= */
-.seccion {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 25px;
-    padding: 40px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.card, .video, .estadisticas, .jugadores, .task-item {
-    background: var(--card);
-    padding: 25px;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-}
-
-/* ================= TABLAS ================= */
-table {
-    width: 90%;
-    margin: 30px auto;
-    border-collapse: collapse;
-    background: var(--card);
-    color: var(--text);
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-}
-
-th, td {
-    padding: 15px;
-    border-bottom: 1px solid var(--border);
-}
-
-th {
-    background: var(--primary);
-    color: white;
-}
-
-/* ================= ESTRUCTURAS ESPECÍFICAS ================= */
-
-/* 1. Títulos con el degradado pro */
-h1 {
-    font-size: 32px;
-    margin: 20px auto;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent; 
-    font-weight: 800;
-}
-
-/* 2. Brackets de Eliminatorias (Conectores) */
-.round:not(:last-child) .match::after {
-    content: "";
-    position: absolute;
-    right: -30px;
-    top: 50%;
-    width: 30px;
-    height: 2px;
-    background: var(--primary);
-}
-
-.round:not(:last-child) .match:nth-child(odd)::before {
-    content: "";
-    position: absolute;
-    right: -30px;
-    top: 50%;
-    width: 2px;
-    height: calc(100% + 60px);
-    background: var(--primary);
-}
-
-/* 3. El cuadro del Campeón (Dorado siempre) */
-#cuadro-campeon {
-    background: linear-gradient(145deg, #facc15, #b45309);
-    padding: 30px;
-    border-radius: 25px;
-    text-align: center;
-    max-width: 320px;
-    margin: 40px auto;
-    color: #000;
-    box-shadow: 0 0 40px rgba(250, 204, 21, 0.5);
-}
-
-/* 4. Inputs de marcador estilo "Neon" */
-.score-input {
-    width: 50px;
-    height: 35px;
-    background: #000 !important;
-    color: #00ffcc !important;
-    border: 2px solid var(--primary) !important;
-    border-radius: 8px;
-    text-align: center;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-}
-
-/* 5. Decoración lateral en tarjetas de jugadores */
-.jugadores {
-    border-left: 5px solid var(--primary);
-    text-align: left;
-}
-
-/* 6. Botones con degradado (Como los de tus capturas) */
-button:not(#theme-toggle):not(.menu-toggle) {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-}
-
-button:not(#theme-toggle):not(.menu-toggle):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 20px rgba(0,0,0,0.15);
-}
-
-/* 7. Logos pequeños en tablas y brackets */
-.logo-tabla, .logo-bracket {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-    vertical-align: middle;
-    margin-right: 8px;
 }
