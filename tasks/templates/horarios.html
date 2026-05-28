@@ -1727,7 +1727,17 @@ function cerrarModal(){
 GUARDAR BLOQUE
 ========================================= */
 
-function guardarBloque(){
+async function guardarBloque(){
+
+    const categoria =
+    document.getElementById(
+        "categoriaCurso"
+    ).value;
+
+    const curso =
+    document.getElementById(
+        "gradoInput"
+    ).value.trim();
 
     const profesor =
     document.getElementById(
@@ -1749,75 +1759,119 @@ function guardarBloque(){
         "tipoBloque"
     ).value;
 
-    if(tipo !== "descanso"){
+    if(!categoria || !curso){
 
-        if(
-            !profesor
-            ||
-            !materia
-            ||
-            !salon
-        ){
+        alert(
+            "Completa categoría y curso"
+        );
 
-            alert(
-                "Completa todos los campos"
-            );
-
-            return;
-
-        }
+        return;
 
     }
 
-    horarioActual.bloques =
-    horarioActual.bloques.filter(b=>{
+    const response =
+    await fetch(
+        "/guardar-bloque/",
+        {
 
-        return !(
+            method:"POST",
 
-            b.fila ===
-            celdaActual.fila
+            headers:{
+                "Content-Type":"application/json"
+            },
 
-            &&
+            body:JSON.stringify({
 
-            b.col ===
-            celdaActual.col
+                categoria,
+                curso,
 
+                fila:celdaActual.fila,
+                col:celdaActual.col,
+
+                profesor:
+                tipo === "descanso"
+                ? "DESCANSO"
+                : profesor,
+
+                materia:
+                tipo === "descanso"
+                ? "DESCANSO"
+                : materia,
+
+                salon:
+                tipo === "descanso"
+                ? "-"
+                : salon,
+
+                tipo
+
+            })
+
+        }
+    );
+
+    const data =
+    await response.json();
+
+    if(data.success){
+
+        alert(
+            "Bloque guardado"
         );
 
-    });
+        cargarHorarioDesdeDB();
 
-    horarioActual.bloques.push({
+        cerrarModal();
 
-        fila:
-        celdaActual.fila,
+    }
 
-        col:
-        celdaActual.col,
+}
 
-        profesor:
-        tipo === "descanso"
-        ? "DESCANSO"
-        : profesor,
+/* =========================================
+CARGAR HORARIO DESDE DB
+========================================= */
 
-        materia:
-        tipo === "descanso"
-        ? "DESCANSO"
-        : materia,
+async function cargarHorarioDesdeDB(){
 
-        salon:
-        tipo === "descanso"
-        ? "-"
-        : salon,
+    const categoria =
+    document.getElementById(
+        "categoriaCurso"
+    ).value;
 
-        tipo
+    const curso =
+    document.getElementById(
+        "gradoInput"
+    ).value.trim();
 
-    });
+    if(!categoria || !curso){
 
-    guardarSistema();
+        return;
+
+    }
+
+    const response =
+    await fetch(
+
+        `/obtener-horario/?categoria=${categoria}&curso=${curso}`
+
+    );
+
+    const data =
+    await response.json();
+
+    horarioActual = {
+
+        clave:`${categoria}-${curso}`,
+        bloques:data.bloques
+
+    };
+
+    document.getElementById(
+        "nombreHorarioActual"
+    ).innerText =
+    `${categoria} - ${curso}`;
 
     renderizarHorario();
-
-    cerrarModal();
 
 }
 
@@ -1825,33 +1879,70 @@ function guardarBloque(){
 ELIMINAR BLOQUE
 ========================================= */
 
-function eliminarBloque(){
+async function eliminarBloque(){
 
-    horarioActual.bloques =
-    horarioActual.bloques.filter(b=>{
+    if(!celdaActual){
+        return;
+    }
 
-        return !(
+    const categoria =
+    document.getElementById(
+        "categoriaCurso"
+    ).value;
 
-            b.fila ===
-            celdaActual.fila
+    const curso =
+    document.getElementById(
+        "gradoInput"
+    ).value.trim();
 
-            &&
+    try{
 
-            b.col ===
-            celdaActual.col
+        const response = await fetch(
+            "/eliminar-bloque/",
+            {
+                method:"POST",
 
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+
+                    categoria,
+                    curso,
+
+                    fila:celdaActual.fila,
+                    col:celdaActual.col
+
+                })
+            }
         );
 
-    });
+        const texto =
+        await response.text();
 
-    guardarSistema();
+        console.log(
+            "RESPUESTA:",
+            texto
+        );
 
-    renderizarHorario();
+        // 🔥 RECARGAR TABLA
+        await cargarHorarioDesdeBD();
 
-    cerrarModal();
+        cerrarModal();
+
+    }
+
+    catch(error){
+
+        console.error(
+            "ERROR:",
+            error
+        );
+
+    }
 
 }
-
 /* =========================================
 ELIMINAR HORARIO
 ========================================= */
@@ -2445,7 +2536,19 @@ function limpiarTodo(){
     localStorage.removeItem(
         "horariosGrados"
     );
+    document.getElementById(
+    "gradoInput"
+).addEventListener(
+    "change",
+    cargarHorarioDesdeDB
+);
 
+document.getElementById(
+    "categoriaCurso"
+).addEventListener(
+    "change",
+    cargarHorarioDesdeDB
+);
     horarios = {};
 
     horarioActual = null;
@@ -2456,6 +2559,7 @@ function limpiarTodo(){
         "nombreHorarioActual"
     ).innerText =
     "Sin horario";
+
 
 }
 </script>

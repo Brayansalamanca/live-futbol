@@ -11,6 +11,10 @@ from django.utils import timezone, encoding, http
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import HorarioCurso, BloqueHorario
+import json
 
 
 from django.utils.http import (
@@ -714,6 +718,123 @@ def lista_profesores(request):
 def horarios(request):
     return render(request, 'horarios.html')
     
+@csrf_exempt
+@login_required
+def guardar_bloque(request):
+
+    if request.method == 'POST':
+
+        data = json.loads(request.body)
+
+        categoria = data.get('categoria')
+        curso = data.get('curso')
+
+        fila = data.get('fila')
+        col = data.get('col')
+
+        profesor = data.get('profesor')
+        materia = data.get('materia')
+        salon = data.get('salon')
+        tipo = data.get('tipo')
+
+        horario = HorarioCurso.objects.filter(
+             categoria=categoria,
+    curso=curso
+        ).first()
+
+        if not horario:
+
+            horario = HorarioCurso.objects.create(
+        categoria=categoria,
+        curso=curso
+    )
+
+        BloqueHorario.objects.filter(
+            horario=horario,
+            fila=fila,
+            col=col
+        ).delete()
+
+        BloqueHorario.objects.create(
+            horario=horario,
+            fila=fila,
+            col=col,
+            profesor=profesor,
+            materia=materia,
+            salon=salon,
+            tipo=tipo
+        )
+
+        return JsonResponse({
+            'success': True
+        })
+@login_required
+def obtener_horario(request):
+
+    categoria = request.GET.get('categoria')
+    curso = request.GET.get('curso')
+
+    try:
+
+        horario = HorarioCurso.objects.filter(
+    categoria=categoria,
+    curso=curso
+).first()
+
+    except HorarioCurso.DoesNotExist:
+
+        return JsonResponse({
+            'bloques': []
+        })
+
+    bloques = []
+
+    for b in horario.bloques.all():
+
+        bloques.append({
+
+            'fila': b.fila,
+            'col': b.col,
+            'profesor': b.profesor,
+            'materia': b.materia,
+            'salon': b.salon,
+            'tipo': b.tipo
+
+        })
+
+    return JsonResponse({
+        'bloques': bloques
+    })
+@csrf_exempt
+@login_required
+def eliminar_bloque(request):
+
+    if request.method == 'POST':
+
+        data = json.loads(request.body)
+
+        categoria = data.get('categoria')
+        curso = data.get('curso')
+
+        fila = data.get('fila')
+        col = data.get('col')
+
+        horario = HorarioCurso.objects.filter(
+            categoria=categoria,
+            curso=curso
+        ).first()
+
+        if horario:
+
+            BloqueHorario.objects.filter(
+                horario=horario,
+                fila=fila,
+                col=col
+            ).delete()
+
+        return JsonResponse({
+            'success': True
+        })
 # ==========================================
 # 🍽️ MÓDULO ASISTENCIA ALIMENTOS (RADAR)
 # ==========================================

@@ -232,3 +232,58 @@ class Torneo(models.Model):
 
     def __str__(self):
         return self.nombre
+    # ==========================================
+# 📚 HORARIOS
+# ==========================================
+
+class HorarioCurso(models.Model):
+
+    categoria = models.CharField(
+        max_length=50
+    )
+
+    curso = models.CharField(
+        max_length=50
+    )
+
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return f"{self.categoria} - {self.curso}"
+
+
+class BloqueHorario(models.Model):
+
+    horario = models.ForeignKey(
+        HorarioCurso,
+        on_delete=models.CASCADE,
+        related_name='bloques'
+    )
+
+    fila = models.IntegerField()
+
+    col = models.IntegerField()
+
+    profesor = models.CharField(
+        max_length=100
+    )
+
+    materia = models.CharField(
+        max_length=100
+    )
+
+    salon = models.CharField(
+        max_length=100
+    )
+
+    tipo = models.CharField(
+        max_length=30,
+        default='clase'
+    )
+
+    def __str__(self):
+
+        return f"{self.profesor} - {self.materia}"

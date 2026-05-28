@@ -5,331 +5,493 @@
 <head>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MKS plataform</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <title>MKS Platform</title>
 
+    <!-- GOOGLE FONTS -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- CSS -->
+    <link
+        rel="stylesheet"
+        href="{% static 'base.css' %}"
+    >
+
+    <!-- CHART JS -->
     <script src="{% static 'js/chart.umd.min.js' %}"></script>
-
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-
-    <script>
-        window.OneSignalDeferred = window.OneSignalDeferred || [];
-
-        OneSignalDeferred.push(async function (OneSignal) {
-
-            await OneSignal.init({
-                appId: "43623638-2360-4a76-927d-9953b3364482",
-                allowLocalhostAsSecureOrigin: true,
-            });
-
-        });
-    </script>
 
 </head>
 
 <body>
 
-    <nav>
+<!-- ==========================================================================
+     LAYOUT GENERAL
+========================================================================== -->
 
-        <button class="menu-toggle" aria-label="Abrir Menú">
-            ☰
-        </button>
+<div class="layout">
 
-        <ul id="nav-menu">
+    <!-- ==========================================================================
+         SIDEBAR
+    ========================================================================== -->
 
-            <!-- LOGO -->
-            <li class="logo-item">
+    <aside
+        class="sidebar"
+        id="sidebar"
+    >
 
-                <div class="logo-container">
+        <!-- LOGO -->
+        <div class="sidebar-top">
 
-                    <a href="{% url 'home' %}">
-                        <img src="{% static '1.webp' %}" alt="Logo Live Futbol">
-                    </a>
+            <div class="logo-box">
+
+                <img
+                    src="{% static '1.webp' %}"
+                    alt="Logo MKS"
+                >
+
+                <div class="logo-text">
+
+                    <h2>MKS Platform</h2>
+
+                    <span>
+                        Melanie Klein School
+                    </span>
 
                 </div>
 
-            </li>
+            </div>
 
-            {% if user.is_authenticated %}
+        </div>
 
-                <!-- ====================================== -->
-                <!-- ADMINISTRACION -->
-                <!-- ====================================== -->
+        <!-- LINKS -->
+        <div class="sidebar-links">
 
-                {% if user.groups.all.0.name == 'administracion' %}
+           
 
-                    <li>
-                        <a href="{% url 'formulario' %}">
-                            Inventario
-                        </a>
-                    </li>
+    {% if user.is_authenticated %}
 
-                    <li>
-                        <a href="{% url 'tipos' %}">
-                            Control Inventario
-                        </a>
-                    </li>
+        <!-- ========================================= -->
+        <!-- ADMINISTRACION -->
+        <!-- ========================================= -->
 
-                    <li>
-                        <a href="{% url 'ranking' %}">
-                            Aprobar Usuarios
-                        </a>
-                    </li>
+        {% if user.groups.all.0.name == 'administracion' %}
 
-                    <li>
-                        <a href="{% url 'soporte' %}">
-                            Soporte
-                        </a>
-                    </li>
+            <a href="{% url 'home' %}"
+               class="{% if request.path == '/' %}active{% endif %}">
+                <span class="icon">🏠</span>
+                <span class="link-text">Inicio</span>
+            </a>
 
-                <!-- ====================================== -->
-                <!-- COORDINACION -->
-                <!-- ====================================== -->
+            <a href="{% url 'formulario' %}"
+               class="{% if request.path == '/formulario/' %}active{% endif %}">
+                <span class="icon">⚽</span>
+                <span class="link-text">Inventario</span>
+            </a>
 
-                {% elif user.groups.all.0.name == 'coordinacion' %}
+            <a href="{% url 'tipos' %}"
+               class="{% if request.path == '/tipos/' %}active{% endif %}">
+                <span class="icon">📦</span>
+                <span class="link-text">Control Inventario</span>
+            </a>
 
-                    <li>
-                        <a href="{% url 'tipos' %}">
-                            Control Inventario
-                        </a>
-                    </li>
+            <a href="{% url 'ranking' %}"
+               class="{% if request.path == '/ranking/' %}active{% endif %}">
+                <span class="icon">🏆</span>
+                <span class="link-text">Aprobar Usuarios</span>
+            </a>
 
+            <a href="{% url 'soporte' %}"
+               class="{% if request.path == '/soporte/' %}active{% endif %}">
+                <span class="icon">🛠</span>
+                <span class="link-text">Soporte</span>
+            </a>
+            <br>
+            <a href="{% url 'logout' %}" class="logout-btn">
+    <span class="icon">🚪</span>
+    <span class="link-text">Cerrar Sesión</span>
+</a>
 
-                    <li>
-                        <a href="{% url 'nfc' %}">
-                            Vista de Balones
-                        </a>
-                    </li>
+        <!-- ========================================= -->
+        <!-- COORDINACION -->
+        <!-- ========================================= -->
 
-                    <li>
-                        <a href="{% url 'signup' %}">
-                            Registrar Usuario
-                        </a>
-                    </li>
+        {% elif user.groups.all.0.name == 'coordinacion' %}
 
-                    <li>
-                        <a href="{% url 'soporte' %}">
-                            Soporte
-                        </a>
-                    </li>
+            <a href="{% url 'home' %}"
+               class="{% if request.path == '/' %}active{% endif %}">
+                <span class="icon">🏠</span>
+                <span class="link-text">Inicio</span>
+            </a>
 
-                <!-- ====================================== -->
-                <!-- PROFESOR INVENTARIO -->
-                <!-- ====================================== -->
+            <a href="{% url 'tipos' %}"
+               class="{% if request.path == '/tipos/' %}active{% endif %}">
+                <span class="icon">📦</span>
+                <span class="link-text">Control Inventario</span>
+            </a>
 
-                {% elif user.groups.all.0.name == 'profesor_inventario' %}
+            <a href="{% url 'nfc' %}"
+               class="{% if request.path == '/nfc/' %}active{% endif %}">
+                <span class="icon">⚽</span>
+                <span class="link-text">Vista Balones</span>
+            </a>
 
-                    <li>
-                        <a href="{% url 'tipos' %}">
-                            Control Inventario
-                        </a>
-                    </li>
+            <a href="{% url 'signup' %}"
+               class="{% if request.path == '/signup/' %}active{% endif %}">
+                <span class="icon">👤</span>
+                <span class="link-text">Registrar Usuario</span>
+            </a>
 
-                    <li>
-                        <a href="{% url 'horarios' %}">
-                            Horario
-                        </a>
-                    </li>
+            <a href="{% url 'soporte' %}"
+               class="{% if request.path == '/soporte/' %}active{% endif %}">
+                <span class="icon">🛠</span>
+                <span class="link-text">Soporte</span>
+            </a>
+            <br>
+            <a href="{% url 'logout' %}" class="logout-btn">
+    <span class="icon">🚪</span>
+    <span class="link-text">Cerrar Sesión</span>
+</a>
 
-                    <li>
-                        <a href="{% url 'profesores' %}">
-                            Torneos
-                        </a>
-                    </li>
+        <!-- ========================================= -->
+        <!-- PROFESOR INVENTARIO -->
+        <!-- ========================================= -->
 
-                    <li>
-                        <a href="{% url 'soporte' %}">
-                            Soporte
-                        </a>
-                    </li>
+        {% elif user.groups.all.0.name == 'profesor_inventario' %}
 
-                <!-- ====================================== -->
-                <!-- ASISTENTE -->
-                <!-- ====================================== -->
+            <a href="{% url 'home' %}"
+               class="{% if request.path == '/' %}active{% endif %}">
+                <span class="icon">🏠</span>
+                <span class="link-text">Inicio</span>
+            </a>
 
-                {% elif user.groups.all.0.name == 'asistente bienestar' %}
+            <a href="{% url 'tipos' %}"
+               class="{% if request.path == '/tipos/' %}active{% endif %}">
+                <span class="icon">📦</span>
+                <span class="link-text">Inventario</span>
+            </a>
 
-                    <li>
-                        <a href="{% url 'radar' %}">
-                            Inventario Balones
-                        </a>
-                    </li>
+            <a href="{% url 'horarios' %}"
+               class="{% if request.path == '/horarios/' %}active{% endif %}">
+                <span class="icon">📅</span>
+                <span class="link-text">Horarios</span>
+            </a>
 
-                    <li>
-                        <a href="{% url 'videos' %}">
-                            Renta Balones
-                        </a>
-                    </li>
+            <a href="{% url 'profesores' %}"
+               class="{% if request.path == '/profesores/' %}active{% endif %}">
+                <span class="icon">🏆</span>
+                <span class="link-text">Torneos</span>
+            </a>
 
-                    <li>
-                        <a href="{% url 'voz' %}">
-                            Bajas Balones
-                        </a>
-                    </li>
+            <a href="{% url 'soporte' %}"
+               class="{% if request.path == '/soporte/' %}active{% endif %}">
+                <span class="icon">🛠</span>
+                <span class="link-text">Soporte</span>
+            </a>
+            <br>
+            <a href="{% url 'logout' %}" class="logout-btn">
+    <span class="icon">🚪</span>
+    <span class="link-text">Cerrar Sesión</span>
+</a>
 
-                    <li>
-                        <a href="{% url 'profesores' %}">
-                            Torneos
-                        </a>
-                    </li>
+        <!-- ========================================= -->
+        <!-- ASISTENTE -->
+        <!-- ========================================= -->
 
-                    <li>
-                        <a href="{% url 'soporte' %}">
-                            Soporte
-                        </a>
-                    </li>
+        {% elif user.groups.all.0.name == 'asistente bienestar' %}
 
-                <!-- ====================================== -->
-                <!-- PROFESOR NORMAL -->
-                <!-- ====================================== -->
+            <a href="{% url 'home' %}"
+               class="{% if request.path == '/' %}active{% endif %}">
+                <span class="icon">🏠</span>
+                <span class="link-text">Inicio</span>
+            </a>
 
-                {% else %}
+            <a href="{% url 'radar' %}"
+               class="{% if request.path == '/radar/' %}active{% endif %}">
+                <span class="icon">⚽</span>
+                <span class="link-text">Inventario Balones</span>
+            </a>
 
-                    
+            <a href="{% url 'videos' %}"
+               class="{% if request.path == '/videos/' %}active{% endif %}">
+                <span class="icon">📦</span>
+                <span class="link-text">Renta Balones</span>
+            </a>
 
-                    <li>
-                        <a href="{% url 'horarios' %}">
-                            Horario
-                        </a>
-                    </li>
+            <a href="{% url 'voz' %}"
+               class="{% if request.path == '/voz/' %}active{% endif %}">
+                <span class="icon">🚫</span>
+                <span class="link-text">Bajas Balones</span>
+            </a>
 
-                    <li>
-                        <a href="{% url 'profesores' %}">
-                            Torneos
-                        </a>
-                    </li>
+            <a href="{% url 'profesores' %}"
+               class="{% if request.path == '/profesores/' %}active{% endif %}">
+                <span class="icon">🏆</span>
+                <span class="link-text">Torneos</span>
+            </a>
 
-                    <li>
-                        <a href="{% url 'soporte' %}">
-                            Soporte
-                        </a>
-                    </li>
+            <a href="{% url 'soporte' %}"
+               class="{% if request.path == '/soporte/' %}active{% endif %}">
+                <span class="icon">🛠</span>
+                <span class="link-text">Soporte</span>
+            </a>
+                <br>
+            <a href="{% url 'logout' %}" class="logout-btn">
+                <span class="icon">🚪</span>
+                <span class="link-text">Cerrar Sesión</span>
+            </a>
 
-                {% endif %}
+        <!-- ========================================= -->
+        <!-- PROFESOR NORMAL -->
+        <!-- ========================================= -->
 
-                <!-- ====================================== -->
-                <!-- LOGOUT -->
-                <!-- ====================================== -->
+        {% else %}
 
-                <li>
-                    <a href="{% url 'logout' %}" class="logout">
-                        Salir
-                    </a>
-                </li>
+            <a href="{% url 'home' %}"
+               class="{% if request.path == '/' %}active{% endif %}">
+                <span class="icon">🏠</span>
+                <span class="link-text">Inicio</span>
+            </a>
 
-            {% else %}
+            <a href="{% url 'horarios' %}"
+               class="{% if request.path == '/horarios/' %}active{% endif %}">
+                <span class="icon">📅</span>
+                <span class="link-text">Horarios</span>
+            </a>
 
-                <li>
-                    <a href="{% url 'home' %}">
-                        Inicio
-                    </a>
-                </li>
+            <a href="{% url 'profesores' %}"
+               class="{% if request.path == '/profesores/' %}active{% endif %}">
+                <span class="icon">🏆</span>
+                <span class="link-text">Torneos</span>
+            </a>
 
-                <li>
-                    <a href="{% url 'signin' %}">
-                        Iniciar Sesión
-                    </a>
-                </li>
+            <a href="{% url 'soporte' %}"
+               class="{% if request.path == '/soporte/' %}active{% endif %}">
+                <span class="icon">🛠</span>
+                <span class="link-text">Soporte</span>
+            </a>
+            <br>
+            <a href="{% url 'logout' %}" class="logout-btn
+">
+                <span class="icon">🚪</span>
+                <span class="link-text">Cerrar Sesión</span>
+            </a>
 
-            {% endif %}
+        {% endif %}
 
-        </ul>
+    {% else %}
 
-        <button id="theme-toggle" title="Cambiar tema">
+        <a href="{% url 'home' %}"
+           class="{% if request.path == '/' %}active{% endif %}">
+            <span class="icon">🏠</span>
+            <span class="link-text">Inicio</span>
+        </a>
+
+        <a href="{% url 'signin' %}"
+           class="{% if request.path == '/signin/' %}active{% endif %}">
+            <span class="icon">🔑</span>
+            <span class="link-text">Iniciar Sesión</span>
+        </a>
+
+    {% endif %}
+
+</div>
+
+    </aside>
+
+    <!-- ==========================================================================
+         MAIN
+    ========================================================================== -->
+
+    <div class="main" id="main">
+
+        <!-- ==========================================================================
+             TOPBAR
+        ========================================================================== -->
+            <header class="topbar">
+
+    <!-- LEFT -->
+    <div class="topbar-left">
+
+        <!-- BOTON SIDEBAR -->
+        <button id="toggleSidebar">
+            ☰
+        </button>
+
+        {% if user.is_authenticated %}
+
+            
+
+        {% endif %}
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="topbar-right">
+
+        {% if user.is_authenticated %}
+
+            <!-- ALERTAS -->
+            <button class="icon-btn">
+
+                🔔
+
+                <span class="notification-dot"></span>
+
+            </button>
+
+        {% endif %}
+
+        <!-- CAMBIO TEMA -->
+        <button
+            class="icon-btn"
+            id="theme-toggle"
+        >
             🌙
         </button>
 
-    </nav>
+        {% if user.is_authenticated %}
 
-    <br>
-    <br>
+            <!-- USUARIO -->
+            <div class="user-box">
 
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
+                <div class="avatar">
 
-    <script>
+                    {{ user.username|first|upper }}
 
-        // =========================
-        // MENU RESPONSIVE
-        // =========================
+                </div>
 
-        const toggleButton = document.querySelector('.menu-toggle');
+                <div class="user-info">
 
-        const navMenu = document.getElementById('nav-menu');
+                    <strong>
+                        {{ user.username }}
+                    </strong>
 
-        toggleButton.addEventListener('click', function () {
+                    <span>
 
-            navMenu.classList.toggle('active');
+                        {% if user.groups.all.0.name %}
+                            {{ user.groups.all.0.name }}
+                        {% else %}
+                            Usuario
+                        {% endif %}
 
-            this.textContent = navMenu.classList.contains('active')
-                ? '✕'
-                : '☰';
+                    </span>
 
-        });
+                </div>
 
-        // =========================
-        // CERRAR MENU MOVIL
-        // =========================
+            </div>
 
-        document.querySelectorAll('#nav-menu a').forEach(link => {
+        {% endif %}
 
-            link.addEventListener('click', () => {
+    </div>
 
-                navMenu.classList.remove('active');
 
-                toggleButton.textContent = '☰';
 
-            });
+        </header>
 
-        });
+        <!-- ==========================================================================
+             CONTENIDO
+        ========================================================================== -->
 
-        // =========================
-        // MODO OSCURO / CLARO
-        // =========================
+        <main class="content">
 
-        const btn = document.getElementById("theme-toggle");
+            {% block content %}
+            {% endblock %}
 
-        // CARGAR TEMA
-        if (localStorage.getItem("theme") === "light") {
+        </main>
 
-            document.body.classList.add("light-mode");
+    </div>
 
-            btn.textContent = "🌙";
+</div>
 
-        } else {
+<!-- ==========================================================================
+     JAVASCRIPT
+========================================================================== -->
 
-            btn.textContent = "☀️";
+<script>
+
+    // ==========================================================================
+    // SIDEBAR TOGGLE
+    // ==========================================================================
+
+    const sidebar =
+        document.getElementById("sidebar");
+
+    const main =
+        document.getElementById("main");
+
+    const toggleBtn =
+        document.getElementById("toggleSidebar");
+
+    toggleBtn.addEventListener("click", () => {
+
+        sidebar.classList.toggle("closed");
+
+        main.classList.toggle("expanded");
+
+    });
+
+    // ==========================================================================
+    // DARK MODE
+    // ==========================================================================
+
+    const themeBtn =
+        document.getElementById("theme-toggle");
+
+    // CARGAR TEMA
+    if(localStorage.getItem("theme") === "light"){
+
+        document.body.classList.add("light-mode");
+
+        themeBtn.textContent = "☀️";
+
+    }else{
+
+        themeBtn.textContent = "🌙";
+
+    }
+
+    // CAMBIAR TEMA
+    themeBtn.addEventListener("click", () => {
+
+        document.body.classList.toggle("light-mode");
+
+        if(document.body.classList.contains("light-mode")){
+
+            localStorage.setItem("theme", "light");
+
+            themeBtn.textContent = "☀️";
+
+        }else{
+
+            localStorage.setItem("theme", "dark");
+
+            themeBtn.textContent = "🌙";
 
         }
 
-        // CAMBIAR TEMA
-        btn.addEventListener("click", () => {
+    });
 
-            document.body.classList.toggle("light-mode");
+    // ==========================================================================
+    // RESPONSIVE SIDEBAR
+    // ==========================================================================
 
-            if (document.body.classList.contains("light-mode")) {
+    if(window.innerWidth <= 900){
 
-                localStorage.setItem("theme", "light");
+        sidebar.classList.add("closed");
 
-                btn.textContent = "🌙";
+        main.classList.add("expanded");
 
-            } else {
+    }
 
-                localStorage.setItem("theme", "dark");
-
-                btn.textContent = "☀️";
-
-            }
-
-        });
-
-    </script>
+</script>
 
 </body>
 </html>

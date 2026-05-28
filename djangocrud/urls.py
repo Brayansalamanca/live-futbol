@@ -260,4 +260,22 @@ path(
     path('api/torneos/listar/', login_required(views.api_obtener_torneos), name='api_obtener_torneos'),
     path('api/torneos/guardar/', login_required(views.api_guardar_torneo), name='api_guardar_torneo'),
     path('api/torneos/eliminar/<str:nombre>/', views.api_eliminar_torneo, name='api_eliminar_torneo'),
+
+    path(
+    'guardar-bloque/',
+    views.guardar_bloque,
+    name='guardar_bloque'
+),
+
+path(
+    'obtener-horario/',
+    views.obtener_horario,
+    name='obtener_horario'
+),
+
+path(
+    'eliminar-bloque/',
+    views.eliminar_bloque,
+    name='eliminar_bloque'
+),
 ]
