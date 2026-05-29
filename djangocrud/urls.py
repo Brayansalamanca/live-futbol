@@ -44,6 +44,11 @@ urlpatterns = [
     path('restablecer_/', login_required(views.signup), name='signup'),
     path('condiciones/', views.condiciones, name='condiciones'),
     path('soporte/',login_required(views.soporte), name='soporte'),
+    path(
+    'cambiar-password-inicial/',
+    login_required(views.cambiar_password_inicial),
+    name='cambiar_password_inicial'
+),
 
     # --- 🍽️ URLS NFC / COMEDOR (PÁGINAS HTML) ---
     path('mis_suscripciones/',  (views.mis_suscripciones), name='mis_suscripciones'),

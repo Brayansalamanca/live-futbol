@@ -549,69 +549,156 @@ def toggle_permiso_prendas(request, id):
         'success': False
     })
 
+from django.utils.text import slugify
+from .models import Perfil
+import random
+
+
+@user_passes_test(es_coordinacion)
 def signup(request):
+
     if request.method == 'GET':
-        return render(request, 'signup.html', {'form': CustomUserCreationForm()})
-    
+
+        return render(request, 'signup.html', {
+            'form': CustomUserCreationForm()
+        })
+
+    form = CustomUserCreationForm(request.POST)
+
+    if form.is_valid():
+
+        try:
+
+            nombre_real = form.cleaned_data['nombre_real']
+            email = form.cleaned_data['email']
+            rol = form.cleaned_data['rol']
+
+            # ==========================================
+            # USERNAME AUTOMÁTICO
+            # ==========================================
+
+            base_username = slugify(nombre_real).replace('-', '')
+
+            username = base_username
+
+            contador = 1
+
+            while User.objects.filter(username=username).exists():
+
+                username = f"{base_username}{contador}"
+
+                contador += 1
+
+            # ==========================================
+            # PASSWORD AUTOMÁTICA
+            # ==========================================
+
+            numero = random.randint(1000, 9999)
+
+            password_temporal = f"ColRosario{numero}"
+
+            # ==========================================
+            # CREAR USUARIO
+            # ==========================================
+
+            user = User.objects.create_user(
+
+                username=username,
+
+                password=password_temporal,
+
+                email=email,
+
+                first_name=rol
+            )
+
+            user.is_active = True
+
+            user.save()
+
+            # ==========================================
+            # GRUPOS
+            # ==========================================
+
+            grupo, _ = Group.objects.get_or_create(
+                name=rol
+            )
+
+            user.groups.add(grupo)
+
+            # ==========================================
+            # PERFIL
+            # ==========================================
+
+            Perfil.objects.create(
+
+                user=user,
+
+                nombre_real=nombre_real,
+
+                debe_cambiar_password=True
+            )
+
+            return render(request, 'signup.html', {
+
+                'form': CustomUserCreationForm(),
+
+                'success': f'''
+Usuario creado correctamente.
+
+Usuario:
+{username}
+
+Contraseña temporal:
+{password_temporal}
+'''
+            })
+
+        except Exception as e:
+
+            return render(request, 'signup.html', {
+
+                'form': form,
+
+                'error': str(e)
+
+            })
+
+    return render(request, 'signup.html', {
+
+        'form': form
+
+    })
+
+@login_required
+def cambiar_password_inicial(request):
+
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            try:
-                # 1. INTENTO DE GUARDADO (Aquí es donde ocurre el 502)
-                user = form.save(commit=False)
-                user.first_name = request.POST.get('rol', 'Sin Rol')
-                user.is_active = False 
-                
-                print("DEBUG: Intentando guardar en MongoDB...")
-                user.save() 
-                print("DEBUG: Usuario guardado exitosamente.")
 
-                # 2. GENERACIÓN DE TOKEN Y CORREO
-                try:
-                    current_site = get_current_site(request)
-                    uid = urlsafe_base64_encode(force_bytes(user.pk))
-                    token = account_activation_token.make_token(user)
-                    
-                    context = {
-                        'user': user,
-                        'domain': current_site.domain,
-                        'uid': uid,
-                        'token': token,
-                    }
+        nueva_password = request.POST['password']
 
-                    html_content = render_to_string('confirmacion_email.html', context)
-                    text_content = strip_tags(html_content)
+        user = request.user
 
-                    msg = EmailMultiAlternatives(
-                        'Activa tu cuenta - Live Fútbol',
-                        text_content,
-                        'Live Fútbol <saebra581@gmail.com>',
-                        [user.email]
-                    )
-                    msg.attach_alternative(html_content, "text/html")
-                    
-                    print("DEBUG: Intentando enviar correo...")
-                    msg.send(fail_silently=False)
-                    print("DEBUG: Correo enviado (o falló silenciosamente).")
+        # CAMBIAR CONTRASEÑA
+        user.set_password(nueva_password)
+        user.save()
 
-                except Exception as mail_error:
-                    print(f"DEBUG: Error enviando correo: {mail_error}")
-                    # No detenemos el proceso si falla el correo, el usuario ya se creó.
+        # 🔐 DESACTIVAR CAMBIO OBLIGATORIO
+        perfil = request.user.perfil
+        perfil.debe_cambiar_password = False
+        perfil.save()
 
-                return render(request, 'signup.html', {
-                    'form': CustomUserCreationForm(), 
-                    'success': 'Registro exitoso. Revisa tu correo (si no llega, contacta a Rosita).'
-                })
+        # VOLVER A LOGUEAR
+        login(request, user)
 
-            except Exception as e:
-                # SI ESTO SE EJECUTA, VERÁS EL ERROR EN LA PÁGINA EN VEZ DEL 502
-                print(f"DEBUG: ERROR CRÍTICO EN BASE DE DATOS: {e}")
-                return render(request, 'signup.html', {
-                    'form': form, 
-                    'error': f"Error de conexión con la base de datos: {str(e)}"
-                })
-        else:
-            return render(request, 'signup.html', {'form': form, 'error': "Datos inválidos en el formulario."})
+        return redirect('home')
+
+    return render(
+        request,
+        'cambiar_password_inicial.html'
+    )
+
+
 
 
 # --- CORRECCIÓN AQUÍ: SE SEPARÓ SIGNIN ---
@@ -626,6 +713,14 @@ def signin(request):
             return render(request, 'signin.html', {'form': AuthenticationForm(), 'error': 'Cuenta pendiente de activación.'})
         
         login(request, user)
+        
+    try:
+
+        if user.perfil.debe_cambiar_password:
+
+          return redirect('cambiar_password_inicial')
+    except:
+        pass
         if es_coordinacion(user): return redirect('tipos')
         if es_asistente(user): return redirect('radar')
         if es_administracion(user): return redirect('formulario')

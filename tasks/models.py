@@ -287,3 +287,142 @@ class BloqueHorario(models.Model):
     def __str__(self):
 
         return f"{self.profesor} - {self.materia}"
+    
+    # ==========================================
+# 👤 PERFIL DE USUARIO
+# ==========================================
+
+# ==========================================
+# 👤 PERFIL DE USUARIO
+# ==========================================
+
+class Perfil(models.Model):
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    nombre_real = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    debe_cambiar_password = models.BooleanField(
+        default=True
+    )
+
+    puede_apartar_prendas = models.BooleanField(
+        default=False
+    )
+
+    def __str__(self):
+
+        return self.user.username
+    
+    # ==========================================
+# 💬 CHAT ESCOLAR
+# ==========================================
+
+class SalaChat(models.Model):
+
+    nombre = models.CharField(
+        max_length=255
+    )
+
+    creada = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return self.nombre
+
+
+class MensajeChat(models.Model):
+
+    sala = models.ForeignKey(
+        SalaChat,
+        on_delete=models.CASCADE,
+        related_name='mensajes'
+    )
+
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    mensaje = models.TextField()
+
+    fecha = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    leido = models.BooleanField(
+        default=False
+    )
+
+    def __str__(self):
+
+        return f"{self.usuario.username}: {self.mensaje[:30]}"
+    
+    # ==========================================
+# 🔔 NOTIFICACIONES
+# ==========================================
+
+class Notificacion(models.Model):
+
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notificaciones'
+    )
+
+    titulo = models.CharField(
+        max_length=255
+    )
+
+    mensaje = models.TextField()
+
+    leida = models.BooleanField(
+        default=False
+    )
+
+    fecha = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return self.titulo
+    
+    # ==========================================
+# 📜 HISTORIAL DEL SISTEMA
+# ==========================================
+
+class LogSistema(models.Model):
+
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    accion = models.CharField(
+        max_length=255
+    )
+
+    modulo = models.CharField(
+        max_length=100
+    )
+
+    fecha = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return f"{self.usuario} - {self.accion}"
+    
+    

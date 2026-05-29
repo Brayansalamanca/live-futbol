@@ -92,7 +92,7 @@
 
             <a href="{% url 'formulario' %}"
                class="{% if request.path == '/formulario/' %}active{% endif %}">
-                <span class="icon">⚽</span>
+                <span class="icon">📋</span>
                 <span class="link-text">Inventario</span>
             </a>
 
@@ -104,7 +104,7 @@
 
             <a href="{% url 'ranking' %}"
                class="{% if request.path == '/ranking/' %}active{% endif %}">
-                <span class="icon">🏆</span>
+                <span class="icon">💼</span>
                 <span class="link-text">Aprobar Usuarios</span>
             </a>
 
@@ -371,7 +371,7 @@
                 <div class="user-info">
 
                     <strong>
-                        {{ user.username }}
+                         {{ request.user.perfil.nombre_real }}
                     </strong>
 
                     <span>
@@ -401,6 +401,53 @@
         ========================================================================== -->
 
         <main class="content">
+            {% if user.is_authenticated and user.perfil.debe_cambiar_password %}
+
+<div
+    style="
+        background:#ff9800;
+        color:white;
+        padding:15px;
+        border-radius:12px;
+        margin-bottom:20px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:20px;
+    "
+>
+
+    <div>
+
+        <strong>
+            🔐 Debes cambiar tu contraseña inicial
+        </strong>
+
+        <br>
+
+        <span>
+            Por seguridad cambia la contraseña que te asignaron.
+        </span>
+
+    </div>
+
+    <a
+        href="{% url 'cambiar_password_inicial' %}"
+        style="
+            background:white;
+            color:#ff9800;
+            padding:10px 18px;
+            border-radius:10px;
+            text-decoration:none;
+            font-weight:700;
+        "
+    >
+        Cambiar contraseña
+    </a>
+
+</div>
+
+{% endif %}
 
             {% block content %}
             {% endblock %}

@@ -1,161 +1,402 @@
+```html
 {% extends "base.html" %}
 
 {% block content %}
+
 <style>
-  .form-container {
-    max-width: 400px;
-    margin: auto;
-    padding: 2rem;
-    border-radius: 10px;
-    /* Mantenemos el borde y sombra pero sin colores específicos */
-    border: 1px solid; 
-    box-shadow: 2px 5px 45px;
-    display: flex;
-    flex-direction: column;
-  }
 
-  .form-container h1 {
-    text-align: center;
-    margin-bottom: 1rem;
-  }
+*{
+    box-sizing:border-box;
+}
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1rem;
-  }
+.form-container{
 
-  .form-group label {
-    margin-bottom: 0.3rem;
-    font-weight: bold;
-    font-size: 0.9rem;
-  }
+    width:100%;
+    max-width:450px;
 
-  .form-group input, 
-  .form-group select {
-    padding: 0.5rem;
-    border-radius: 5px;
-    border: 1px solid;
-    outline: none;
-    width: 100%;
-    box-sizing: border-box;
-  }
+    margin:40px auto;
 
-  .form-container button {
-    padding: 0.7rem;
-    border: 1px solid;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: opacity 0.3s;
-    width: 100%;
-  }
+    padding:35px;
 
-  .form-container button:hover {
-    opacity: 0.8;
-  }
+    border-radius:20px;
 
-  .secondary-btn {
-    margin-top: 0.5rem;
-  }
+    border:1px solid rgba(255,255,255,0.1);
 
-  .terms {
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+    backdrop-filter:blur(10px);
 
-  .terms input {
-    margin-right: 0.5rem;
-  }
+    box-shadow:0 10px 40px rgba(0,0,0,0.3);
 
-  .success-message {
-    border: 1px solid;
-    padding: 10px;
-    border-radius: 5px;
-    text-align: center;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-  }
+    display:flex;
 
-  .error-text {
-    text-align: center;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-  }
+    flex-direction:column;
+}
 
-  .error-msg {
-    font-size: 0.8rem;
-  }
+.form-container h1{
+
+    text-align:center;
+
+    margin-bottom:25px;
+
+    font-size:2rem;
+
+    font-weight:800;
+}
+
+.form-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    margin-bottom:18px;
+}
+
+.form-group label{
+
+    margin-bottom:8px;
+
+    font-size:0.95rem;
+
+    font-weight:600;
+}
+
+.form-group input,
+.form-group select{
+
+    width:100%;
+
+    padding:14px;
+
+    border-radius:10px;
+
+    border:1px solid rgba(255,255,255,0.2);
+
+    background:rgba(255,255,255,0.05);
+
+    color:white;
+
+    outline:none;
+
+    transition:0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus{
+
+    border:1px solid #4da3ff;
+
+    box-shadow:0 0 10px rgba(77,163,255,0.4);
+}
+
+.form-group select option{
+
+    color:black;
+}
+
+.submit-btn{
+
+    width:100%;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:10px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:0.3s;
+
+    font-size:1rem;
+}
+
+.submit-btn:hover{
+
+    transform:translateY(-2px);
+
+    opacity:0.9;
+}
+
+.secondary-btn{
+
+    width:100%;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    border:1px solid rgba(255,255,255,0.2);
+
+    background:transparent;
+
+    cursor:pointer;
+
+    margin-top:12px;
+
+    transition:0.3s;
+}
+
+.secondary-btn:hover{
+
+    opacity:0.8;
+}
+
+.terms{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:10px;
+
+    margin-top:10px;
+
+    margin-bottom:25px;
+
+    font-size:0.9rem;
+}
+
+.terms input{
+
+    margin-top:4px;
+}
+
+.terms a{
+
+    color:#4da3ff;
+
+    text-decoration:none;
+
+    font-weight:600;
+}
+
+.success-message{
+
+    padding:14px;
+
+    border-radius:10px;
+
+    margin-bottom:20px;
+
+    text-align:center;
+
+    border:1px solid #00c853;
+
+    background:rgba(0,200,83,0.1);
+
+    color:#00e676;
+}
+
+.error-message{
+
+    padding:14px;
+
+    border-radius:10px;
+
+    margin-bottom:20px;
+
+    text-align:center;
+
+    border:1px solid #ff5252;
+
+    background:rgba(255,82,82,0.1);
+
+    color:#ff8a80;
+}
+
+.error-text{
+
+    color:#ff8a80;
+
+    font-size:0.8rem;
+
+    margin-top:5px;
+}
+
+.login-link{
+
+    margin-top:15px;
+
+    text-align:center;
+}
+
+.login-link a{
+
+    text-decoration:none;
+}
+
+.credenciales-box{
+
+    margin-top:15px;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    border:1px solid rgba(255,255,255,0.2);
+
+    background:rgba(255,255,255,0.05);
+
+    text-align:left;
+}
+
+.credenciales-box p{
+
+    margin:8px 0;
+}
+
+@media(max-width:500px){
+
+    .form-container{
+
+        margin:20px;
+
+        padding:25px;
+    }
+}
+
 </style>
 
 <div class="form-container">
-  <h1>Crear cuenta</h1>
 
-  {% if success %}
-    <div class="success-message">
-      {{ success }}
+    <h1>Crear cuenta</h1>
+
+    {% if success %}
+        <div class="success-message">
+
+            {{ success }}
+
+            {% if usuario_generado %}
+
+            <div class="credenciales-box">
+
+                <h3>
+                    Datos de acceso
+                </h3>
+
+                <p>
+                    <strong>Usuario:</strong>
+                    {{ usuario_generado }}
+                </p>
+
+                <p>
+                    <strong>Contraseña:</strong>
+                    {{ password_generada }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form action="{% url 'signup' %}" method="POST">
+
+        {% csrf_token %}
+
+        <div class="form-group">
+
+            <label for="id_nombre_real">
+                Nombre completo
+            </label>
+
+            {{ form.nombre_real }}
+
+            {% if form.nombre_real.errors %}
+                <div class="error-text">
+                    {{ form.nombre_real.errors }}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="id_email">
+                Correo electrónico
+            </label>
+
+            {{ form.email }}
+
+            {% if form.email.errors %}
+                <div class="error-text">
+                    {{ form.email.errors }}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="id_rol">
+                ¿Cuál es tu cargo?
+            </label>
+
+            {{ form.rol }}
+
+            {% if form.rol.errors %}
+                <div class="error-text">
+                    {{ form.rol.errors }}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <div class="terms">
+
+            <input
+                type="checkbox"
+                name="acepta"
+                id="acepta"
+                required
+            >
+
+            <label for="acepta">
+
+                Acepto los
+
+                <a href="{% url 'condiciones' %}">
+                    términos y condiciones
+                </a>
+
+            </label>
+
+        </div>
+
+        <button
+            type="submit"
+            class="submit-btn"
+        >
+            Enviar solicitud de acceso
+        </button>
+
+    </form>
+
+    <div class="login-link">
+
+        <a href="{% url 'signin' %}">
+
+            <button
+                type="button"
+                class="secondary-btn"
+            >
+                ¿Ya tienes cuenta? Inicia sesión
+            </button>
+
+        </a>
+
     </div>
-  {% endif %}
 
-  {% if error %}
-    <p style="color: #ff6666; text-align: center; font-size: 0.9rem;">{{ error }}</p>
-  {% endif %}
-
-  <form action="{% url 'signup' %}" method="POST">
-    {% csrf_token %}
-
-    <div class="form-group">
-      <label for="id_username">Nombre de usuario</label>
-      {{ form.username }}
-      <span style="color: #ff6666; font-size: 0.8rem;">{{ form.username.errors }}</span>
-    </div>
-
-    <div class="form-group">
-      <label for="id_email">Correo electrónico</label>
-      {{ form.email }}
-      <span style="color: #ff6666; font-size: 0.8rem;">{{ form.email.errors }}</span>
-    </div>
-
-    <div class="form-group">
-      <label for="id_password1">Contraseña</label>
-      {{ form.password1 }}
-      <span style="color: #ff6666; font-size: 0.8rem;">{{ form.password1.errors }}</span>
-    </div>
-
-    <div class="form-group">
-      <label for="id_password2">Confirmar contraseña</label>
-      {{ form.password2 }}
-      <span style="color: #ff6666; font-size: 0.8rem;">{{ form.password2.errors }}</span>
-    </div>
-    <div class="form-group">
-  <label for="id_rol">¿Cuál es tu cargo?</label>
-  <select name="rol" id="id_rol" required style="padding: 0.5rem; border-radius: 5px; border: none; outline: none; background: white; color: black;">
-    <option value="" disabled selected>Selecciona una opción</option>
-    <option value="asistente bienestar">Asistente de Bienestar</option>
-    <option value="coordinacion">Coordinación / Administrativo</option>
-    <option value="profesores">Profesor</option>
-  </select>
-  <br>
 </div>
 
-    <div class="terms">
-      <input type="checkbox" name="acepta" id="acepta" required>
-      <label for="acepta">Acepto los <a href="/condiciones" style="color:#f20b0b;">términos y condiciones</a></label>
-     
-    </div>
-<br>
-<br>
-    <button type="submit">Enviar solicitud de acceso</button>
-  </form>
-
-  <div style="margin-top: 1rem; text-align: center;">
-    <a href="{% url 'signin' %}">
-      <button type="button" class="secondary-btn">¿Ya tienes cuenta? Inicia sesión</button>
-    </a>
-  </div>
-</div>
 {% endblock %}
+```
