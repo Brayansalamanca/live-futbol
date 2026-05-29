@@ -15,6 +15,17 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import HorarioCurso, BloqueHorario
 import json
+from django.utils import timezone
+from .models import (
+    Task,
+    RegistroEntrega,
+    ObjetoPerdido,
+    PrendaRopa,
+    BajaBalon,
+    ReservaPrenda,
+    BalonNFC,
+  
+)
 
 
 from django.utils.http import (
@@ -200,38 +211,22 @@ def es_administracion(user):
 from django.views.decorators.http import require_POST
 
 @require_POST
+
 def borrar_registros_antiguos(request):
 
-    ahora = timezone.now()
+    hoy = timezone.now()
 
-    eliminados = 0
+    if hoy.weekday() == 5:
+        # sábado
 
-    registros = RegistroEntrega.objects.all()
+        hace_7_dias = hoy - timedelta(days=7)
 
-    for r in registros:
-
-        try:
-
-            if not r.fecha:
-                continue
-
-            # Diferencia de tiempo real
-            diferencia = ahora - r.fecha
-
-            # SOLO borrar si tiene más de 1 día
-            if diferencia >= timedelta(days=1):
-
-                r.delete()
-
-                eliminados += 1
-
-        except Exception as e:
-
-            print("Error borrando:", e)
+        RegistroEntrega.objects.filter(
+            fecha__lt=hace_7_dias
+        ).delete()
 
     return JsonResponse({
-        "ok": True,
-        "eliminados": eliminados
+        "ok": True
     })
 
 @csrf_exempt
@@ -995,38 +990,46 @@ def api_guardar_entrega(request):
 
 @login_required
 def api_obtener_entregas(request):
+
     entregas = RegistroEntrega.objects.all().order_by('-fecha')
-    data = [{"id": e.id, "nombre": e.nombre, "objeto": e.objeto, "curso": e.curso, "lugar": e.lugar, "fecha": e.fecha.isoformat()} for e in entregas]
-    return JsonResponse(data, safe=False)
+
+    data = []
+
+    for e in entregas:
+
+        data.append({
+
+            'id': e.id,
+            'nombre': e.nombre,
+            'curso': e.curso,
+            'objeto': e.objeto,
+            'fecha': e.fecha,
+            'eliminado': e.eliminado
+        })
+
+    return JsonResponse(
+        data,
+        safe=False
+    )
 
 @user_passes_test(es_asistente_o_coordinacion)
+
+@login_required
 def api_eliminar_entrega(request, entrega_id):
 
-    if request.method == "POST":
+    entrega = get_object_or_404(
+        RegistroEntrega,
+        id=entrega_id
+    )
 
-        try:
+    entrega.eliminado = True
+    entrega.fecha_eliminado = timezone.now()
 
-            entrega = get_object_or_404(
-                RegistroEntrega,
-                id=entrega_id
-            )
-
-            entrega.delete()
-
-            return JsonResponse({
-                "status": "success"
-            })
-
-        except Exception as e:
-
-            return JsonResponse({
-                "status": "error",
-                "message": str(e)
-            })
+    entrega.save()
 
     return JsonResponse({
-        "status": "error"
-    }, status=405)
+        'success': True
+    })
 
 @user_passes_test(es_asistente)
 def api_editar_entrega(request, entrega_id):
@@ -2015,3 +2018,4 @@ def api_eliminar_solicitud(request, solicitud_id):
     return JsonResponse({
         "success": False
     }, status=405)
+

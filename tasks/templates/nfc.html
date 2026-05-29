@@ -328,7 +328,6 @@ function togglePanel(id){
 // STORAGE
 // ==========================================
 
-const STORAGE_KEY = "historial_balones";
 
 // ==========================================
 // CARGAR
@@ -338,11 +337,13 @@ async function cargarEntregas(){
 
     try{
 
-        const response = await fetch(API.obtenerEntregas);
+        const response = await fetch(
+            API.obtenerEntregas
+        );
 
-        const entregasActuales = await response.json();
+        const entregas = await response.json();
 
-        sincronizarHistorial(entregasActuales);
+        renderizarTablas(entregas);
 
     }catch(error){
 
@@ -453,7 +454,7 @@ function crearFila(entrega){
         emoji = "🏐";
     }
 
-    const estado = entrega.eliminadoPrincipal
+    const estado = entrega.eliminado
 
     ? `
         <span style="
