@@ -125,6 +125,11 @@ path(
     path('api/guardar-baja/', user_passes_test(es_asistente)(views.api_guardar_baja), name='api_guardar_baja'),
     path('api/obtener-bajas/', login_required(views.api_obtener_bajas), name='api_obtener_bajas'),
     path('api/eliminar-baja/<int:baja_id>/', user_passes_test(es_asistente)(views.api_eliminar_baja), name='api_eliminar_baja'),
+    path(
+    'api/obtener-historial/',
+    views.api_obtener_historial,
+    name='api_obtener_historial'
+),
    
     # ==========================================
 # 📊 APIS DEL MÓDULO BALONES

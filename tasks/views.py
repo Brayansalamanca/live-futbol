@@ -970,6 +970,29 @@ def api_listar_asistencia(request):
 
     return JsonResponse(data, safe=False)
 
+
+@login_required
+def api_obtener_historial(request):
+
+    todas = RegistroEntrega.objects.all().order_by('-fecha')
+
+    data = []
+
+    for e in todas:
+
+        # SOLO LOS ELIMINADOS
+        if not getattr(e, 'eliminado', False):
+            continue
+
+        data.append({
+            'id': e.id,
+            'nombre': e.nombre,
+            'curso': e.curso,
+            'objeto': e.objeto,
+            'fecha': e.fecha,
+        })
+
+    return JsonResponse(data, safe=False)
 # ==========================================
 # ⚽ MÓDULO BALONES (SOLO ASISTENTE)
 # ==========================================
@@ -997,14 +1020,21 @@ def api_obtener_entregas(request):
 
     for e in entregas:
 
+        # Ocultar registros eliminados
+        if getattr(e, 'eliminado', False):
+            continue
+
         data.append({
 
             'id': e.id,
             'nombre': e.nombre,
             'curso': e.curso,
             'objeto': e.objeto,
-            'fecha': e.fecha,
-            'eliminado': e.eliminado
+            'lugar': e.lugar,
+            'marca': e.marca,
+            'fecha': e.fecha.strftime('%d/%m/%Y %H:%M'),
+            'eliminado': False
+
         })
 
     return JsonResponse(

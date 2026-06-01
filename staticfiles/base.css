@@ -191,7 +191,8 @@ body{
 
     z-index:1000;
 
-    overflow:hidden;
+     overflow-y:auto;
+    overflow-x:hidden;
 
     transition:0.3s ease;
 
@@ -203,6 +204,13 @@ body{
 
 .sidebar.closed{
     width:95px;
+}
+
+@media screen and (max-width:900px){
+
+    .sidebar.closed{
+        width:270px !important;
+    }
 }
 
 /* ==========================================================================
@@ -687,8 +695,11 @@ body{
 
 .content{
 
-    padding:35px;
+    width:100%;
+
+    overflow-x:hidden;
 }
+
 
 /* ==========================================================================
    CARDS
@@ -974,4 +985,602 @@ p{
 
         display:none;
     }
+}
+/* ==========================================================================
+   📱 RESPONSIVE EXTRA MOBILE
+   ========================================================================== */
+
+@media(max-width:768px){
+
+    /* =========================
+       SIDEBAR
+    ========================== */
+
+    .sidebar{
+
+        width:260px;
+
+        transform:translateX(-100%);
+
+        position:fixed;
+
+        z-index:2000;
+    }
+
+    .sidebar.active{
+
+        transform:translateX(0);
+    }
+
+    .sidebar.closed{
+    width:95px;
+}
+
+@media screen and (max-width:900px){
+
+    .sidebar.closed{
+        width:270px !important;
+    }
+}
+
+    .sidebar.closed .logo-text,
+    .sidebar.closed .sidebar-links a .link-text{
+
+        opacity:1;
+
+        width:auto;
+    }
+
+    .sidebar.closed .sidebar-links a{
+
+        justify-content:flex-start;
+
+        padding:16px 18px;
+    }
+
+    /* =========================
+       MAIN
+    ========================== */
+
+    .main,
+    .main.expanded{
+
+        margin-left:0;
+
+        width:100%;
+    }
+
+    /* =========================
+       TOPBAR
+    ========================== */
+
+    .topbar{
+
+        height:auto;
+
+        padding:15px;
+
+        flex-wrap:wrap;
+
+        gap:15px;
+    }
+
+    .topbar-left,
+    .topbar-right{
+
+        width:100%;
+
+        justify-content:space-between;
+    }
+
+    /* =========================
+       SEARCH
+    ========================== */
+
+    .search-box{
+
+        width:100%;
+    }
+
+    .search-box input{
+
+        width:100%;
+    }
+
+    /* =========================
+       USER BOX
+    ========================== */
+
+    .user-box{
+
+        padding:8px 12px;
+    }
+
+    .user-info{
+
+        display:none;
+    }
+
+    /* =========================
+       CONTENT
+    ========================== */
+
+    .content{
+
+    width:100%;
+
+    overflow-x:hidden;
+}
+
+    /* =========================
+       TITLES
+    ========================== */
+
+    h1{
+
+        font-size:30px;
+    }
+
+    h2{
+
+        font-size:24px;
+    }
+
+    h3{
+
+        font-size:20px;
+    }
+
+    /* =========================
+       CARDS
+    ========================== */
+
+    .card,
+    .video,
+    .estadisticas,
+    .jugadores,
+    .task-item{
+
+        padding:18px;
+
+        border-radius:20px;
+    }
+
+    /* =========================
+       GRID SECTIONS
+    ========================== */
+
+    .seccion{
+
+        grid-template-columns:1fr;
+    }
+
+    /* =========================
+       TABLE RESPONSIVE
+    ========================== */
+
+    table{
+
+        display:block;
+
+        overflow-x:auto;
+
+        white-space:nowrap;
+
+        border-radius:18px;
+    }
+
+    th,
+    td{
+
+        padding:14px;
+    }
+
+    /* =========================
+       BUTTONS
+    ========================== */
+
+    button:not(.icon-btn):not(#toggleSidebar){
+
+        width:100%;
+
+        padding:14px;
+
+        font-size:14px;
+    }
+
+    /* =========================
+       INPUTS
+    ========================== */
+
+    input,
+    textarea,
+    select{
+
+        font-size:16px;
+    }
+
+    /* =========================
+       ICON BUTTONS
+    ========================== */
+
+    .icon-btn{
+
+        width:44px;
+        height:44px;
+    }
+
+    /* =========================
+       SCORE INPUT
+    ========================== */
+
+    .score-input{
+
+        width:48px;
+
+        height:38px;
+    }
+
+}
+
+/* ==========================================================================
+   📱 EXTRA SMALL DEVICES
+   ========================================================================== */
+
+@media(max-width:480px){
+
+    .topbar{
+
+        padding:12px;
+    }
+
+    .content{
+
+    width:100%;
+
+    overflow-x:hidden;
+}
+
+    h1{
+
+        font-size:25px;
+    }
+
+    .logo-box img{
+
+        width:48px;
+        height:48px;
+    }
+
+    .sidebar{
+
+        width:100%;
+    }
+
+    .card,
+    .video,
+    .estadisticas,
+    .jugadores,
+    .task-item{
+
+        padding:15px;
+    }
+
+    th,
+    td{
+
+        font-size:13px;
+    }
+
+    .avatar{
+
+        width:42px;
+        height:42px;
+    }
+
+}
+/* ==========================================================================
+   MOBILE FIXES
+   ========================================================================== */
+
+@media (max-width: 900px){
+
+    /* =========================
+       SIDEBAR
+    ========================== */
+
+    .sidebar{
+
+        width:260px;
+
+        transform:translateX(-100%);
+
+        overflow-y:auto;
+
+        overflow-x:hidden;
+    }
+
+    .sidebar.active{
+
+        transform:translateX(0);
+    }
+
+    /* IMPORTANTE:
+       mostrar textos en celular
+    */
+
+    .sidebar .logo-text{
+
+        opacity:1 !important;
+
+        width:auto !important;
+    }
+
+    .sidebar .sidebar-links a{
+
+        justify-content:flex-start !important;
+
+        padding:16px 18px !important;
+    }
+
+    .sidebar .sidebar-links a .link-text{
+
+        opacity:1 !important;
+
+        width:auto !important;
+
+        overflow:visible !important;
+
+        display:block !important;
+    }
+
+    /* =========================
+       MAIN
+    ========================== */
+
+    .main{
+
+        margin-left:0 !important;
+
+        width:100%;
+    }
+
+    /* =========================
+       TOPBAR
+    ========================== */
+
+    .topbar{
+
+        padding:0 12px;
+
+        height:75px;
+
+        gap:10px;
+    }
+
+    .topbar-left,
+    .topbar-right{
+
+        gap:10px;
+    }
+
+    /* =========================
+       SEARCH
+    ========================== */
+
+    .search-box{
+
+        display:none;
+    }
+
+    /* =========================
+       USER BOX
+    ========================== */
+
+    .user-box{
+
+        padding:8px 12px;
+    }
+
+    .user-info{
+
+        display:none;
+    }
+
+    .avatar{
+
+        width:42px;
+        height:42px;
+    }
+
+    /* =========================
+       CONTENT
+    ========================== */
+
+.content{
+
+    width:100%;
+
+    overflow-x:hidden;
+}
+
+    h1{
+
+        font-size:32px;
+
+        line-height:1.2;
+    }
+
+    h2{
+
+        font-size:24px;
+    }
+
+    /* =========================
+       TABLAS
+    ========================== */
+
+    table{
+
+        display:block;
+
+        overflow-x:auto;
+
+        white-space:nowrap;
+    }
+
+    /* =========================
+       URLS Y TEXTOS LARGOS
+    ========================== */
+
+    /* SOLO romper URLs largas */
+a{
+
+    overflow-wrap:anywhere;
+}
+
+/* Texto normal */
+p,
+span,
+td,
+div,
+h1,
+h2,
+h3{
+
+    word-break:normal !important;
+
+    overflow-wrap:normal !important;
+
+    white-space:normal;
+}
+
+    /* =========================
+       BOTONES
+    ========================== */
+
+    button:not(.icon-btn):not(#toggleSidebar){
+
+        width:100%;
+    }
+
+    /* =========================
+       SECCIONES GRID
+    ========================== */
+
+    .seccion{
+
+        grid-template-columns:1fr;
+    }
+}
+/* ==========================================================================
+   FIX FINAL MOBILE SIDEBAR
+   ========================================================================== */
+
+@media screen and (max-width: 900px){
+
+    /* Sidebar completo */
+    .sidebar,
+    .sidebar.closed{
+
+        width:270px !important;
+
+        transform:translateX(-100%);
+
+        overflow-y:auto !important;
+
+        overflow-x:hidden !important;
+    }
+
+    .sidebar.active,
+    .sidebar.closed.active{
+
+        transform:translateX(0) !important;
+    }
+
+    /* Mostrar textos */
+    .sidebar.closed .logo-text,
+    .sidebar.closed .sidebar-links a .link-text{
+
+        opacity:1 !important;
+
+        width:auto !important;
+
+        overflow:visible !important;
+
+        display:block !important;
+
+        white-space:normal !important;
+    }
+
+    /* Links */
+    .sidebar.closed .sidebar-links a{
+
+        justify-content:flex-start !important;
+
+        padding:16px 18px !important;
+    }
+
+    /* Íconos */
+    .sidebar.closed .sidebar-links a .icon{
+
+        margin-right:12px !important;
+
+        min-width:28px !important;
+
+        font-size:22px !important;
+
+        display:flex !important;
+
+        align-items:center !important;
+
+        justify-content:center !important;
+    }
+
+    /* Textos largos */
+    .sidebar a,
+    .sidebar span,
+    .sidebar div{
+
+        word-break:break-word !important;
+
+        overflow-wrap:break-word !important;
+    }
+
+    /* Main */
+    .main,
+    .main.expanded{
+
+        margin-left:0 !important;
+    }
+
+    /* Topbar */
+    .topbar{
+
+        padding:12px !important;
+
+        height:auto !important;
+    }
+
+    /* Search */
+    .search-box{
+
+        display:none !important;
+    }
+
+    /* Títulos */
+    h1{
+
+        font-size:30px !important;
+    }
+}
+body{
+
+    overflow-x:hidden;
+}
+p{
+
+    line-height:1.5;
+
+    font-size:16px;
 }

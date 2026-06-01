@@ -1,124 +1,86 @@
 /* ==========================================================================
-   MKS PLATFORM - PROFESSIONAL DASHBOARD UI
+   MKS PLATFORM - CLEAN PROFESSIONAL DASHBOARD
    ========================================================================== */
 
-:root {
+:root{
 
-    /* =========================
-       COLORES PRINCIPALES
-    ========================== */
-
-    --bg: #edf3f8;
-    --bg-soft: #dbeafe;
+    --bg:#edf3f8;
+    --bg-soft:#dbeafe;
 
     --sidebar:
-linear-gradient(
-    180deg,
-    #0b3b2e,
-    #14532d
-);
+    linear-gradient(
+        180deg,
+        #0f172a,
+        #1e293b
+    );
 
-    --topbar:
-        rgba(255,255,255,0.72);
+    --topbar:rgba(255,255,255,0.72);
 
-    --card:
-        rgba(255,255,255,0.72);
+    --card:rgba(255,255,255,0.72);
 
-    --card-solid:
-        #ffffff;
+    --card-solid:#ffffff;
 
-    --card-border:
-        rgba(255,255,255,0.3);
+    --card-border:rgba(255,255,255,0.25);
 
-    --primary:
-        #2563eb;
+    --primary:#2563eb;
 
-    --secondary:
-        #10b981;
+    --secondary:#10b981;
 
-    --accent:
-        #38bdf8;
+    --accent:#38bdf8;
 
-    --text:
-        #0f172a;
+    --text:#0f172a;
 
-    --text-soft:
-        #64748b;
+    --text-soft:#64748b;
 
-    --danger:
-        #ef4444;
+    --danger:#ef4444;
 
-    --warning:
-        #f59e0b;
+    --warning:#f59e0b;
 
-    --success:
-        #10b981;
+    --success:#10b981;
+
+    --radius:24px;
 
     --shadow:
         0 10px 35px rgba(15,23,42,0.08);
 
-    --radius:
-        24px;
-
-    --blur:
-        blur(18px);
-
+    --blur:blur(18px);
 }
 
 /* ==========================================================================
    DARK MODE
    ========================================================================== */
 
-body.light-mode {
+body.light-mode{
 
-    --bg: #0b1220;
+    --bg:#0b1220;
 
-    --bg-soft: #111827;
+    --bg-soft:#111827;
 
-    --topbar:
-        rgba(15,23,42,0.78);
+    --topbar:rgba(15,23,42,0.78);
 
-    --card:
-        rgba(15,23,42,0.72);
+    --card:rgba(15,23,42,0.72);
 
-    --card-solid:
-        #1e293b;
+    --card-solid:#1e293b;
 
-    --card-border:
-        rgba(255,255,255,0.05);
+    --card-border:rgba(255,255,255,0.05);
 
-    --text:
-        #f8fafc;
+    --text:#f8fafc;
 
-    --text-soft:
-        #cbd5e1;
+    --text-soft:#cbd5e1;
+
+    --sidebar:
+    linear-gradient(
+        180deg,
+        #020617,
+        #0f172a
+    );
 
     --shadow:
         0 15px 35px rgba(0,0,0,0.35);
-        --sidebar:
-linear-gradient(
-    180deg,
-    #0f172a,
-    #1e293b
-);
 }
-
-.sidebar.closed .logo-text{
-    opacity:0;
-    width:0;
-}
-
-.sidebar.closed .sidebar-links a{
-
-    justify-content:center;
-
-    padding:16px 0;
-}
-
-
 
 /* ==========================================================================
-   BASE
+   RESET
    ========================================================================== */
 
 *{
@@ -162,7 +124,7 @@ body{
 }
 
 /* ==========================================================================
-   DASHBOARD LAYOUT
+   LAYOUT
    ========================================================================== */
 
 .layout{
@@ -189,20 +151,44 @@ body{
 
     padding:20px;
 
-    z-index:1000;
-
-    overflow:hidden;
+    overflow-y:auto;
+    overflow-x:hidden;
 
     transition:0.3s ease;
+
+    z-index:1000;
 
     box-shadow:
         0 0 40px rgba(0,0,0,0.15);
 }
 
-/* SIDEBAR CLOSED */
+/* ==========================================================================
+   SIDEBAR CLOSED
+   ========================================================================== */
 
 .sidebar.closed{
     width:95px;
+}
+
+.sidebar.closed .logo-text{
+    opacity:0;
+    width:0;
+    overflow:hidden;
+}
+
+.sidebar.closed .sidebar-links a{
+    justify-content:center;
+    padding:16px 0;
+}
+
+.sidebar.closed .sidebar-links a .link-text{
+    opacity:0;
+    width:0;
+    overflow:hidden;
+}
+
+.sidebar.closed .sidebar-links a .icon{
+    margin:0;
 }
 
 /* ==========================================================================
@@ -257,8 +243,6 @@ body{
 
     flex-direction:column;
 
-    white-space:nowrap;
-
     transition:0.3s;
 }
 
@@ -309,10 +293,32 @@ body{
 
     font-weight:600;
 
-    transition:0.3s;
+    transition:0.3s ease;
 }
+
+.sidebar-links a:hover{
+
+    background:
+        rgba(255,255,255,0.12);
+
+    transform:translateX(4px);
+}
+
+.sidebar-links a.active{
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--secondary),
+            var(--primary)
+        );
+
+    box-shadow:
+        0 10px 25px rgba(37,99,235,0.25);
+}
+
 /* ==========================================================================
-   ICONOS SIDEBAR
+   ICONOS
    ========================================================================== */
 
 .sidebar-links a .icon{
@@ -330,98 +336,15 @@ body{
     flex-shrink:0;
 }
 
-/* ==========================================================================
-   TEXTO SIDEBAR
-   ========================================================================== */
-
 .sidebar-links a .link-text{
 
     white-space:nowrap;
 
-    transition:0.25s ease;
+    transition:0.3s;
 }
 
 /* ==========================================================================
-   SIDEBAR CERRADO
-   ========================================================================== */
-
-.sidebar.closed .sidebar-links a{
-
-    justify-content:center;
-
-    padding:16px 0;
-}
-
-.sidebar.closed .sidebar-links a .link-text{
-
-    opacity:0;
-
-    width:0;
-
-    overflow:hidden;
-}
-
-/* EL ICONO SIEMPRE VISIBLE */
-
-.sidebar.closed .sidebar-links a .icon{
-
-    margin:0;
-}
-
-/* ==========================================================================
-   HOVER
-   ========================================================================== */
-
-.sidebar-links a:hover{
-
-    background:
-        rgba(255,255,255,0.12);
-
-    transform:translateX(4px);
-}
-
-/* ==========================================================================
-   ACTIVE
-   ========================================================================== */
-
-.sidebar-links a.active{
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--secondary),
-            var(--primary)
-        );
-
-    box-shadow:
-        0 10px 25px rgba(37,99,235,0.25);
-}
-
-.sidebar-links a:hover{
-
-    background:
-        rgba(255,255,255,0.12);
-
-    transform:translateX(4px);
-}
-
-.sidebar-links a.active{
-
-    background:
-    linear-gradient(
-        135deg,
-        var(--secondary),
-        var(--primary)
-    );
-
-    color:white;
-
-    box-shadow:
-        0 10px 25px rgba(37,99,235,0.25);
-}
-
-/* ==========================================================================
-   MAIN CONTENT
+   MAIN
    ========================================================================== */
 
 .main{
@@ -467,17 +390,14 @@ body{
         1px solid var(--card-border);
 }
 
-/* ==========================================================================
-   TOPBAR LEFT
-   ========================================================================== */
-
-.topbar-left{
+.topbar-left,
+.topbar-right{
 
     display:flex;
 
     align-items:center;
 
-    gap:18px;
+    gap:16px;
 }
 
 /* ==========================================================================
@@ -502,19 +422,19 @@ body{
     font-size:22px;
 
     box-shadow:var(--shadow);
+
+    transition:0.3s;
 }
 
 #toggleSidebar:hover{
-
     transform:translateY(-2px);
 }
 
 /* ==========================================================================
-   SEARCH BAR
+   SEARCH
    ========================================================================== */
 
 .search-box{
-
     position:relative;
 }
 
@@ -539,19 +459,6 @@ body{
     font-size:15px;
 
     box-shadow:var(--shadow);
-}
-
-/* ==========================================================================
-   TOPBAR RIGHT
-   ========================================================================== */
-
-.topbar-right{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:16px;
 }
 
 /* ==========================================================================
@@ -583,13 +490,8 @@ body{
 }
 
 .icon-btn:hover{
-
     transform:translateY(-3px);
 }
-
-/* ==========================================================================
-   ALERT DOT
-   ========================================================================== */
 
 .notification-dot{
 
@@ -627,10 +529,6 @@ body{
     box-shadow:var(--shadow);
 }
 
-/* ==========================================================================
-   USER AVATAR
-   ========================================================================== */
-
 .avatar{
 
     width:48px;
@@ -656,10 +554,6 @@ body{
         );
 }
 
-/* ==========================================================================
-   USER INFO
-   ========================================================================== */
-
 .user-info{
 
     display:flex;
@@ -668,9 +562,6 @@ body{
 }
 
 .user-info strong{
-
-    font-size:15px;
-
     color:var(--text);
 }
 
@@ -688,6 +579,10 @@ body{
 .content{
 
     padding:35px;
+
+    width:100%;
+
+    overflow-x:hidden;
 }
 
 /* ==========================================================================
@@ -713,7 +608,7 @@ body{
 
     box-shadow:var(--shadow);
 
-    transition:0.3s;
+    transition:0.3s ease;
 }
 
 .card:hover,
@@ -729,7 +624,7 @@ body{
 }
 
 /* ==========================================================================
-   TITLES
+   TEXTOS
    ========================================================================== */
 
 h1,h2,h3{
@@ -741,15 +636,29 @@ h1,h2,h3{
     letter-spacing:-1px;
 
     margin-bottom:15px;
+
+    line-height:1.2;
 }
 
 h1{
-
     font-size:42px;
 }
 
+p{
+
+    color:var(--text-soft);
+
+    line-height:1.8;
+
+    margin-bottom:12px;
+
+    word-break:normal;
+
+    overflow-wrap:normal;
+}
+
 /* ==========================================================================
-   TABLES
+   TABLAS
    ========================================================================== */
 
 table{
@@ -876,23 +785,7 @@ button:not(.icon-btn):not(#toggleSidebar):hover{
 }
 
 /* ==========================================================================
-   SELECTED BUTTON
-   ========================================================================== */
-
-.btn-seleccionado{
-
-    background:
-        linear-gradient(
-            135deg,
-            #10b981,
-            #059669
-        ) !important;
-
-    color:white !important;
-}
-
-/* ==========================================================================
-   SECTIONS
+   GRID
    ========================================================================== */
 
 .seccion{
@@ -906,72 +799,245 @@ button:not(.icon-btn):not(#toggleSidebar):hover{
 }
 
 /* ==========================================================================
-   SCORE INPUT
-   ========================================================================== */
-
-.score-input{
-
-    width:55px;
-
-    height:40px;
-
-    text-align:center;
-
-    border-radius:12px;
-
-    background:#000 !important;
-
-    color:#00ffcc !important;
-
-    font-weight:bold;
-
-    border:2px solid var(--primary) !important;
-}
-
-/* ==========================================================================
-   PARAGRAPHS
-   ========================================================================== */
-
-p{
-
-    color:var(--text-soft);
-
-    line-height:1.7;
-}
-
-/* ==========================================================================
    MOBILE
    ========================================================================== */
 
 @media(max-width:900px){
 
-    .sidebar{
+    /* SIDEBAR */
+
+    .sidebar,
+    .sidebar.closed{
+
+        width:270px !important;
 
         transform:translateX(-100%);
     }
 
-    .sidebar.active{
+    .sidebar.active,
+    .sidebar.closed.active{
 
         transform:translateX(0);
     }
 
-    .main{
+    /* MOSTRAR TEXTO SIEMPRE */
 
-        margin-left:0;
+    .sidebar.closed .logo-text,
+    .sidebar.closed .sidebar-links a .link-text{
+
+        opacity:1 !important;
+
+        width:auto !important;
+
+        overflow:visible !important;
+
+        display:block !important;
     }
+
+    .sidebar.closed .sidebar-links a{
+
+        justify-content:flex-start !important;
+
+        padding:16px 18px !important;
+    }
+
+    /* MAIN */
+
+    .main,
+    .main.expanded{
+
+        margin-left:0 !important;
+    }
+
+    /* TOPBAR */
 
     .topbar{
 
-        padding:0 15px;
+        padding:12px 15px;
+
+        height:auto;
+
+        flex-wrap:wrap;
+
+        gap:12px;
     }
 
-    .search-box input{
+    .topbar-left,
+    .topbar-right{
 
-        width:180px;
+        width:100%;
+
+        justify-content:space-between;
     }
+
+    /* SEARCH */
+
+    /* SEARCH & TOPBAR ALIGNMENT */
+    .search-box {
+        display: none;
+    }
+
+    /* Asegura que los elementos de la barra superior no colapsen uno encima de otro bruscamente */
+    .topbar-left, 
+    .topbar-right {
+        width: auto; /* Cambiado de 100% a auto para mantenerlos en la misma línea superior */
+        display: flex;
+        align-items: center;
+    }
+    
+    .topbar {
+        height: 70px;
+        flex-wrap: nowrap; /* Evita que el botón de menú y el usuario se dividan en dos pisos */
+    }
+
+    /* USER */
 
     .user-info{
-
         display:none;
+    }
+
+    .avatar{
+
+        width:42px;
+        height:42px;
+    }
+
+    /* CONTENT */
+
+    .content{
+        padding:18px;
+    }
+
+    /* TITLES */
+
+    h1{
+        font-size:30px;
+    }
+
+    h2{
+        font-size:24px;
+    }
+
+    h3{
+        font-size:20px;
+    }
+
+    /* CARDS */
+
+    .card,
+    .video,
+    .estadisticas,
+    .jugadores,
+    .task-item{
+
+        padding:18px;
+
+        border-radius:20px;
+    }
+
+    /* TABLE */
+
+   /* CONTENEDOR RESPONSIVO PARA TABLAS */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Scroll suave en pantallas táctiles */
+        margin-top: 25px;
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+    }
+
+    /* Mantiene la estructura de la tabla intacta */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0 !important; /* Resetea el margen porque ya lo tiene el contenedor */
+    }
+
+    /* TEXT FIX SEGURO (Sin romper contenedores estructurales como divs o spans) */
+    p, td, h1, h2, h3 {
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+
+    /* SOLO URLS */
+
+    a{
+
+        overflow-wrap:anywhere;
+    }
+
+    /* GRID */
+
+    .seccion{
+        grid-template-columns:1fr;
+    }
+}
+
+/* ==========================================================================
+   EXTRA SMALL
+   ========================================================================== */
+
+@media(max-width:480px){
+
+    .content{
+        padding:14px;
+    }
+
+    h1{
+        font-size:25px;
+    }
+
+    .topbar{
+        padding:10px;
+    }
+
+    .logo-box img{
+
+        width:48px;
+        height:48px;
+    }
+
+    .card,
+    .video,
+    .estadisticas,
+    .jugadores,
+    .task-item{
+
+        padding:15px;
+    }
+
+    th,
+    td{
+        font-size:13px;
+    }
+}
+/* ==========================================================================
+   LAPTOPS & MEDIUM SCREENS (Auto-colapsar Sidebar para dar espacio)
+   ========================================================================== */
+
+@media (max-width: 1200px) and (min-width: 901px) {
+    .sidebar {
+        width: 95px;
+    }
+
+    .sidebar .logo-text,
+    .sidebar .sidebar-links a .link-text {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    .sidebar .sidebar-links a {
+        justify-content: center;
+        padding: 16px 0;
+    }
+
+    .sidebar .sidebar-links a .icon {
+        margin: 0;
+    }
+
+    .main {
+        margin-left: 95px;
     }
 }
