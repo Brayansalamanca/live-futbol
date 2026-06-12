@@ -1044,9 +1044,9 @@ def api_registrar_nuevo_balon(request):
 
 
 # --- API 2: OBTENER BALONES DISPONIBLES ---
-# En tasks/views.py
 
-from .models import BalonInventario # No olvides el import
+
+from .models import BalonInventario 
 
 @user_passes_test(es_asistente)
 def api_balones_disponibles(request):
@@ -1140,6 +1140,8 @@ def api_obtener_entregas(request):
             'objeto': e.objeto,
             'lugar': e.lugar,
             'marca': e.marca,
+            # Cambia esto en views.py:
+            'id_unico': e.marca if e.marca else "Sin ID",
             'fecha': fecha_formateada,
             'fecha_debug': fecha_debug_str,
             'eliminado': False

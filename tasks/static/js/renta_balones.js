@@ -97,7 +97,6 @@ async function cargarBalonesDesdeAPI() {
         console.warn("Error al conectar con la API de inventario.");
     }
 }
-
 function actualizarSelectorBalones() {
     const selectorID = document.getElementById("idObjetoSelect");
     if (!selectorID) return;
@@ -107,16 +106,40 @@ function actualizarSelectorBalones() {
 
     if (!objetoActual) return;
 
-    // Filtra las existencias por la categoría seleccionada (Fútbol, Básquet, etc.)
+    // Filtra los balones del inventario por la categoría seleccionada
     const balonesFiltrados = balonesInventario.filter(b => b.tipo === objetoActual);
 
     balonesFiltrados.forEach(balon => {
-        const estaPrestado = registros.some(r => r.id_unico === balon.id_unico);
+        // 1. OBTENER EL ID DEL BALÓN (Soporta id_unico o codigo_nfc)
+        const idBalonInventario = balon.id_unico || balon.codigo_nfc;
         
-        // Mostrar si está disponible en bodega y no está roto
-        if (!estaPrestado && balon.estado !== "Dañado") {
-            let textoOpcion = `${balon.id_unico} - (${balon.marca || 'Sin Marca/Número'})`;
-            let option = new Option(textoOpcion, balon.id_unico);
+        if (!idBalonInventario) return; // Si no hay ID, saltamos este elemento
+
+        // 2. VERIFICAR SI ESTÁ PRESTADO CON FILTRO PARA EVITAR REGISTROS VACÍOS (TU INTUICIÓN)
+        const estaPrestado = registros.some(r => {
+            // Evaluamos contra lo que devuelva la API de entregas (id_unico o marca)
+            const idRegistro = r.id_unico || r.marca;
+            
+            // --- REGLA DE EXCLUSIÓN PARA EVITAR FALSOS NEGATIVOS ---
+            // Si el registro de la base de datos es viejo o está vacío ("Sin ID", null, ""), 
+            // NO permitimos que descuente el balón ni que sume al contador.
+            if (!idRegistro || idRegistro === "Sin ID" || String(idRegistro).trim() === "") {
+                return false; 
+            }
+
+            // Comparamos los IDs válidos limpiando espacios accidentales
+            return String(idRegistro).trim() === String(idBalonInventario).trim();
+        });
+        
+        // 3. VERIFICAR EL ESTADO (Soporta 'estado !== Dañado' o 'disponible === true')
+        const esValido = (balon.estado !== "Dañado") && (balon.disponible !== false);
+
+        // Solo lo agregamos al selector si NO está prestado y el balón está apto/disponible
+        if (!estaPrestado && esValido) {
+            let marcaBalon = balon.marca || balon.nombre_balon || 'Sin Marca';
+            let textoOpcion = `${idBalonInventario} - (${marcaBalon})`;
+            
+            let option = new Option(textoOpcion, idBalonInventario);
             selectorID.add(option);
         }
     });

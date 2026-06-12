@@ -13,41 +13,82 @@
 
     <title>MKS Platform</title>
 
-    <!-- GOOGLE FONTS -->
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
 
-    <!-- CSS -->
     <link
         rel="stylesheet"
         href="{% static 'base.css' %}"
     >
 
-    <!-- CHART JS -->
     <script src="{% static 'js/chart.umd.min.js' %}"></script>
+
+    <style>
+        /* Asegura que todos los enlaces del sidebar usen flexbox alineado al centro */
+        .sidebar-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        /* Centrado simétrico de los iconos */
+        .sidebar-links a .icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px; /* Ancho fijo para que todos los textos inicien en la misma línea */
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        /* Alineación vertical para el texto del link */
+        .sidebar-links a .link-text {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        /* Cuando el sidebar está cerrado, centra los iconos en el medio del contenedor */
+        .sidebar.closed .sidebar-links a {
+            justify-content: center;
+            padding: 12px 0;
+        }
+
+        /* Centrado para botones de la barra superior */
+        .topbar-left, .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+    </style>
 
 </head>
 
 <body>
 
-<!-- ==========================================================================
-     LAYOUT GENERAL
-========================================================================== -->
-
 <div class="layout">
-
-    <!-- ==========================================================================
-         SIDEBAR
-    ========================================================================== -->
 
     <aside
         class="sidebar"
         id="sidebar"
     >
 
-        <!-- LOGO -->
         <div class="sidebar-top">
 
             <div class="logo-box">
@@ -71,285 +112,214 @@
 
         </div>
 
-        <!-- LINKS -->
-        <div class="sidebar-links">
-
-           
+      <div class="sidebar-links">
 
     {% if user.is_authenticated %}
 
-        <!-- ========================================= -->
-        <!-- ADMINISTRACION -->
-        <!-- ========================================= -->
-
         {% if user.groups.all.0.name == 'administracion' %}
 
-            <a href="{% url 'home' %}"
-               class="{% if request.path == '/' %}active{% endif %}">
-                <span class="icon">🏠</span>
-                <span class="link-text">Inicio</span>
+            <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
             </a>
 
-            <a href="{% url 'formulario' %}"
-               class="{% if request.path == '/formulario/' %}active{% endif %}">
-                <span class="icon">📋</span>
-                <span class="link-text">Inventario</span>
+            <a href="{% url 'formulario' %}" class="{% if request.path == '/formulario/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📋</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Inventario</span>
             </a>
 
-            <a href="{% url 'tipos' %}"
-               class="{% if request.path == '/tipos/' %}active{% endif %}">
-                <span class="icon">📦</span>
-                <span class="link-text">Control Inventario</span>
+            <a href="{% url 'tipos' %}" class="{% if request.path == '/tipos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📦</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Control Inventario</span>
             </a>
 
-            <a href="{% url 'ranking' %}"
-               class="{% if request.path == '/ranking/' %}active{% endif %}">
-                <span class="icon">💼</span>
-                <span class="link-text">Aprobar Usuarios</span>
+            <a href="{% url 'ranking' %}" class="{% if request.path == '/ranking/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">💼</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Aprobar Usuarios</span>
             </a>
 
-            <a href="{% url 'soporte' %}"
-               class="{% if request.path == '/soporte/' %}active{% endif %}">
-                <span class="icon">🛠</span>
-                <span class="link-text">Soporte</span>
+            <a href="{% url 'soporte' %}" class="{% if request.path == '/soporte/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🛠</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Soporte</span>
             </a>
             <br>
-            <a href="{% url 'logout' %}" class="logout-btn">
-    <span class="icon">🚪</span>
-    <span class="link-text">Cerrar Sesión</span>
-</a>
-
-        <!-- ========================================= -->
-        <!-- COORDINACION -->
-        <!-- ========================================= -->
+            <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚪</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Cerrar Sesión</span>
+            </a>
 
         {% elif user.groups.all.0.name == 'coordinacion' %}
 
-            <a href="{% url 'home' %}"
-               class="{% if request.path == '/' %}active{% endif %}">
-                <span class="icon">🏠</span>
-                <span class="link-text">Inicio</span>
+            <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
             </a>
 
-            <a href="{% url 'tipos' %}"
-               class="{% if request.path == '/tipos/' %}active{% endif %}">
-                <span class="icon">📦</span>
-                <span class="link-text">Control Inventario</span>
+            <a href="{% url 'tipos' %}" class="{% if request.path == '/tipos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📦</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Control Inventario</span>
             </a>
 
-            <a href="{% url 'nfc' %}"
-               class="{% if request.path == '/nfc/' %}active{% endif %}">
-                <span class="icon">⚽</span>
-                <span class="link-text">Vista Balones</span>
+            <a href="{% url 'nfc' %}" class="{% if request.path == '/nfc/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">⚽</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Vista Balones</span>
             </a>
 
-            <a href="{% url 'signup' %}"
-               class="{% if request.path == '/signup/' %}active{% endif %}">
-                <span class="icon">👤</span>
-                <span class="link-text">Registrar Usuario</span>
+            <a href="{% url 'signup' %}" class="{% if request.path == '/signup/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">👤</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Registrar Usuario</span>
             </a>
 
-            <a href="{% url 'soporte' %}"
-               class="{% if request.path == '/soporte/' %}active{% endif %}">
-                <span class="icon">🛠</span>
-                <span class="link-text">Soporte</span>
+            <a href="{% url 'soporte' %}" class="{% if request.path == '/soporte/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🛠</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Soporte</span>
             </a>
             <br>
-            <a href="{% url 'logout' %}" class="logout-btn">
-    <span class="icon">🚪</span>
-    <span class="link-text">Cerrar Sesión</span>
-</a>
-
-        <!-- ========================================= -->
-        <!-- PROFESOR INVENTARIO -->
-        <!-- ========================================= -->
+            <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚪</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Cerrar Sesión</span>
+            </a>
 
         {% elif user.groups.all.0.name == 'profesor_inventario' %}
 
-            <a href="{% url 'home' %}"
-               class="{% if request.path == '/' %}active{% endif %}">
-                <span class="icon">🏠</span>
-                <span class="link-text">Inicio</span>
+            <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
             </a>
 
-            <a href="{% url 'tipos' %}"
-               class="{% if request.path == '/tipos/' %}active{% endif %}">
-                <span class="icon">📦</span>
-                <span class="link-text">Inventario</span>
+            <a href="{% url 'tipos' %}" class="{% if request.path == '/tipos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📦</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Inventario</span>
             </a>
 
-            <a href="{% url 'horarios' %}"
-               class="{% if request.path == '/horarios/' %}active{% endif %}">
-                <span class="icon">📅</span>
-                <span class="link-text">Horarios</span>
+            <a href="{% url 'horarios' %}" class="{% if request.path == '/horarios/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📅</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Horarios</span>
             </a>
 
-            <a href="{% url 'profesores' %}"
-               class="{% if request.path == '/profesores/' %}active{% endif %}">
-                <span class="icon">🏆</span>
-                <span class="link-text">Torneos</span>
+            <a href="{% url 'profesores' %}" class="{% if request.path == '/profesores/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏆</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Torneos</span>
             </a>
 
-            <a href="{% url 'soporte' %}"
-               class="{% if request.path == '/soporte/' %}active{% endif %}">
-                <span class="icon">🛠</span>
-                <span class="link-text">Soporte</span>
+            <a href="{% url 'soporte' %}" class="{% if request.path == '/soporte/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🛠</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Soporte</span>
             </a>
             <br>
-            <a href="{% url 'logout' %}" class="logout-btn">
-    <span class="icon">🚪</span>
-    <span class="link-text">Cerrar Sesión</span>
-</a>
-
-        <!-- ========================================= -->
-        <!-- ASISTENTE -->
-        <!-- ========================================= -->
+            <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚪</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Cerrar Sesión</span>
+            </a>
 
         {% elif user.groups.all.0.name == 'asistente bienestar' %}
 
-            <a href="{% url 'home' %}"
-               class="{% if request.path == '/' %}active{% endif %}">
-                <span class="icon">🏠</span>
-                <span class="link-text">Inicio</span>
+            <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
             </a>
 
-            <a href="{% url 'radar' %}"
-               class="{% if request.path == '/radar/' %}active{% endif %}">
-                <span class="icon">⚽</span>
-                <span class="link-text">Inventario Balones</span>
+            <a href="{% url 'radar' %}" class="{% if request.path == '/radar/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">⚽</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Inventario Balones</span>
             </a>
 
-            <a href="{% url 'videos' %}"
-               class="{% if request.path == '/videos/' %}active{% endif %}">
-                <span class="icon">📦</span>
-                <span class="link-text">Renta Balones</span>
+            <a href="{% url 'videos' %}" class="{% if request.path == '/videos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📦</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Renta Balones</span>
             </a>
 
-            <a href="{% url 'voz' %}"
-               class="{% if request.path == '/voz/' %}active{% endif %}">
-                <span class="icon">🚫</span>
-                <span class="link-text">Bajas Balones</span>
+            <a href="{% url 'voz' %}" class="{% if request.path == '/voz/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚫</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Bajas Balones</span>
             </a>
 
-            <a href="{% url 'profesores' %}"
-               class="{% if request.path == '/profesores/' %}active{% endif %}">
-                <span class="icon">🏆</span>
-                <span class="link-text">Torneos</span>
+            <a href="{% url 'profesores' %}" class="{% if request.path == '/profesores/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏆</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Torneos</span>
             </a>
 
-            <a href="{% url 'soporte' %}"
-               class="{% if request.path == '/soporte/' %}active{% endif %}">
-                <span class="icon">🛠</span>
-                <span class="link-text">Soporte</span>
+            <a href="{% url 'soporte' %}" class="{% if request.path == '/soporte/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🛠</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Soporte</span>
             </a>
-                <br>
-            <a href="{% url 'logout' %}" class="logout-btn">
-                <span class="icon">🚪</span>
-                <span class="link-text">Cerrar Sesión</span>
+            <br>
+            <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚪</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Cerrar Sesión</span>
             </a>
-
-        <!-- ========================================= -->
-        <!-- PROFESOR NORMAL -->
-        <!-- ========================================= -->
 
         {% else %}
 
-            <a href="{% url 'home' %}"
-               class="{% if request.path == '/' %}active{% endif %}">
-                <span class="icon">🏠</span>
-                <span class="link-text">Inicio</span>
+            <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
             </a>
 
-            <a href="{% url 'horarios' %}"
-               class="{% if request.path == '/horarios/' %}active{% endif %}">
-                <span class="icon">📅</span>
-                <span class="link-text">Horarios</span>
+            <a href="{% url 'horarios' %}" class="{% if request.path == '/horarios/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📅</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Horarios</span>
             </a>
 
-            <a href="{% url 'profesores' %}"
-               class="{% if request.path == '/profesores/' %}active{% endif %}">
-                <span class="icon">🏆</span>
-                <span class="link-text">Torneos</span>
+            <a href="{% url 'profesores' %}" class="{% if request.path == '/profesores/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏆</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Torneos</span>
             </a>
 
-            <a href="{% url 'soporte' %}"
-               class="{% if request.path == '/soporte/' %}active{% endif %}">
-                <span class="icon">🛠</span>
-                <span class="link-text">Soporte</span>
+            <a href="{% url 'soporte' %}" class="{% if request.path == '/soporte/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🛠</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Soporte</span>
             </a>
             <br>
-            <a href="{% url 'logout' %}" class="logout-btn
-">
-                <span class="icon">🚪</span>
-                <span class="link-text">Cerrar Sesión</span>
+            <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚪</span>
+                <span class="link-text" style="line-height: 1; display: inline-block;">Cerrar Sesión</span>
             </a>
 
         {% endif %}
 
     {% else %}
 
-        <a href="{% url 'home' %}"
-           class="{% if request.path == '/' %}active{% endif %}">
-            <span class="icon">🏠</span>
-            <span class="link-text">Inicio</span>
+        <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+            <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
+            <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
         </a>
 
-        <a href="{% url 'signin' %}"
-           class="{% if request.path == '/signin/' %}active{% endif %}">
-            <span class="icon">🔑</span>
-            <span class="link-text">Iniciar Sesión</span>
+        <a href="{% url 'signin' %}" class="{% if request.path == '/signin/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+            <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🔑</span>
+            <span class="link-text" style="line-height: 1; display: inline-block;">Iniciar Sesión</span>
         </a>
 
     {% endif %}
 
 </div>
+    
 
     </aside>
 
-    <!-- ==========================================================================
-         MAIN
-    ========================================================================== -->
-
     <div class="main" id="main">
 
-        <!-- ==========================================================================
-             TOPBAR
-        ========================================================================== -->
-            <header class="topbar">
+        <header class="topbar">
 
-    <!-- LEFT -->
     <div class="topbar-left">
 
-        <!-- BOTON SIDEBAR -->
-        <button id="toggleSidebar">
+        <button id="toggleSidebar" style="display: inline-flex; align-items: center; justify-content: center; height: 40px; width: 40px; border-radius: 8px; cursor: pointer;">
             ☰
         </button>
 
-        {% if user.is_authenticated %}
-
-            
-
-        {% endif %}
-
     </div>
 
-    <!-- RIGHT -->
     <div class="topbar-right">
 
         {% if user.is_authenticated %}
 
-            <!-- ALERTAS -->
             <button class="icon-btn">
-
                 🔔
-
                 <span class="notification-dot"></span>
-
             </button>
 
         {% endif %}
 
-        <!-- CAMBIO TEMA -->
         <button
             class="icon-btn"
             id="theme-toggle"
@@ -359,29 +329,24 @@
 
         {% if user.is_authenticated %}
 
-            <!-- USUARIO -->
-            <div class="user-box">
+            <div class="user-box" style="display: flex; align-items: center; gap: 10px;">
 
-                <div class="avatar">
-
+                <div class="avatar" style="display: inline-flex; align-items: center; justify-content: center;">
                     {{ user.username|first|upper }}
-
                 </div>
 
-                <div class="user-info">
+                <div class="user-info" style="display: flex; flex-direction: column; justify-content: center;">
 
                     <strong>
                          {{ request.user.perfil.nombre_real }}
                     </strong>
 
                     <span>
-
                         {% if user.groups.all.0.name %}
                             {{ user.groups.all.0.name }}
                         {% else %}
                             Usuario
                         {% endif %}
-
                     </span>
 
                 </div>
@@ -392,13 +357,7 @@
 
     </div>
 
-
-
         </header>
-
-        <!-- ==========================================================================
-             CONTENIDO
-        ========================================================================== -->
 
         <main class="content">
             {% if user.is_authenticated and user.perfil.debe_cambiar_password %}
@@ -458,72 +417,64 @@
 
 </div>
 
-<!-- ==========================================================================
-     JAVASCRIPT
-========================================================================== -->
-
 <script>
 
     // ==========================================================================
-    // SIDEBAR TOGGLE
+    // SIDEBAR TOGGLE CON PERSISTENCIA
     // ==========================================================================
 
-    const sidebar =
-        document.getElementById("sidebar");
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("main");
+    const toggleBtn = document.getElementById("toggleSidebar");
 
-    const main =
-        document.getElementById("main");
+    const estadoSidebar = localStorage.getItem("sidebar-estado");
 
-    const toggleBtn =
-        document.getElementById("toggleSidebar");
+    if (estadoSidebar === "cerrado") {
+        sidebar.classList.add("closed");
+        main.classList.add("expanded");
+    } else if (estadoSidebar === "abierto") {
+        sidebar.classList.remove("closed");
+        main.classList.remove("expanded");
+    } else {
+        if (window.innerWidth <= 900) {
+            sidebar.classList.add("closed");
+            main.classList.add("expanded");
+        }
+    }
 
     toggleBtn.addEventListener("click", () => {
-
         sidebar.classList.toggle("closed");
-
         main.classList.toggle("expanded");
 
+        if (sidebar.classList.contains("closed")) {
+            localStorage.setItem("sidebar-estado", "cerrado");
+        } else {
+            localStorage.setItem("sidebar-estado", "abierto");
+        }
     });
 
     // ==========================================================================
     // DARK MODE
     // ==========================================================================
 
-    const themeBtn =
-        document.getElementById("theme-toggle");
+    const themeBtn = document.getElementById("theme-toggle");
 
-    // CARGAR TEMA
     if(localStorage.getItem("theme") === "light"){
-
         document.body.classList.add("light-mode");
-
         themeBtn.textContent = "☀️";
-
     }else{
-
         themeBtn.textContent = "🌙";
-
     }
 
-    // CAMBIAR TEMA
     themeBtn.addEventListener("click", () => {
-
         document.body.classList.toggle("light-mode");
-
         if(document.body.classList.contains("light-mode")){
-
             localStorage.setItem("theme", "light");
-
             themeBtn.textContent = "☀️";
-
         }else{
-
             localStorage.setItem("theme", "dark");
-
             themeBtn.textContent = "🌙";
-
         }
-
     });
 
     // ==========================================================================
@@ -531,11 +482,8 @@
     // ==========================================================================
 
     if(window.innerWidth <= 900){
-
         sidebar.classList.add("closed");
-
         main.classList.add("expanded");
-
     }
 
 </script>
