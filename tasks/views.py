@@ -1,6 +1,11 @@
 from django.db import transaction
 import json
+import traceback
 from datetime import datetime, timedelta
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import user_passes_test
+from .models import BalonNFC
+
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
@@ -996,6 +1001,96 @@ def api_obtener_historial(request):
 # ==========================================
 # ⚽ MÓDULO BALONES (SOLO ASISTENTE)
 # ==========================================
+@csrf_exempt  # Evita problemas de CSRF temporalmente si haces la petición por fetch directo
+@user_passes_test(es_asistente)
+def api_registrar_nuevo_balon(request):
+    if request.method == "POST":
+        try:
+            # Validamos que el cuerpo no esté vacío
+            if not request.body:
+                return JsonResponse({"error": "El cuerpo de la petición está vacío"}, status=400)
+                
+            data = json.loads(request.body)
+            
+            nombre = data.get('nombre')
+            tipo = data.get('tipo', 'Fútbol')
+            
+            if not nombre:
+                return JsonResponse({"error": "El campo 'nombre' es obligatorio"}, status=400)
+            
+            # Generamos un código temporal si no viene uno por NFC
+            codigo_nfc = data.get('codigo_nfc', f"TEMP-{nombre.upper().replace(' ', '-')}")
+            
+            # Creamos el registro en tu base de datos
+            nuevo_balon = BalonNFC.objects.create(
+                nombre_balon=nombre,
+                tipo=tipo,
+                codigo_nfc=codigo_nfc,
+                disponible=True
+            )
+            
+            return JsonResponse({
+                "status": "success",
+                "message": f"Balón registrado con éxito.",
+                "id": nuevo_balon.id
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "JSON inválido enviado al servidor"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+            
+    return JsonResponse({"error": "Método no permitido"}, status=405)
+
+
+# --- API 2: OBTENER BALONES DISPONIBLES ---
+# En tasks/views.py
+
+from .models import BalonInventario # No olvides el import
+
+@user_passes_test(es_asistente)
+def api_balones_disponibles(request):
+    try:
+        balones = BalonInventario.objects.all()
+        data = list(balones.values('id', 'id_unico', 'marca', 'tipo', 'estado'))
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+@csrf_exempt
+@user_passes_test(es_asistente)
+def api_registrar_nuevo_balon(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            BalonInventario.objects.create(
+                id_unico=data.get('id_unico'),
+                marca=data.get('marca'),
+                tipo=data.get('tipo', 'Balón Fútbol')
+            )
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+        require_POST # Solo permite peticiones POST por seguridad
+@user_passes_test(es_asistente)
+def api_eliminar_balon(request, id):
+    balon = get_object_or_404(BalonInventario, id=id)
+    balon.delete()
+    return JsonResponse({"status": "success", "message": "Balón eliminado"})
+
+@require_POST
+@user_passes_test(es_asistente)
+def api_editar_balon(request, id):
+    balon = get_object_or_404(BalonInventario, id=id)
+    data = json.loads(request.body)
+    
+    balon.id_unico = data.get('id_unico', balon.id_unico)
+    balon.marca = data.get('marca', balon.marca)
+    balon.tipo = data.get('tipo', balon.tipo)
+    balon.save()
+    
+    return JsonResponse({"status": "success", "message": "Balón actualizado"})
+    
 @user_passes_test(es_asistente)
 def radar(request): return render(request, 'radar.html')
 
@@ -1007,40 +1102,50 @@ def api_guardar_entrega(request):
             nombre=data.get('recibido_por'), 
             objeto=data.get('balon'), 
             curso=data.get('curso'),
-            lugar=data.get('lugar')
+            lugar=data.get('lugar'),
+            # ✅ CORRECCIÓN 1: Forzamos que se guarde con la hora exacta local del servidor
+            fecha=timezone.now() 
         )
         return JsonResponse({"status": "success"})
 
 @login_required
 def api_obtener_entregas(request):
-
     entregas = RegistroEntrega.objects.all().order_by('-fecha')
-
     data = []
 
     for e in entregas:
-
         # Ocultar registros eliminados
         if getattr(e, 'eliminado', False):
             continue
 
-        data.append({
+        # --- PROTECCIÓN CONTRA NAIVE DATETIME ---
+        fecha_evaluar = e.fecha
+        if fecha_evaluar:
+            # Si la fecha no tiene zona horaria (naive), le asignamos la del sistema
+            if not timezone.is_aware(fecha_evaluar):
+                fecha_evaluar = timezone.make_aware(fecha_evaluar)
+            
+            # Ahora sí es seguro convertirla a la hora local de Colombia
+            fecha_local = timezone.localtime(fecha_evaluar)
+            fecha_formateada = fecha_local.strftime("%d/%m/%Y %I:%M %p")
+            fecha_debug_str = str(fecha_local)
+        else:
+            fecha_formateada = "Sin fecha"
+            fecha_debug_str = "None"
 
+        data.append({
             'id': e.id,
             'nombre': e.nombre,
             'curso': e.curso,
             'objeto': e.objeto,
             'lugar': e.lugar,
             'marca': e.marca,
-            'fecha': e.fecha.strftime('%d/%m/%Y %H:%M'),
+            'fecha': fecha_formateada,
+            'fecha_debug': fecha_debug_str,
             'eliminado': False
-
         })
 
-    return JsonResponse(
-        data,
-        safe=False
-    )
+    return JsonResponse(data, safe=False)
 
 @user_passes_test(es_asistente_o_coordinacion)
 
@@ -1061,18 +1166,19 @@ def api_eliminar_entrega(request, entrega_id):
         'success': True
     })
 
-@user_passes_test(es_asistente)
+@require_POST
+@user_passes_test(es_asistente_o_coordinacion)
 def api_editar_entrega(request, entrega_id):
-    if request.method == "POST":
+    entrega = get_object_or_404(RegistroEntrega, id=entrega_id)
+    try:
         data = json.loads(request.body)
-        entrega = get_object_or_404(RegistroEntrega, pk=entrega_id)
         entrega.nombre = data.get('nombre', entrega.nombre)
-        entrega.objeto = data.get('objeto', entrega.objeto)
         entrega.curso = data.get('curso', entrega.curso)
-        entrega.lugar = data.get('lugar', entrega.lugar)
+        entrega.objeto = data.get('objeto', entrega.objeto)
         entrega.save()
-        return JsonResponse({"status": "success"})
-    return JsonResponse({"status": "error"}, status=405)
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 @user_passes_test(es_asistente)
 def api_guardar_baja(request):

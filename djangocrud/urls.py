@@ -146,6 +146,14 @@ path(
     login_required(views.api_obtener_entregas),
     name='api_obtener_entregas'
 ),
+path('api/registrar-nuevo-balon/', views.api_registrar_nuevo_balon, name='api_registrar_nuevo_balon'),
+    # ✅ Cambiada para que coincida exactamente con tu JS:
+path('api/obtener-balones-disponibles/', views.api_balones_disponibles, name='api_obtener_balones_disponibles'),
+
+path('api/eliminar-balon/<int:id>/', views.api_eliminar_balon, name='api_eliminar_balon'),
+
+path('api/editar-balon/<int:id>/', views.api_editar_balon, name='api_editar_balon'),
+
 
 path(
     'api/eliminar-entrega/<int:entrega_id>/',

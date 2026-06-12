@@ -2,1137 +2,173 @@
 {% load static %}
 
 {% block content %}
-<style>
-    .contenedor-registro {
-        max-width: 95%;
-        margin: 20px auto;
-        padding: 20px;
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-        backdrop-filter: blur(5px);
-        
-        padding-top: 80px; 
-    }
+<link rel="stylesheet" href="{% static 'css/renta_balones.css' %}">
+<div class="content">
 
-    /* BOTONES */
-    .btn-objeto, .btn-curso {
-        width: 10rem;
-        padding: 10px 18px;
-        margin: 5px;
-        border: 2px solid transparent;
-        border-radius: 10px;
-        font-weight: 3rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .btn-objeto:hover, .btn-curso:hover {
-        background: #7293aa;
-
-        transform: translateY(-3px);
-    }
-
-    .btn-objeto.activo, .btn-curso.activo {
-        background: #5f17e4;
-        
-        border-color: #ffffff;
-        box-shadow: 0 0 15px rgba(95, 23, 228, 0.5);
-    }
-
-    /* TABLA - AQUÍ ESTABA EL FALLO */
-    table {
-        width: 100%;
-        border-radius: 15px;
-        overflow: hidden;
-        margin-top: 20px;
-        background: white !important; /* Fondo blanco obligatorio */
-        border-collapse: collapse;
-    }
-
-    th { 
-        background-color: #2c3e50 !important; 
-       
-        padding: 15px; 
-        font-weight: bold;
-        text-transform: uppercase;
-    }
-
-    td { 
-        padding: 12px; 
-        border-bottom: 1px solid #ddd; 
-        text-align: center; 
-        color: #000000 !important; /* NEGRO PURO PARA LOS NOMBRES */
-        font-weight: 700 !important; /* MÁS GRUESAS */
-    }
-
-    /* Estilo para los nombres dentro de la tabla */
-    td strong {
-        color: #000000 !important;
-    }
-
-    .btn-entregado { 
-        background-color: #27ae60; 
-    
-        border: none; 
-        padding: 8px 15px; 
-        border-radius: 5px; 
-        cursor: pointer; 
-        font-weight: bold; 
-    }
-    
-    
-</style>
-
-<div class="contenedor-registro">
-    <h1>⚽ Registro de Entrega (Balones y Equipos)</h1>
-
-    <h3>1. Selecciona el objeto</h3>
-    <div id="objetosContenedor" style="margin-bottom: 20px;">
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Fútbol')">⚽ Fútbol</button>
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Básquet')">🏀 Básquet</button>
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Volley')">🏐 Volley</button>
-        <br>
-        <br>
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Cuerda')">🥨 Cuerda</button>
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Juegos de mesa')">Juegos de mesa</button>
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Jenga')">🧱 Jenga</button>
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Ping Pong')">🏓 Ping Pong</button>
-        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Ping Pong')">♟️ Ajedrez</button>
+    <div class="tabs-navegacion" style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button id="btn-vista-renta" class="btn btn-primary" onclick="cambiarVista('renta')">
+            📋 Control de Préstamos
+        </button>
+        <button id="btn-vista-almacen" class="btn btn-tab-inactivo" onclick="cambiarVista('almacen')">
+            📦 Administrar Almacén (Registrar/Marcas)
+        </button>
     </div>
 
-    <h3>2. Lugar de uso</h3>
-    <select id="lugarSelect" style="
-    width: 13rem;           /* Más ancho */
-    font-size: 20px;        /* Letra mucho más grande */
-    padding: 15px;          /* Espacio interno para que no se vea apretado */
-    border-radius: 12px;    /* Bordes redondeados para que se vea moderno */
-    cursor: pointer;        /* Que el mouse cambie al pasar por encima */
-">
-        <option>sin un lugar </option>
-
-        
-        <option>Cancha Sintetica </option>
-        <option>Cancha Externa</option>
-        <option>Cancha de Baloncesto</option>
-        <option>Cancha de Volley</option>
-        <option>Coliseo / Salón</option>
-    </select>
-
-    <h3 sty>
-        3. Nombre de la persona</h3>
-    <input  style="  width: 13rem;           /* Más ancho */
-    font-size: 20px;        /* Letra mucho más grande */
-    padding: 15px;          /* Espacio interno para que no se vea apretado */
-    border-radius: 12px;    /* Bordes redondeados para que se vea moderno */
-    cursor: pointer;        /* Que el mouse cambie al pasar por encima */" id="textoVoz" placeholder="Escribe el nombre del estudiante...">
-
-    <div id="seccionCurso" style="margin: 20px 0; border: 1px solid rgba(255,255,255,0.3); padding: 15px; border-radius: 10px;">
-        <h3>4. Selecciona el Curso</h3>
-        <div id="gradosContenedor"></div>
-        <div id="letrasContenedor" style="margin-top: 10px; min-height: 50px;"></div>
-    </div>
-    
-    <button onclick="registrarEnNube()" style="background-color: #5f17e4; padding: 15px 40px; font-weight: bold; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; width: 100%; max-width: 400px;">
-        🚀 Registrar Entrega
+    <div id="seccion-modulo-renta">
+        <div class="panel card">
+            <div class="grid-formulario">
+                
+                <div class="card-seccion">
+                    <h3>1. Identificación del Estudiante</h3>
+                    
+                    <label for="textoVoz">Nombre del Alumno</label>
+<div class="input-nfc-container">
+    <input id="textoVoz" class="control-form" placeholder="Escanea celular o escribe nombre...">
+    <button type="button" class="btn-scan-nfc" onclick="iniciarEscaneoNFCPersona()" title="Escanear tag o celular del estudiante">
+        <span class="icon-radar">📡</span>
     </button>
+</div>
+                    <p id="nfc-persona-estado" style="font-size: 12px; margin-bottom: 8px; font-weight: 600; color: var(--text-soft);"></p>
 
-    <hr style="margin: 40px 0; opacity: 0.2;">
+                    <label for="lugarSelect">Lugar de Destino</label>
+                    <select id="lugarSelect" class="control-form">
+                        <option value="Sin lugar">Sin un lugar</option>
+                        <option value="Cancha Sintetica">Cancha Sintética</option>
+                        <option value="Cancha Externa">Cancha Externa</option>
+                        <option value="Cancha de Baloncesto">Cancha de Baloncesto</option>
+                        <option value="Cancha de Volley">Cancha de Volley</option>
+                        <option value="Coliseo / Salón">Coliseo / Salón</option>
+                    </select>
+                </div>
 
-    <div class="seccion-busqueda">
-        <h2>🔍 Préstamos Activos</h2>
-        <input style="  width: 13rem;           /* Más ancho */
-    font-size: 20px;        /* Letra mucho más grande */
-    padding: 15px;          /* Espacio interno para que no se vea apretado */
-    border-radius: 12px;    /* Bordes redondeados para que se vea moderno */
-    cursor: pointer;        /* Que el mouse cambie al pasar por encima */"id="buscador" placeholder="Buscar por nombre o curso..." onkeyup="dibujar()">
-    </div>
+                <div class="card-seccion">
+                    <h3>2. Selecciona el Objeto y Unidad</h3>
+                    <div class="flex-botones" id="objetosContenedor" style="margin-bottom: 15px;">
+                        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Fútbol')">
+                            ⚽ Fútbol <br><span class="badge-stock" id="stock-Balón Fútbol">...</span>
+                        </button>
+                        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Básquet')">
+                            🏀 Básquet <br><span class="badge-stock" id="stock-Balón Básquet">...</span>
+                        </button>
+                        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Balón Volley')">
+                            🏐 Volley <br><span class="badge-stock" id="stock-Balón Volley">...</span>
+                        </button>
+                        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Cuerda')">🥨 Cuerda</button>
+                        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Juegos de mesa')">🎲 Juegos de mesa</button>
+                        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Jenga')">🧱 Jenga</button>
+                        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Ping Pong')">🏓 Ping Pong</button>
+                        <button class="btn-objeto" onclick="seleccionarObjeto(this,'Ajedrez')">♟️ Ajedrez</button>
+                    </div>
 
-    <div style="overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre / Curso</th>
-                    <th>Objeto</th>
-                    <th>Lugar</th>
-                    <th>Fecha / Hora</th>
-                    <th>Vence a</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="tabla"></tbody>
-        </table>
-    </div>
-    <button onclick="borrarNoHoy()" style="
-    background-color:#e74c3c;
-    padding:15px 40px;
-    font-weight:bold;
-    color:white;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:18px;
-    width:100%;
-    max-width:400px;
-    margin-top:10px;
-">
-    🗑️ Borrar registros que NO son de hoy
-</button>
+                    <label for="idObjetoSelect">¿Qué unidad exacta se lleva?</label>
+                    <select id="idObjetoSelect" class="control-form">
+                        <option value="">-- Selecciona Unidad (ID + Marca) --</option>
+                    </select>
+                </div>
 
-    <div style="margin-top: 30px;">
-        <h2>📌 Faltan por entregar</h2>
-        <div style="overflow-x: auto;">
+                <div class="card-seccion" id="seccionCurso">
+                    <h3>3. Curso</h3>
+                    <div id="gradosContenedor" class="flex-botones"></div>
+                <br>
+                    <div id="letrasContenedor" class="flex-botones"></div>
+                </div>
+            </div>
+
+            <button type="button" onclick="registrarEnNube()" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                🚀 Validar y Registrar Entrega
+            </button>
+        </div>
+
+        <div class="seccion-busqueda">
+            <h2>Préstamos Activos</h2>
+            <input id="buscador" class="control-form" placeholder="Buscar por nombre, curso o ID..." onkeyup="dibujar()">
+        </div>
+
+        <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>Nombre / Curso</th>
-                        <th>Objeto</th>
-                        <th>Hora entrega</th>
-                        <th>Vence</th>
-                        <th>Minutos retraso</th>
+                        <th>Nombre / Estudiante</th>
+                        <th>Objeto / ID Específico</th>
+                        <th>Lugar</th>
+                        <th>Fecha / Hora</th>
+                        <th>Vence a</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="tablaVencidos"></tbody>
+                <tbody id="tabla"></tbody>
             </table>
-
         </div>
-        <button style="background-color: #000000;">
-       <a href="{% url 'nfc' %}">
-                            Histórico de entregas
-                        </a>
-                        </button>
+
+        <button type="button" onclick="borrarNoHoy()" class="btn-peligro">
+            🗑️ Borrar registros que NO son de hoy
+        </button>
+
+        <div class="seccion-vencidos">
+            <h2>📌 Faltan por entregar (Retrasados)</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre / Curso</th>
+                            <th>Objeto</th>
+                            <th>Hora entrega</th>
+                            <th>Vence</th>
+                            <th>Minutos retraso</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaVencidos"></tbody>
+                </table>
+            </div>
+            
+            <a href="{% url 'nfc' %}" class="btn-navegacion">
+                📚 Histórico de entregas
+            </a>
+        </div>
+    </div>
+
+    <div id="seccion-modulo-almacen" style="display: none;">
+        <div class="panel card">
+            <div class="search-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px;">
+                
+                <div class="card-seccion">
+                    <h3 style="margin-bottom:15px;">➕ Registrar Nuevo Elemento al Stock</h3>
+                    
+                    <label for="nuevoTipoSelect">Tipo de Objeto</label>
+                    <select id="nuevoTipoSelect" class="control-form">
+                        <option value="Balón Fútbol">⚽ Balón Fútbol</option>
+                        <option value="Balón Básquet">🏀 Balón Básquet</option>
+                        <option value="Balón Volley">🏐 Balón Volley</option>
+                        <option value="Cuerda">🥨 Cuerda</option>
+                        <option value="Juegos de mesa">🎲 Juegos de mesa</option>
+                    </select>
+
+                    <label for="nuevoIdInput">ID Único / Código Interno (Ej: BALON-FT-01)</label>
+                    <input type="text" id="nuevoIdInput" class="control-form" placeholder="Ej: FT-01 o MKS-1...">
+
+                    <label for="nuevaMarcaInput">Marca, Número o Característica</label>
+                    <input type="text" id="nuevaMarcaInput" class="control-form" placeholder="Ej: Golty, MKS, Num 2...">
+
+                    <button class="btn btn-primary" style="margin-top:10px; width: 100%;" onclick="agregarBalonAlInventario()">
+                        💾 Guardar en Almacén
+                    </button>
+                </div>
+
+               
+                    <h3 style="margin-bottom:15px;">📊 Estado General de Marcas</h3>
+                    <div id="listaInventarioRapido" style="max-height: 300px; overflow-y: auto; background: var(--bg-soft); padding: 15px; border-radius: 18px;">
+                        <p style="text-align: center; font-size: 14px;">Cargando inventario físico...</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    let registros = [];
-let objetoActual = "";
-let gradoActual = "";
-let letraActual = "";
-
-// =========================================
-// LISTA DE VETADOS
-// =========================================
-const VETADOS = [
-    "pepito perez",
-    "fulano de tal"
-];
-
-// =========================================
-// NORMALIZAR NOMBRES
-// =========================================
-function normalizarNombre(nombre) {
-
-    if (!nombre) return "";
-
-    return nombre
-        .toLowerCase()
-
-        // quitar tildes
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-
-        // quitar # y numeros
-        .replace(/#\d+/g, "")
-        .replace(/\b\d+\b/g, "")
-
-        // quitar textos molestos
-        .replace(/alquilo:/g, "")
-        .replace(/boto:/g, "")
-
-        // quitar símbolos
-        .replace(/[^\w\s]/g, "")
-
-        // quitar espacios dobles
-        .replace(/\s+/g, " ")
-        .trim();
-
-}
-
-// =========================================
-// COMPARAR NOMBRES FLEXIBLE
-// =========================================
-function nombresParecidos(nombre1, nombre2) {
-
-    const n1 = normalizarNombre(nombre1);
-    const n2 = normalizarNombre(nombre2);
-
-    if (!n1 || !n2) return false;
-
-    // exacto
-    if (n1 === n2) return true;
-
-    // uno contiene al otro
-    if (n1.includes(n2) || n2.includes(n1)) {
-        return true;
-    }
-
-    // comparar palabras
-    const palabras1 = n1.split(" ");
-    const palabras2 = n2.split(" ");
-
-    let coincidencias = 0;
-
-    palabras1.forEach(p1 => {
-
-        if (palabras2.includes(p1)) {
-            coincidencias++;
-        }
-
-    });
-
-    return coincidencias >= 2;
-}
-
-// =========================================
-// CARGAR DATOS
-// =========================================
-async function cargarDatos() {
-
-    try {
-
-        const res = await fetch(
-            "{% url 'api_obtener_entregas' %}?t=" + Date.now()
-        );
-
-        if (!res.ok) return;
-
-        const nuevosRegistros = await res.json();
-
-        if (
-            JSON.stringify(nuevosRegistros) !==
-            JSON.stringify(registros)
-        ) {
-
-            registros = nuevosRegistros;
-
-            dibujar();
-
-        }
-
-    } catch (e) {
-
-        console.warn("Error de conexión");
-
-    }
-
-}
-
-// =========================================
-// REGISTRAR ENTREGA
-// =========================================
-async function registrarEnNube() {
-
-    const nombreInput =
-        document.getElementById("textoVoz").value.trim();
-
-    const lugarInput =
-        document.getElementById("lugarSelect").value ||
-        "Sin lugar";
-
-    const cursoCompleto =
-        gradoActual + (letraActual || "");
-
-    // VALIDACIONES
-    if (!nombreInput || !objetoActual || !gradoActual) {
-
-        alert("⚠️ Completa Nombre, Curso y Objeto");
-
-        return;
-
-    }
-
-    if (VETADOS.includes(nombreInput.toLowerCase())) {
-
-        alert("❌ ESTUDIANTE VETADO");
-
-        return;
-
-    }
-
-    // =========================================
-    // VERIFICAR BAJAS
-    // =========================================
-    try {
-
-        const resBajas = await fetch(
-            "{% url 'api_obtener_bajas' %}?t=" + Date.now()
-        );
-
-        const bajas = await resBajas.json();
-
-        const suspendido = bajas.some(b => {
-
-            const nombreBaja =
-                b.usuario ||
-                b.nombre ||
-                b.responsable ||
-                b.estudiante ||
-                "";
-
-            return nombresParecidos(
-                nombreInput,
-                nombreBaja
-            );
-
-        });
-
-        if (suspendido) {
-
-            alert(
-                "❌ ESTE ESTUDIANTE ESTÁ SUSPENDIDO"
-            );
-
-            return;
-
-        }
-
-    } catch (e) {
-
-        alert("❌ Error verificando bajas");
-
-        return;
-
-    }
-
-    // =========================================
-    // GUARDAR
-    // =========================================
-    const datos = {
-
-        recibido_por: nombreInput,
-        curso: cursoCompleto,
-        balon: objetoActual,
-        lugar: lugarInput
-
-    };
-
-    try {
-
-        const res = await fetch(
-            "{% url 'api_guardar_entrega' %}",
-            {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-
-                body: JSON.stringify(datos)
-
-            }
-        );
-
-        if (res.ok) {
-
-            resetearFormulario();
-
-            await cargarDatos();
-
-        } else {
-
-            alert("❌ Error al guardar");
-
-        }
-
-    } catch (error) {
-
-        alert("❌ Error de conexión");
-
-    }
-
-}
-
-// =========================================
-// DIBUJAR TABLA
-// =========================================
-function dibujar() {
-
-    let html = "";
-
-    const filtro =
-        document.getElementById("buscador")
-        .value
-        .toLowerCase();
-
-    document.getElementById(
-        "tablaVencidos"
-    ).innerHTML = "";
-
-    if (!registros || registros.length === 0) {
-
-        document.getElementById("tabla").innerHTML =
-            "<tr><td colspan='7'>No hay préstamos activos.</td></tr>";
-
-        return;
-
-    }
-
-    registros.forEach((r) => {
-
-        const nombre =
-            r.nombre ||
-            r.recibido_por ||
-            r.usuario ||
-            r.estudiante ||
-            "---";
-
-        const objeto =
-            r.objeto ||
-            r.balon ||
-            r.tipo ||
-            "---";
-
-        const curso =
-            r.curso ||
-            r.grado ||
-            "N/A";
-
-        const lugar =
-            r.lugar ||
-            r.ubicacion ||
-            "Cancha";
-
-        const id = r.id || r._id;
-
-        if (
-            (nombre + curso + objeto)
-            .toLowerCase()
-            .includes(filtro)
-        ) {
-
-            let fechaTexto = "Pendiente";
-            let venceTexto = "Pendiente";
-            let estado = "🟡";
-            let isVencido = false;
-            let retrasoMinutos = 0;
-
-            if (r.fecha) {
-
-                let d = new Date(r.fecha);
-
-                if (isNaN(d.getTime())) {
-
-                    const fallback =
-                        r.fecha
-                        .replace(/\//g, "-")
-                        .replace(" ", "T");
-
-                    d = new Date(fallback);
-
-                }
-
-                if (!isNaN(d.getTime())) {
-
-                    fechaTexto =
-                        d.toLocaleDateString("es-CO") +
-                        " " +
-                        d.toLocaleTimeString("es-CO", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true
-                        });
-
-                    const vencimiento =
-                        obtenerSiguienteDescanso(d);
-
-                    venceTexto =
-                        vencimiento.toLocaleDateString("es-CO") +
-                        " " +
-                        vencimiento.toLocaleTimeString("es-CO", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true
-                        });
-
-                    const ahora = new Date();
-
-                    if (ahora > vencimiento) {
-
-                        isVencido = true;
-
-                        estado = "⛔ Vencido";
-
-                        retrasoMinutos = Math.floor(
-                            (ahora - vencimiento) /
-                            (1000 * 60)
-                        );
-
-                    } else {
-
-                        estado = "✅ En tiempo";
-
-                    }
-
-                }
-
-            }
-
-            html += `
-            <tr>
-
-                <td>
-                    <strong>${nombre}</strong>
-                    <br>
-                    <small>${curso}</small>
-                </td>
-
-                <td>${objeto}</td>
-
-                <td>${lugar}</td>
-
-                <td>${fechaTexto}</td>
-
-                <td>${venceTexto}</td>
-
-                <td style="
-                    color:${isVencido ? '#ff4444' : '#27ae60'};
-                    font-weight:bold;
-                ">
-                    ${estado}
-                </td>
-
-                <td>
-
-                    <button
-                        class="btn-entregado"
-                        onclick="editarEntrega(
-                            '${id}',
-                            '${nombre}',
-                            '${curso}',
-                            '${objeto}',
-                            '${lugar}'
-                        )"
-                    >
-                        ✏️ Editar
-                    </button>
-
-                    <button
-                        class="btn-entregado"
-                        onclick="marcarEntregado('${id}')"
-                    >
-                        ✅ Finalizar
-                    </button>
-
-                </td>
-
-            </tr>
-            `;
-
-            if (isVencido) {
-
-                const tbodyVencidos =
-                    document.getElementById(
-                        "tablaVencidos"
-                    );
-
-                tbodyVencidos.insertAdjacentHTML(
-                    "beforeend",
-                    `
-                    <tr>
-
-                        <td>
-                            <strong>${nombre}</strong>
-                            <br>
-                            <small>${curso}</small>
-                        </td>
-
-                        <td>${objeto}</td>
-
-                        <td>${fechaTexto}</td>
-
-                        <td>${venceTexto}</td>
-
-                        <td>${retrasoMinutos} min</td>
-
-                    </tr>
-                    `
-                );
-
-            }
-
-        }
-
-    });
-
-    document.getElementById("tabla").innerHTML =
-        html ||
-        "<tr><td colspan='7'>Sin resultados</td></tr>";
-
-}
-
-// =========================================
-// FINALIZAR
-// =========================================
-async function marcarEntregado(id) {
-
-    if (!confirm("¿Confirmas la devolución?")) {
-        return;
-    }
-
-    try {
-
-        const res = await fetch(
-            `/api/eliminar-entrega/${id}/`,
-            {
-
-                method: "POST",
-
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-
-            }
-        );
-
-        if (res.ok) {
-
-            registros = registros.filter(
-                r => (r.id || r._id) != id
-            );
-
-            dibujar();
-
-        }
-
-    } catch (e) {
-
-        alert("❌ Error eliminando");
-
-    }
-
-}
-
-// =========================================
-// EDITAR
-// =========================================
-async function editarEntrega(
-    id,
-    nombre,
-    curso,
-    objeto,
-    lugar
-) {
-
-    const newNombre =
-        prompt("Editar nombre", nombre);
-
-    if (newNombre === null) return;
-
-    const newCurso =
-        prompt("Editar curso", curso);
-
-    if (newCurso === null) return;
-
-    const newObjeto =
-        prompt("Editar objeto", objeto);
-
-    if (newObjeto === null) return;
-
-    const newLugar =
-        prompt("Editar lugar", lugar);
-
-    if (newLugar === null) return;
-
-    try {
-
-        const res = await fetch(
-            `/api/editar-entrega/${id}/`,
-            {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-
-                body: JSON.stringify({
-
-                    nombre: newNombre,
-                    curso: newCurso,
-                    objeto: newObjeto,
-                    lugar: newLugar
-
-                })
-
-            }
-        );
-
-        if (res.ok) {
-
-            await cargarDatos();
-
-        }
-
-    } catch (error) {
-
-        alert("❌ Error actualizando");
-
-    }
-
-}
-
-// =========================================
-// BORRAR NO HOY
-// =========================================
-async function borrarNoHoy() {
-
-    if (
-        !confirm(
-            "⚠️ Se eliminarán TODOS los registros que NO son de hoy"
-        )
-    ) {
-        return;
-    }
-
-    try {
-
-        const res = await fetch(
-            "/api/borrar-registros-antiguos/",
-            {
-
-                method: "POST",
-
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-
-            }
-        );
-
-        const data = await res.json();
-
-        if (res.ok) {
-
-            alert(
-                `✅ ${data.eliminados} eliminados`
-            );
-
-            await cargarDatos();
-
-        }
-
-    } catch (e) {
-
-        alert("❌ Error");
-
-    }
-
-}
-
-// =========================================
-// BOTONES
-// =========================================
-function seleccionarObjeto(btn, obj) {
-
-    objetoActual = obj;
-
-    document
-        .querySelectorAll(".btn-objeto")
-        .forEach(b => b.classList.remove("activo"));
-
-    btn.classList.add("activo");
-
-}
-
-function seleccionarGrado(btn, grado) {
-
-    gradoActual = grado;
-
-    document
-        .querySelectorAll(
-            "#gradosContenedor .btn-curso"
-        )
-        .forEach(b => b.classList.remove("activo"));
-
-    btn.classList.add("activo");
-
-    generarLetras(grado);
-
-}
-
-function seleccionarLetra(btn, letra) {
-
-    letraActual = letra;
-
-    document
-        .querySelectorAll(
-            "#letrasContenedor .btn-curso"
-        )
-        .forEach(b => b.classList.remove("activo"));
-
-    btn.classList.add("activo");
-
-}
-
-// =========================================
-// LETRAS
-// =========================================
-function generarLetras(grado) {
-
-    let letras = ["A", "B", "C", "D", "E"];
-
-    let limite = (grado <= 9) ? 4 : 5;
-
-    let html = "";
-
-    for (let i = 0; i < limite; i++) {
-
-        html += `
-        <button
-            class="btn-curso"
-            onclick="seleccionarLetra(this, '${letras[i]}')"
-        >
-            ${letras[i]}
-        </button>
-        `;
-
-    }
-
-    document.getElementById(
-        "letrasContenedor"
-    ).innerHTML = html;
-
-    letraActual = "";
-
-}
-
-// =========================================
-// CURSOS DINÁMICOS
-// =========================================
-function obtenerPeriodoActual(fecha) {
-
-    const periodoData = [
-
-        {
-            start: '08:00',
-            end: '09:40',
-            grades: [6,7,8],
-            label: 'Seniors'
-        },
-
-        {
-            start: '10:00',
-            end: '10:50',
-            grades: [3,4,5],
-            label: 'Teens'
-        },
-
-        {
-            start: '10:51',
-            end: '11:45',
-            grades: [9,10,11],
-            label: 'Masters'
-        },
-
-        {
-            start: '11:46',
-            end: '12:40',
-            grades: [6,7,8],
-            label: 'Seniors'
-        },
-
-        {
-            start: '12:41',
-            end: '13:35',
-            grades: [3,4,5],
-            label: 'Teens'
-        },
-
-        {
-            start: '13:36',
-            end: '14:15',
-            grades: [9,10,11],
-            label: 'Masters'
-        }
-
-    ];
-
-    const minutos =
-        fecha.getHours() * 60 +
-        fecha.getMinutes();
-
-    for (const p of periodoData) {
-
-        const [hs, ms] =
-            p.start.split(':').map(Number);
-
-        const [he, me] =
-            p.end.split(':').map(Number);
-
-        const minStart = hs * 60 + ms;
-        const minEnd = he * 60 + me;
-
-        if (
-            minutos >= minStart &&
-            minutos < minEnd
-        ) {
-            return p;
-        }
-
-    }
-
-    return null;
-}
-
-function cargarBotonesCursos() {
-
-    const now = new Date();
-
-    const periodo =
-        obtenerPeriodoActual(now);
-
-    let buttons = [];
-
-    let label = "Sin periodo activo";
-
-    if (periodo) {
-
-        label =
-            `${periodo.label} (${periodo.start} - ${periodo.end})`;
-
-        buttons = periodo.grades;
-
-    } else {
-
-        buttons = [6,7,8,3,4,5,9,10,11];
-
-    }
-
-    document.getElementById(
-        "gradosContenedor"
-    ).innerHTML = `
-        <div style="
-            margin-bottom:8px;
-            color:red;
-            font-weight:bold;
-        ">
-            ${label}
-        </div>
-    `;
-
-    let html = "";
-
-    buttons.forEach((g) => {
-
-        html += `
-        <button
-            class="btn-curso"
-            onclick="seleccionarGrado(this, ${g})"
-        >
-            ${g}°
-        </button>
-        `;
-
-    });
-
-    document.getElementById(
-        "gradosContenedor"
-    ).innerHTML += html;
-
-}
-
-// =========================================
-// RESET
-// =========================================
-function resetearFormulario() {
-
-    document.getElementById(
-        "textoVoz"
-    ).value = "";
-
-    document
-        .querySelectorAll(
-            ".btn-objeto, .btn-curso"
-        )
-        .forEach(b => b.classList.remove("activo"));
-
-    objetoActual = "";
-    gradoActual = "";
-    letraActual = "";
-
-    document.getElementById(
-        "letrasContenedor"
-    ).innerHTML = "";
-
-    document.getElementById(
-        "lugarSelect"
-    ).selectedIndex = 0;
-
-}
-
-// =========================================
-// HORARIO
-// =========================================
-function obtenerSiguienteDescanso(fecha) {
-
-    const periodoData = [
-
-        {start: '09:05', end: '09:45'},
-        {start: '10:00', end: '10:50'},
-        {start: '10:55', end: '11:45'},
-        {start: '11:46', end: '12:40'},
-        {start: '12:41', end: '13:35'},
-        {start: '13:36', end: '14:15'}
-
-    ];
-
-    const minutos =
-        fecha.getHours() * 60 +
-        fecha.getMinutes();
-
-    for (const p of periodoData) {
-
-        const [he, me] =
-            p.end.split(':').map(Number);
-
-        const minEnd = he * 60 + me;
-
-        if (minutos < minEnd) {
-
-            const next = new Date(fecha);
-
-            next.setHours(he, me, 0, 0);
-
-            return next;
-
-        }
-
-    }
-
-    const next = new Date(fecha);
-
-    next.setDate(next.getDate() + 1);
-
-    next.setHours(9, 5, 0, 0);
-
-    return next;
-
-}
-
-// =========================================
-// INICIO
-// =========================================
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        cargarBotonesCursos();
-
-        cargarDatos();
-
-        setInterval(cargarDatos, 4000);
-
-        setInterval(
-            cargarBotonesCursos,
-            30000
-        );
-
-    }
-);
+    window.CSRF_TOKEN = "{{ csrf_token }}";
 </script>
+<script src="{% static 'js/renta_balones.js' %}"></script>
 {% endblock %}

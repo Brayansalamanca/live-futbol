@@ -645,3 +645,12 @@ class LogSistema(models.Model):
     def __str__(self):
 
         return f"{self.usuario} - {self.accion}"
+class BalonInventario(models.Model):
+    id_unico = models.CharField(max_length=50, unique=True, verbose_name="ID o Código del Balón")
+    marca = models.CharField(max_length=100, verbose_name="Marca o Identificador")
+    tipo = models.CharField(max_length=50, verbose_name="Tipo (Ej: Balón Fútbol)")
+    estado = models.CharField(max_length=50, default="Excelente")
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.id_unico} - {self.marca}"

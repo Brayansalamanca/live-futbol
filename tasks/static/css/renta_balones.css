@@ -1,0 +1,438 @@
+/* ==========================================================================
+   Live Futbol - Estilos Base del Módulo de Control de Préstamos
+   ========================================================================== */
+
+
+
+.content {
+    padding: 20px;
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* --- SISTEMA DE PESTAÑAS (NAVEGACIÓN INTERNA) --- */
+.tabs-navegacion button {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-tab-inactivo {
+    background: var(--bg-soft);
+    color: var(--text-soft);
+}
+
+.btn-tab-inactivo:hover {
+    background: var(--card-border);
+    color: var(--text-main);
+}
+
+/* --- DISEÑO DE PANELES Y FORMULARIOS --- */
+/* --- CORRECCIÓN DE COLOR PARA SELECTS, OPTIONS E INPUTS --- */
+
+/* 1. Obliga a que todas las opciones de las listas desplegables tengan fondo oscuro y texto claro */
+select option {
+    background-color: #161b22 !important; /* El mismo fondo oscuro de tus tarjetas */
+    color: #c9d1d9 !important;            /* Texto gris claro/blanco que contrasta perfectamente */
+}
+
+/* 2. Corrige los campos selectores cuando están cerrados o desplegados */
+.control-form, select.control-form {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg-dark);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    color: #ffffff !important; /* Texto de la opción seleccionada siempre blanco */
+    font-size: 14px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    transition: border-color 0.2s ease;
+}
+.input-nfc-container {
+    display: flex;
+    gap: 8px; /* Reducimos un poco el espacio para que ajuste mejor */
+    margin-bottom: 20px;
+    align-items: center;
+    width: 100%;
+}
+
+.input-nfc-container .control-form {
+    flex: 1;
+    margin-bottom: 0 !important;
+}
+
+.btn-scan-nfc {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1e70e6 0%, #00b493 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    /* Al quitar el texto, lo hacemos cuadrado perfecto con el mismo alto del input */
+    width: 46px; 
+    height: 46px; 
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 180, 147, 0.2);
+    flex-shrink: 0; /* CRÍTICO: Evita que el botón se aplaste si el input crece */
+}
+
+.btn-scan-nfc:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(30, 112, 230, 0.4);
+    filter: brightness(1.1);
+}
+
+.icon-radar {
+    font-size: 1.2rem;
+}
+
+/* 3. Estilo para los textos que sirven de marcadores de posición (Placeholder) */
+.control-form::placeholder {
+    color: var(--text-soft) !important; /* Hace que el texto de "O escribe el ID manual..." sea legible */
+    opacity: 1;
+}
+
+/* 4. Por seguridad, si el sistema abre un menú nativo claro en móviles, forzamos texto oscuro solo en estados específicos */
+@media (prefers-color-scheme: light) {
+    select option {
+        color: #000000 !important; /* Texto negro si el navegador obliga a usar interfaz clara */
+        background-color: #ffffff !important;
+    }
+}
+.panel.card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.grid-formulario {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.card-seccion {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 20px;
+}
+
+.card-seccion h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 8px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-soft);
+}
+
+.control-form {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg-dark);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-size: 14px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    transition: border-color 0.2s ease;
+}
+
+.control-form:focus {
+    outline: none;
+    border-color: var(--primary-hover);
+}
+
+/* --- INTEGRACIÓN NFC EN ENTRADA DEL ALUMNO --- */
+.input-nfc-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+}
+
+.input-nfc-container .control-form {
+    flex: 1;
+}
+
+.input-nfc-container .icon-btn {
+    white-space: nowrap;
+    padding: 0 16px;
+    height: 44px;
+    background: #1f6feb; /* Azul distintivo para tecnología NFC */
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.input-nfc-container .icon-btn:hover {
+    background: #388bfd;
+    transform: translateY(-1px);
+}
+
+/* --- BOTONES DE SELECCIÓN (OBJETOS Y CURSOS) --- */
+
+.flex-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn-objeto, .btn-curso {
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+.btn-objeto:hover, .btn-curso:hover {
+    background: var(--card-border);
+    border-color: var(--text-soft);
+}
+
+/* --- ESTADOS ACTIVOS DE LOS GRADOS Y OBJETOS (VERDE) --- */
+.btn-objeto.activo, .btn-curso.activo {
+    background: var(--primary);
+    border-color: var(--success);
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(46, 160, 67, 0.4);
+}
+
+.badge-stock {
+    display: inline-block;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-top: 4px;
+    font-weight: bold;
+}
+
+/* --- BOTONES GENERALES DE ACCIÓN --- */
+.btn {
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--primary);
+    
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.btn-peligro {
+    background: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.2s ease;
+}
+
+.btn-peligro:hover {
+    background: var(--danger);
+
+}
+
+/* --- TABLAS DE DATOS RESPONSIVAS --- */
+.seccion-busqueda {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.seccion-busqueda #buscador {
+    max-width: 350px;
+    margin-bottom: 0;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 15px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+th, td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+th {
+    background: var(--bg-soft);
+    color: var(--text-soft);
+    font-weight: 600;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+.btn-accion {
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 4px;
+}
+
+.btn-accion:hover {
+    background: var(--card-border);
+}
+
+/* --- SECCIÓN RETRASADOS / VENCIDOS --- */
+.seccion-vencidos {
+    margin-top: 40px;
+    background: rgba(218, 54, 55, 0.05);
+    border: 1px dashed var(--danger);
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.seccion-vencidos h2 {
+    color: #ff6b6b;
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.btn-navegacion {
+    display: inline-block;
+    margin-top: 15px;
+    color: #58a6ff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.btn-navegacion:hover {
+    text-decoration: underline;
+}
+/* --- BOTONES ESPECÍFICOS PARA LAS LETRAS DEL CURSO --- */
+.btn-letra {
+    background: #1f2937; /* Un fondo un poco más oscuro */
+    border: 1px solid #4b5563;
+    color: #e5e7eb;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+.btn-letra:hover {
+    background: #09ff00;
+    border-color: #9ca3af;
+}
+
+/* Cuando la letra esté seleccionada (Activa), cambiará a azul en vez de verde */
+.btn-letra.activo {
+    background: #294d6d; 
+    border-color: #5b6c82;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(31, 111, 235, 0.4);
+}
+
+/* --- BOTONES ESPECÍFICOS PARA LAS LETRAS DEL CURSO --- */
+#letrasContenedor .btn-letra {
+    background-color: #1f2937 !important; /* Gris oscuro de fondo inicial */
+    background-image: none !important;    /* Tumba el degradado azul/verde */
+    border: 1px solid #4b5563 !important;
+    color: #e5e7eb !important;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+/* Efecto al pasar el mouse por encima */
+#letrasContenedor .btn-letra:hover {
+    background-color: #09ff00 !important; /* Verde brillante en hover */
+    background-image: none !important;
+    border-color: #9ca3af !important;
+    color: #000000 !important;             /* Texto negro para que contraste */
+}
+
+/* Estado seleccionado (Activo) al hacer clic */
+#letrasContenedor .btn-letra.activo {
+    background-color: #294d6d !important; /* Azul grisáceo seleccionado */
+    background-image: none !important;
+    border-color: #5b6c82 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(41, 77, 109, 0.6);
+}
+#listaInventarioRapido button {
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+#listaInventarioRapido button:hover {
+    background: #252545;
+}
