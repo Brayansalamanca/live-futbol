@@ -13,10 +13,6 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 ">
 
-    <!-- ========================================== -->
-    <!-- HEADER -->
-    <!-- ========================================== -->
-
     <header style="
         display:flex;
         justify-content:space-between;
@@ -25,21 +21,11 @@
         flex-wrap:wrap;
         gap:15px;
     ">
-
         <div>
-
-            <h1 style="margin:0;">
-                ⚽ Historial Inteligente de Balones
-            </h1>
-
-            <p style="
-                margin-top:8px;
-                color:#94a3b8;
-                font-size:14px;
-            ">
-                Historial automático sincronizado con el sistema principal.
+            <h1 style="margin:0;">⚽ Historial NFC de Balones</h1>
+            <p style="margin-top:8px; color:#64748b; font-size:14px;">
+                Monitoreo centralizado con respaldo automático de ID.
             </p>
-
         </div>
 
         <div id="estadoConexion" style="
@@ -52,7 +38,6 @@
             align-items:center;
             gap:10px;
         ">
-
             <span style="
                 width:10px;
                 height:10px;
@@ -60,16 +45,9 @@
                 border-radius:50%;
                 display:inline-block;
             "></span>
-
-            Historial sincronizado
-
+            Sincronizado en Tiempo Real
         </div>
-
     </header>
-
-    <!-- ========================================== -->
-    <!-- FILTRO -->
-    <!-- ========================================== -->
 
     <section style="
         margin-bottom:25px;
@@ -78,11 +56,10 @@
         border-radius:18px;
         box-shadow:0 4px 10px rgba(0,0,0,.08);
     ">
-
         <input
             type="text"
             id="inputBusqueda"
-            placeholder="Buscar estudiante, curso, ciclo o balón..."
+            placeholder="Buscar por estudiante, curso, balón o copia de ID..."
             style="
                 width:100%;
                 padding:15px;
@@ -92,564 +69,183 @@
                 outline:none;
             "
         >
-
     </section>
 
-    <!-- ========================================== -->
-    <!-- SENIORS -->
-    <!-- ========================================== -->
-
-    <section style="
-        background:white;
-        border-radius:20px;
-        overflow:hidden;
-        box-shadow:0 4px 10px rgba(0,0,0,.08);
-        margin-bottom:25px;
-    ">
-
-        <button onclick="togglePanel('panelSeniors')" style="
-            width:100%;
-            border:none;
-            background:#2563eb;
-            color:white;
-            padding:20px;
-            cursor:pointer;
-            font-size:22px;
-            font-weight:bold;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-        ">
-
+    <section style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,.08); margin-bottom:25px;">
+        <button onclick="togglePanel('panelSeniors')" style="width:100%; border:none; background:#2563eb; color:white; padding:20px; cursor:pointer; font-size:22px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
             <span>🔵 Seniors</span>
-
-            <span id="contadorSeniors">
-                0 registros
-            </span>
-
+            <span id="contadorSeniors">0 registros</span>
         </button>
-
-        <div id="panelSeniors" style="display:none;overflow:auto;">
-
-            <table style="
-                width:100%;
-                border-collapse:collapse;
-                min-width:900px;
-            ">
-
+        <div id="panelSeniors" style="display:none; overflow:auto;">
+            <table style="width:100%; border-collapse:collapse; min-width:1000px;">
                 <thead style="background:#f8fafc;">
-
                     <tr>
-
-                        <th style="padding:16px;text-align:left;">Balón</th>
-                        <th style="padding:16px;text-align:left;">Estudiante</th>
-                        <th style="padding:16px;text-align:left;">Curso</th>
-                        <th style="padding:16px;text-align:left;">Ciclo</th>
-                        <th style="padding:16px;text-align:left;">Tipo</th>
-                        <th style="padding:16px;text-align:left;">Fecha</th>
-                        <th style="padding:16px;text-align:left;">Estado</th>
-
+                        <th style="padding:16px; text-align:left;">ID Copia</th>
+                        <th style="padding:16px; text-align:left;">Balón</th>
+                        <th style="padding:16px; text-align:left;">Estudiante</th>
+                        <th style="padding:16px; text-align:left;">Curso</th>
+                        <th style="padding:16px; text-align:left;">Lugar / Tipo</th>
+                        <th style="padding:16px; text-align:left;">Fecha Entrega</th>
+                        <th style="padding:16px; text-align:left;">Estado</th>
                     </tr>
-
                 </thead>
-
                 <tbody id="tablaSeniors"></tbody>
-
             </table>
-
         </div>
-
     </section>
 
-    <!-- ========================================== -->
-    <!-- TEENS -->
-    <!-- ========================================== -->
-
-    <section style="
-        background:white;
-        border-radius:20px;
-        overflow:hidden;
-        box-shadow:0 4px 10px rgba(0,0,0,.08);
-        margin-bottom:25px;
-    ">
-
-        <button onclick="togglePanel('panelTeens')" style="
-            width:100%;
-            border:none;
-            background:#16a34a;
-            color:white;
-            padding:20px;
-            cursor:pointer;
-            font-size:22px;
-            font-weight:bold;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-        ">
-
+    <section style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,.08); margin-bottom:25px;">
+        <button onclick="togglePanel('panelTeens')" style="width:100%; border:none; background:#16a34a; color:white; padding:20px; cursor:pointer; font-size:22px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
             <span>🟢 Teens</span>
-
-            <span id="contadorTeens">
-                0 registros
-            </span>
-
+            <span id="contadorTeens">0 registros</span>
         </button>
-
-        <div id="panelTeens" style="display:none;overflow:auto;">
-
-            <table style="
-                width:100%;
-                border-collapse:collapse;
-                min-width:900px;
-            ">
-
+        <div id="panelTeens" style="display:none; overflow:auto;">
+            <table style="width:100%; border-collapse:collapse; min-width:1000px;">
                 <thead style="background:#f8fafc;">
-
                     <tr>
-
-                        <th style="padding:16px;text-align:left;">Balón</th>
-                        <th style="padding:16px;text-align:left;">Estudiante</th>
-                        <th style="padding:16px;text-align:left;">Curso</th>
-                        <th style="padding:16px;text-align:left;">Ciclo</th>
-                        <th style="padding:16px;text-align:left;">Tipo</th>
-                        <th style="padding:16px;text-align:left;">Fecha</th>
-                        <th style="padding:16px;text-align:left;">Estado</th>
-
+                        <th style="padding:16px; text-align:left;">ID Copia</th>
+                        <th style="padding:16px; text-align:left;">Balón</th>
+                        <th style="padding:16px; text-align:left;">Estudiante</th>
+                        <th style="padding:16px; text-align:left;">Curso</th>
+                        <th style="padding:16px; text-align:left;">Lugar / Tipo</th>
+                        <th style="padding:16px; text-align:left;">Fecha Entrega</th>
+                        <th style="padding:16px; text-align:left;">Estado</th>
                     </tr>
-
                 </thead>
-
                 <tbody id="tablaTeens"></tbody>
-
             </table>
-
         </div>
-
     </section>
 
-    <!-- ========================================== -->
-    <!-- MASTERS -->
-    <!-- ========================================== -->
-
-    <section style="
-        background:white;
-        border-radius:20px;
-        overflow:hidden;
-        box-shadow:0 4px 10px rgba(0,0,0,.08);
-        margin-bottom:25px;
-    ">
-
-        <button onclick="togglePanel('panelMasters')" style="
-            width:100%;
-            border:none;
-            background:#9333ea;
-            color:white;
-            padding:20px;
-            cursor:pointer;
-            font-size:22px;
-            font-weight:bold;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-        ">
-
+    <section style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,.08); margin-bottom:25px;">
+        <button onclick="togglePanel('panelMasters')" style="width:100%; border:none; background:#9333ea; color:white; padding:20px; cursor:pointer; font-size:22px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
             <span>🟣 Masters</span>
-
-            <span id="contadorMasters">
-                0 registros
-            </span>
-
+            <span id="contadorMasters">0 registros</span>
         </button>
-
-        <div id="panelMasters" style="display:none;overflow:auto;">
-
-            <table style="
-                width:100%;
-                border-collapse:collapse;
-                min-width:900px;
-            ">
-
+        <div id="panelMasters" style="display:none; overflow:auto;">
+            <table style="width:100%; border-collapse:collapse; min-width:1000px;">
                 <thead style="background:#f8fafc;">
-
                     <tr>
-
-                        <th style="padding:16px;text-align:left;">Balón</th>
-                        <th style="padding:16px;text-align:left;">Estudiante</th>
-                        <th style="padding:16px;text-align:left;">Curso</th>
-                        <th style="padding:16px;text-align:left;">Ciclo</th>
-                        <th style="padding:16px;text-align:left;">Tipo</th>
-                        <th style="padding:16px;text-align:left;">Fecha</th>
-                        <th style="padding:16px;text-align:left;">Estado</th>
-
+                        <th style="padding:16px; text-align:left;">ID Copia</th>
+                        <th style="padding:16px; text-align:left;">Balón</th>
+                        <th style="padding:16px; text-align:left;">Estudiante</th>
+                        <th style="padding:16px; text-align:left;">Curso</th>
+                        <th style="padding:16px; text-align:left;">Lugar / Tipo</th>
+                        <th style="padding:16px; text-align:left;">Fecha Entrega</th>
+                        <th style="padding:16px; text-align:left;">Estado</th>
                     </tr>
-
                 </thead>
-
                 <tbody id="tablaMasters"></tbody>
-
             </table>
-
         </div>
-
     </section>
 
 </div>
 
 <script>
-
-// ==========================================
-// API
-// ==========================================
-
-const API = {
-
-    obtenerEntregas: "/api/obtener-historial/"
-};
-
-// ==========================================
-// TOGGLE
-// ==========================================
+// URL de tu API para obtener el listado de entregas
+const API_OBTENER_ENTREGAS = "/api/obtener-historial/"; 
 
 function togglePanel(id){
-
     const panel = document.getElementById(id);
-
-    if(panel.style.display === "none" || panel.style.display === ""){
-
-        panel.style.display = "block";
-
-    }else{
-
-        panel.style.display = "none";
-    }
+    panel.style.display = (panel.style.display === "none" || panel.style.display === "") ? "block" : "none";
 }
 
-// ==========================================
-// STORAGE
-// ==========================================
-
-
-// ==========================================
-// CARGAR
-// ==========================================
-
-async function cargarEntregas(){
-
-    try{
-
-        const response = await fetch(
-            API.obtenerEntregas
-        );
-
-        const entregas = await response.json();
-
-        renderizarTablas(entregas);
-
-    }catch(error){
-
-        console.error(error);
-    }
-}
-
-// ==========================================
-// SINCRONIZAR
-// ==========================================
-
-function sincronizarHistorial(entregasActuales){
-
-    let historial = JSON.parse(
-        localStorage.getItem(STORAGE_KEY)
-    ) || [];
-
-    entregasActuales.forEach(entregaActual => {
-
-        const existe = historial.find(h =>
-            h.id === entregaActual.id
-        );
-
-        if(!existe){
-
-            historial.unshift({
-
-                ...entregaActual,
-
-                eliminadoPrincipal:false,
-
-                fechaHistorial:new Date().toISOString()
-            });
-        }
-    });
-
-    historial.forEach(item => {
-
-        const existeEnPrincipal = entregasActuales.find(
-            e => e.id === item.id
-        );
-
-        if(!existeEnPrincipal){
-
-            item.eliminadoPrincipal = true;
-        }
-    });
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(historial)
-    );
-
-    renderizarTablas(historial);
-}
-
-// ==========================================
-// OBTENER CICLO
-// ==========================================
-
+// Clasificación de ciclos dinámica basada en el curso numérico
 function obtenerCiclo(curso){
-
     if(!curso) return "Sin ciclo";
-
     const grado = parseInt(curso);
-
-    if([6,7,8].includes(grado)){
-
-        return "Seniors";
-    }
-
-    if([3,4,5].includes(grado)){
-
-        return "Teens";
-    }
-
-    if([9,10,11].includes(grado)){
-
-        return "Masters";
-    }
-
+    if([6, 7, 8].includes(grado)) return "Seniors";
+    if([3, 4, 5].includes(grado)) return "Teens";
+    if([9, 10, 11].includes(grado)) return "Masters";
     return "Sin ciclo";
 }
 
-// ==========================================
-// CREAR FILA
-// ==========================================
-
+// Construye la fila inyectando de forma persistente la copia del ID de la base de datos
 function crearFila(entrega){
-
     const fecha = new Date(entrega.fecha);
-
-    const fechaFormateada =
-        fecha.toLocaleDateString() + " " +
-        fecha.toLocaleTimeString();
+    const fechaFormateada = fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString();
 
     let emoji = "⚽";
-
     const objeto = entrega.objeto || "";
+    if(objeto.toLowerCase().includes("basket")) emoji = "🏀";
+    if(objeto.toLowerCase().includes("volley")) emoji = "🏐";
 
-    if(objeto.toLowerCase().includes("basket")){
-
-        emoji = "🏀";
-    }
-
-    if(objeto.toLowerCase().includes("volley")){
-
-        emoji = "🏐";
-    }
-
-    const estado = entrega.eliminado
-
-    ? `
-        <span style="
-            background:#fee2e2;
-            color:#b91c1c;
-            padding:6px 12px;
-            border-radius:999px;
-            font-size:12px;
-            font-weight:bold;
-        ">
-            Eliminado
-        </span>
-    `
-
-    : `
-        <span style="
-            background:#dcfce7;
-            color:#166534;
-            padding:6px 12px;
-            border-radius:999px;
-            font-size:12px;
-            font-weight:bold;
-        ">
-            Activo
-        </span>
-    `;
+    const estadoBadge = entrega.eliminado 
+    ? `<span style="background:#fee2e2; color:#b91c1c; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:bold;">Respaldado en BD</span>`
+    : `<span style="background:#dcfce7; color:#166534; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:bold;">Activo</span>`;
 
     return `
-
         <tr style="border-bottom:1px solid #e2e8f0;">
-
+            <td style="padding:15px; font-family: monospace; color: #475569; font-weight: bold;">
+                #${entrega.id_prestamo_original || 'S/N'}
+            </td>
             <td style="padding:15px;">
-
-                <div style="
-                    display:flex;
-                    align-items:center;
-                    gap:10px;
-                ">
-
-                    <div style="
-                        width:50px;
-                        height:50px;
-                        border-radius:12px;
-                        background:#f1f5f9;
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        font-size:25px;
-                    ">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:40px; height:40px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px;">
                         ${emoji}
                     </div>
-
-                    <strong>
-                        ${entrega.objeto}
-                    </strong>
-
+                    <strong>${entrega.objeto}</strong>
                 </div>
-
             </td>
-
-            <td style="padding:15px;">
-                <strong>${entrega.nombre}</strong>
-            </td>
-
-            <td style="padding:15px;">
-                ${entrega.curso}
-            </td>
-
-            <td style="padding:15px;">
-                ${obtenerCiclo(entrega.curso)}
-            </td>
-
-            <td style="padding:15px;">
-                ${entrega.objeto}
-            </td>
-
-            <td style="padding:15px;">
-                ${fechaFormateada}
-            </td>
-
-            <td style="padding:15px;">
-                ${estado}
-            </td>
-
+            <td style="padding:15px;"><strong>${entrega.nombre}</strong></td>
+            <td style="padding:15px;">${entrega.curso}</td>
+            <td style="padding:15px; color:#475569;">${entrega.lugar || 'N/A'}</td>
+            <td style="padding:15px; font-size:13px; color:#64748b;">${fechaFormateada}</td>
+            <td style="padding:15px;">${estadoBadge}</td>
         </tr>
     `;
 }
 
-// ==========================================
-// RENDER
-// ==========================================
-
+// Reparte los datos de la BD en cada una de las tres tablas
 function renderizarTablas(entregas){
-
-    const tablaSeniors =
-        document.getElementById("tablaSeniors");
-
-    const tablaTeens =
-        document.getElementById("tablaTeens");
-
-    const tablaMasters =
-        document.getElementById("tablaMasters");
+    const tablaSeniors = document.getElementById("tablaSeniors");
+    const tablaTeens = document.getElementById("tablaTeens");
+    const tablaMasters = document.getElementById("tablaMasters");
 
     tablaSeniors.innerHTML = "";
     tablaTeens.innerHTML = "";
     tablaMasters.innerHTML = "";
 
-    let totalSeniors = 0;
-    let totalTeens = 0;
-    let totalMasters = 0;
+    let totalSeniors = 0, totalTeens = 0, totalMasters = 0;
 
     entregas.forEach(entrega => {
-
         const ciclo = obtenerCiclo(entrega.curso);
-
-        if(ciclo === "Seniors"){
-
-            tablaSeniors.innerHTML += crearFila(entrega);
-
-            totalSeniors++;
-        }
-
-        if(ciclo === "Teens"){
-
-            tablaTeens.innerHTML += crearFila(entrega);
-
-            totalTeens++;
-        }
-
-        if(ciclo === "Masters"){
-
-            tablaMasters.innerHTML += crearFila(entrega);
-
-            totalMasters++;
-        }
+        if(ciclo === "Seniors") { tablaSeniors.innerHTML += crearFila(entrega); totalSeniors++; }
+        if(ciclo === "Teens") { tablaTeens.innerHTML += crearFila(entrega); totalTeens++; }
+        if(ciclo === "Masters") { tablaMasters.innerHTML += crearFila(entrega); totalMasters++; }
     });
 
-    document.getElementById(
-        "contadorSeniors"
-    ).innerText = `${totalSeniors} registros`;
-
-    document.getElementById(
-        "contadorTeens"
-    ).innerText = `${totalTeens} registros`;
-
-    document.getElementById(
-        "contadorMasters"
-    ).innerText = `${totalMasters} registros`;
+    document.getElementById("contadorSeniors").innerText = `${totalSeniors} registros`;
+    document.getElementById("contadorTeens").innerText = `${totalTeens} registros`;
+    document.getElementById("contadorMasters").innerText = `${totalMasters} registros`;
 }
 
-// ==========================================
-// FILTRO
-// ==========================================
+// Consume los datos del servidor de manera asíncrona (MongoDB Centralized)
+async function cargarEntregas(){
+    try{
+        const response = await fetch(API_OBTENER_ENTREGAS);
+        if(response.ok) {
+            const entregas = await response.json();
+            renderizarTablas(entregas);
+        }
+    }catch(error){
+        console.error("Error al sincronizar con el servidor MongoDB:", error);
+    }
+}
 
-document.getElementById('inputBusqueda')
-.addEventListener('keyup', filtrarTabla);
-
-function filtrarTabla(){
-
-    const texto = document.getElementById(
-        'inputBusqueda'
-    ).value.toLowerCase();
-
-    const filas = document.querySelectorAll(
-        'tbody tr'
-    );
-
-    filas.forEach(fila => {
-
-        fila.style.display = fila.innerText
-        .toLowerCase()
-        .includes(texto)
-
-        ? ''
-
-        : 'none';
+// Filtro de búsqueda reactivo en tiempo de ejecución
+document.getElementById('inputBusqueda').addEventListener('keyup', function(){
+    const texto = this.value.toLowerCase();
+    document.querySelectorAll('tbody tr').forEach(fila => {
+        fila.style.display = fila.innerText.toLowerCase().includes(texto) ? '' : 'none';
     });
-}
+});
 
-// ==========================================
-// AUTO REFRESH
-// ==========================================
+// POLLING AUTOMÁTICO EN TIEMPO REAL (Frecuencia de alta prioridad: Cada 2 segundos)
+setInterval(cargarEntregas, 2000);
 
-setInterval(() => {
-
-    cargarEntregas();
-
-}, 4000);
-
-// ==========================================
-// INICIO
-// ==========================================
-
+// Ejecución inicial al cargar el archivo en el DOM
 cargarEntregas();
-
 </script>
-
 {% endblock %}

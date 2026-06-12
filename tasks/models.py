@@ -49,6 +49,8 @@ class Task(models.Model):
 # ==========================================
 
 class RegistroEntrega(models.Model):
+    # Añade solo esta línea dentro de la clase que ya existe:
+    id_prestamo_original = models.CharField(max_length=100, blank=True, null=True, verbose_name="ID Copia Texto Plano")
 
     nombre = models.CharField(max_length=100)
 
@@ -75,15 +77,6 @@ class RegistroEntrega(models.Model):
         null=True,
         blank=True
     )
-
-    class Meta:
-        verbose_name = "Registro de Entrega"
-        verbose_name_plural = "Registros de Entrega"
-        ordering = ['-fecha']
-
-    def __str__(self):
-
-        return f"{self.nombre} - {self.objeto}"
 
 
 # ==========================================

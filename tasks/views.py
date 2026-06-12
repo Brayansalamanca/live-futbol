@@ -324,79 +324,69 @@ def api_subir_balones_excel(request):
     # ==========================================
 # ⚽ REGISTRAR ENTREGA NFC
 # ==========================================
-
 @csrf_exempt
 @login_required
 def api_registrar_entrega_nfc(request):
-
     if request.method != "POST":
-
-        return JsonResponse({
-            "success": False
-        })
+        return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
 
     try:
-
+        # 1. Leer los datos que vienen desde el frontend (JavaScript)
         data = json.loads(request.body)
-
         nombre = data.get("nombre")
         curso = data.get("curso")
         ciclo = data.get("ciclo")
         codigo_nfc = data.get("codigo_nfc")
+        
+        # Por si en el futuro mandas un ID de transacción o préstamo específico desde el cliente
+        id_origen = data.get("id_prestamo", "") 
 
-        balon = BalonNFC.objects.filter(
-            codigo_nfc=codigo_nfc
-        ).first()
+        # 2. Buscar el balón en el inventario NFC
+        balon = BalonNFC.objects.filter(codigo_nfc=codigo_nfc).first()
 
         if not balon:
-
             return JsonResponse({
-                "success": False,
-                "error": "Balón no encontrado"
-            })
+                "success": False, 
+                "error": "El balón con este código NFC no está registrado"
+            }, status=404)
 
         if not balon.disponible:
-
             return JsonResponse({
-                "success": False,
-                "error": "Balón no disponible"
-            })
+                "success": False, 
+                "error": f"El balón '{balon.nombre_balon}' ya está prestado actualmente"
+            }, status=400)
 
+        # 3. Definir qué ID usaremos como copia de seguridad en texto plano
+        # Si no viene un 'id_prestamo' en el JSON, usamos el ID único de la base de datos del balón.
+        id_copia = id_origen if id_origen else str(balon.id)
+
+        # 4. Crear el Registro de Entrega (La copia persistente en MongoDB)
         RegistroEntrega.objects.create(
-
+            id_prestamo_original=id_copia,  # <-- Aquí se guarda el ID como texto plano
             nombre=nombre,
-
-            curso=f"{curso} - {ciclo}",
-
+            curso=f"{curso} - {ciclo}",      # Guardamos el curso junto con su ciclo
             objeto=balon.nombre_balon,
-
-            lugar=balon.tipo
+            lugar=balon.tipo                 # Usamos el tipo de balón como referencia de lugar/categoría
         )
 
+        # 5. Cambiar el estado del balón a No Disponible y guardar
         balon.disponible = False
-
         balon.save()
 
+        # 6. Responder al frontend que todo salió perfecto
         return JsonResponse({
-
             "success": True,
-
             "balon": {
-
                 "nombre": balon.nombre_balon,
                 "tipo": balon.tipo,
                 "imagen": balon.imagen
             }
         })
 
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "JSON inválido"}, status=400)
     except Exception as e:
-
-        return JsonResponse({
-
-            "success": False,
-            "error": str(e)
-
-        })
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
     # ==========================================
 # ⚽ DEVOLVER BALÓN
 # ==========================================
@@ -1103,7 +1093,7 @@ def api_guardar_entrega(request):
             objeto=data.get('balon'), 
             curso=data.get('curso'),
             lugar=data.get('lugar'),
-            # ✅ CORRECCIÓN 1: Forzamos que se guarde con la hora exacta local del servidor
+            marca=data.get('id_unico'),
             fecha=timezone.now() 
         )
         return JsonResponse({"status": "success"})
