@@ -601,8 +601,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(() => {
         cargarDatos();
         cargarBalonesDesdeAPI();
-    }, 2000); 
+    }, 4000); 
 
     // Lista de vetados puede ser más lenta porque no cambia cada segundo
-    setInterval(cargarVetadosDesdeAPI, 30000); 
+    setInterval(cargarVetadosDesdeAPI, 50000); 
 });
