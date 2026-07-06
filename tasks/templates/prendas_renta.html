@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="seccion-inventario">
+    
+    <h1 class="titulo-principal">👕 Catálogo de Inventario</h1>
+    
+    <!-- Panel de Filtros -->
+    <div class="card card-filtros">
+        <div class="filtro-item flex-2">
+            <label>BUSCAR PRENDA:</label>
+            <input type="text" id="busquedaNombre" onkeyup="filtrarCatalogo()" placeholder="Ej: Camiseta, Pantalón..." class="input-hibrido">
+        </div>
+        
+        <div class="filtro-item flex-1">
+            <label>FILTRAR TALLA:</label>
+            <select id="filtroTalla" onchange="filtrarCatalogo()" class="input-hibrido">
+                <option value="">Todas las tallas</option>
+                <option value="6">6</option> <option value="8">8</option> <option value="10">10</option>
+                <option value="12">12</option> <option value="14">14</option> <option value="XS">XS</option>
+                <option value="S">S</option> <option value="M">M</option> <option value="L">L</option>
+                <option value="XL">XL</option> <option value="XXL">XXL</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Tabla de Catálogo General -->
+    <div class="card card-tabla-inventario">
+        <div class="table-responsive">
+            <table class="tabla-limpia">
+                <thead>
+                    <tr>
+                        <th style="padding: 15px;">Imagen</th>
+                        <th>Prenda</th>
+                        <th>Talla</th>
+                        <th>Stock Disp.</th>
+                        <th>Reservados</th>
+                        <th>Devolución</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCuerpo"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Sección Administrativa (Solo para 'rosita') -->
+    {% if request.user.username == 'rosita' %}
+    <div class="admin-section">
+        <h2 class="titulo-admin">🛡️ Control de Devoluciones (Admin)</h2>
+        
+        <h3 style="color: #e74c3c; margin-top: 20px;">🚨 Entregas Atrasadas (Vencidas)</h3>
+        <div class="card card-tabla-admin" style="border: 1px solid #e74c3c; margin-bottom: 30px;">
+            <div class="table-responsive">
+                <table class="tabla-limpia">
+                    <thead style="background: #e74c3c; color: white;">
+                        <tr>
+                            <th style="padding: 15px;">Foto</th>
+                            <th>Prenda</th>
+                            <th>Último en apartar</th>
+                            <th>Cant. Reservada</th>
+                            <th>Curso / Evento</th>
+                            <th>Fecha Uso</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaAtrasados"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3 style="color: #27ae60;">✅ Entregas a Tiempo / Próximas</h3>
+        <div class="card card-tabla-admin">
+            <div class="table-responsive">
+                <table class="tabla-limpia">
+                    <thead class="head-admin">
+                        <tr>
+                            <th style="padding: 15px;">Foto</th>
+                            <th>Prenda</th>
+                            <th>Último en apartar</th>
+                            <th>Cant. Reservada</th>
+                            <th>Curso / Evento</th>
+                            <th>Fecha Uso</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaDevoluciones"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<div id="visorImagen" onclick="cerrarVisor()" class="visor-modal">
+    <img id="imgGrande" src="" class="img-ampliada">
+</div>
+
+<link rel="stylesheet" href="{% static 'css/prendas_renta.css' %}">
+
+<script src="{% static 'js/prendas_renta.js' %}"></script>
+
+{% endblock %}

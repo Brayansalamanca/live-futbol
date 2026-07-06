@@ -3,6 +3,7 @@
 
 {% block content %}
 
+
 <div class="contenedor-principal" style="
     padding-top: 100px;
     max-width: 1500px;
@@ -22,15 +23,15 @@
         gap:15px;
     ">
         <div>
-            <h1 style="margin:0;">⚽ Historial NFC de Balones</h1>
-            <p style="margin-top:8px; color:#64748b; font-size:14px;">
+            <h1 style="margin:0;">⚽ Historial de Balones</h1>
+            <p style="margin-top:8px;  font-size:14px;">
                 Monitoreo centralizado con respaldo automático de ID.
             </p>
         </div>
 
         <div id="estadoConexion" style="
             background:#0f172a;
-            color:white;
+            
             padding:10px 15px;
             border-radius:12px;
             font-size:13px;
@@ -71,8 +72,9 @@
         >
     </section>
 
+
     <section style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,.08); margin-bottom:25px;">
-        <button onclick="togglePanel('panelSeniors')" style="width:100%; border:none; background:#2563eb; color:white; padding:20px; cursor:pointer; font-size:22px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
+        <button onclick="togglePanel('panelSeniors')" style="width:100%; border:none; background:#2563eb; ; padding:20px; cursor:pointer; font-size:22px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
             <span>🔵 Seniors</span>
             <span id="contadorSeniors">0 registros</span>
         </button>
@@ -95,7 +97,7 @@
     </section>
 
     <section style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,.08); margin-bottom:25px;">
-        <button onclick="togglePanel('panelTeens')" style="width:100%; border:none; background:#16a34a; color:white; padding:20px; cursor:pointer; font-size:22px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
+        <button onclick="togglePanel('panelTeens')" style="width:100%; border:none; background:#16a34a;  padding:20px; cursor:pointer; font-size:22px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
             <span>🟢 Teens</span>
             <span id="contadorTeens">0 registros</span>
         </button>
@@ -142,110 +144,7 @@
 
 </div>
 
-<script>
-// URL de tu API para obtener el listado de entregas
-const API_OBTENER_ENTREGAS = "/api/obtener-historial/"; 
+<script language="javascript" src="{% static 'js/historial.js' %}"></script>
 
-function togglePanel(id){
-    const panel = document.getElementById(id);
-    panel.style.display = (panel.style.display === "none" || panel.style.display === "") ? "block" : "none";
-}
 
-// Clasificación de ciclos dinámica basada en el curso numérico
-function obtenerCiclo(curso){
-    if(!curso) return "Sin ciclo";
-    const grado = parseInt(curso);
-    if([6, 7, 8].includes(grado)) return "Seniors";
-    if([3, 4, 5].includes(grado)) return "Teens";
-    if([9, 10, 11].includes(grado)) return "Masters";
-    return "Sin ciclo";
-}
-
-// Construye la fila inyectando de forma persistente la copia del ID de la base de datos
-function crearFila(entrega){
-    const fecha = new Date(entrega.fecha);
-    const fechaFormateada = fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString();
-
-    let emoji = "⚽";
-    const objeto = entrega.objeto || "";
-    if(objeto.toLowerCase().includes("basket")) emoji = "🏀";
-    if(objeto.toLowerCase().includes("volley")) emoji = "🏐";
-
-    const estadoBadge = entrega.eliminado 
-    ? `<span style="background:#fee2e2; color:#b91c1c; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:bold;">Respaldado en BD</span>`
-    : `<span style="background:#dcfce7; color:#166534; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:bold;">Activo</span>`;
-
-    return `
-        <tr style="border-bottom:1px solid #e2e8f0;">
-            <td style="padding:15px; font-family: monospace; color: #475569; font-weight: bold;">
-                #${entrega.id_prestamo_original || 'S/N'}
-            </td>
-            <td style="padding:15px;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width:40px; height:40px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px;">
-                        ${emoji}
-                    </div>
-                    <strong>${entrega.objeto}</strong>
-                </div>
-            </td>
-            <td style="padding:15px;"><strong>${entrega.nombre}</strong></td>
-            <td style="padding:15px;">${entrega.curso}</td>
-            <td style="padding:15px; color:#475569;">${entrega.lugar || 'N/A'}</td>
-            <td style="padding:15px; font-size:13px; color:#64748b;">${fechaFormateada}</td>
-            <td style="padding:15px;">${estadoBadge}</td>
-        </tr>
-    `;
-}
-
-// Reparte los datos de la BD en cada una de las tres tablas
-function renderizarTablas(entregas){
-    const tablaSeniors = document.getElementById("tablaSeniors");
-    const tablaTeens = document.getElementById("tablaTeens");
-    const tablaMasters = document.getElementById("tablaMasters");
-
-    tablaSeniors.innerHTML = "";
-    tablaTeens.innerHTML = "";
-    tablaMasters.innerHTML = "";
-
-    let totalSeniors = 0, totalTeens = 0, totalMasters = 0;
-
-    entregas.forEach(entrega => {
-        const ciclo = obtenerCiclo(entrega.curso);
-        if(ciclo === "Seniors") { tablaSeniors.innerHTML += crearFila(entrega); totalSeniors++; }
-        if(ciclo === "Teens") { tablaTeens.innerHTML += crearFila(entrega); totalTeens++; }
-        if(ciclo === "Masters") { tablaMasters.innerHTML += crearFila(entrega); totalMasters++; }
-    });
-
-    document.getElementById("contadorSeniors").innerText = `${totalSeniors} registros`;
-    document.getElementById("contadorTeens").innerText = `${totalTeens} registros`;
-    document.getElementById("contadorMasters").innerText = `${totalMasters} registros`;
-}
-
-// Consume los datos del servidor de manera asíncrona (MongoDB Centralized)
-async function cargarEntregas(){
-    try{
-        const response = await fetch(API_OBTENER_ENTREGAS);
-        if(response.ok) {
-            const entregas = await response.json();
-            renderizarTablas(entregas);
-        }
-    }catch(error){
-        console.error("Error al sincronizar con el servidor MongoDB:", error);
-    }
-}
-
-// Filtro de búsqueda reactivo en tiempo de ejecución
-document.getElementById('inputBusqueda').addEventListener('keyup', function(){
-    const texto = this.value.toLowerCase();
-    document.querySelectorAll('tbody tr').forEach(fila => {
-        fila.style.display = fila.innerText.toLowerCase().includes(texto) ? '' : 'none';
-    });
-});
-
-// POLLING AUTOMÁTICO EN TIEMPO REAL (Frecuencia de alta prioridad: Cada 2 segundos)
-setInterval(cargarEntregas, 2000);
-
-// Ejecución inicial al cargar el archivo en el DOM
-cargarEntregas();
-</script>
 {% endblock %}

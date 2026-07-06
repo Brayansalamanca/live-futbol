@@ -13,74 +13,16 @@
 
     <title>MKS Platform</title>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" >
 
-    <link
-        rel="stylesheet"
-        href="{% static 'base.css' %}"
-    >
+    <link rel="stylesheet"href="{% static 'base.css' %}">
 
     <script src="{% static 'js/chart.umd.min.js' %}"></script>
-
-    <style>
-        /* Asegura que todos los enlaces del sidebar usen flexbox alineado al centro */
-        .sidebar-links a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        /* Centrado simétrico de los iconos */
-        .sidebar-links a .icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px; /* Ancho fijo para que todos los textos inicien en la misma línea */
-            text-align: center;
-            font-size: 1.2rem;
-        }
-
-        /* Alineación vertical para el texto del link */
-        .sidebar-links a .link-text {
-            display: inline-block;
-            vertical-align: middle;
-        }
-
-        /* Cuando el sidebar está cerrado, centra los iconos en el medio del contenedor */
-        .sidebar.closed .sidebar-links a {
-            justify-content: center;
-            padding: 12px 0;
-        }
-
-        /* Centrado para botones de la barra superior */
-        .topbar-left, .topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .icon-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-        }
-    </style>
 
 </head>
 
 <body>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
 <div class="layout">
 
@@ -116,164 +58,184 @@
 
     {% if user.is_authenticated %}
 
+
+
         {% if user.groups.all.0.name == 'administracion' %}
 
             <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
+                <span class="icon" >🏠</span>
+                <span class="link-text">Inicio</span>
             </a>
 
             <a href="{% url 'formulario' %}" class="{% if request.path == '/formulario/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📋</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Inventario</span>
+                <span class="icon" >📋</span>
+                <span class="link-text">Inventario</span>
             </a>
 
             <a href="{% url 'tipos' %}" class="{% if request.path == '/tipos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📦</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Control Inventario</span>
+                <span class="icon" >📦</span>
+                <span class="link-text">Control Inventario</span>
             </a>
 
-            <a href="{% url 'ranking' %}" class="{% if request.path == '/ranking/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">💼</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Aprobar Usuarios</span>
+            <a href="{% url 'inventario' %}" class="{% if request.path == '/inventario/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" >💼</span>
+                <span class="link-text">Aprobar Usuarios</span>
             </a>
 
             <a href="{% url 'soporte' %}" class="{% if request.path == '/soporte/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🛠</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Soporte</span>
+                <span class="icon" >🛠</span>
+                <span class="link-text">Soporte</span>
             </a>
             <br>
             <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚪</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Cerrar Sesión</span>
+                <span class="icon" >🚪</span>
+                <span class="link-text">Cerrar Sesión</span>
             </a>
 
+
+    
+
+            
         {% elif user.groups.all.0.name == 'coordinacion' %}
 
             <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
+                <span class="icon" >🏠</span>
+                <span class="link-text">Inicio</span>
             </a>
 
             <a href="{% url 'tipos' %}" class="{% if request.path == '/tipos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📦</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Control Inventario</span>
+                <span class="icon" >📦</span>
+                <span class="link-text">Control Inventario</span>
             </a>
 
-            <a href="{% url 'nfc' %}" class="{% if request.path == '/nfc/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">⚽</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Vista Balones</span>
+            <a href="{% url 'historial' %}" class="{% if request.path == '/historial/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" >⚽</span>
+                <span class="link-text">Vista Balones</span>
             </a>
 
             <a href="{% url 'signup' %}" class="{% if request.path == '/signup/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">👤</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Registrar Usuario</span>
+                <span class="icon" >👤</span>
+                <span class="link-text">Registrar Usuario</span>
             </a>
 
             <a href="{% url 'soporte' %}" class="{% if request.path == '/soporte/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🛠</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Soporte</span>
+                <span class="icon" >🛠</span>
+                <span class="link-text">Soporte</span>
             </a>
             <br>
             <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚪</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Cerrar Sesión</span>
+                <span class="icon" >🚪</span>
+                <span class="link-text">Cerrar Sesión</span>
             </a>
+             <a href="{% url 'horarios' %}" class="{% if request.path == '/horarios/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" >📅</span>
+                <span class="link-text">Horarios</span>
+            </a>
+
+
+
 
         {% elif user.groups.all.0.name == 'profesor_inventario' %}
 
             <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
+                <span class="icon" >🏠</span>
+                <span class="link-text">Inicio</span>
             </a>
 
             <a href="{% url 'tipos' %}" class="{% if request.path == '/tipos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📦</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Inventario</span>
+                <span class="icon" >📦</span>
+                <span class="link-text">Inventario</span>
             </a>
 
             <a href="{% url 'horarios' %}" class="{% if request.path == '/horarios/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📅</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Horarios</span>
+                <span class="icon" >📅</span>
+                <span class="link-text">Horarios</span>
             </a>
 
             <a href="{% url 'profesores' %}" class="{% if request.path == '/profesores/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏆</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Torneos</span>
+                <span class="icon" >🏆</span>
+                <span class="link-text">Torneos</span>
             </a>
 
             <a href="{% url 'soporte' %}" class="{% if request.path == '/soporte/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🛠</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Soporte</span>
+                <span class="icon" >🛠</span>
+                <span class="link-text">Soporte</span>
             </a>
             <br>
             <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚪</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Cerrar Sesión</span>
+                <span class="icon" >🚪</span>
+                <span class="link-text">Cerrar Sesión</span>
             </a>
+
+
+
 
         {% elif user.groups.all.0.name == 'asistente bienestar' %}
 
             <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
+            <span class="icon" >🏠</span>
+            <span class="link-text">Inicio</span>
             </a>
 
-            <a href="{% url 'radar' %}" class="{% if request.path == '/radar/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">⚽</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Inventario Balones</span>
+            <a href="{% url 'objetos_perdidos' %}" class="{% if request.path == '/objetos_perdidos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" >⚽</span>
+                <span class="link-text">Objetos Perdidos</span>
             </a>
 
-            <a href="{% url 'videos' %}" class="{% if request.path == '/videos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📦</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Renta Balones</span>
+            <a href="{% url 'renta_balones' %}" class="{% if request.path == '/renta_balones/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" >📦</span>
+                <span class="link-text">Renta Balones</span>
             </a>
 
-            <a href="{% url 'voz' %}" class="{% if request.path == '/voz/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚫</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Bajas Balones</span>
+            <a href="{% url 'balones_perdidos' %}" class="{% if request.path == '/balones_perdidos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" >🚫</span>
+                <span class="link-text">Bajas Balones</span>
             </a>
 
-            <a href="{% url 'profesores' %}" class="{% if request.path == '/profesores/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏆</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Torneos</span>
+            <a href="{% url 'equipos' %}" class="{% if request.path == '/equipos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" >🏆</span>
+                <span class="link-text">Torneos</span>
             </a>
 
             <a href="{% url 'soporte' %}" class="{% if request.path == '/soporte/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🛠</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Soporte</span>
+                <span class="icon" >🛠</span>
+                <span class="link-text">Soporte</span>
             </a>
             <br>
             <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚪</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Cerrar Sesión</span>
+                <span class="icon" >🚪</span>
+                <span class="link-text">Cerrar Sesión</span>
             </a>
+
+
+
+
 
         {% else %}
 
             <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
+                <span class="icon" >🏠</span>
+                <span class="link-text">Inicio</span>
             </a>
 
             <a href="{% url 'horarios' %}" class="{% if request.path == '/horarios/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">📅</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Horarios</span>
+                <span class="icon" >📅</span>
+                <span class="link-text">Horarios</span>
             </a>
 
-            <a href="{% url 'profesores' %}" class="{% if request.path == '/profesores/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏆</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Torneos</span>
+            <a href="{% url 'equipos' %}" class="{% if request.path == '/equipos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
+                <span class="icon" >🏆</span>
+                <span class="link-text">Torneos</span>
             </a>
 
             <a href="{% url 'soporte' %}" class="{% if request.path == '/soporte/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🛠</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Soporte</span>
+                <span class="icon" >🛠</span>
+                <span class="link-text">Soporte</span>
             </a>
             <br>
             <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🚪</span>
-                <span class="link-text" style="line-height: 1; display: inline-block;">Cerrar Sesión</span>
+                <span class="icon" >🚪</span>
+                <span class="link-text">Cerrar Sesión</span>
             </a>
 
         {% endif %}
@@ -281,13 +243,13 @@
     {% else %}
 
         <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-            <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🏠</span>
-            <span class="link-text" style="line-height: 1; display: inline-block;">Inicio</span>
+            <span class="icon" >🏠</span>
+            <span class="link-text">Inicio</span>
         </a>
 
         <a href="{% url 'signin' %}" class="{% if request.path == '/signin/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-            <span class="icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 1.2rem; text-align: center; margin: 0; padding: 0; line-height: 1;">🔑</span>
-            <span class="link-text" style="line-height: 1; display: inline-block;">Iniciar Sesión</span>
+            <span class="icon" >🔑</span>
+            <span class="link-text">Iniciar Sesión</span>
         </a>
 
     {% endif %}
@@ -417,76 +379,9 @@
 
 </div>
 
-<script>
+<script src="{% static 'js/base.js' %}"></script>
 
-    // ==========================================================================
-    // SIDEBAR TOGGLE CON PERSISTENCIA
-    // ==========================================================================
 
-    const sidebar = document.getElementById("sidebar");
-    const main = document.getElementById("main");
-    const toggleBtn = document.getElementById("toggleSidebar");
-
-    const estadoSidebar = localStorage.getItem("sidebar-estado");
-
-    if (estadoSidebar === "cerrado") {
-        sidebar.classList.add("closed");
-        main.classList.add("expanded");
-    } else if (estadoSidebar === "abierto") {
-        sidebar.classList.remove("closed");
-        main.classList.remove("expanded");
-    } else {
-        if (window.innerWidth <= 900) {
-            sidebar.classList.add("closed");
-            main.classList.add("expanded");
-        }
-    }
-
-    toggleBtn.addEventListener("click", () => {
-        sidebar.classList.toggle("closed");
-        main.classList.toggle("expanded");
-
-        if (sidebar.classList.contains("closed")) {
-            localStorage.setItem("sidebar-estado", "cerrado");
-        } else {
-            localStorage.setItem("sidebar-estado", "abierto");
-        }
-    });
-
-    // ==========================================================================
-    // DARK MODE
-    // ==========================================================================
-
-    const themeBtn = document.getElementById("theme-toggle");
-
-    if(localStorage.getItem("theme") === "light"){
-        document.body.classList.add("light-mode");
-        themeBtn.textContent = "☀️";
-    }else{
-        themeBtn.textContent = "🌙";
-    }
-
-    themeBtn.addEventListener("click", () => {
-        document.body.classList.toggle("light-mode");
-        if(document.body.classList.contains("light-mode")){
-            localStorage.setItem("theme", "light");
-            themeBtn.textContent = "☀️";
-        }else{
-            localStorage.setItem("theme", "dark");
-            themeBtn.textContent = "🌙";
-        }
-    });
-
-    // ==========================================================================
-    // RESPONSIVE SIDEBAR
-    // ==========================================================================
-
-    if(window.innerWidth <= 900){
-        sidebar.classList.add("closed");
-        main.classList.add("expanded");
-    }
-
-</script>
 
 </body>
 </html>

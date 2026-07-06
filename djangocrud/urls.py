@@ -44,52 +44,21 @@ urlpatterns = [
     path('restablecer_/', login_required(views.signup), name='signup'),
     path('condiciones/', views.condiciones, name='condiciones'),
     path('soporte/',login_required(views.soporte), name='soporte'),
-    path(
-    'cambiar-password-inicial/',
-    login_required(views.cambiar_password_inicial),
-    name='cambiar_password_inicial'
-),
+    path('cambiar-password-inicial/',login_required(views.cambiar_password_inicial),name='cambiar_password_inicial'),
 
-    # --- 🍽️ URLS NFC / COMEDOR (PÁGINAS HTML) ---
-    path('mis_suscripciones/',  (views.mis_suscripciones), name='mis_suscripciones'),
+  
+    
     path('subir_excel_comedor/',    (views.subir_excel_comedor), name='subir_excel_comedor'),
     path('registrar_entrega_comedor/',  (views.registrar_entrega_comedor), name='registrar_entrega_comedor'),
+     path('historial/', views.historial,name='historial'),
 
-    # --- 🍽️ API NFC ---
-    path(
-    'nfc/',
-    views.nfc,
-    name='nfc'
-),
+    path('api/subir-balones-excel/', views.api_subir_balones_excel,name='api_subir_balones_excel'),
 
-path(
-    'api/subir-balones-excel/',
-    views.api_subir_balones_excel,
-    name='api_subir_balones_excel'
-),
+    path('api/registrar-entrega-nfc/',views.api_registrar_entrega_nfc,name='api_registrar_entrega_nfc'),
+    path('api/borrar-registros-antiguos/',views.borrar_registros_antiguos,name='borrar_registros_antiguos'),
+    path('api/devolver-balon/',views.api_devolver_balon,name='api_devolver_balon'),
 
-path(
-    'api/registrar-entrega-nfc/',
-    views.api_registrar_entrega_nfc,
-    name='api_registrar_entrega_nfc'
-
-),
-path(
-    'api/borrar-registros-antiguos/',
-    views.borrar_registros_antiguos,
-    name='borrar_registros_antiguos'
-),
-path(
-    'api/devolver-balon/',
-    views.api_devolver_balon,
-    name='api_devolver_balon'
-),
-
-path(
-    'api/listar-entregas-nfc/',
-    views.api_listar_entregas_nfc,
-    name='api_listar_entregas_nfc'
-),
+    path('api/listar-entregas-nfc/',views.api_listar_entregas_nfc,name='api_listar_entregas_nfc'),
 
     # --- 🏆 GESTIÓN DE USUARIOS (RANKING) ---
     path('ranking/', user_passes_test(es_administracion)(views.ranking), name='ranking'),
@@ -105,7 +74,7 @@ path(
 
     # --- 👕 MÓDULO ROPA ---
     path('formulario/', user_passes_test(es_administracion)(views.formulario), name='formulario'),
-    path('tipos/', login_required(views.tipos), name='tipos'), 
+    path('prendas-renta/', login_required(views.prendas_renta), name='prendas_renta'),
     path('api/guardar-prenda/', user_passes_test(es_coordinacion)(views.api_guardar_prenda), name='api_guardar_prenda'),
     path('api/apartar-prenda/<int:prenda_id>/', login_required(views.api_apartar_prenda), name='api_apartar_prenda'),
     path('liberar-reserva/<int:reserva_id>/', login_required(views.liberar_reserva), name='liberar_reserva'),
@@ -114,9 +83,10 @@ path(
     path('api/editar-entrega/<int:entrega_id>/', user_passes_test(es_asistente)(views.api_editar_entrega), name='api_editar_entrega'),
 
     # --- ⚽ MÓDULO BALONES (Radar, Renta y Bajas) ---
-    path('radar/', user_passes_test(es_asistente)(views.radar), name='radar'), 
-    path('videos/', user_passes_test(es_asistente)(views.videos), name='videos'),
-    path('voz/', user_passes_test(es_asistente)(views.voz), name='voz'),
+    path('inventario/', user_passes_test(es_asistente)(views.inventario), name='inventario'), 
+    path('renta_balones/', user_passes_test(es_asistente)(views.renta_balones), name='renta_balones'),
+    path('balones_perdidos/', user_passes_test(es_asistente)(views.balones_perdidos), name='balones_perdidos'),
+    path('objetos_perdidos/', user_passes_test(es_asistente)(views.objetos_perdidos), name='objetos_perdidos'),
     
     # --- 📊 APIS DEL MÓDULO BALONES  ---
     path('api/guardar-entrega/', user_passes_test(es_asistente)(views.api_guardar_entrega), name='api_guardar_entrega'),
@@ -125,124 +95,55 @@ path(
     path('api/guardar-baja/', user_passes_test(es_asistente)(views.api_guardar_baja), name='api_guardar_baja'),
     path('api/obtener-bajas/', login_required(views.api_obtener_bajas), name='api_obtener_bajas'),
     path('api/eliminar-baja/<int:baja_id>/', user_passes_test(es_asistente)(views.api_eliminar_baja), name='api_eliminar_baja'),
-    path(
-    'api/obtener-historial/',
-    views.api_obtener_historial,
-    name='api_obtener_historial'
-),
+    path('api/obtener-historial/', views.api_obtener_historial,name='api_obtener_historial'),
    
     # ==========================================
 # 📊 APIS DEL MÓDULO BALONES
 # ==========================================
 
-path(
-    'api/guardar-entrega/',
-    user_passes_test(es_asistente)(views.api_guardar_entrega),
-    name='api_guardar_entrega'
-),
+    path('api/guardar-entrega/',user_passes_test(es_asistente)(views.api_guardar_entrega),name='api_guardar_entrega'),
 
-path(
-    'api/obtener-entregas/',
-    login_required(views.api_obtener_entregas),
-    name='api_obtener_entregas'
-),
-path('api/registrar-nuevo-balon/', views.api_registrar_nuevo_balon, name='api_registrar_nuevo_balon'),
-    # ✅ Cambiada para que coincida exactamente con tu JS:
-path('api/obtener-balones-disponibles/', views.api_balones_disponibles, name='api_obtener_balones_disponibles'),
+    path('api/obtener-entregas/',login_required(views.api_obtener_entregas), name='api_obtener_entregas'),
+    path('api/registrar-nuevo-balon/', views.api_registrar_nuevo_balon, name='api_registrar_nuevo_balon'),
 
-path('api/eliminar-balon/<int:id>/', views.api_eliminar_balon, name='api_eliminar_balon'),
+    path('api/obtener-balones-disponibles/', views.api_balones_disponibles, name='api_obtener_balones_disponibles'),
+    path('api/eliminar-balon/<int:id>/', views.api_eliminar_balon, name='api_eliminar_balon'),
+    path('api/editar-balon/<int:id>/', views.api_editar_balon, name='api_editar_balon'),
 
-path('api/editar-balon/<int:id>/', views.api_editar_balon, name='api_editar_balon'),
-
-
-path(
-    'api/eliminar-entrega/<int:entrega_id>/',
-    user_passes_test(es_asistente)(views.api_eliminar_entrega),
-    name='api_eliminar_entrega'
-),
-
-path(
-    'api/guardar-baja/',
-    user_passes_test(es_asistente)(views.api_guardar_baja),
-    name='api_guardar_baja'
-),
-
-path(
-    'api/obtener-bajas/',
-    login_required(views.api_obtener_bajas),
-    name='api_obtener_bajas'
-),
-
-path(
-    'api/eliminar-baja/<int:baja_id>/',
-    user_passes_test(es_asistente)(views.api_eliminar_baja),
-    name='api_eliminar_baja'
-),
+    path('api/eliminar-entrega/<int:entrega_id>/',user_passes_test(es_asistente)(views.api_eliminar_entrega),name='api_eliminar_entrega'),
+    path('api/guardar-baja/',user_passes_test(es_asistente)(views.api_guardar_baja),name='api_guardar_baja'),
+    path( 'api/obtener-bajas/',login_required(views.api_obtener_bajas),name='api_obtener_bajas'),
+    path('api/eliminar-baja/<int:baja_id>/',user_passes_test(es_asistente)(views.api_eliminar_baja),name='api_eliminar_baja'),
 
 # ==========================================
 # 📝 SOLICITUDES
 # ==========================================
 
-path(
-    'api/obtener-solicitudes/',
-    user_passes_test(es_asistente)(views.api_obtener_solicitudes),
-    name='api_obtener_solicitudes'
-),
-
-path(
-    'api/guardar-solicitud/',
-    user_passes_test(es_asistente)(views.api_guardar_solicitud),
-    name='api_guardar_solicitud'
-),
+    path('api/obtener-solicitudes/',user_passes_test(es_asistente)(views.api_obtener_solicitudes),name='api_obtener_solicitudes'),
+    path('api/guardar-solicitud/',user_passes_test(es_asistente)(views.api_guardar_solicitud),name='api_guardar_solicitud'),
 
 # ==========================================
 # 🔍 OBJETOS PERDIDOS
 # ==========================================
 
-path(
-    'api/obtener-objetos/',
-    login_required(views.api_obtener_objetos),
-    name='api_obtener_objetos'
-),
+    path('api/obtener-objetos/',login_required(views.api_obtener_objetos),name='api_obtener_objetos'),
 
-path(
-    'api/guardar-objeto/',
-    login_required(views.api_guardar_objeto),
-    name='api_guardar_objeto'
-),
+    path('api/guardar-objeto/',login_required(views.api_guardar_objeto), name='api_guardar_objeto'),
 
-path(
-    'api/eliminar-objeto/<int:obj_id>/',
-    login_required(views.api_eliminar_objeto),
-    name='api_eliminar_objeto'
-),
+    path('api/eliminar-objeto/<int:obj_id>/',login_required(views.api_eliminar_objeto),name='api_eliminar_objeto'),
 
 # ==========================================
 # 🔍 HALLAZGOS V2
 # ==========================================
 
-path(
-    'api/v2/hallazgos/guardar/',
-    login_required(views.hallazgo_v2_guardar),
-    name='hallazgo_v2_guardar'
-),
-
-path(
-    'api/v2/hallazgos/listar/',
-    login_required(views.hallazgo_v2_listar),
-    name='hallazgo_v2_listar'
-),
-
-path(
-    'api/v2/hallazgos/eliminar/<int:item_id>/',
-    login_required(views.hallazgo_v2_eliminar),
-    name='hallazgo_v2_eliminar'
-),
+    path('api/v2/hallazgos/guardar/',login_required(views.hallazgo_v2_guardar),name='hallazgo_v2_guardar'),
+    path('api/v2/hallazgos/listar/',login_required(views.hallazgo_v2_listar),name='hallazgo_v2_listar'),
+    path('api/v2/hallazgos/eliminar/<int:item_id>/',login_required(views.hallazgo_v2_eliminar),name='hallazgo_v2_eliminar'),
 
 
     # --- 📅 MÓDULO INFORMACIÓN (Horarios y Profesores) ---
     path('horarios/', login_required(views.horarios), name='horarios'),
-    path('profesores/', login_required(views.lista_profesores), name='profesores'),
+    path('equipos/', login_required(views.equipos), name='equipos'),
 
     # --- 🔍 OBJETOS PERDIDOS (CONVIVENCIA V1 y V2) ---
     path('api/guardar-objeto/', login_required(views.api_guardar_objeto), name='api_guardar_objeto'),
@@ -253,11 +154,7 @@ path(
     path('api/v2/hallazgos/guardar/', login_required(views.hallazgo_v2_guardar), name='hallazgo_v2_guardar'),
     path('api/v2/hallazgos/listar/', login_required(views.hallazgo_v2_listar), name='hallazgo_v2_listar'),
     path('api/v2/hallazgos/eliminar/<int:item_id>/', login_required(views.hallazgo_v2_eliminar), name='hallazgo_v2_eliminar'),
-    path(
-    'api/eliminar-solicitud/<int:solicitud_id>/',
-    views.api_eliminar_solicitud,
-    name='api_eliminar_solicitud'
-),
+    path('api/eliminar-solicitud/<int:solicitud_id>/',views.api_eliminar_solicitud,name='api_eliminar_solicitud'),
 
     # --- ✅ TAREAS ---
     path('tasks/', login_required(views.tasks), name='tasks'),
@@ -278,22 +175,8 @@ path(
     path('api/torneos/listar/', login_required(views.api_obtener_torneos), name='api_obtener_torneos'),
     path('api/torneos/guardar/', login_required(views.api_guardar_torneo), name='api_guardar_torneo'),
     path('api/torneos/eliminar/<str:nombre>/', views.api_eliminar_torneo, name='api_eliminar_torneo'),
-
+    path('guardar-bloque/',views.guardar_bloque,name='guardar_bloque'),
+    path('obtener-horario/',views.obtener_horario,name='obtener_horario'),
     path(
-    'guardar-bloque/',
-    views.guardar_bloque,
-    name='guardar_bloque'
-),
-
-path(
-    'obtener-horario/',
-    views.obtener_horario,
-    name='obtener_horario'
-),
-
-path(
-    'eliminar-bloque/',
-    views.eliminar_bloque,
-    name='eliminar_bloque'
-),
-]
+    'eliminar-bloque/', views.eliminar_bloque,name='eliminar_bloque'),
+    ]

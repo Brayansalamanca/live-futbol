@@ -1,100 +1,104 @@
 from django.db import transaction
+
 import json
+
 import traceback
+
 from datetime import datetime, timedelta
+
 from django.views.decorators.csrf import csrf_exempt
+
 from django.contrib.auth.decorators import user_passes_test
+
 from .models import BalonNFC
 
-
 from django.shortcuts import render, redirect, get_object_or_404
+
 from django.contrib.auth import login, logout, authenticate
+
 from django.contrib.auth.models import User, Group
+
 from django.contrib.auth.decorators import login_required, user_passes_test
+
 from django.contrib.auth.forms import AuthenticationForm
+
 from django.utils import timezone, encoding, http
+
 from django.http import JsonResponse
+
 from django.views.decorators.csrf import csrf_exempt
+
 import json
+
 from django.http import JsonResponse
+
+
 from django.views.decorators.csrf import csrf_exempt
+
 from .models import HorarioCurso, BloqueHorario
+
 import json
+
 from django.utils import timezone
-from .models import (
-    Task,
-    RegistroEntrega,
-    ObjetoPerdido,
-    PrendaRopa,
-    BajaBalon,
-    ReservaPrenda,
-    BalonNFC,
-  
-)
 
+from .models import ( Task,RegistroEntrega,ObjetoPerdido,PrendaRopa,BajaBalon,ReservaPrenda,BalonNFC,)
 
-from django.utils.http import (
-    urlsafe_base64_encode,
-    urlsafe_base64_decode
-)
-from django.utils.encoding import (
-    force_bytes,
-    force_str
-)
+from django.utils.http import (urlsafe_base64_encode,urlsafe_base64_decode)
+
+from django.utils.encoding import (force_bytes,force_str)
+
 from .models import ObjetoPerdido
+
 from django.urls import reverse_lazy
+
 from django.contrib.auth.views import PasswordResetView
+
 from django.contrib.messages.views import SuccessMessageMixin
+
 from django.core.mail import send_mail, EmailMultiAlternatives
+
 from django.http import JsonResponse
+
 from django.template.loader import render_to_string
+
 from django.utils.html import strip_tags
+
 from django.contrib.sites.shortcuts import get_current_site
+
 from django.conf import settings
 
 from pymongo import MongoClient
 
 # Importación de modelos y formularios locales
-from .models import (
-    Task,
-    RegistroEntrega,
-    ObjetoPerdido,
-    PrendaRopa,
-    BajaBalon,
-    ReservaPrenda,
-    BalonNFC
-)
+from .models import ( Task,RegistroEntrega,ObjetoPerdido,PrendaRopa,BajaBalon,ReservaPrenda,BalonNFC)
 
-from .forms import (
-    TaskForm,
-    CustomUserCreationForm
-)
+from .forms import (TaskForm,CustomUserCreationForm)
 
 from .tokens import account_activation_token
 
 import socket
 
-# Forzar IPv4
+
 socket.getaddrinfo = lambda *args: [
     (socket.AF_INET, socket.SOCK_STREAM, 6, '', (args[0], args[1]))
 ]
 
 import requests
+
 from requests.exceptions import RequestException
 
 from django.contrib.auth.tokens import default_token_generator
+
 from pymongo import MongoClient
+
 from django.conf import settings
 
 
 # ==========================================
 # 🔐 RECUPERACIÓN DE CONTRASEÑA
 # ==========================================
-class CustomPasswordResetView(
-    SuccessMessageMixin,
-    PasswordResetView
+class CustomPasswordResetView(SuccessMessageMixin,PasswordResetView
 ):
-
     template_name = 'recuperar_contraseña.html'
     success_url = reverse_lazy('password_reset_done')
 
@@ -116,9 +120,7 @@ class CustomPasswordResetView(
             db = client[db_name]
 
             usuarios = list(
-                db.auth_user.find({
-                    "email": email,
-                    "is_active": True
+                db.auth_user.find({"email": email,"is_active": True
                 })
             )
 
@@ -180,6 +182,8 @@ class CustomPasswordResetView(
             traceback.print_exc()
 
         return redirect(self.success_url)
+    
+
 # ==========================================
 # 🔐 FUNCIONES DE VERIFICACIÓN
 # ==========================================
@@ -196,13 +200,13 @@ def es_asistente_o_coordinacion(user):
         or es_coordinacion(user)
     )
 
-@user_passes_test(es_asistente_o_coordinacion)
-def nfc(request):
 
-    return render(
-        request,
-        'nfc.html'
-    )
+
+# ================inicio cuentas=========================
+@user_passes_test(es_asistente_o_coordinacion)
+def historial(request):
+
+    return render(request,'historial.html')
 
 
 
@@ -502,19 +506,19 @@ def activar(request, uidb64, token):
     return render(request, 'confirmar_fallido.html')
 
 @login_required
-def tipos(request):
+def prendas_renta(request):
 
     # ADMINISTRACION
     if request.user.groups.filter(name='administracion').exists():
-        return render(request, 'tipos.html')
+        return render(request, 'prendas_renta.html')
 
     # COORDINACION
     if request.user.groups.filter(name='coordinacion').exists():
-        return render(request, 'tipos.html')
+        return render(request, 'prendas_renta.html')
 
     # PERMISO TEMPORAL
     if request.user.groups.filter(name='inventario_temporal').exists():
-        return render(request, 'tipos.html')
+        return render(request, 'prendas_renta.html')
 
     return redirect('home')
 
@@ -692,10 +696,15 @@ def cambiar_password_inicial(request):
 
 
 # --- CORRECCIÓN AQUÍ: SE SEPARÓ SIGNIN ---
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.shortcuts import render, redirect
+
 def signin(request):
     if request.method == 'GET':
         return render(request, 'signin.html', {'form': AuthenticationForm()})
-        
+    
+    # Intentar autenticar
     user = authenticate(request, username=request.POST.get('username'), password=request.POST.get('password'))
     
     if user is not None:
@@ -704,18 +713,21 @@ def signin(request):
         
         login(request, user)
         
-    try:
-
-        if user.perfil.debe_cambiar_password:
-
-          return redirect('cambiar_password_inicial')
-    except:
-        pass
-        if es_coordinacion(user): return redirect('tipos')
-        if es_asistente(user): return redirect('radar')
-        if es_administracion(user): return redirect('formulario')
-        return redirect('tipos')
+        # Verificar si debe cambiar contraseña
+        if hasattr(user, 'perfil') and user.perfil.debe_cambiar_password:
+            return redirect('cambiar_password_inicial')
         
+        # Redirecciones según rol
+        if es_coordinacion(user): 
+            return redirect('tipos')
+        if es_asistente(user): 
+            return redirect('inventario')
+        if es_administracion(user): 
+            return redirect('formulario')
+        
+        return redirect('tipos')
+    
+    # Si las credenciales son incorrectas
     return render(request, 'signin.html', {'form': AuthenticationForm(), 'error': 'Credenciales incorrectas'})
 
 def signout(request):
@@ -783,7 +795,7 @@ def api_eliminar_usuario(request, user_id):
     return JsonResponse({'status': 'error'}, status=405)
 
 # Al final de tasks/views.py
-def lista_profesores(request):
+def equipos(request):
     import requests
     from requests.exceptions import RequestException
 
@@ -797,7 +809,7 @@ def lista_profesores(request):
         print(f"Error de conexión: {e}")
         profesores = []
 
-    return render(request, 'profesores.html', {'profesores': profesores})
+    return render(request, 'equipos.html', {'profesores': profesores})
 
 @login_required
 def horarios(request):
@@ -1082,7 +1094,7 @@ def api_editar_balon(request, id):
     return JsonResponse({"status": "success", "message": "Balón actualizado"})
     
 @user_passes_test(es_asistente)
-def radar(request): return render(request, 'radar.html')
+def inventario(request): return render(request, 'inventario.html')
 
 @user_passes_test(es_asistente)
 def api_guardar_entrega(request):
@@ -1132,7 +1144,7 @@ def api_obtener_entregas(request):
             'marca': e.marca,
             # Cambia esto en views.py:
             'id_unico': e.marca if e.marca else "Sin ID",
-            'fecha': fecha_formateada,
+            'fecha': e.fecha.isoformat(),
             'fecha_debug': fecha_debug_str,
             'eliminado': False
         })
@@ -1942,9 +1954,13 @@ def api_eliminar_prenda(request, prenda_id):
         return JsonResponse({'status': 'ok'})
 
 @user_passes_test(es_asistente)
-def videos(request): return render(request, 'videos.html')
+def renta_balones(request): return render(request, 'renta_balones.html')
+
 @user_passes_test(es_asistente)
-def voz(request): return render(request, 'voz.html')
+def balones_perdidos(request): return render(request, 'balones_perdidos.html')
+
+@user_passes_test(es_asistente)
+def objetos_perdidos(request): return render(request, 'objetos_perdidos.html')
 
 @login_required
 def create_task(request):

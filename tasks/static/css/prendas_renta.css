@@ -1,0 +1,46 @@
+ :root {
+        --primary: #2c3e50;
+        --border: #dcdde1;
+        --bg-soft: #f8f9fa;
+        --text: #2f3640;
+        --text-soft: #7f8c8d;
+    }
+
+    .seccion-inventario { padding: 80px 20px 50px; min-height: 100vh; max-width: 1200px; margin: 0 auto; }
+    .titulo-principal { text-align: center; color: var(--primary); text-transform: uppercase; font-weight: 900; margin-bottom: 30px; }
+
+    .card { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .card-filtros { display: flex; gap: 15px; flex-wrap: wrap; padding: 20px; border: 1px solid var(--border); }
+    .filtro-item { min-width: 150px; }
+    .flex-2 { flex: 2; }
+    .flex-1 { flex: 1; }
+    .filtro-item label { color: var(--primary); font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px; }
+
+    .input-hibrido { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; outline: none; }
+
+    .card-tabla-inventario, .card-tabla-admin { padding: 0 !important; overflow: hidden; border: 1px solid var(--border); }
+    .table-responsive { overflow-x: auto; }
+    .tabla-limpia { width: 100%; border-collapse: collapse; text-align: center; color: var(--text); }
+    .tabla-limpia thead { background: var(--primary); color: white; font-size: 12px; text-transform: uppercase; }
+    .tabla-limpia td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+
+    .stock-ok { color: #27ae60; font-weight: bold; }
+    .stock-wait { color: #f39c12; font-weight: bold; }
+    .fecha-info { color: var(--text-soft); font-size: 12px; }
+
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; color: white; }
+    .badge-ok { background: #27ae60; }
+    .badge-warn { background: #f39c12; }
+    .badge-fail { background: #e74c3c; }
+
+    .admin-section { margin-top: 60px; }
+    .titulo-admin { color: #d35400; border-left: 5px solid #d35400; padding-left: 15px; font-size: 1.2rem; margin-bottom: 20px; }
+    .head-admin { background: #d35400 !important; }
+
+    .img-tabla { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); cursor: zoom-in; }
+    .visor-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+    .img-ampliada { width: auto; max-width: 80%; max-height: 80%; border: 4px solid white; border-radius: 12px; }
+
+    .form-row { background: #f1f2f6; }
+    .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; padding: 15px; }
+    .grid-form label { font-size: 10px; color: var(--primary); font-weight: bold; display: block; }

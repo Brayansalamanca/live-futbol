@@ -1,62 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-.form-container {
-    max-width: 400px;
-    margin: auto;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 2px 5px 45px; /* Dejamos la sombra para marcar la forma */
-  }
-
-  .form-container h1 {
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1rem;
-  }
-
-  .form-group label {
-    margin-bottom: 0.3rem;
-    font-weight: bold;
-    font-size: 0.9rem;
-  }
-
-  .form-group input {
-    padding: 0.5rem;
-    border-radius: 5px;
-    border: none; /* Como el original */
-    outline: none;
-  }
-
-  .form-container button {
-    padding: 0.7rem;
-    border: none; /* Como el original */
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: opacity 0.3s;
-    width: 100%;
-    margin-top: 0.5rem;
-  }
-
-  .form-container button:hover {
-    opacity: 0.8;
-  }
-
-  .secondary-btn {
-    margin-top: 0.5rem;
-  }
-
-  .link-btn {
-    margin-top: 0.5rem;
-  }
-</style>
+<link rel="stylesheet" href="{% static 'css/signin.css' %}">
 
 <div class="form-container">
   <h1>Iniciar sesión</h1>
