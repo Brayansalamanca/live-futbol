@@ -406,6 +406,8 @@ async function cargarDatos() {
         }
         
         registros = await res.json();
+        console.log(registros);
+console.table(registros);
         dibujar();
         actualizarContadoresStock();
         actualizarSelectorBalones();
