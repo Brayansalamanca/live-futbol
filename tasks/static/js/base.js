@@ -18,17 +18,33 @@
             main.classList.add("expanded");
         }
     }
-
+    console.log(toggleBtn);
+console.log(sidebar);
     toggleBtn.addEventListener("click", () => {
+        document.addEventListener("click", (e) => {
+
+    if (
+        window.innerWidth <= 900 &&
+        sidebar.classList.contains("active") &&
+        !sidebar.contains(e.target) &&
+        !toggleBtn.contains(e.target)
+    ) {
+        sidebar.classList.remove("active");
+    }
+
+});
+    if (window.innerWidth <= 900) {
+
+        sidebar.classList.toggle("active");
+
+    } else {
+
         sidebar.classList.toggle("closed");
         main.classList.toggle("expanded");
 
-        if (sidebar.classList.contains("closed")) {
-            localStorage.setItem("sidebar-estado", "cerrado");
-        } else {
-            localStorage.setItem("sidebar-estado", "abierto");
-        }
-    });
+    }
+
+});
 
     // ==========================================================================
     // DARK MODE

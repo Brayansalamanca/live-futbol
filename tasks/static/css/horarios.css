@@ -1,0 +1,1090 @@
+:root{
+
+    /* Colores tomados del tema actual */
+
+    --page-bg: var(--bg);
+    --panel-bg: var(--card);
+    --panel-bg2: var(--card2);
+
+    --text: var(--text);
+    --text2: var(--text-light);
+
+    --border: var(--border);
+
+    --primary: var(--primary);
+    --primary-dark: var(--primary-dark);
+
+    --success: var(--success);
+    --warning: var(--warning);
+    --danger: var(--danger);
+
+    --shadow: var(--shadow);
+
+}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:'Poppins',sans-serif;
+}
+
+.container{
+    max-width:1400px;
+    margin:auto;
+    padding:15px;
+}
+
+/* =========================
+HEADER
+========================= */
+
+.topbar{
+    color:white;
+    padding:14px 18px;
+    border-radius:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.topbar h1{
+    font-size:1.2rem;
+}
+
+.btn{
+    border:none;
+    border-radius:10px;
+    padding:10px 14px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.btn-primary{
+    background:#15803d;
+    color:white;
+}
+
+.btn-danger{
+    background:#dc2626;
+    color:white;
+}
+
+.btn-secondary{
+    background:#2563eb;
+    color:white;
+}
+
+/* =========================
+PANEL
+========================= */
+
+.panel{
+   
+    border-radius:14px;
+    padding:15px;
+    margin-bottom:15px;
+    box-shadow:0 4px 10px rgba(0,0,0,.05);
+}
+
+/* =========================
+BUSQUEDAS
+========================= */
+
+.search-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.search-box{
+    position:relative;
+}
+
+.search-box input{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    outline:none;
+}
+
+.sugerencias{
+    position:absolute;
+    width:100%;
+    border-radius:10px;
+    box-shadow:0 5px 20px rgba(0,0,0,.12);
+    top:105%;
+    left:0;
+    z-index:100;
+    display:none;
+    max-height:250px;
+    overflow:auto;
+}
+
+.sugerencia-item{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    cursor:pointer;
+}
+
+.sugerencia-item:hover{
+    background:#f0fdf4;
+}
+
+.curso-actions{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+}
+
+/* =========================
+INFO
+========================= */
+
+.info-actual{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.info-box{
+    background:#f9fafb;
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:.92rem;
+}
+
+/* =========================
+CONFIG
+========================= */
+
+.config-grid{
+    display:grid;
+    grid-template-columns:
+        repeat(auto-fit,minmax(180px,1fr));
+    gap:10px;
+}
+
+.config-grid input,
+.config-grid select{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+}
+
+/* =========================
+TABLA
+========================= */
+
+.table-wrapper{
+    overflow:auto;
+}
+
+table{
+    width:100%;
+    min-width:1200px;
+    border-collapse:collapse;
+    background:white;
+    border-radius:14px;
+    overflow:hidden;
+}
+
+th{
+    background:#15803d;
+    color:white;
+    padding:12px;
+    font-size:.9rem;
+}
+
+td{
+    border:1px solid #e5e7eb;
+    height:90px;
+    padding:4px;
+    vertical-align:top;
+}
+
+.hora-col{
+    width:110px;
+    text-align:center;
+    background:#eff6ff;
+    font-weight:600;
+    font-size:.8rem;
+    color:#ffffff;
+}
+
+.cell{
+    width:100%;
+    height:100%;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.cell:hover{
+    background:#f0fdf4;
+}
+
+/* =========================
+CARDS
+========================= */
+
+.card{
+    border-radius:8px;
+    padding:6px;
+    font-size:.72rem;
+    line-height:1.4;
+    height:100%;
+}
+
+.card strong{
+    display:block;
+    margin-bottom:4px;
+}
+
+.card-clase{
+    background:#ecfdf5;
+    border-left:5px solid #15803d;
+}
+
+.card-relevo{
+    background:#fff7ed;
+    border-left:5px solid #ea580c;
+}
+
+.card-descanso{
+    background:#eff6ff;
+    border-left:5px solid #2563eb;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    font-weight:700;
+}
+
+.filtro-activo{
+    outline:3px solid #2563eb;
+}
+
+/* =========================
+MODAL
+========================= */
+
+.overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    display:none;
+    z-index:999;
+}
+
+.modal{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background:white;
+    width:95%;
+    max-width:400px;
+    border-radius:14px;
+    padding:20px;
+    display:none;
+    z-index:1000;
+}
+
+.modal-body{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+@media(max-width:900px){
+
+    .search-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+:root{
+    --bg:#eef2ff;
+    --card:#ffffff;
+    --primary:#2563eb;
+    --primary2:#1d4ed8;
+    --success:#16a34a;
+    --danger:#dc2626;
+    --warning:#ea580c;
+    --text:#0f172a;
+    --text2:#475569;
+    --border:#dbe4ff;
+
+    --shadow:
+    0 10px 30px rgba(37,99,235,.10);
+
+    --radius:18px;
+}
+
+
+/* =========================================
+SCROLL
+========================================= */
+
+::-webkit-scrollbar{
+    width:10px;
+    height:10px;
+}
+
+::-webkit-scrollbar-track{
+    background:#dbeafe;
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#3b82f6;
+    border-radius:20px;
+}
+
+/* =========================================
+NAVBAR
+========================================= */
+
+.navbar{
+    width:100%;
+    padding:18px 25px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    flex-wrap:wrap;
+
+   
+
+    backdrop-filter:blur(12px);
+
+    border-bottom:
+    1px solid rgba(255,255,255,.4);
+
+    position:sticky;
+    top:0;
+    z-index:100;
+
+    box-shadow:var(--shadow);
+}
+
+.navbar h1{
+    font-size:1.5rem;
+    font-weight:700;
+    color:#1e293b;
+}
+
+.nav-right{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+/* =========================================
+BOTONES
+========================================= */
+
+.btn{
+    border:none;
+    border-radius:14px;
+    padding:12px 18px;
+
+    font-size:.92rem;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+
+.btn:hover{
+    transform:
+    translateY(-2px)
+    scale(1.02);
+}
+
+.btn-primary{
+    background:
+    linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+
+    color:white;
+
+    box-shadow:
+    0 8px 20px rgba(37,99,235,.25);
+}
+
+.btn-secondary{
+    background:
+    linear-gradient(
+        135deg,
+        #475569,
+        #334155
+    );
+
+    color:white;
+}
+
+.btn-danger{
+    background:
+    linear-gradient(
+        135deg,
+        #ef4444,
+        #dc2626
+    );
+
+    color:white;
+}
+
+/* =========================================
+CONTENEDOR
+========================================= */
+
+.container{
+    max-width:1450px;
+    margin:auto;
+    padding:20px;
+}
+
+/* =========================================
+PANEL GENERAL
+========================================= */
+
+.panel{
+    
+
+    backdrop-filter:blur(10px);
+
+    border:
+    1px solid rgba(255,255,255,.5);
+
+    border-radius:24px;
+
+    padding:18px;
+
+    margin-bottom:18px;
+
+    box-shadow:var(--shadow);
+}
+
+/* =========================================
+TOP GRID
+========================================= */
+
+.top-grid{
+    display:grid;
+
+    grid-template-columns:
+    1.3fr
+    .8fr
+    auto;
+
+    gap:14px;
+
+    align-items:end;
+}
+
+@media(max-width:900px){
+
+    .top-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+/* =========================================
+TITULOS
+========================================= */
+
+.title-box{
+    margin-bottom:12px;
+}
+
+.title-box h2{
+    font-size:1.1rem;
+    font-weight:700;
+}
+
+.title-box p{
+    font-size:.88rem;
+    color:var(--text2);
+    margin-top:4px;
+}
+
+/* =========================================
+INPUTS
+========================================= */
+
+.input-group{
+    position:relative;
+}
+
+.input-group input,
+.input-group select{
+    width:100%;
+
+    border:
+    1px solid var(--border);
+
+    background:white;
+
+    border-radius:16px;
+
+    padding:
+    14px 15px;
+
+    font-size:.95rem;
+
+    outline:none;
+
+    transition:.2s;
+}
+
+.input-group input:focus,
+.input-group select:focus{
+
+    border-color:#3b82f6;
+
+    box-shadow:
+    0 0 0 4px
+    rgba(59,130,246,.12);
+
+}
+
+/* =========================================
+SUGERENCIAS
+========================================= */
+
+.sugerencias{
+    position:absolute;
+
+    top:105%;
+    left:0;
+
+    width:100%;
+
+    background:white;
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    display:none;
+
+    max-height:320px;
+    overflow-y:auto;
+
+    z-index:50;
+
+    box-shadow:
+    0 15px 35px rgba(0,0,0,.12);
+}
+
+.sugerencia-item{
+    padding:14px;
+
+    cursor:pointer;
+
+    border-bottom:
+    1px solid #f1f5f9;
+
+    transition:.2s;
+}
+
+.sugerencia-item:hover{
+    background:#eff6ff;
+}
+
+.sugerencia-item strong{
+    color:#1d4ed8;
+}
+
+/* =========================================
+HORARIO INFO
+========================================= */
+
+.current-info{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.info-card{
+    flex:1;
+
+    min-width:220px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #eff6ff,
+        #dbeafe
+    );
+
+    border-radius:18px;
+
+    padding:16px;
+
+    border:
+    1px solid #bfdbfe;
+}
+
+.info-label{
+    font-size:.8rem;
+    color:#475569;
+    margin-bottom:5px;
+}
+
+.info-value{
+    font-size:1.1rem;
+    font-weight:700;
+    color:#1e3a8a;
+}
+
+/* =========================================
+SEMANA
+========================================= */
+
+.calendar-controls{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+#tituloSemana{
+    background:white;
+
+    padding:
+    22px 38px;
+
+    border-radius:14px;
+
+    font-size:1rem;
+
+    box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================================
+CONFIG GRID
+========================================= */
+
+.config-grid{
+    display:grid;
+
+    grid-template-columns:
+    repeat(
+        auto-fit,
+        minmax(180px,1fr)
+    );
+
+    gap:12px;
+}
+
+/* =========================================
+TABLA
+========================================= */
+
+.table-wrapper{
+    overflow:auto;
+
+    border-radius:24px;
+
+    box-shadow:
+    0 15px 35px rgba(0,0,0,.08);
+}
+
+table{
+    width:100%;
+
+    min-width:1250px;
+
+    border-collapse:collapse;
+
+    background:white;
+}
+
+/* =========================================
+HEADERS
+========================================= */
+
+th{
+    background:
+    linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+
+    color:white;
+
+    padding:15px;
+
+    font-size:.92rem;
+
+    position:sticky;
+    top:0;
+    z-index:5;
+}
+
+.hora-col{
+    min-width:120px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #0f172a,
+        #1e293b
+    ) !important;
+}
+
+/* =========================================
+CELDAS
+========================================= */
+
+td{
+    border:
+    1px solid #e2e8f0;
+
+    height:105px;
+
+    padding:5px;
+
+    background:#f8fafc;
+}
+
+.cell{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    border-radius:14px;
+    transition:.2s;
+    cursor:pointer;
+    position:relative;
+}
+
+.cell:hover{
+    background:#e0f2fe;
+    transform:scale(1.01);
+}
+
+/* =========================================
+CARD HORARIO
+========================================= */
+
+.card-horario{
+    width:100%;
+    height:100%;
+
+    border-radius:14px;
+
+    padding:8px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:center;
+
+    overflow:hidden;
+
+    background:
+    linear-gradient(
+        135deg,
+        #ecfeff,
+        #dbeafe
+    );
+
+    border-left:5px solid #2563eb;
+
+    transition:.2s;
+}
+
+.card-horario:hover{
+    transform:scale(1.02);
+}
+
+.card-horario strong{
+    font-size:.9rem;
+    color:#1d4ed8;
+    margin-bottom:4px;
+}
+
+/*========================*/
+.card-title{
+    width:100%;
+
+    font-size:.95rem;
+    font-weight:700;
+
+    color:#1d4ed8;
+
+    text-align:center;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+
+    margin-bottom:6px;
+}
+
+.card-mini{
+    width:100%;
+
+    font-size:.72rem;
+
+    color:#334155;
+
+    text-align:center;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+
+    line-height:1.3;
+}
+/* =========================================
+RELEVO
+========================================= */
+
+.card-relevo{
+    background:
+    linear-gradient(
+        135deg,
+        #fff7ed,
+        #ffedd5
+    );
+
+    border-left:
+    6px solid #f97316;
+}
+
+/* =========================================
+DESCANSO
+========================================= */
+
+.card-descanso{
+    width:100%;
+    height:100%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+
+    font-weight:700;
+
+    border-radius:16px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #dcfce7,
+        #bbf7d0
+    );
+
+    color:#166534;
+
+    font-size:.9rem;
+}
+
+/* =========================================
+FILTRO ACTIVO
+========================================= */
+
+.filtro-activo{
+
+    animation:
+    pulse 1.2s infinite;
+
+    outline:
+    4px solid #3b82f6;
+
+    z-index:2;
+}
+
+@keyframes pulse{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.04);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+
+}
+
+/* =========================================
+MODAL
+========================================= */
+
+.overlay{
+    position:fixed;
+    inset:0;
+
+    background:
+    rgba(15,23,42,.55);
+
+    display:none;
+
+    z-index:999;
+
+    backdrop-filter:blur(5px);
+}
+
+.modal{
+    position:fixed;
+
+    top:50%;
+    left:50%;
+
+    transform:
+    translate(-50%,-50%);
+
+    width:420px;
+    max-width:94%;
+
+    background:white;
+
+    border-radius:28px;
+
+    padding:22px;
+
+    display:none;
+
+    z-index:1000;
+
+    box-shadow:
+    0 30px 80px rgba(0,0,0,.25);
+
+    animation:
+    aparecer .25s ease;
+}
+
+@keyframes aparecer{
+
+    from{
+        opacity:0;
+        transform:
+        translate(-50%,-45%);
+    }
+
+    to{
+        opacity:1;
+        transform:
+        translate(-50%,-50%);
+    }
+
+}
+
+.modal h2{
+    margin-bottom:18px;
+    font-size:1.2rem;
+}
+
+.modal-body{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+/* =========================================
+BADGES
+========================================= */
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+
+    padding:
+    7px 12px;
+
+    border-radius:999px;
+
+    font-size:.75rem;
+    font-weight:600;
+}
+
+.badge-success{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-warning{
+    background:#ffedd5;
+    color:#9a3412;
+}
+
+.badge-primary{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+/* =========================================
+RESPONSIVE
+========================================= */
+
+@media(max-width:700px){
+
+    .navbar{
+        justify-content:center;
+    }
+
+    .navbar h1{
+        font-size:1.2rem;
+        text-align:center;
+    }
+
+    .btn{
+        width:100%;
+    }
+
+    td{
+    border:1px solid #e2e8f0;
+    height:110px;
+    min-height:110px;
+    max-height:110px;
+    padding:4px;
+    background:#f8fafc;
+    vertical-align:top;
+    
+    }
+
+    .card-horario{
+        font-size:.7rem;
+        padding:7px;
+    }
+
+    .card-horario strong{
+        font-size:.78rem;
+    }
+
+}

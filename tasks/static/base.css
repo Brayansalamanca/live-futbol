@@ -820,7 +820,7 @@ button:not(.icon-btn):not(#toggleSidebar):hover{
         transform:translateX(0);
     }
 
-    /* MOSTRAR TEXTO SIEMPRE */
+    
 
     .sidebar.closed .logo-text,
     .sidebar.closed .sidebar-links a .link-text{

@@ -1,0 +1,49 @@
+   .seccion-bajas { min-height: 100vh; padding: 40px 20px; }
+    .contenedor-bajas { max-width: 1100px; margin: 0 auto; }
+
+    .card-header-bajas { 
+        background: var(--nav); 
+        padding: 20px; 
+        border-radius: var(--radius) var(--radius) 0 0;
+        border-bottom: 3px solid var(--primary);
+    }
+    
+    .accent-text { color: var(--primary); }
+
+    .card-formulario { 
+        border-radius: 0 0 var(--radius) var(--radius); 
+        padding: 40px !important; 
+        margin-bottom: 30px;
+        text-align: left;
+    }
+
+    .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .row-extra { margin-top: 20px; grid-template-columns: 1fr 1fr; }
+
+    .input-group label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: bold; color: var(--primary); text-transform: uppercase; }
+    .label-danger { color: #ff4444 !important; }
+
+    .input-hibrido { 
+        width: 100%; height: 45px; background: var(--bg-soft); 
+        border: 1px solid var(--border); border-radius: 8px; 
+        color: var(--text); padding: 0 15px; outline: none; 
+    }
+
+    .file-input { color: var(--text-soft); font-size: 12px; margin-top: 10px; }
+
+    .btn-enviar { width: 100%; margin-top: 25px; height: 50px; font-size: 1rem; }
+
+    /* Estilos Tabla */
+    .card-tabla { padding: 0 !important; overflow: hidden; }
+    .tabla-header { padding: 15px 25px; background: var(--nav); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .tabla-header h2 { margin: 0; font-size: 14px; text-transform: uppercase; color: var(--text); }
+    
+    .table-responsive { overflow-x: auto; }
+    .img-celda { width: 110px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; }
+    
+    .btn-excel { background: #10b981 !important; font-size: 11px !important; }
+    .btn-eliminar { background: none !important; color: #ff4444 !important; border: 1px solid #ff4444 !important; padding: 5px 10px !important; font-size: 10px !important; }
+
+    /* Visor */
+    .visor-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
+    .visor-img { max-width: 90%; max-height: 90%; border: 2px solid var(--primary); border-radius: 10px; }

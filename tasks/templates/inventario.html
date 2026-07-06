@@ -3,6 +3,7 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="{% static 'css/inventario.css' %}">
 <div class="contenedor-ranking">
 
     <h1>Permisos de Inventario</h1>
@@ -89,60 +90,8 @@
 
 </div>
 
-<style>
 
-.contenedor-ranking{
-    width:95%;
-    margin:auto;
-    padding:40px;
-    color:white;
-}
 
-.tabla{
-    width:100%;
-    border-collapse:collapse;
-    color: aliceblue;
-}
 
-.tabla th{
-    background:#1f1f1f;
-    padding:15px;
-}
-
-.tabla td{
-    padding:15px;
-    border-bottom:1px solid #333;
-    text-align:center;
-}
-
-.activo{
-    color:#00ff88;
-    font-weight:bold;
-}
-
-.inactivo{
-    color:#ff4d4d;
-    font-weight:bold;
-}
-
-.btn-dar{
-    background:#00aa55;
-    color:white;
-    border:none;
-    padding:10px 15px;
-    border-radius:10px;
-    cursor:pointer;
-}
-
-.btn-quitar{
-    background:#cc3333;
-    color:white;
-    border:none;
-    padding:10px 15px;
-    border-radius:10px;
-    cursor:pointer;
-}
-
-</style>
 
 {% endblock %}

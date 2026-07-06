@@ -478,7 +478,17 @@ async function borrarNoHoy() {
     if (!confirm("⚠️ ¿Eliminar registros obsoletos de días anteriores?")) return;
     const tokenCsrf = window.CSRF_TOKEN || document.querySelector('[name=csrfmiddlewaretoken]')?.value;
     try {
-        const res = await fetch(ENDPOINTS.borrarAntiguos, { method: "POST", headers: { "X-CSRFToken": tokenCsrf } });
+        const res = await fetch(ENDPOINTS.borrarAntiguos, {
+    method: "POST",
+    headers: {
+        "X-CSRFToken": tokenCsrf
+    }
+});
+
+console.log(res.status);
+
+const texto = await res.text();
+console.log(texto);
         if (res.ok) { await cargarDatos(); await cargarBalonesDesdeAPI(); }
     } catch (e) { alert("Error."); }
 }
