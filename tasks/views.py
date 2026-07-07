@@ -1136,19 +1136,22 @@ def api_obtener_entregas(request):
             fecha_debug_str = "None"
 
         data.append({
-            'id': e.id,
-            'nombre': e.nombre,
-            'curso': e.curso,
-            'objeto': e.objeto,
-            'lugar': e.lugar,
-            'marca': e.marca,
-            # Cambia esto en views.py:
-            'id_unico': e.marca if e.marca else "Sin ID",
-            'fecha': e.fecha.isoformat(),
-            'fecha_debug': fecha_debug_str,
-            'eliminado': False
-        })
+    'id': e.id,
+    'nombre': e.nombre,
+    'curso': e.curso,
+    'objeto': e.objeto,
+    'lugar': e.lugar,
+    'marca': e.marca,
+    'id_unico': e.marca if e.marca else "Sin ID",
 
+    # <-- AGREGA ESTO
+    'chatgpt_test': 'SI_LLEGO_A_RENDER',
+
+    'fecha': fecha_formateada,
+    'fecha_debug': fecha_debug_str,
+    'eliminado': False
+})
+    print(data)
     return JsonResponse(data, safe=False)
 
 @user_passes_test(es_asistente_o_coordinacion)
