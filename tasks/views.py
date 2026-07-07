@@ -1143,10 +1143,6 @@ def api_obtener_entregas(request):
     'lugar': e.lugar,
     'marca': e.marca,
     'id_unico': e.marca if e.marca else "Sin ID",
-
-    # <-- AGREGA ESTO
-    'chatgpt_test': 'SI_LLEGO_A_RENDER',
-
     'fecha': fecha_formateada,
     'fecha_debug': fecha_debug_str,
     'eliminado': False

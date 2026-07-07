@@ -340,11 +340,6 @@ function dibujar() {
     registros.forEach((r) => {
         const nombre = r.nombre || r.recibido_por || "---";
         const objeto = r.objeto || r.balon || "---";
-        console.log("ANTES", r);
-
-const idUnico = r.id_unico || r.marca || "Sin ID";
-
-console.log("DESPUÉS", idUnico);
         const idUnico = r.id_unico || r.marca || "Sin ID";
         const curso = r.curso || "N/A";
         const lugar = r.lugar || "Cancha";
