@@ -229,6 +229,7 @@ function generarJornadaCompleta() {
                 torneo.ligaMatches.push({
                     jornada: j + 1,
                     t1: { ...equipos[i] },
+                    
                     t2: { ...equipos[k] },
                     s1: null, s2: null, fin: false, fecha: "", hora: ""
                 });
@@ -246,25 +247,117 @@ function updateMatchTeam(i,num,name){
   guardar(); renderJornadaActual();
 }
 
-function renderJornadaActual(){
-  const c=$id("league-matches-list"); if(!c) return;
-  const jornadas=[...new Set(torneo.ligaMatches.map(m=>m.jornada))];
-  c.innerHTML=jornadas.map(j=>`
-    <div style="margin-top:20px"><h3>Jornada ${j}</h3></div>
-    ${torneo.ligaMatches.map((m,i)=>m.jornada!==j?"":`
-      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;margin-bottom:15px;padding:12px;border:1px solid var(--border);border-radius:10px">
-        <input type="date" value="${m.fecha||''}" onchange="updateMatchInfo(${i},'fecha',this.value)">
-        <input type="time" value="${m.hora||''}" onchange="updateMatchInfo(${i},'hora',this.value)">
-        <select onchange="updateMatchTeam(${i},1,this.value)">${equipos.map(e=>`<option value="${e.name}"${e.name===m.t1.name?' selected':''}>${e.name}</option>`).join("")}</select>
-        <img src="${m.t1.logo}" width="25">
-        <input type="number" value="${m.s1??''}" onchange="setScore(${i},1,this.value)" style="width:70px">
-        <strong>VS</strong>
-        <input type="number" value="${m.s2??''}" onchange="setScore(${i},2,this.value)" style="width:70px">
-        <img src="${m.t2.logo}" width="25">
-        <select onchange="updateMatchTeam(${i},2,this.value)">${equipos.map(e=>`<option value="${e.name}"${e.name===m.t2.name?' selected':''}>${e.name}</option>`).join("")}</select>
-      </div>`).join("")}`).join("");
-}
+function renderJornadaActual() {
 
+    const c = $id("league-matches-list");
+    if (!c) return;
+
+    const jornadas = [...new Set(torneo.ligaMatches.map(m => m.jornada))];
+
+    c.innerHTML = jornadas.map(jornada => {
+
+        const partidos = torneo.ligaMatches
+            .map((m, i) => {
+
+                if (m.jornada !== jornada) return "";
+
+                return `
+                    <div class="match-card">
+
+                        <div class="match-info">
+
+                            <div>
+                                <label>📅 Fecha</label><br>
+                                <input
+                                    type="date"
+                                    value="${m.fecha || ''}"
+                                    onchange="updateMatchInfo(${i},'fecha',this.value)">
+                            </div>
+
+                            <div>
+                                <label>🕒 Hora</label><br>
+                                <input
+                                    type="time"
+                                    value="${m.hora || ''}"
+                                    onchange="updateMatchInfo(${i},'hora',this.value)">
+                            </div>
+
+                        </div>
+
+                        <div class="match-game">
+
+                            <!-- EQUIPO LOCAL -->
+                            <div class="team-box">
+
+                                <select onchange="updateMatchTeam(${i},1,this.value)">
+                                    ${equipos.map(e => `
+                                        <option value="${e.name}" ${e.name === m.t1.name ? "selected" : ""}>
+                                            ${e.name}
+                                        </option>
+                                    `).join("")}
+                                </select>
+
+                                <img src="${m.t1.logo}" alt="${m.t1.name}">
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value="${m.s1 ?? ''}"
+                                    onchange="setScore(${i},1,this.value)">
+
+                            </div>
+
+                            <!-- VS -->
+                            <div class="vs-box">
+
+                                <span>⚽</span>
+
+                                <strong>VS</strong>
+
+                                <span>⚽</span>
+
+                            </div>
+
+                            <!-- EQUIPO VISITANTE -->
+                            <div class="team-box">
+
+                                <select onchange="updateMatchTeam(${i},2,this.value)">
+                                    ${equipos.map(e => `
+                                        <option value="${e.name}" ${e.name === m.t2.name ? "selected" : ""}>
+                                            ${e.name}
+                                        </option>
+                                    `).join("")}
+                                </select>
+
+                                <img src="${m.t2.logo}" alt="${m.t2.name}">
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value="${m.s2 ?? ''}"
+                                    onchange="setScore(${i},2,this.value)">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+
+            })
+            .join("");
+
+        return `
+            <div class="jornada-titulo">
+                <h3>⚽ Jornada ${jornada}</h3>
+            </div>
+
+            ${partidos}
+        `;
+
+    }).join("");
+
+}
 function setScore(i,team,val){
   if(val==="") return;
   const m=torneo.ligaMatches[i];
@@ -292,7 +385,9 @@ function renderTabla(){
   const c=$id("tabla-puntos"); if(!c) return;
   let data=equipos.map(e=>({name:e.name,logo:e.logo,...(statsEquipos[e.name]||{pj:0,g:0,e:0,p:0,gf:0,gc:0,dg:0,pts:0})}));
   data.sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:b.dg!==a.dg?b.dg-a.dg:b.gf-a.gf);
-  c.innerHTML=`<table><thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th></tr></thead><tbody>${data.map((d,i)=>`<tr><td>${i+1}</td><td><img src="${d.logo}" width="20"> ${d.name}</td><td>${d.pj}</td><td>${d.g}</td><td>${d.e}</td><td>${d.p}</td><td>${d.gf}</td><td>${d.gc}</td><td>${d.dg}</td><td>${d.pts}</td></tr>`).join("")}</tbody></table>`;
+  c.innerHTML=`<table>
+  <thead>
+  <tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th></tr></thead><tbody>${data.map((d,i)=>`<tr><td>${i+1}</td><td><img src="${d.logo}" width="20"> ${d.name}</td><td>${d.pj}</td><td>${d.g}</td><td>${d.e}</td><td>${d.p}</td><td>${d.gf}</td><td>${d.gc}</td><td>${d.dg}</td><td>${d.pts}</td></tr>`).join("")}</tbody></table>`;
 }
 
 // ===== FINALES =====

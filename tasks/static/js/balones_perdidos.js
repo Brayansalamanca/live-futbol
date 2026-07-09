@@ -1,15 +1,20 @@
-
 let datosGlobales = [];
 const IMG_DEFAULT = "{% static 'sin evidencia.webp' %}";
 
 async function sincronizar() {
     try {
-        const res = await fetch("{% url 'api_obtener_bajas' %}");
+        const res = await fetch(CONFIG.urlObtener);
+        if (!res.ok) return;
         const data = await res.json();
-        datosGlobales = data;
-        dibujarTabla(data);
+        
+        if (JSON.stringify(datosGlobales) !== JSON.stringify(data)) {
+            datosGlobales = data;
+            dibujarTabla(data);
+        }
     } catch (e) { console.error("Error al sincronizar:", e); }
 }
+
+setInterval(sincronizar, 2000);
 
 function dibujarTabla(data) {
     const tbody = document.getElementById('tablaCuerpo');
@@ -29,11 +34,7 @@ function dibujarTabla(data) {
         let fechaMostrada = 'Reciente';
         if (b.fecha) {
             const date = new Date(b.fecha);
-            if (!isNaN(date.getTime())) {
-                fechaMostrada = date.toLocaleString('es-CO');
-            } else {
-                fechaMostrada = b.fecha;
-            }
+            fechaMostrada = !isNaN(date.getTime()) ? date.toLocaleString('es-CO') : b.fecha;
         }
 
         return `
@@ -46,9 +47,7 @@ function dibujarTabla(data) {
                 </td>
                 <td style="font-size: 13px;">${material}<br><small style="color:var(--primary)">${lugar}</small></td>
                 <td><span style="background:var(--bg-soft); padding:4px 8px; border-radius:4px; font-size:10px; border: 1px solid var(--border);">${causa.toUpperCase()}</span></td>
-                <td>
-                    <button onclick="eliminar('${b.id}')" class="btn-eliminar">Eliminar</button>
-                </td>
+                <td><button onclick="eliminar('${b.id}')" class="btn-eliminar">Eliminar</button></td>
             </tr>
         `;
     }).join('');
@@ -74,16 +73,21 @@ async function guardarBaja() {
         };
 
         try {
-            const res = await fetch("{% url 'api_guardar_baja' %}", {
+            const res = await fetch(CONFIG.urlGuardar, {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+                headers: { 
+                    "Content-Type": "application/json", 
+                    "X-CSRFToken": CONFIG.csrf 
+                },
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
                 document.getElementById('formBalones').reset();
                 sincronizar();
+            } else {
+                alert("Error al guardar en el servidor.");
             }
-        } catch (e) { alert("Error al guardar."); }
+        } catch (e) { alert("Error de conexión."); }
         finally {
             btn.disabled = false;
             btn.innerText = "🚀 Registrar Novedad";
@@ -103,7 +107,7 @@ async function eliminar(id) {
     if (confirm("¿Eliminar este registro?")) {
         const res = await fetch(`/api/eliminar-baja/${id}/`, { 
             method: "POST", 
-            headers: { "X-CSRFToken": "{{ csrf_token }}" } 
+            headers: { "X-CSRFToken": CONFIG.csrf } 
         });
         if (res.ok) sincronizar();
     }

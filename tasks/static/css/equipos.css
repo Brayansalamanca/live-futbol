@@ -20,6 +20,19 @@
     font-family:inherit;
     cursor:pointer
 }
+.jornada-titulo{
+    margin:25px 0 15px;
+    text-align:center;
+}
+
+.jornada-titulo h3{
+    display:inline-block;
+    padding:10px 25px;
+    background:var(--primary);
+    color:#fff;
+    border-radius:10px;
+    box-shadow:var(--shadow);
+}
 
 
 #tabs-torneos button{
@@ -178,133 +191,956 @@ h3{width:100%;
     overflow-x:auto;
     padding:30px 10px;
     justify-content:center
-}
-.match-card{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:15px;
-    padding:15px;
-    border:1px solid var(--border);
-    border-radius:12px;
-    margin-bottom:15px;
-}
-
-
-
-.match-info{
-    display:flex;
-    justify-content:center;
-    gap:15px;
-    flex-wrap:wrap;
-}
-
-
-
-.match-game{
-    display:grid;
-    grid-template-columns:1fr auto auto auto 1fr;
-    align-items:center;
-    gap:10px;
-}
-/* =======================================================
-   PARTIDOS RESPONSIVE
+}/* =======================================================
+    PARTIDOS (LOGICA RESPONSIVE UNIFICADA)
 ======================================================= */
 
-.match-card{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:15px;
-    margin-bottom:18px;
-    padding:18px;
-    background:var(--bg);
-    border:1px solid var(--border);
+.match-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+    margin: 20px auto;
+    box-shadow: var(--shadow);
+    max-width: 950px; /* Tamaño ideal para PC */
+    width: 95%;       /* Para que no toque los bordes en celular */
+}
+
+.match-game {
+    display: grid;
+    /* En PC, estructura de 5 columnas fluidas */
+    grid-template-columns: 1fr auto 80px auto 1fr;
+    gap: 15px;
+    align-items: center;
+    width: 100%;
+}
+
+.match-game select {
+    width: 100%;
+    min-width: 150px;
+}
+
+.match-game input[type="number"] {
+    width: 80px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.match-game img {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+}
+
+.vs-text {
+    font-size: 1.5rem;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+/* =======================================================
+   JORNADAS
+======================================================= */
+
+.jornada-titulo{
+    text-align:center;
+    margin:35px 0 20px;
+}
+
+.jornada-titulo h3{
+    display:inline-block;
+    padding:12px 30px;
+    background:var(--primary);
+    color:#fff;
     border-radius:12px;
     box-shadow:var(--shadow);
 }
 
+/* =======================================================
+   TARJETA DEL PARTIDO
+======================================================= */
 
+.match-card{
+
+    width:100%;
+    max-width:1100px;
+
+    margin:20px auto;
+
+    padding:25px;
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    box-shadow:var(--shadow);
+
+}
+
+/* =======================================================
+   FECHA Y HORA
+======================================================= */
 
 .match-info{
+
     display:flex;
+
     justify-content:center;
+
     align-items:center;
+
+    gap:20px;
+
     flex-wrap:wrap;
-    gap:15px;
+
+    margin-bottom:25px;
+
 }
+
+.match-info input{
+
+    min-width:180px;
+
+}
+
+/* =======================================================
+   PARTIDO
+======================================================= */
 
 .match-game{
+
     display:grid;
-    grid-template-columns:
-        minmax(220px,1fr)
-        auto
-        70px
-        auto
-        70px
-        auto
-        minmax(220px,1fr);
 
-    gap:12px;
+    grid-template-columns:1fr auto 1fr;
+
+    gap:30px;
+
     align-items:center;
+
 }
 
-.match-game select{
+/* =======================================================
+   EQUIPOS
+======================================================= */
+
+.team-box{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+.team-box select{
+
     width:100%;
-    min-width:220px;
-    max-width:100%;
+
+    max-width:350px;
+
 }
 
-.match-game input[type="number"]{
+.team-box img{
+
     width:70px;
-    text-align:center;
-}
 
-.match-game img{
-    width:32px;
-    height:32px;
+    height:70px;
+
     object-fit:contain;
+
 }
 
+.team-box input[type="number"]{
 
+    width:90px;
 
-.match-game strong{
     text-align:center;
-    font-size:1.4rem;
+
+    font-size:1.3rem;
+
+    font-weight:bold;
+
 }
 
+/* =======================================================
+   VS
+======================================================= */
+
+.vs-box{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+}
+
+.vs-box span{
+
+    font-size:26px;
+
+}
+
+.vs-box strong{
+
+    font-size:2rem;
+
+    color:var(--primary);
+
+}
+
+/* =======================================================
+   RESPONSIVE
+======================================================= */
 
 @media(max-width:900px){
+
+    .match-card{
+
+        padding:18px;
+
+    }
+
+    .match-info{
+
+        flex-direction:column;
+
+    }
+
+    .match-info input{
+
+        width:100%;
+
+    }
 
     .match-game{
 
         grid-template-columns:1fr;
-        justify-items:center;
+
+        gap:25px;
 
     }
 
-    .match-game select{
+    .team-box{
 
         width:100%;
-        max-width:500px;
 
     }
 
-    .match-game input[type="number"]{
+    .team-box select{
 
-        width:100px;
-
-    }
-
-    .match-game img{
-
-        width:40px;
-        height:40px;
+        max-width:100%;
 
     }
 
-    .match-game strong{
-        font-size:2rem;
+    .team-box img{
+
+        width:60px;
+
+        height:60px;
+
+    }
+
+    .vs-box{
+
         margin:10px 0;
 
     }
+
+}
+/* ==========================================================
+   PARTE 2
+   EQUIPOS + TABLA DE POSICIONES
+==========================================================*/
+
+
+/*===========================================================
+    LISTA DE EQUIPOS
+===========================================================*/
+
+#teams-list{
+
+    list-style:none;
+
+    padding:0;
+
+    margin:30px auto;
+
+    width:100%;
+
+    max-width:1300px;
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+
+    gap:20px;
+
+}
+
+
+/*===========================================================
+    TARJETA DE EQUIPO
+===========================================================*/
+
+#teams-list li{
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    padding:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:15px;
+
+    transition:.25s;
+
+    box-shadow:var(--shadow);
+
+}
+
+#teams-list li:hover{
+
+    transform:translateY(-5px);
+
+    border-color:var(--primary);
+
+}
+
+
+/*===========================================================
+    LOGO DEL EQUIPO
+===========================================================*/
+
+#teams-list img{
+
+    width:60px;
+
+    height:60px;
+
+    object-fit:contain;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    padding:6px;
+
+    border:2px solid var(--border);
+
+}
+
+
+/*===========================================================
+    NOMBRE DEL EQUIPO
+===========================================================*/
+
+#teams-list span{
+
+    flex:1;
+
+    font-size:17px;
+
+    font-weight:700;
+
+    color:var(--text);
+
+    text-align:left;
+
+}
+
+
+/*===========================================================
+    BOTONES DEL EQUIPO
+===========================================================*/
+
+#teams-list button{
+
+    background:var(--primary);
+
+    color:#fff;
+
+    border:none;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    padding:8px 14px;
+
+    transition:.25s;
+
+    font-weight:600;
+
+}
+
+#teams-list button:hover{
+
+    transform:scale(1.05);
+
+}
+
+#teams-list button:last-child{
+
+    background:#dc2626;
+
+}
+
+
+/*===========================================================
+    BOTON INICIAR TORNEO
+===========================================================*/
+
+#btn-start-comp{
+
+    margin:35px auto 10px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    width:260px;
+
+    height:50px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:linear-gradient(
+        135deg,
+        var(--primary),
+        var(--accent-green)
+    );
+
+    color:#fff;
+
+    font-size:17px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    box-shadow:var(--shadow);
+
+}
+
+#btn-start-comp:hover{
+
+    transform:translateY(-3px);
+
+}
+
+#btn-start-comp:disabled{
+
+    background:#777;
+
+    cursor:not-allowed;
+
+    transform:none;
+
+}
+
+
+/*===========================================================
+    TABLA DE POSICIONES
+===========================================================*/
+
+#tabla-puntos{
+
+    margin:30px auto;
+
+    width:100%;
+
+    overflow-x:auto;
+
+}
+
+
+/*===========================================================
+    TABLA
+===========================================================*/
+
+#tabla-puntos table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    min-width:900px;
+
+    background:var(--card);
+
+    border-radius:16px;
+
+    overflow:hidden;
+
+    box-shadow:var(--shadow);
+
+}
+
+
+/*===========================================================
+    ENCABEZADO
+===========================================================*/
+
+#tabla-puntos thead{
+
+    background:linear-gradient(
+        90deg,
+        var(--primary),
+        var(--accent-green)
+    );
+
+}
+
+#tabla-puntos th{
+
+    color:#fff;
+
+    padding:16px;
+
+    font-size:14px;
+
+    text-transform:uppercase;
+
+    letter-spacing:.5px;
+
+}
+
+
+/*===========================================================
+    FILAS
+===========================================================*/
+
+#tabla-puntos td{
+
+    padding:14px;
+
+    text-align:center;
+
+    border-bottom:1px solid var(--border);
+
+    transition:.2s;
+
+}
+
+
+#tabla-puntos tbody tr:nth-child(even){
+
+    background:rgba(255,255,255,.02);
+
+}
+
+
+#tabla-puntos tbody tr:hover{
+
+    background:rgba(16,185,129,.08);
+
+}
+
+
+/*===========================================================
+    PRIMEROS CLASIFICADOS
+===========================================================*/
+
+#tabla-puntos tbody tr:nth-child(1){
+
+    border-left:6px solid gold;
+
+}
+
+#tabla-puntos tbody tr:nth-child(2){
+
+    border-left:6px solid silver;
+
+}
+
+#tabla-puntos tbody tr:nth-child(3){
+
+    border-left:6px solid #cd7f32;
+
+}
+
+
+/*===========================================================
+    RESPONSIVE
+===========================================================*/
+
+@media(max-width:900px){
+
+    #teams-list{
+
+        grid-template-columns:1fr;
+
+    }
+
+    #teams-list li{
+
+        flex-direction:column;
+
+        text-align:center;
+
+    }
+
+    #teams-list span{
+
+        text-align:center;
+
+    }
+
+    #teams-list img{
+
+        width:80px;
+
+        height:80px;
+
+    }
+
+    #btn-start-comp{
+
+        width:100%;
+
+    }
+
+}
+/* ==========================================================
+   PARTE 3
+   CALENDARIO DE PARTIDOS
+==========================================================*/
+
+
+/*===========================================================
+    TITULO DE JORNADA
+===========================================================*/
+
+.jornada-titulo{
+
+    display:flex;
+
+    justify-content:center;
+
+    margin:35px 0 20px;
+
+}
+
+.jornada-titulo h3{
+
+    background:linear-gradient(
+        135deg,
+        var(--primary),
+        var(--accent-green)
+    );
+
+    color:#fff;
+
+    padding:14px 35px;
+
+    border-radius:15px;
+
+    font-size:1.3rem;
+
+    letter-spacing:1px;
+
+    box-shadow:var(--shadow);
+
+}
+
+
+/*===========================================================
+    TARJETA DEL PARTIDO
+===========================================================*/
+
+.match-card{
+
+    width:100%;
+
+    max-width:1200px;
+
+    margin:22px auto;
+
+    padding:25px;
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    box-shadow:var(--shadow);
+
+    transition:.25s;
+
+}
+
+.match-card:hover{
+
+    transform:translateY(-4px);
+
+}
+
+
+/*===========================================================
+    FECHA Y HORA
+===========================================================*/
+
+.match-info{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:25px;
+
+}
+
+.match-info input{
+
+    min-width:180px;
+
+}
+
+
+/*===========================================================
+    CUERPO DEL PARTIDO
+===========================================================*/
+
+.match-game{
+
+    display:grid;
+
+    grid-template-columns:
+
+        1fr
+
+        180px
+
+        1fr;
+
+    align-items:center;
+
+    gap:25px;
+
+}
+
+
+/*===========================================================
+    EQUIPO
+===========================================================*/
+
+.team-box{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+.team-box select{
+
+    width:100%;
+
+    max-width:320px;
+
+}
+
+.team-box img{
+
+    width:75px;
+
+    height:75px;
+
+    object-fit:contain;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    padding:6px;
+
+    border:2px solid var(--border);
+
+}
+
+.team-box input[type="number"]{
+
+    width:90px;
+
+    height:55px;
+
+    text-align:center;
+
+    font-size:1.4rem;
+
+    font-weight:bold;
+
+}
+
+
+/*===========================================================
+    VS
+===========================================================*/
+
+.vs-box{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.vs-box strong{
+
+    font-size:2rem;
+
+    color:var(--primary);
+
+}
+
+.vs-box span{
+
+    font-size:2rem;
+
+}
+
+
+/*===========================================================
+    RESPONSIVE
+===========================================================*/
+
+@media(max-width:1000px){
+
+    .match-game{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .vs-box{
+
+        margin:15px 0;
+
+    }
+
+}
+
+@media(max-width:700px){
+
+    .match-card{
+
+        padding:18px;
+
+    }
+
+    .match-info{
+
+        flex-direction:column;
+
+    }
+
+    .match-info input{
+
+        width:100%;
+
+    }
+
+    .team-box{
+
+        width:100%;
+
+    }
+
+    .team-box select{
+
+        width:100%;
+
+        max-width:100%;
+
+    }
+
+    .team-box img{
+
+        width:65px;
+
+        height:65px;
+
+    }
+
+}
+.calendar-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:15px;
+
+    margin:20px 0 30px;
+
+}
+
+.btn-remix{
+
+    background:var(--primary);
+
+    color:#fff;
+
+    border:none;
+
+    border-radius:10px;
+
+    padding:12px 22px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+    transition:.25s;
+
+}
+
+.btn-remix:hover{
+
+    transform:translateY(-2px);
 
 }

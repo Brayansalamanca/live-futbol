@@ -101,13 +101,18 @@
 
     <hr>
 
-    <div class="match-card">
+    <div class="calendar-header">
 
-      <h2>Calendario</h2>
+    <h2>📅 Calendario de Partidos</h2>
 
-      <button onclick="if(confirm('¿Re-mezclar?')){generarJornadaCompleta();renderJornadaActual()}">Re-Mezclar Aleatorio</button>
+    <button class="btn-remix"
+        onclick="if(confirm('¿Re-mezclar el calendario?')){generarJornadaCompleta();renderJornadaActual()}">
 
-    </div>
+        🔀 Re-Mezclar
+
+    </button>
+
+</div>
 
     <div id="league-matches-list"></div><br>
 

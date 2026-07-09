@@ -80,10 +80,20 @@
     <img id="img_visor_inv" class="visor-img">
 </div>
 
+
 <link rel="stylesheet" href="{% static 'css/balones_perdidos.css' %}">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const CONFIG = {
+    urlObtener: "{% url 'api_obtener_bajas' %}",
+    urlGuardar: "{% url 'api_guardar_baja' %}",
+    csrf: "{{ csrf_token }}"
+};
 
+console.log("CONFIG =", CONFIG);
+</script>
 <script src="{% static 'js/balones_perdidos.js' %}"></script>
+
 
 {% endblock %}
