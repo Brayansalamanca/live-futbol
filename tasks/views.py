@@ -992,12 +992,14 @@ def api_obtener_historial(request):
             continue
 
         data.append({
-            'id': e.id,
-            'nombre': e.nombre,
-            'curso': e.curso,
-            'objeto': e.objeto,
-            'fecha': e.fecha,
-        })
+    
+    'marca': e.marca,
+    'nombre': e.nombre,
+    'curso': e.curso,
+    'objeto': e.objeto,
+    'lugar': e.lugar,
+    'fecha': e.fecha,
+})
 
     return JsonResponse(data, safe=False)
 # ==========================================

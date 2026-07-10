@@ -33,7 +33,9 @@ function crearFila(entrega){
     return `
         <tr style="border-bottom:1px solid #e2e8f0;">
             <td style="padding:15px; font-family: monospace;  font-weight: bold;">
-                #${entrega.id_prestamo_original || 'S/N'}
+                <td style="padding:15px; font-family: monospace; font-weight: bold;">
+    #${entrega.marca || 'S/N'}
+</td>
             </td>
             <td style="padding:15px;">
                 <div style="display:flex; align-items:center; gap:10px;">
