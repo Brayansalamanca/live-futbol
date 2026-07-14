@@ -1063,9 +1063,7 @@ RESPONSIVE
         text-align:center;
     }
 
-    .btn{
-        width:100%;
-    }
+    
 
     td{
     border:1px solid #e2e8f0;
@@ -1083,8 +1081,5 @@ RESPONSIVE
         padding:7px;
     }
 
-    .card-horario strong{
-        font-size:.78rem;
-    }
 
 }

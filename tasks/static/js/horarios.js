@@ -67,9 +67,7 @@ const usuariosRegistrados = [
 VARIABLES
 ========================================= */
 
-let horarios = JSON.parse(
-    localStorage.getItem("horariosGrados")
-) || {};
+
 
 let horarioActual = null;
 
@@ -184,18 +182,8 @@ function cargarProfesores(){
 
 }
 
-/* =========================================
-GUARDAR
-========================================= */
 
-function guardarSistema(){
 
-    localStorage.setItem(
-        "horariosGrados",
-        JSON.stringify(horarios)
-    );
-
-}
 
 /* =========================================
 SEMANA
@@ -563,7 +551,7 @@ function eliminarHorarioActual(){
         horarioActual.clave
     ];
 
-    guardarSistema();
+    
 
     horarioActual = null;
 
@@ -1126,9 +1114,6 @@ function limpiarTodo(){
 
     if(!confirmar) return;
 
-    localStorage.removeItem(
-        "horariosGrados"
-    );
     document.getElementById(
     "gradoInput"
 ).addEventListener(

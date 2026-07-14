@@ -1,7 +1,43 @@
-/**
- * Live Futbol - Módulo de Control de Préstamos e Inventario
- * Sincronización automática optimizada con intervalos extendidos para evitar lag en el servidor
- */
+/* ==========================================
+   API DE ESTUDIANTES
+========================================== */
+
+const API_ESTUDIANTE = "/api/estudiantes?id=";
+
+/* ==========================================
+   CONSULTAR ESTUDIANTE POR ID NFC
+========================================== */
+
+async function consultarEstudiante(idTarjeta) {
+
+    try {
+
+        const res = await fetch(API_ESTUDIANTE + encodeURIComponent(idTarjeta));
+
+        if (!res.ok) {
+            alert("Tarjeta no registrada.");
+            return;
+        }
+
+        const estudiante = await res.json();
+
+        document.getElementById("textoVoz").value = estudiante.nombre || "";
+        document.getElementById("alquilado_por").value = estudiante.nombre || "";
+
+        // Guardamos el curso para usarlo al registrar
+        gradoActual = estudiante.curso || "";
+
+        console.log(estudiante);
+
+    } catch (error) {
+
+        console.error(error);
+        alert("No fue posible consultar la API.");
+
+    }
+
+}
+
 
 let registros = [];
 let balonesInventario = []; 
@@ -63,16 +99,21 @@ async function iniciarEscaneoNFCPersona() {
         estadoTxt.innerText = "📡 Buscando... Acerca la etiqueta o celular del alumno.";
         estadoTxt.style.color = "var(--warning)";
 
-        ndef.onreading = event => {
-            const idDigital = event.serialNumber; 
-            
-            // Asigna el ID único del tag o celular directamente al estudiante
-            inputNombre.value = idDigital;
-            estadoTxt.innerText = `✅ Alumno Vinculado: ${idDigital}`;
-            estadoTxt.style.color = "var(--success)";
-            
-            console.log("Estudiante detectado mediante NFC con código: " + idDigital);
-        };
+       ndef.onreading = async event => {
+
+    const idDigital = event.serialNumber;
+
+    estadoTxt.innerText = "🔎 Consultando estudiante...";
+    estadoTxt.style.color = "var(--warning)";
+
+    await consultarEstudiante(idDigital);
+
+    estadoTxt.innerText = "✅ Estudiante identificado";
+    estadoTxt.style.color = "var(--success)";
+
+    console.log("ID NFC:", idDigital);
+
+};
 
     } catch (error) {
         estadoTxt.innerText = "❌ Error al activar lector NFC.";
@@ -278,17 +319,14 @@ async function registrarEnNube() {
     const lugarInput = document.getElementById("lugarSelect").value;
     const idUnicoInput = document.getElementById("idObjetoSelect").value;
 
-    // Si el campo contiene un UID numérico largo leído por NFC, el flujo omite la selección de curso obligatorio
-    const esIdNfcLargo = nombreInput.length > 6 && !isNaN(nombreInput);
-    const cursoCompleto = (gradoActual || letraActual) ? (gradoActual + (letraActual || "")) : "NFC Estudiante";
-
     if (!nombreInput || !objetoActual || !idUnicoInput) {
         alert("⚠️ Datos incompletos: Faltan campos obligatorios (Estudiante, Tipo de Objeto e ID del Balón).");
         return;
     }
 
-    if (!esIdNfcLargo && !gradoActual) {
-        alert("⚠️ Por favor selecciona el Curso Responsable del estudiante.");
+    // Verificamos que el estudiante tenga curso asignado
+    if (!gradoActual) {
+        alert("⚠️ No se encontró el curso del estudiante.");
         return;
     }
 
@@ -297,20 +335,25 @@ async function registrarEnNube() {
         return;
     }
 
-    const tokenCsrf = window.CSRF_TOKEN || document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    const tokenCsrf =
+        window.CSRF_TOKEN ||
+        document.querySelector('[name=csrfmiddlewaretoken]')?.value;
 
     const datos = {
         recibido_por: nombreInput,
-        curso: cursoCompleto,
+        curso: gradoActual,
         balon: objetoActual,
-        id_unico: idUnicoInput, 
+        id_unico: idUnicoInput,
         lugar: lugarInput
     };
 
     try {
         const res = await fetch(ENDPOINTS.guardarEntrega, {
             method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": tokenCsrf },
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": tokenCsrf
+            },
             body: JSON.stringify(datos)
         });
 
@@ -318,10 +361,17 @@ async function registrarEnNube() {
             resetearFormulario();
             await cargarDatos();
             await cargarBalonesDesdeAPI();
+            alert("✅ Préstamo registrado correctamente.");
         } else {
-            alert("❌ No se pudo registrar la renta. Verifica los datos.");
+            const error = await res.text();
+            console.error(error);
+            alert("❌ No se pudo registrar la renta.");
         }
-    } catch (error) { alert("❌ Error de red."); }
+
+    } catch (error) {
+        console.error(error);
+        alert("❌ Error de red.");
+    }
 }
 
 // ==========================================================================

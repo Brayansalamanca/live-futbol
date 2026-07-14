@@ -719,9 +719,9 @@ def signin(request):
         
         # Redirecciones según rol
         if es_coordinacion(user): 
-            return redirect('tipos')
+            return redirect('prendas_renta')
         if es_asistente(user): 
-            return redirect('inventario')
+            return redirect('prendas_renta')
         if es_administracion(user): 
             return redirect('formulario')
         
