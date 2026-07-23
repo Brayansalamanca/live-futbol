@@ -1129,27 +1129,24 @@ def api_obtener_entregas(request):
             if not timezone.is_aware(fecha_evaluar):
                 fecha_evaluar = timezone.make_aware(fecha_evaluar)
             
-            # Ahora sí es seguro convertirla a la hora local de Colombia
+            # Ahora sí es seguro convertirla a la hora local
             fecha_local = timezone.localtime(fecha_evaluar)
             fecha_formateada = fecha_local.strftime("%d/%m/%Y %I:%M %p")
-            fecha_debug_str = str(fecha_local)
         else:
             fecha_formateada = "Sin fecha"
-            fecha_debug_str = "None"
 
         data.append({
-    'id': e.id,
-    'nombre': e.nombre,
-    'curso': e.curso,
-    'objeto': e.objeto,
-    'lugar': e.lugar,
-    'marca': e.marca,
-    'id_unico': e.marca if e.marca else "Sin ID",
-    'fecha': fecha_formateada,
-    'fecha_debug': fecha_debug_str,
-    'eliminado': False
-})
-    print(data)
+            'id': e.id,
+            'nombre': e.nombre,
+            'curso': e.curso,
+            'objeto': e.objeto,
+            'lugar': e.lugar,
+            'marca': e.marca,
+            'id_unico': e.marca if e.marca else "Sin ID",
+            'fecha': fecha_formateada,
+            'eliminado': False
+        })
+
     return JsonResponse(data, safe=False)
 
 @user_passes_test(es_asistente_o_coordinacion)

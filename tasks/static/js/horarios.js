@@ -1,1142 +1,1455 @@
-    /* =========================================
+/* ==========================================================
+   HORARIOS MKS PLATFORM
+   ==========================================================
+   PARTE 1
+   ----------------------------------------------------------
+   ✓ Configuración
+   ✓ Estado global
+   ✓ Helpers
+   ✓ Inicialización
+   ✓ Registro de eventos
+==========================================================*/
+
+/* ==========================================================
 CONFIGURACIÓN
-========================================= */
+========================================================== */
 
-const dias = [
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado",
-    "Domingo"
-];
+const CONFIG = {
 
-const horas = [
-    "06:00 - 07:00",
-    "07:00 - 08:00",
-    "08:00 - 09:00",
-    "09:00 - 10:00",
-    "10:00 - 11:00",
-    "11:00 - 12:00",
-    "12:00 - 13:00",
-    "13:00 - 14:00",
-    "14:00 - 15:00",
-    "15:00 - 16:00"
-];
+    dias: [
 
-/* =========================================
-USUARIOS
-========================================= */
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+        "Domingo"
 
-const usuariosRegistrados = [
+    ],
+
+    horas: [
+
+        "06:00 - 07:00",
+        "07:00 - 08:00",
+        "08:00 - 09:00",
+        "09:00 - 10:00",
+        "10:00 - 11:00",
+        "11:00 - 12:00",
+        "12:00 - 13:00",
+        "13:00 - 14:00",
+        "14:00 - 15:00",
+        "15:00 - 16:00"
+
+    ],
+
+    endpoints: {
+
+        guardar : "/guardar-bloque/",
+
+        obtener : "/obtener-horario/",
+
+        eliminar : "/eliminar-bloque/"
+
+    }
+
+};
+
+/* ==========================================================
+PROFESORES
+========================================================== */
+
+const profesores = [
 
     {
+
         nombre: "Salamanca Lopez",
+
         tipo: "Seniors"
+
     },
 
     {
+
         nombre: "Carlos Perez",
+
         tipo: "Teens"
+
     },
 
     {
+
         nombre: "Andrea Ruiz",
+
         tipo: "Masters"
+
     },
 
     {
+
         nombre: "Fernanda Gomez",
+
         tipo: "Seniors"
+
     },
 
     {
+
         nombre: "Mateo Ramirez",
+
         tipo: "Teens"
+
     },
 
     {
+
         nombre: "Mateo Torres",
+
         tipo: "Masters"
+
     }
 
 ];
 
-/* =========================================
-VARIABLES
-========================================= */
+/* ==========================================================
+ESTADO GLOBAL
+========================================================== */
 
+const state = {
 
+    horario: null,
 
-let horarioActual = null;
+    celda: null,
 
-let celdaActual = null;
+    fecha: new Date(),
 
-let fechaActual = new Date();
+    horarios: {}
 
-/* =========================================
-INICIO
-========================================= */
+};
+
+/* ==========================================================
+HELPERS DOM
+========================================================== */
+
+const $ = id => document.getElementById(id);
+
+const $$ = selector => document.querySelectorAll(selector);
+
+const crear = etiqueta => document.createElement(etiqueta);
+
+const texto = (id, valor) => {
+
+    $(id).textContent = valor;
+
+};
+
+const html = (id, valor) => {
+
+    $(id).innerHTML = valor;
+
+};
+
+const mostrar = id => {
+
+    $(id).style.display = "block";
+
+};
+
+const ocultar = id => {
+
+    $(id).style.display = "none";
+
+};
+
+const limpiar = id => {
+
+    html(id, "");
+
+};
+
+/* ==========================================================
+HELPERS GENERALES
+========================================================== */
+
+function obtenerCursoActual() {
+
+    return {
+
+        categoria: $("categoriaCurso")?.value || "",
+
+        curso: $("gradoInput")?.value.trim() || ""
+
+    };
+
+}
+
+function obtenerCelda(fila, col) {
+
+    return $(`cell-${fila}-${col}`);
+
+}
+
+function obtenerJSONFormulario() {
+
+    const {
+
+        categoria,
+
+        curso
+
+    } = obtenerCursoActual();
+
+    return {
+
+        categoria,
+
+        curso,
+
+        profesor: $("profesorSelect").value,
+
+        materia: $("materiaInput").value.trim(),
+
+        salon: $("salonInput").value.trim(),
+
+        tipo: $("tipoBloque").value
+
+    };
+
+}
+
+/* ==========================================================
+INICIALIZACIÓN
+========================================================== */
 
 document.addEventListener(
+
     "DOMContentLoaded",
-    () => {
 
-        crearGrid();
+    iniciarAplicacion
 
-        cargarProfesores();
-
-        actualizarSemana();
-
-    }
 );
 
-/* =========================================
-GRID
-========================================= */
+function iniciarAplicacion() {
 
-function crearGrid(){
+    registrarEventos();
 
-    const tbody =
-    document.getElementById(
-        "gridAsignar"
+    crearGrid();
+
+    cargarProfesores();
+
+    actualizarSemana();
+
+}
+
+/* ==========================================================
+EVENTOS
+========================================================== */
+
+function registrarEventos() {
+
+    $("gradoInput")?.addEventListener(
+
+        "change",
+
+        cargarHorarioDesdeDB
+
     );
+
+    $("categoriaCurso")?.addEventListener(
+
+        "change",
+
+        cargarHorarioDesdeDB
+
+    );
+
+}
+
+/* ==========================================================
+VALIDACIONES
+========================================================== */
+
+function validarCurso() {
+
+    const {
+
+        categoria,
+
+        curso
+
+    } = obtenerCursoActual();
+
+    if (!categoria || !curso) {
+
+        alert(
+
+            "Selecciona una categoría y un curso."
+
+        );
+
+        return false;
+
+    }
+
+    return true;
+
+}
+
+function validarCeldaSeleccionada() {
+
+    if (state.celda) {
+
+        return true;
+
+    }
+
+    alert(
+
+        "Selecciona una celda del horario."
+
+    );
+
+    return false;
+
+}
+/* ==========================================================
+   PARTE 2
+   ----------------------------------------------------------
+   ✓ Grid del horario
+   ✓ Eventos de las celdas
+   ✓ Profesores
+   ✓ Semana
+==========================================================*/
+
+/* ==========================================================
+GRID
+========================================================== */
+
+function crearGrid() {
+
+    const tbody = $("gridAsignar");
+
+    if (!tbody) return;
 
     tbody.innerHTML = "";
 
-    horas.forEach((hora,fila)=>{
+    CONFIG.horas.forEach((hora, fila) => {
 
-        const tr =
-        document.createElement("tr");
+        const tr = crear("tr");
 
-        let html = `
+        tr.innerHTML = `
 
             <td class="hora-col">
+
                 ${hora}
+
             </td>
 
-        `;
-
-        dias.forEach((dia,col)=>{
-
-            html += `
+            ${CONFIG.dias.map((dia, col) => `
 
                 <td>
 
                     <div
                         class="cell"
                         id="cell-${fila}-${col}"
-                        onclick="
-                            abrirModal(
-                                ${fila},
-                                ${col}
-                            )
-                        "
+                        data-fila="${fila}"
+                        data-col="${col}"
                     ></div>
 
                 </td>
 
-            `;
+            `).join("")}
 
-        });
-
-        tr.innerHTML = html;
+        `;
 
         tbody.appendChild(tr);
 
     });
 
+    registrarEventosGrid();
+
 }
 
-/* =========================================
-PROFESORES
-========================================= */
+/* ==========================================================
+EVENTOS DEL GRID
+========================================================== */
 
-function cargarProfesores(){
+function registrarEventosGrid() {
 
-    const select =
-    document.getElementById(
-        "profesorSelect"
-    );
+    $$(".cell").forEach(cell => {
 
-    select.innerHTML = `
+        cell.addEventListener(
 
-        <option value="">
-            Seleccionar profesor
-        </option>
+            "click",
 
-    `;
+            () => {
 
-    usuariosRegistrados.forEach(usuario=>{
+                abrirModal(
 
-        select.innerHTML += `
+                    Number(cell.dataset.fila),
 
-            <option value="${usuario.nombre}">
-                ${usuario.nombre}
-            </option>
+                    Number(cell.dataset.col)
 
-        `;
+                );
+
+            }
+
+        );
 
     });
 
 }
 
+/* ==========================================================
+PROFESORES
+========================================================== */
 
+function cargarProfesores() {
 
+    const select = $("profesorSelect");
 
-/* =========================================
-SEMANA
-========================================= */
+    if (!select) return;
 
-function obtenerLunes(fecha){
+    select.innerHTML = `
 
-    const copia =
-    new Date(fecha);
+        <option value="">
 
-    const dia =
-    copia.getDay();
+            Seleccionar profesor
 
-    const diferencia =
-    dia === 0
-    ? -6
-    : 1 - dia;
-
-    copia.setDate(
-        copia.getDate()
-        + diferencia
-    );
-
-    return copia;
-
-}
-
-function actualizarSemana(){
-
-    const lunes =
-    obtenerLunes(fechaActual);
-
-    const domingo =
-    new Date(lunes);
-
-    domingo.setDate(
-        domingo.getDate() + 6
-    );
-
-    const opciones = {
-
-        day:"numeric",
-        month:"long"
-
-    };
-
-    document.getElementById(
-        "tituloSemana"
-    ).innerText = `
-
-        ${lunes.toLocaleDateString(
-            "es-CO",
-            opciones
-        )}
-
-        -
-
-        ${domingo.toLocaleDateString(
-            "es-CO",
-            opciones
-        )}
+        </option>
 
     `;
 
+    profesores.forEach(({ nombre }) => {
+
+        select.insertAdjacentHTML(
+
+            "beforeend",
+
+            `
+
+                <option value="${nombre}">
+
+                    ${nombre}
+
+                </option>
+
+            `
+
+        );
+
+    });
+
 }
 
-function cambiarSemana(valor){
+/* ==========================================================
+SEMANA
+========================================================== */
 
-    fechaActual.setDate(
-        fechaActual.getDate()
-        + (7 * valor)
+function obtenerLunes(fecha) {
+
+    const lunes = new Date(fecha);
+
+    const diferencia =
+
+        lunes.getDay() === 0
+
+            ? -6
+
+            : 1 - lunes.getDay();
+
+    lunes.setDate(
+
+        lunes.getDate() + diferencia
+
+    );
+
+    return lunes;
+
+}
+
+function obtenerDomingo(lunes) {
+
+    const domingo = new Date(lunes);
+
+    domingo.setDate(
+
+        domingo.getDate() + 6
+
+    );
+
+    return domingo;
+
+}
+
+function actualizarSemana() {
+
+    const lunes = obtenerLunes(
+
+        state.fecha
+
+    );
+
+    const domingo = obtenerDomingo(
+
+        lunes
+
+    );
+
+    const formato = {
+
+        day: "numeric",
+
+        month: "long"
+
+    };
+
+    texto(
+
+        "tituloSemana",
+
+        `${lunes.toLocaleDateString(
+
+            "es-CO",
+
+            formato
+
+        )} - ${domingo.toLocaleDateString(
+
+            "es-CO",
+
+            formato
+
+        )}`
+
+    );
+
+}
+
+function cambiarSemana(direccion) {
+
+    state.fecha.setDate(
+
+        state.fecha.getDate()
+
+        + (direccion * 7)
+
     );
 
     actualizarSemana();
 
 }
 
-/* =========================================
-MODAL
-========================================= */
+/* ==========================================================
+FECHA Y HORA ACTUAL
+========================================================== */
 
-function abrirModal(fila,col){
+function obtenerDiaActual() {
 
-    if(!horarioActual){
+    let dia = new Date().getDay();
 
-        alert(
-            "Busca un curso primero"
-        );
+    return dia === 0
 
-        return;
+        ? 6
 
-    }
+        : dia - 1;
 
-    celdaActual = {
-        fila,
-        col
+}
+
+function obtenerFilaActual() {
+
+    const hora = new Date().getHours();
+
+    return CONFIG.horas.findIndex(rango => {
+
+        const [inicio, fin] = rango.split(" - ");
+
+        const horaInicio = parseInt(inicio);
+
+        const horaFin = parseInt(fin);
+
+        return hora >= horaInicio && hora < horaFin;
+
+    });
+
+}
+/* ==========================================================
+   PARTE 3
+   ----------------------------------------------------------
+   ✓ API
+   ✓ Curso actual
+   ✓ Modal
+   ✓ Validaciones
+   ✓ Guardar bloque
+   ✓ Cargar horario
+   ✓ Eliminar bloque
+==========================================================*/
+
+/* ==========================================================
+API
+========================================================== */
+
+async function api(url, datos = null) {
+
+    const opciones = {
+
+        method: datos ? "POST" : "GET",
+
+        headers: {
+            "Content-Type": "application/json"
+        }
+
     };
 
-    document.getElementById(
-        "overlay"
-    ).style.display = "block";
+    if (datos) {
 
-    document.getElementById(
-        "modal"
-    ).style.display = "block";
+        opciones.body = JSON.stringify(datos);
 
-}
+    }
 
-function cerrarModal(){
+    const response = await fetch(url, opciones);
 
-    document.getElementById(
-        "overlay"
-    ).style.display = "none";
-
-    document.getElementById(
-        "modal"
-    ).style.display = "none";
+    return await response.json();
 
 }
 
-/* =========================================
-GUARDAR BLOQUE
-========================================= */
+/* ==========================================================
+CURSO ACTUAL
+========================================================== */
 
-async function guardarBloque(){
+function obtenerCursoActual() {
 
-    const categoria =
-    document.getElementById(
-        "categoriaCurso"
-    ).value;
+    return {
 
-    const curso =
-    document.getElementById(
-        "gradoInput"
-    ).value.trim();
+        categoria: $("categoriaCurso").value,
 
-    const profesor =
-    document.getElementById(
-        "profesorSelect"
-    ).value;
+        curso: $("gradoInput").value.trim()
 
-    const materia =
-    document.getElementById(
-        "materiaInput"
-    ).value.trim();
+    };
 
-    const salon =
-    document.getElementById(
-        "salonInput"
-    ).value.trim();
+}
 
-    const tipo =
-    document.getElementById(
-        "tipoBloque"
-    ).value;
+function obtenerDatosFormulario() {
 
-    if(!categoria || !curso){
+    const curso = obtenerCursoActual();
 
-        alert(
-            "Completa categoría y curso"
-        );
+    return {
+
+        ...curso,
+
+        profesor: $("profesorSelect").value,
+
+        materia: $("materiaInput").value.trim(),
+
+        salon: $("salonInput").value.trim(),
+
+        tipo: $("tipoBloque").value
+
+    };
+
+}
+
+/* ==========================================================
+VALIDACIONES
+========================================================== */
+
+function validarCurso() {
+
+    const { categoria, curso } = obtenerCursoActual();
+
+    if (!categoria || !curso) {
+
+        alert("Completa la categoría y el curso.");
+
+        return false;
+
+    }
+
+    return true;
+
+}
+
+/* ==========================================================
+MODAL
+========================================================== */
+
+function abrirModal(fila, col) {
+
+    if (!state.horario) {
+
+        alert("Busca un curso primero.");
 
         return;
 
     }
 
-    const response =
-    await fetch(
-        "/guardar-bloque/",
-        {
+    state.celda = {
 
-            method:"POST",
+        fila,
 
-            headers:{
-                "Content-Type":"application/json"
-            },
+        col
 
-            body:JSON.stringify({
+    };
 
-                categoria,
-                curso,
+    mostrar("overlay");
 
-                fila:celdaActual.fila,
-                col:celdaActual.col,
+    mostrar("modal");
 
-                profesor:
-                tipo === "descanso"
+}
+
+function cerrarModal() {
+
+    ocultar("overlay");
+
+    ocultar("modal");
+
+}
+
+/* ==========================================================
+GUARDAR BLOQUE
+========================================================== */
+
+async function guardarBloque() {
+
+    if (!validarCurso()) return;
+
+    const datos = obtenerDatosFormulario();
+
+    const payload = {
+
+        categoria: datos.categoria,
+
+        curso: datos.curso,
+
+        fila: state.celda.fila,
+
+        col: state.celda.col,
+
+        profesor:
+
+            datos.tipo === "descanso"
+
                 ? "DESCANSO"
-                : profesor,
 
-                materia:
-                tipo === "descanso"
+                : datos.profesor,
+
+        materia:
+
+            datos.tipo === "descanso"
+
                 ? "DESCANSO"
-                : materia,
 
-                salon:
-                tipo === "descanso"
+                : datos.materia,
+
+        salon:
+
+            datos.tipo === "descanso"
+
                 ? "-"
-                : salon,
 
-                tipo
+                : datos.salon,
 
-            })
+        tipo: datos.tipo
+
+    };
+
+    try {
+
+        const respuesta = await api(
+
+            "/guardar-bloque/",
+
+            payload
+
+        );
+
+        if (!respuesta.success) {
+
+            alert("No fue posible guardar el bloque.");
+
+            return;
 
         }
-    );
 
-    const data =
-    await response.json();
-
-    if(data.success){
-
-        alert(
-            "Bloque guardado"
-        );
-
-        cargarHorarioDesdeDB();
+        await cargarHorarioDesdeDB();
 
         cerrarModal();
+
+        alert("Bloque guardado correctamente.");
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        alert("Error al guardar el bloque.");
 
     }
 
 }
 
-/* =========================================
-CARGAR HORARIO DESDE DB
-========================================= */
+/* ==========================================================
+CARGAR HORARIO
+========================================================== */
 
-async function cargarHorarioDesdeDB(){
+async function cargarHorarioDesdeDB() {
 
-    const categoria =
-    document.getElementById(
-        "categoriaCurso"
-    ).value;
+    if (!validarCurso()) return;
 
-    const curso =
-    document.getElementById(
-        "gradoInput"
-    ).value.trim();
+    const {
 
-    if(!categoria || !curso){
+        categoria,
 
-        return;
+        curso
+
+    } = obtenerCursoActual();
+
+    try {
+
+        const data = await api(
+
+            `/obtener-horario/?categoria=${categoria}&curso=${curso}`
+
+        );
+
+        state.horario = {
+
+            clave: `${categoria}-${curso}`,
+
+            bloques: data.bloques || []
+
+        };
+
+        texto(
+
+            "nombreHorarioActual",
+
+            state.horario.clave
+
+        );
+
+        renderizarHorario();
 
     }
 
-    const response =
-    await fetch(
+    catch (error) {
 
-        `/obtener-horario/?categoria=${categoria}&curso=${curso}`
+        console.error(error);
 
-    );
+        alert("No fue posible cargar el horario.");
 
-    const data =
-    await response.json();
+    }
 
-    horarioActual = {
+}
 
-        clave:`${categoria}-${curso}`,
-        bloques:data.bloques
+/* ==========================================================
+ELIMINAR BLOQUE
+========================================================== */
+
+async function eliminarBloque() {
+
+    if (!state.celda) return;
+
+    const {
+
+        categoria,
+
+        curso
+
+    } = obtenerCursoActual();
+
+    try {
+
+        await api(
+
+            "/eliminar-bloque/",
+
+            {
+
+                categoria,
+
+                curso,
+
+                fila: state.celda.fila,
+
+                col: state.celda.col
+
+            }
+
+        );
+
+        await cargarHorarioDesdeDB();
+
+        cerrarModal();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        alert("Error eliminando el bloque.");
+
+    }
+
+}
+/* ==========================================================
+   PARTE 3
+   ----------------------------------------------------------
+   ✓ API
+   ✓ Curso actual
+   ✓ Modal
+   ✓ Validaciones
+   ✓ Guardar bloque
+   ✓ Cargar horario
+   ✓ Eliminar bloque
+==========================================================*/
+
+/* ==========================================================
+API
+========================================================== */
+
+async function api(url, datos = null) {
+
+    const opciones = {
+
+        method: datos ? "POST" : "GET",
+
+        headers: {
+            "Content-Type": "application/json"
+        }
 
     };
 
-    document.getElementById(
-        "nombreHorarioActual"
-    ).innerText =
-    `${categoria} - ${curso}`;
+    if (datos) {
 
-    renderizarHorario();
+        opciones.body = JSON.stringify(datos);
+
+    }
+
+    const response = await fetch(url, opciones);
+
+    return await response.json();
 
 }
 
-/* =========================================
-ELIMINAR BLOQUE
-========================================= */
+/* ==========================================================
+CURSO ACTUAL
+========================================================== */
 
-async function eliminarBloque(){
+function obtenerCursoActual() {
 
-    if(!celdaActual){
-        return;
+    return {
+
+        categoria: $("categoriaCurso").value,
+
+        curso: $("gradoInput").value.trim()
+
+    };
+
+}
+
+function obtenerDatosFormulario() {
+
+    const curso = obtenerCursoActual();
+
+    return {
+
+        ...curso,
+
+        profesor: $("profesorSelect").value,
+
+        materia: $("materiaInput").value.trim(),
+
+        salon: $("salonInput").value.trim(),
+
+        tipo: $("tipoBloque").value
+
+    };
+
+}
+
+/* ==========================================================
+VALIDACIONES
+========================================================== */
+
+function validarCurso() {
+
+    const { categoria, curso } = obtenerCursoActual();
+
+    if (!categoria || !curso) {
+
+        alert("Completa la categoría y el curso.");
+
+        return false;
+
     }
 
-    const categoria =
-    document.getElementById(
-        "categoriaCurso"
-    ).value;
+    return true;
 
-    const curso =
-    document.getElementById(
-        "gradoInput"
-    ).value.trim();
+}
 
-    try{
+/* ==========================================================
+MODAL
+========================================================== */
 
-        const response = await fetch(
+function abrirModal(fila, col) {
+
+    if (!state.horario) {
+
+        alert("Busca un curso primero.");
+
+        return;
+
+    }
+
+    state.celda = {
+
+        fila,
+
+        col
+
+    };
+
+    mostrar("overlay");
+
+    mostrar("modal");
+
+}
+
+function cerrarModal() {
+
+    ocultar("overlay");
+
+    ocultar("modal");
+
+}
+
+/* ==========================================================
+GUARDAR BLOQUE
+========================================================== */
+
+async function guardarBloque() {
+
+    if (!validarCurso()) return;
+
+    const datos = obtenerDatosFormulario();
+
+    const payload = {
+
+        categoria: datos.categoria,
+
+        curso: datos.curso,
+
+        fila: state.celda.fila,
+
+        col: state.celda.col,
+
+        profesor:
+
+            datos.tipo === "descanso"
+
+                ? "DESCANSO"
+
+                : datos.profesor,
+
+        materia:
+
+            datos.tipo === "descanso"
+
+                ? "DESCANSO"
+
+                : datos.materia,
+
+        salon:
+
+            datos.tipo === "descanso"
+
+                ? "-"
+
+                : datos.salon,
+
+        tipo: datos.tipo
+
+    };
+
+    try {
+
+        const respuesta = await api(
+
+            "/guardar-bloque/",
+
+            payload
+
+        );
+
+        if (!respuesta.success) {
+
+            alert("No fue posible guardar el bloque.");
+
+            return;
+
+        }
+
+        await cargarHorarioDesdeDB();
+
+        cerrarModal();
+
+        alert("Bloque guardado correctamente.");
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        alert("Error al guardar el bloque.");
+
+    }
+
+}
+
+/* ==========================================================
+CARGAR HORARIO
+========================================================== */
+
+async function cargarHorarioDesdeDB() {
+
+    if (!validarCurso()) return;
+
+    const {
+
+        categoria,
+
+        curso
+
+    } = obtenerCursoActual();
+
+    try {
+
+        const data = await api(
+
+            `/obtener-horario/?categoria=${categoria}&curso=${curso}`
+
+        );
+
+        state.horario = {
+
+            clave: `${categoria}-${curso}`,
+
+            bloques: data.bloques || []
+
+        };
+
+        texto(
+
+            "nombreHorarioActual",
+
+            state.horario.clave
+
+        );
+
+        renderizarHorario();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        alert("No fue posible cargar el horario.");
+
+    }
+
+}
+
+/* ==========================================================
+ELIMINAR BLOQUE
+========================================================== */
+
+async function eliminarBloque() {
+
+    if (!state.celda) return;
+
+    const {
+
+        categoria,
+
+        curso
+
+    } = obtenerCursoActual();
+
+    try {
+
+        await api(
+
             "/eliminar-bloque/",
+
             {
-                method:"POST",
 
-                headers:{
-                    "Content-Type":"application/json"
-                },
+                categoria,
 
-                body:JSON.stringify({
+                curso,
 
-                    categoria,
-                    curso,
+                fila: state.celda.fila,
 
-                    fila:celdaActual.fila,
-                    col:celdaActual.col
+                col: state.celda.col
 
-                })
             }
+
         );
 
-        const texto =
-        await response.text();
-
-        console.log(
-            "RESPUESTA:",
-            texto
-        );
-
-        // 🔥 RECARGAR TABLA
-        await cargarHorarioDesdeBD();
+        await cargarHorarioDesdeDB();
 
         cerrarModal();
 
     }
 
-    catch(error){
+    catch (error) {
 
-        console.error(
-            "ERROR:",
-            error
-        );
+        console.error(error);
+
+        alert("Error eliminando el bloque.");
 
     }
 
 }
-/* =========================================
-ELIMINAR HORARIO
-========================================= */
+/* ==========================================================
+   PARTE 4
+   ----------------------------------------------------------
+   ✓ Render del horario
+   ✓ Tarjetas
+   ✓ Resaltado de celdas
+   ✓ Eliminar horario
+==========================================================*/
 
-function eliminarHorarioActual(){
+/* ==========================================================
+LIMPIAR GRID
+========================================================== */
 
-    if(!horarioActual){
+function limpiarGrid() {
 
-        alert(
-            "No hay horario cargado"
-        );
-
-        return;
-
-    }
-
-    const confirmar =
-    confirm(
-        "¿Eliminar este horario?"
-    );
-
-    if(!confirmar) return;
-
-    delete horarios[
-        horarioActual.clave
-    ];
-
-    
-
-    horarioActual = null;
-
-    renderizarHorario();
-
-    document.getElementById(
-        "nombreHorarioActual"
-    ).innerText =
-    "Sin horario";
-
-}
-
-/* =========================================
-RENDER
-========================================= */
-
-function renderizarHorario(){
-
-    document
-    .querySelectorAll(".cell")
-    .forEach(cell=>{
+    $$(".cell").forEach(cell => {
 
         cell.innerHTML = "";
 
         cell.classList.remove(
+
             "filtro-activo"
+
         );
-
-    });
-
-    if(!horarioActual) return;
-
-    horarioActual.bloques.forEach(bloque=>{
-
-        const cell =
-        document.getElementById(
-            `cell-${bloque.fila}-${bloque.col}`
-        );
-
-        if(!cell) return;
-
-        if(
-            bloque.tipo === "descanso"
-        ){
-
-            cell.innerHTML = `
-
-                <div class="card-descanso">
-                    ☕ Descanso
-                </div>
-
-            `;
-
-        }
-
-        else{
-
-            let claseExtra = "";
-
-            if(
-                bloque.tipo === "relevo"
-            ){
-
-                claseExtra =
-                "card-relevo";
-
-            }
-
-            cell.innerHTML = `
-
-    <div
-        class="
-            card-horario
-            ${claseExtra}
-        "
-    >
-
-        <div class="card-title">
-            ${bloque.materia}
-        </div>
-
-        <div class="card-mini">
-            👨‍🏫 ${bloque.profesor}
-        </div>
-
-        <div class="card-mini">
-            🏫 ${bloque.salon}
-        </div>
-
-        <div class="card-mini">
-            🔖 ${bloque.tipo}
-        </div>
-
-    </div>
-
-`;
-
-        }
 
     });
 
 }
 
-/* =========================================
-BUSCAR PROFESOR
-========================================= */
+/* ==========================================================
+OBTENER CELDA
+========================================================== */
 
-function buscarHorarioInteligente(){
+function obtenerCelda(fila, col) {
 
-    const texto =
-    document.getElementById(
-        "busquedaHorario"
-    )
-    .value
-    .toLowerCase()
-    .trim();
+    return $(`cell-${fila}-${col}`);
 
-    const sugerencias =
-    document.getElementById(
-        "sugerenciasBusqueda"
-    );
+}
 
-    sugerencias.innerHTML = "";
+/* ==========================================================
+TARJETAS
+========================================================== */
 
-    if(texto === ""){
+function crearCardDescanso() {
 
-        sugerencias.style.display =
-        "none";
+    return `
 
-        return;
+        <div class="card-descanso">
 
-    }
+            ☕ Descanso
 
-    let resultados = [];
+        </div>
 
-    Object.entries(horarios)
-    .forEach(([clave,horario])=>{
+    `;
 
-        horario.bloques.forEach(bloque=>{
+}
 
-            const combinado = `
+function crearCardHorario(bloque) {
 
-                ${bloque.profesor}
+    return `
+
+        <div class="card-horario ${bloque.tipo === "relevo" ? "card-relevo" : ""}">
+
+            <div class="card-title">
+
                 ${bloque.materia}
-                ${bloque.salon}
 
-            `
-            .toLowerCase();
+            </div>
 
-            if(
-                combinado.includes(texto)
-            ){
+            <div class="card-mini">
 
-                resultados.push({
+                👨‍🏫 ${bloque.profesor}
 
-                    profesor:
-                    bloque.profesor,
+            </div>
 
-                    materia:
-                    bloque.materia,
+            <div class="card-mini">
 
-                    salon:
-                    bloque.salon,
+                🏫 ${bloque.salon}
 
-                    fila:
-                    bloque.fila,
+            </div>
 
-                    col:
-                    bloque.col,
+            <div class="card-mini">
 
-                    clave
+                🔖 ${bloque.tipo}
 
-                });
+            </div>
 
-            }
+        </div>
 
-        });
-
-    });
-
-    resultados.forEach(resultado=>{
-
-        const item =
-        document.createElement("div");
-
-        item.className =
-        "sugerencia-item";
-
-        item.innerHTML = `
-
-            <strong>
-                👨‍🏫
-                ${resultado.profesor}
-            </strong>
-
-            <br>
-
-            📚
-            ${resultado.materia}
-
-            <br>
-
-            🏫
-            ${resultado.salon}
-
-        `;
-
-        item.onclick = ()=>{
-
-            abrirResultadoBusqueda(
-                resultado
-            );
-
-            sugerencias.style.display =
-            "none";
-
-        };
-
-        sugerencias.appendChild(item);
-
-    });
-
-    sugerencias.style.display =
-
-        resultados.length > 0
-        ? "block"
-        : "none";
+    `;
 
 }
 
-/* =========================================
-BUSCAR CURSO
-========================================= */
+/* ==========================================================
+RENDER DE BLOQUE
+========================================================== */
 
-function buscarCurso(){
+function renderizarBloque(bloque) {
 
-    const texto =
-    document.getElementById(
-        "busquedaCurso"
-    )
-    .value
-    .toLowerCase()
-    .trim();
+    const cell = obtenerCelda(
 
-    const sugerencias =
-    document.getElementById(
-        "sugerenciasCurso"
+        bloque.fila,
+
+        bloque.col
+
     );
 
-    sugerencias.innerHTML = "";
+    if (!cell) return;
 
-    if(texto === ""){
+    cell.innerHTML =
 
-        sugerencias.style.display =
-        "none";
+        bloque.tipo === "descanso"
 
-        return;
+            ? crearCardDescanso()
 
-    }
-
-    let resultados = [];
-
-    Object.entries(horarios)
-    .forEach(([clave,horario])=>{
-
-        if(
-            clave.toLowerCase()
-            .includes(texto)
-        ){
-
-            resultados.push({
-                clave,
-                horario
-            });
-
-        }
-
-    });
-
-    resultados.forEach(resultado=>{
-
-        const item =
-        document.createElement("div");
-
-        item.className =
-        "sugerencia-item";
-
-        item.innerHTML = `
-
-            📚
-            ${resultado.clave}
-
-        `;
-
-        item.onclick = ()=>{
-
-            horarioActual =
-            resultado.horario;
-
-            horarioActual.clave =
-            resultado.clave;
-
-            document.getElementById(
-                "nombreHorarioActual"
-            ).innerText =
-            resultado.clave;
-
-            renderizarHorario();
-
-            sugerencias.style.display =
-            "none";
-
-        };
-
-        sugerencias.appendChild(item);
-
-    });
-
-    sugerencias.style.display =
-
-        resultados.length > 0
-        ? "block"
-        : "none";
+            : crearCardHorario(bloque);
 
 }
 
-/* =========================================
-ABRIR RESULTADO
-========================================= */
+/* ==========================================================
+RENDER GENERAL
+========================================================== */
 
-function abrirResultadoBusqueda(
-    resultado
-){
+function renderizarHorario() {
 
-    horarioActual =
-    horarios[resultado.clave];
+    limpiarGrid();
 
-    horarioActual.clave =
-    resultado.clave;
+    if (!state.horario) return;
 
-    document.getElementById(
-        "nombreHorarioActual"
-    ).innerText =
-    resultado.clave;
+    state.horario.bloques.forEach(
 
-    renderizarHorario();
+        renderizarBloque
 
-    setTimeout(()=>{
-
-        const cell =
-        document.getElementById(
-            `cell-${resultado.fila}-${resultado.col}`
-        );
-
-        if(cell){
-
-            cell.classList.add(
-                "filtro-activo"
-            );
-
-            cell.scrollIntoView({
-
-                behavior:"smooth",
-
-                block:"center",
-
-                inline:"center"
-
-            });
-
-        }
-
-    },100);
-
-}
-
-/* =========================================
-VER PROFESOR ACTUAL
-========================================= */
-
-function verProfesorActual(){
-
-    const texto =
-    document.getElementById(
-        "busquedaHorario"
-    )
-    .value
-    .trim()
-    .toLowerCase();
-
-    if(texto === ""){
-
-        alert(
-            "Escribe un profesor"
-        );
-
-        return;
-
-    }
-
-    const ahora =
-    new Date();
-
-    let diaActual =
-    ahora.getDay();
-
-    if(diaActual === 0){
-
-        diaActual = 6;
-
-    }
-
-    else{
-
-        diaActual--;
-
-    }
-
-    const horaActual =
-    ahora.getHours();
-
-    let filaActual = -1;
-
-    horas.forEach((hora,index)=>{
-
-        const partes =
-        hora.split(" - ");
-
-        const inicio =
-        parseInt(
-            partes[0]
-            .split(":")[0]
-        );
-
-        const fin =
-        parseInt(
-            partes[1]
-            .split(":")[0]
-        );
-
-        if(
-            horaActual >= inicio
-            &&
-            horaActual < fin
-        ){
-
-            filaActual = index;
-
-        }
-
-    });
-
-    if(filaActual === -1){
-
-        alert(
-            "No hay clases ahora"
-        );
-
-        return;
-
-    }
-
-    let encontrado = null;
-
-    Object.entries(horarios)
-    .forEach(([clave,horario])=>{
-
-        horario.bloques.forEach(bloque=>{
-
-            if(
-
-                bloque.profesor
-                .toLowerCase()
-                .includes(texto)
-
-                &&
-
-                bloque.fila === filaActual
-
-                &&
-
-                bloque.col === diaActual
-
-            ){
-
-                encontrado = {
-
-                    bloque,
-                    horario,
-                    clave
-
-                };
-
-            }
-
-        });
-
-    });
-
-    if(!encontrado){
-
-        alert(
-            "No encontrado"
-        );
-
-        return;
-
-    }
-
-    horarioActual =
-    encontrado.horario;
-
-    horarioActual.clave =
-    encontrado.clave;
-
-    document.getElementById(
-        "nombreHorarioActual"
-    ).innerText =
-    encontrado.clave;
-
-    renderizarHorario();
-
-    setTimeout(()=>{
-
-        const cell =
-        document.getElementById(
-            `cell-${encontrado.bloque.fila}-${encontrado.bloque.col}`
-        );
-
-        if(cell){
-
-            cell.classList.add(
-                "filtro-activo"
-            );
-
-            cell.scrollIntoView({
-
-                behavior:"smooth",
-
-                block:"center"
-
-            });
-
-        }
-
-    },100);
-
-}
-
-/* =========================================
-LIMPIAR TODO
-========================================= */
-
-function limpiarTodo(){
-
-    const confirmar =
-    confirm(
-        "¿Eliminar todos los horarios?"
     );
 
-    if(!confirmar) return;
+}
 
-    document.getElementById(
-    "gradoInput"
-).addEventListener(
-    "change",
-    cargarHorarioDesdeDB
-);
+/* ==========================================================
+RESALTAR CELDAS
+========================================================== */
 
-document.getElementById(
-    "categoriaCurso"
-).addEventListener(
-    "change",
-    cargarHorarioDesdeDB
-);
-    horarios = {};
+function limpiarResaltados() {
 
-    horarioActual = null;
+    $$(".cell").forEach(cell =>
+
+        cell.classList.remove(
+
+            "filtro-activo"
+
+        )
+
+    );
+
+}
+
+function resaltarCelda(fila, col) {
+
+    limpiarResaltados();
+
+    const cell = obtenerCelda(
+
+        fila,
+
+        col
+
+    );
+
+    if (!cell) return;
+
+    cell.classList.add(
+
+        "filtro-activo"
+
+    );
+
+    cell.scrollIntoView({
+
+        behavior: "smooth",
+
+        block: "center",
+
+        inline: "center"
+
+    });
+
+}
+
+/* ==========================================================
+ELIMINAR HORARIO
+========================================================== */
+
+function eliminarHorarioActual() {
+
+    if (!state.horario) {
+
+        alert(
+
+            "No hay horario cargado."
+
+        );
+
+        return;
+
+    }
+
+    if (
+
+        !confirm(
+
+            "¿Eliminar este horario?"
+
+        )
+
+    ) {
+
+        return;
+
+    }
+
+    delete horarios[
+
+        state.horario.clave
+
+    ];
+
+    state.horario = null;
 
     renderizarHorario();
 
-    document.getElementById(
-        "nombreHorarioActual"
-    ).innerText =
-    "Sin horario";
+    texto(
 
+        "nombreHorarioActual",
+
+        "Sin horario"
+
+    );
 
 }

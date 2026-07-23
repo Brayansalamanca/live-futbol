@@ -7,108 +7,115 @@
     rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
 >
-<link rel="stylesheet" href="{% static 'css/horarios.css' %}">
+
+<link
+    rel="stylesheet"
+    href="{% static 'css/horarios.css' %}"
+>
 
 <div class="container">
 
-    <!-- TOP -->
+    <!-- ====================================================== -->
+    <!-- TOPBAR -->
+    <!-- ====================================================== -->
 
     <div class="topbar">
 
         <h1>
+
             📚 Gestión de Horarios
+
         </h1>
 
         <button
             class="btn btn-danger"
             onclick="limpiarTodo()"
         >
+
             🗑 Limpiar Todo
+
         </button>
 
     </div>
 
-    <!-- BUSQUEDAS -->
+    <!-- ====================================================== -->
+    <!-- BUSCADORES -->
+    <!-- ====================================================== -->
 
     <div class="panel">
 
         <div class="search-grid">
 
-            <!-- PROFESORES -->
+            <!-- =============================================== -->
+            <!-- BUSCAR PROFESOR -->
+            <!-- =============================================== -->
 
             <div>
 
-                <h3 style="margin-bottom:10px;">
+                <h3>
+
                     🔍 Buscar Profesor
+
                 </h3>
 
                 <div class="search-box">
 
                     <input
-                        type="text"
                         id="busquedaHorario"
+                        type="text"
                         placeholder="Profesor, materia o salón..."
-                        oninput="buscarHorarioInteligente()"
                         autocomplete="off"
+                        oninput="buscarHorarioInteligente()"
                     >
 
                     <div
                         class="sugerencias"
                         id="sugerenciasBusqueda"
-                    ></div>
+                    >
+
+                    </div>
 
                 </div>
 
                 <button
                     class="btn btn-primary"
-                    style="margin-top:10px;"
                     onclick="verProfesorActual()"
                 >
+
                     📍 ¿Dónde está ahora?
+
                 </button>
 
             </div>
 
-            <!-- CURSOS -->
+            <!-- =============================================== -->
+            <!-- BUSCAR CURSO -->
+            <!-- =============================================== -->
 
             <div>
 
-                <h3 style="margin-bottom:10px;">
-                    📚 Buscar Curso Completo
+                <h3>
+
+                    📚 Buscar Curso
+
                 </h3>
 
                 <div class="search-box">
 
                     <input
-                        type="text"
                         id="busquedaCurso"
-                        placeholder="Ej: 6A"
-                        oninput="buscarCurso()"
+                        type="text"
+                        placeholder="Ej: Seniors 1A"
                         autocomplete="off"
+                        oninput="buscarCurso()"
                     >
 
                     <div
                         class="sugerencias"
                         id="sugerenciasCurso"
-                    ></div>
-
-                </div>
-
-                <div class="curso-actions">
-
-                    <button
-                        class="btn btn-secondary"
-                        onclick="buscarCursoManual()"
                     >
-                        🔎 Buscar
-                    </button>
 
-                    <button
-                        class="btn btn-danger"
-                        onclick="eliminarHorarioCurso()"
-                    >
-                        🗑 Eliminar
-                    </button>
+                    </div>
 
                 </div>
 
@@ -118,7 +125,9 @@
 
     </div>
 
-    <!-- INFO -->
+    <!-- ====================================================== -->
+    <!-- INFORMACIÓN DEL HORARIO -->
+    <!-- ====================================================== -->
 
     <div class="panel">
 
@@ -129,38 +138,48 @@
                 📂 Mostrando:
 
                 <strong id="nombreHorarioActual">
+
                     Ningún horario seleccionado
+
                 </strong>
 
             </div>
 
             <div class="semana-control">
 
-    <button
-        class="btn btn-secondary semana-btn"
-        onclick="cambiarSemana(-1)"
-    >
-        ⬅
-    </button>
+                <button
+                    class="btn btn-secondary semana-btn"
+                    onclick="cambiarSemana(-1)"
+                >
 
-    <div id="tituloSemana">
-        Semana
-    </div>
+                    ⬅
 
-    <button
-        class="btn btn-secondary semana-btn"
-        onclick="cambiarSemana(1)"
-    >
-        ➡
-    </button>
+                </button>
 
-</div>
+                <div id="tituloSemana">
+
+                    Semana
+
+                </div>
+
+                <button
+                    class="btn btn-secondary semana-btn"
+                    onclick="cambiarSemana(1)"
+                >
+
+                    ➡
+
+                </button>
+
+            </div>
 
         </div>
 
     </div>
 
-    <!-- CONFIG -->
+    <!-- ====================================================== -->
+    <!-- CONFIGURACIÓN -->
+    <!-- ====================================================== -->
 
     <div class="panel">
 
@@ -169,61 +188,77 @@
             <select id="categoriaCurso">
 
                 <option value="">
+
                     Categoría
+
                 </option>
 
                 <option value="Seniors">
+
                     Seniors
+
                 </option>
 
                 <option value="Teens">
+
                     Teens
+
                 </option>
 
                 <option value="Masters">
+
                     Masters
+
                 </option>
 
             </select>
 
             <input
-                type="text"
                 id="gradoInput"
+                type="text"
                 placeholder="Curso"
             >
 
             <select id="profesorSelect">
 
                 <option value="">
+
                     Profesor
+
                 </option>
 
             </select>
 
             <input
-                type="text"
                 id="materiaInput"
+                type="text"
                 placeholder="Materia"
             >
 
             <input
-                type="text"
                 id="salonInput"
+                type="text"
                 placeholder="Salón"
             >
 
             <select id="tipoBloque">
 
                 <option value="clase">
+
                     📚 Clase
+
                 </option>
 
                 <option value="relevo">
+
                     🔄 Relevo
+
                 </option>
 
                 <option value="descanso">
+
                     ☕ Descanso
+
                 </option>
 
             </select>
@@ -231,64 +266,78 @@
         </div>
 
     </div>
-
-    <!-- TABLA -->
+        <!-- ====================================================== -->
+    <!-- TABLA DE HORARIOS -->
+    <!-- ====================================================== -->
 
     <div class="panel table-wrapper">
 
-        <table>
+        <table class="tabla-horario">
 
             <thead>
 
                 <tr>
 
                     <th class="hora-col">
+
                         Hora
+
                     </th>
 
-                    <th>Lunes</th>
-                    <th>Martes</th>
-                    <th>Miércoles</th>
-                    <th>Jueves</th>
-                    <th>Viernes</th>
-                    <th>Sábado</th>
-                    <th>Domingo</th>
+                    <th>
+
+                        Lunes
+
+                    </th>
+
+                    <th>
+
+                        Martes
+
+                    </th>
+
+                    <th>
+
+                        Miércoles
+
+                    </th>
+
+                    <th>
+
+                        Jueves
+
+                    </th>
+
+                    <th>
+
+                        Viernes
+
+                    </th>
+
+                    <th>
+
+                        Sábado
+
+                    </th>
+
+                    <th>
+
+                        Domingo
+
+                    </th>
 
                 </tr>
 
             </thead>
 
-            <tbody>
+            <!--
+                El contenido del horario se crea automáticamente
+                desde crearGrid() del archivo horarios.js
+            -->
 
-<tr>
-    <td class="hora-col">06:00 - 07:00</td>
+            <tbody id="gridAsignar">
 
-    <td><div class="cell" id="cell-0-0" onclick="abrirModal(0,0)"></div></td>
-    <td><div class="cell" id="cell-0-1" onclick="abrirModal(0,1)"></div></td>
-    <td><div class="cell" id="cell-0-2" onclick="abrirModal(0,2)"></div></td>
-    <td><div class="cell" id="cell-0-3" onclick="abrirModal(0,3)"></div></td>
-    <td><div class="cell" id="cell-0-4" onclick="abrirModal(0,4)"></div></td>
-    <td><div class="cell" id="cell-0-5" onclick="abrirModal(0,5)"></div></td>
-    <td><div class="cell" id="cell-0-6" onclick="abrirModal(0,6)"></div></td>
-</tr>
-
-<tr>
-    <td class="hora-col">07:00 - 08:00</td>
-
-    <td><div class="cell" id="cell-1-0" onclick="abrirModal(1,0)"></div></td>
-    <td><div class="cell" id="cell-1-1" onclick="abrirModal(1,1)"></div></td>
-    <td><div class="cell" id="cell-1-2" onclick="abrirModal(1,2)"></div></td>
-    <td><div class="cell" id="cell-1-3" onclick="abrirModal(1,3)"></div></td>
-    <td><div class="cell" id="cell-1-4" onclick="abrirModal(1,4)"></div></td>
-    <td><div class="cell" id="cell-1-5" onclick="abrirModal(1,5)"></div></td>
-    <td><div class="cell" id="cell-1-6" onclick="abrirModal(1,6)"></div></td>
-</tr>
-
-<!-- Continúa igual hasta la última hora -->
-
-</tbody>
-
-            
+            </tbody>
 
         </table>
 
@@ -296,21 +345,31 @@
 
 </div>
 
-<!-- MODAL -->
+<!-- ====================================================== -->
+<!-- OVERLAY -->
+<!-- ====================================================== -->
 
 <div
-    class="overlay"
     id="overlay"
+    class="overlay"
     onclick="cerrarModal()"
-></div>
-
-<div
-    class="modal"
-    id="modal"
 >
 
-    <h2 style="margin-bottom:15px;">
+</div>
+
+<!-- ====================================================== -->
+<!-- MODAL -->
+<!-- ====================================================== -->
+
+<div
+    id="modal"
+    class="modal"
+>
+
+    <h2>
+
         Gestión del Bloque
+
     </h2>
 
     <div class="modal-body">
@@ -319,28 +378,29 @@
             class="btn btn-primary"
             onclick="guardarBloque()"
         >
+
             💾 Guardar Bloque
+
         </button>
 
         <button
             class="btn btn-danger"
             onclick="eliminarBloque()"
         >
-            🗑 Eliminar Bloque
-        </button>
 
-        <button
-            class="btn btn-danger"
-            onclick="eliminarHorarioProfesor()"
-        >
-            🗑 Eliminar Horario Profesor
+            🗑 Eliminar Bloque
+
         </button>
 
     </div>
 
 </div>
-<script src="{% static 'js/horarios.js' %}" >
+<!-- ====================================================== -->
+<!-- JAVASCRIPT -->
+<!-- ====================================================== -->
 
-</script>
+<script
+    src="{% static 'js/horarios.js' %}"
+></script>
 
 {% endblock %}

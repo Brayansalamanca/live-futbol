@@ -2,40 +2,48 @@
    API DE ESTUDIANTES
 ========================================== */
 
-const API_ESTUDIANTE = "/api/estudiantes?id=";
+const API_ESTUDIANTE = "https://script.google.com/macros/s/AKfycbzKpXyD0WPJV580HoVoeJpBPCQ6wCfxo9rBOAyRhTaFZ3iZUnPRm8lnbJtbhKpSkXtZUQ/exec?action=get_all";
 
 /* ==========================================
    CONSULTAR ESTUDIANTE POR ID NFC
 ========================================== */
 
+/* ==========================================
+ CONSULTAR ESTUDIANTE POR ID NFC (API Google Sheets)
+========================================== */
 async function consultarEstudiante(idTarjeta) {
+  try {
+    const res = await fetch(API_ESTUDIANTE + encodeURIComponent(idTarjeta));
+    if (!res.ok) {
+      alert("Tarjeta no registrada.");
+      return;
+    }
+    
+    const respuesta = await res.json();
+    const estudiante = Array.isArray(respuesta) ? respuesta[0] : respuesta;
 
-    try {
-
-        const res = await fetch(API_ESTUDIANTE + encodeURIComponent(idTarjeta));
-
-        if (!res.ok) {
-            alert("Tarjeta no registrada.");
-            return;
-        }
-
-        const estudiante = await res.json();
-
-        document.getElementById("textoVoz").value = estudiante.nombre || "";
-        document.getElementById("alquilado_por").value = estudiante.nombre || "";
-
-        // Guardamos el curso para usarlo al registrar
-        gradoActual = estudiante.curso || "";
-
-        console.log(estudiante);
-
-    } catch (error) {
-
-        console.error(error);
-        alert("No fue posible consultar la API.");
-
+    if (!estudiante) {
+      alert("No se encontró información para esta tarjeta.");
+      return;
     }
 
+    // 1. Asignar el nombre del estudiante
+    const nombreEstudiante = estudiante["estudiante"] || estudiante["nombre"] || "";
+    document.getElementById("textoVoz").value = nombreEstudiante;
+
+    // 2. Extraer curso y grupo
+    // "id pestaña" suele venir como "11C" o "10A"
+    // "curso asignado" suele venir como "ELEVENTH C"
+    let cursoCompleto = estudiante["id pestaña"] || estudiante["curso asignado"] || estudiante["curso"] || "";
+
+    // Guardamos el curso obtenido automáticamente
+    gradoActual = cursoCompleto;
+
+    console.log("✅ Estudiante cargado desde NFC:", nombreEstudiante, "| Curso:", gradoActual);
+  } catch (error) {
+    console.error("Error consultando la API de estudiante:", error);
+    alert("No fue posible consultar la API de estudiantes.");
+  }
 }
 
 
@@ -315,63 +323,66 @@ function actualizarContadoresStock() {
 }
 
 async function registrarEnNube() {
-    const nombreInput = document.getElementById("textoVoz").value.trim();
-    const lugarInput = document.getElementById("lugarSelect").value;
-    const idUnicoInput = document.getElementById("idObjetoSelect").value;
+  const nombreInput = document.getElementById("textoVoz").value.trim();
+  const lugarInput = document.getElementById("lugarSelect").value;
+  const idUnicoInput = document.getElementById("idObjetoSelect").value;
 
-    if (!nombreInput || !objetoActual || !idUnicoInput) {
-        alert("⚠️ Datos incompletos: Faltan campos obligatorios (Estudiante, Tipo de Objeto e ID del Balón).");
-        return;
+  if (!nombreInput || !objetoActual || !idUnicoInput) {
+    alert("⚠️ Datos incompletos: Faltan campos obligatorios (Estudiante, Tipo de Objeto e ID del Balón).");
+    return;
+  }
+
+  // Si el estudiante se leyó por NFC o se seleccionó con botones, verificamos gradoActual
+  if (!gradoActual) {
+    alert("⚠️ No se encontró el curso del estudiante. Por favor escanea el carnet o selecciona el grado.");
+    return;
+  }
+
+  // Si se seleccionó una letra manualmente en los botones, se la concatenamos si hace falta
+  let cursoFinal = gradoActual;
+  if (letraActual && !cursoFinal.includes(letraActual)) {
+      cursoFinal = `${gradoActual} ${letraActual}`;
+  }
+
+  if (listaVetados.includes(nombreInput.toLowerCase())) {
+    alert("❌ El estudiante se encuentra vetado o suspendido en el sistema de bajas.");
+    return;
+  }
+
+  const tokenCsrf = window.CSRF_TOKEN || document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+  const datos = {
+    recibido_por: nombreInput,
+    curso: cursoFinal,
+    balon: objetoActual,
+    id_unico: idUnicoInput,
+    lugar: lugarInput
+  };
+
+  try {
+    const res = await fetch(ENDPOINTS.guardarEntrega, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": tokenCsrf
+      },
+      body: JSON.stringify(datos)
+    });
+
+    if (res.ok) {
+      resetearFormulario();
+      await cargarDatos();
+      await cargarBalonesDesdeAPI();
+      alert("✅ Préstamo registrado correctamente.");
+    } else {
+      const error = await res.text();
+      console.error(error);
+      alert("❌ No se pudo registrar la renta.");
     }
-
-    // Verificamos que el estudiante tenga curso asignado
-    if (!gradoActual) {
-        alert("⚠️ No se encontró el curso del estudiante.");
-        return;
-    }
-
-    if (listaVetados.includes(nombreInput.toLowerCase())) {
-        alert("❌ El estudiante se encuentra vetado o suspendido en el sistema de bajas.");
-        return;
-    }
-
-    const tokenCsrf =
-        window.CSRF_TOKEN ||
-        document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-
-    const datos = {
-        recibido_por: nombreInput,
-        curso: gradoActual,
-        balon: objetoActual,
-        id_unico: idUnicoInput,
-        lugar: lugarInput
-    };
-
-    try {
-        const res = await fetch(ENDPOINTS.guardarEntrega, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": tokenCsrf
-            },
-            body: JSON.stringify(datos)
-        });
-
-        if (res.ok) {
-            resetearFormulario();
-            await cargarDatos();
-            await cargarBalonesDesdeAPI();
-            alert("✅ Préstamo registrado correctamente.");
-        } else {
-            const error = await res.text();
-            console.error(error);
-            alert("❌ No se pudo registrar la renta.");
-        }
-
-    } catch (error) {
-        console.error(error);
-        alert("❌ Error de red.");
-    }
+  } catch (error) {
+    console.error(error);
+    alert("❌ Error de red.");
+  }
 }
 
 // ==========================================================================
@@ -596,24 +607,14 @@ function generarLetras(grado) {
     document.getElementById("letrasContenedor").innerHTML = html;
     letraActual = "";
 }
-
 function obtenerPeriodoActual(fecha) {
-    const periodoData = [
-        { start: '08:00', end: '09:40', grades: [6,7,8], label: 'Seniors' },
-        { start: '10:00', end: '10:50', grades: [3,4,5], label: 'Teens' },
-        { start: '10:51', end: '11:45', grades: [9,10,11], label: 'Masters' },
-        { start: '11:46', end: '12:40', grades: [6,7,8], label: 'Seniors' },
-        { start: '12:41', end: '13:35', grades: [3,4,5], label: 'Teens' },
-        { start: '13:36', end: '14:15', grades: [9,10,11], label: 'Masters' }
-    ];
-    const minutos = fecha.getHours() * 60 + fecha.getMinutes();
-    for (const p of periodoData) {
-        const [hs, ms] = p.start.split(':').map(Number);
-        const [he, me] = p.end.split(':').map(Number);
-        if (minutos >= (hs * 60 + ms) && minutos < (he * 60 + me)) return p;
-    }
-    return null; // Aquí termina la función limpiamente
+    // Retorna todos los cursos disponibles del 3 al 11 sin filtrar por hora
+    return {
+        grades: [3, 4, 5, 6, 7, 8, 9, 10, 11],
+        label: 'Todos los cursos'
+    };
 }
+
 
 function cargarBotonesCursos() {
     const now = new Date();
@@ -686,8 +687,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(() => {
         cargarDatos();
         cargarBalonesDesdeAPI();
-    }, 4000); 
+    }, 6000); 
 
     // Lista de vetados puede ser más lenta porque no cambia cada segundo
-    setInterval(cargarVetadosDesdeAPI, 50000); 
+    setInterval(cargarVetadosDesdeAPI, 70000); 
 });

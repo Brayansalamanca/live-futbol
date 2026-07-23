@@ -1,0 +1,371 @@
+.contenedor-principal{
+    padding:100px 20px 40px;
+    max-width:1300px;
+    margin:auto;
+    font-family:'Segoe UI',sans-serif;
+}
+
+.header-objetos{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+    margin-bottom:30px;
+}
+
+.titulo-objetos{
+    margin:0;
+}
+
+.subtitulo-objetos{
+    margin-top:8px;
+    color:#94a3b8;
+    font-size:14px;
+}
+
+.status-indicador{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 15px;
+    background:#0f172a;
+    color:#fff;
+    border-radius:12px;
+    font-size:13px;
+}
+
+.status-online{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#22c55e;
+    display:inline-block;
+}
+
+/* ============================= */
+/* FILTRO */
+/* ============================= */
+
+.filtro-section{
+    margin-bottom:25px;
+    background:#fff;
+    padding:18px;
+    border-radius:18px;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+.input-busqueda{
+    width:100%;
+    padding:15px;
+    border:1px solid #cbd5e1;
+    border-radius:12px;
+    font-size:15px;
+    outline:none;
+    transition:.25s;
+}
+
+.input-busqueda:focus{
+    border-color:#2563eb;
+    box-shadow:0 0 0 3px rgba(37,99,235,.15);
+}
+
+/* ============================= */
+/* GRID */
+/* ============================= */
+
+.grid-principal{
+    display:grid;
+    grid-template-columns:1fr 2fr;
+    gap:25px;
+}
+
+/* ============================= */
+/* PANEL IZQUIERDO */
+/* ============================= */
+
+.panel-lateral{
+    display:flex;
+    flex-direction:column;
+    gap:25px;
+}
+/*======================================
+=            TARJETAS
+======================================*/
+
+.card{
+    background:#fff;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+.card-azul{
+    border-top:6px solid #2563eb;
+}
+
+/*======================================
+=            TITULOS
+======================================*/
+
+.titulo-card{
+    margin-top:0;
+    margin-bottom:20px;
+    font-size:24px;
+}
+
+.titulo-azul{
+    color:#2563eb;
+}
+
+/*======================================
+=            FORMULARIOS
+======================================*/
+
+.grupo-formulario{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.input-form{
+    padding:12px;
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+    font-size:15px;
+    outline:none;
+    transition:.25s;
+}
+
+.input-form:focus{
+    border-color:#2563eb;
+    box-shadow:0 0 0 3px rgba(37,99,235,.15);
+}
+
+/*======================================
+=            BOTONES
+======================================*/
+
+.btn{
+    border:none;
+    border-radius:12px;
+    padding:14px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}
+
+.btn-azul{
+    background:#2563eb;
+    color:#fff;
+}
+
+.btn-azul:hover{
+    background:#1d4ed8;
+}
+/*======================================
+=            TARJETA MORADA
+======================================*/
+
+.card-morado{
+    border-top:6px solid #9333ea;
+}
+
+/*======================================
+=            TITULOS
+======================================*/
+
+.titulo-morado{
+    color:#9333ea;
+}
+
+/*======================================
+=            DESCRIPCION
+======================================*/
+
+.descripcion-card{
+    font-size:13px;
+    color:#64748b;
+    margin-bottom:20px;
+}
+
+/*======================================
+=            BOTON MORADO
+======================================*/
+
+.btn-morado{
+    background:#9333ea;
+    color:#fff;
+}
+
+.btn-morado:hover{
+    background:#7e22ce;
+}
+
+/*======================================
+=            PANEL DERECHO
+======================================*/
+
+.panel-principal{
+    display:flex;
+    flex-direction:column;
+    gap:30px;
+}
+/*======================================
+=            TABLAS
+======================================*/
+
+.tabla-card{
+    background:#fff;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+/*======================================
+=            HEADER TABLA
+======================================*/
+
+.tabla-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px;
+    border-bottom:1px solid #e2e8f0;
+}
+
+.tabla-titulo{
+    margin:0;
+}
+
+/*======================================
+=            CONTADORES
+======================================*/
+
+.contador{
+    padding:8px 14px;
+    border-radius:999px;
+    color:#fff;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.contador-azul{
+    background:#2563eb;
+}
+
+/*======================================
+=            TABLA
+======================================*/
+
+.tabla-responsive{
+    overflow:auto;
+}
+
+.tabla-general{
+    width:100%;
+    min-width:700px;
+    border-collapse:collapse;
+}
+
+.tabla-general thead{
+    background:#f8fafc;
+}
+
+.tabla-general th{
+    padding:15px;
+    text-align:left;
+    font-weight:600;
+    border-bottom:1px solid #e2e8f0;
+}
+
+.tabla-general td{
+    padding:15px;
+    border-bottom:1px solid #edf2f7;
+    vertical-align:middle;
+}
+
+.tabla-general tbody tr{
+    transition:.25s;
+}
+
+.tabla-general tbody tr:hover{
+    background:#f8fafc;
+}
+/*======================================
+=            CONTADOR MORADO
+======================================*/
+
+.contador-morado{
+    background:#9333ea;
+}
+
+/*======================================
+=            RESPONSIVE
+======================================*/
+
+@media (max-width:1100px){
+
+    .grid-principal{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media (max-width:768px){
+
+    .contenedor-principal{
+        padding-top:80px;
+        padding-left:15px;
+        padding-right:15px;
+    }
+
+    .header-objetos{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .tabla-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
+
+    .tabla-general{
+        min-width:600px;
+    }
+
+    .titulo-card{
+        font-size:20px;
+    }
+
+    .tabla-titulo{
+        font-size:20px;
+    }
+
+}
+
+@media (max-width:480px){
+
+    .input-form,
+    .input-busqueda,
+    .btn{
+        font-size:14px;
+        padding:12px;
+    }
+
+    .card{
+        padding:18px;
+    }
+
+    .contador{
+        font-size:12px;
+        padding:6px 12px;
+    }
+
+}

@@ -2,808 +2,281 @@
 {% load static %}
 
 {% block content %}
-
-<div class="contenedor-principal" style="
-    padding-top: 100px;
-    max-width: 1300px;
-    margin: auto;
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-bottom: 40px;
-    font-family: 'Segoe UI', sans-serif;
-">
-
-    <!-- ===================================== -->
+<div class="contenedor-principal">
+    <link rel="stylesheet" href="{% static 'css/objetos_perdidos.css' %}">
     <!-- HEADER -->
-    <!-- ===================================== -->
 
-    <header style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:30px;
-        flex-wrap:wrap;
-        gap:15px;
-    ">
+    <header class="header-objetos">
 
         <div>
-            <h1 style="margin:0;">
+            <h1 class="titulo-objetos">
                 🔍 Control Inteligente de Objetos Perdidos
             </h1>
 
-            <p style="
-                margin-top:8px;
-                color:#94a3b8;
-                font-size:14px;
-            ">
+            <p class="subtitulo-objetos">
                 Sistema sincronizado en tiempo real.
             </p>
         </div>
 
-        <div id="status-indicador" style="
-            background:#0f172a;
-            color:white;
-            padding:10px 15px;
-            border-radius:12px;
-            font-size:13px;
-            display:flex;
-            align-items:center;
-            gap:10px;
-        ">
-            <span style="
-                width:10px;
-                height:10px;
-                background:#22c55e;
-                border-radius:50%;
-                display:inline-block;
-            "></span>
-
-            Sincronizado
+        <div id="status-indicador" class="status-indicador">
+            <span class="status-online">Sincronizado</span>
+            
         </div>
 
     </header>
-
-    <!-- ===================================== -->
-    <!-- FILTRO -->
-    <!-- ===================================== -->
-
-    <section style="
-        margin-bottom:25px;
-        background:white;
-        padding:18px;
-        border-radius:18px;
-        box-shadow:0 4px 10px rgba(0,0,0,.08);
-    ">
-
-        <input
-            type="text"
-            id="inputBusqueda"
-            placeholder="Buscar prenda, estudiante, curso o ubicación..."
-            onkeyup="filtrarTablas()"
-            style="
-                width:100%;
-                padding:15px;
-                border-radius:12px;
-                border:1px solid #cbd5e1;
-                font-size:15px;
-                outline:none;
-            "
-        >
-
-    </section>
-
-    <!-- ===================================== -->
-    <!-- GRID -->
-    <!-- ===================================== -->
-
-    <div style="
-        display:grid;
-        grid-template-columns:1fr 2fr;
-        gap:25px;
-    ">
-
-        <!-- ================================= -->
-        <!-- PANEL IZQUIERDO -->
-        <!-- ================================= -->
-
-        <aside style="
-            display:flex;
-            flex-direction:column;
-            gap:25px;
-        ">
-
-            <!-- REGISTRAR HALLAZGO -->
-
-            <div style="
-                background:white;
-                padding:25px;
-                border-radius:20px;
-                box-shadow:0 4px 10px rgba(0,0,0,.08);
-                border-top:6px solid #2563eb;
-            ">
-
-                <h2 style="
-                    margin-top:0;
-                    margin-bottom:20px;
-                    color:#2563eb;
-                ">
-                    📦 Registrar Hallazgo
-                </h2>
-
-                <form id="formHallazgo"
-                      onsubmit="event.preventDefault(); guardarHallazgo();">
-
-                    <div style="
-                        display:flex;
-                        flex-direction:column;
-                        gap:15px;
-                    ">
-
-                        <input
-                            id="h_tipo"
-                            list="tipos"
-                            placeholder="Tipo de prenda"
-                            required
-                            style="
-                                padding:12px;
-                                border-radius:10px;
-                                border:1px solid #cbd5e1;
-                            "
-                        >
-
-                        <datalist id="tipos">
-                            <option value="Saco/Busito">
-                            <option value="Chaqueta">
-                            <option value="Sudadera">
-                            <option value="Gorra">
-                            <option value="Uniforme Diario">
-                            <option value="Camisa">
-                            <option value="Pantalón">
-                        </datalist>
-
-                        <input
-                            id="h_color"
-                            placeholder="Color o marca"
-                            required
-                            style="
-                                padding:12px;
-                                border-radius:10px;
-                                border:1px solid #cbd5e1;
-                            "
-                        >
-
-                        <input
-                            id="h_lugar"
-                            placeholder="Lugar encontrado"
-                            required
-                            style="
-                                padding:12px;
-                                border-radius:10px;
-                                border:1px solid #cbd5e1;
-                            "
-                        >
-
-                        <button type="submit" style="
-                            background:#2563eb;
-                            color:white;
-                            border:none;
-                            border-radius:12px;
-                            padding:14px;
-                            font-weight:bold;
-                            cursor:pointer;
-                            font-size:15px;
-                        ">
-                            🚀 Registrar Hallazgo
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-            <!-- REGISTRAR SOLICITUD -->
-
-            <div style="
-                background:white;
-                padding:25px;
-                border-radius:20px;
-                box-shadow:0 4px 10px rgba(0,0,0,.08);
-                border-top:6px solid #9333ea;
-            ">
-
-                <h2 style="
-                    margin-top:0;
-                    margin-bottom:10px;
-                    color:#9333ea;
-                ">
-                    🙋‍♂️ Persona Buscando
-                </h2>
-
-                <p style="
-                    font-size:13px;
-                    color:#64748b;
-                    margin-bottom:20px;
-                ">
-                    Registra estudiantes que estén buscando una prenda.
-                </p>
-
-                <form id="formSolicitud"
-                      onsubmit="event.preventDefault(); guardarSolicitud();">
-
-                    <div style="
-                        display:flex;
-                        flex-direction:column;
-                        gap:15px;
-                    ">
-
-                        <input
-                            id="s_nombre"
-                            placeholder="Nombre completo"
-                            required
-                            style="
-                                padding:12px;
-                                border-radius:10px;
-                                border:1px solid #cbd5e1;
-                            "
-                        >
-
-                        <input
-                            id="s_curso"
-                            placeholder="Curso"
-                            required
-                            style="
-                                padding:12px;
-                                border-radius:10px;
-                                border:1px solid #cbd5e1;
-                            "
-                        >
-
-                        <input
-                            id="s_prenda"
-                            placeholder="¿Qué perdió?"
-                            required
-                            style="
-                                padding:12px;
-                                border-radius:10px;
-                                border:1px solid #cbd5e1;
-                            "
-                        >
-
-                        <button type="submit" style="
-                            background:#9333ea;
-                            color:white;
-                            border:none;
-                            border-radius:12px;
-                            padding:14px;
-                            font-weight:bold;
-                            cursor:pointer;
-                            font-size:15px;
-                        ">
-                            ➕ Registrar Solicitud
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </aside>
-
-        <!-- ================================= -->
-        <!-- PANEL DERECHO -->
-        <!-- ================================= -->
-
-        <main style="
-            display:flex;
-            flex-direction:column;
-            gap:30px;
-        ">
-
-            <!-- INVENTARIO -->
-
-            <section style="
-                background:white;
-                border-radius:20px;
-                overflow:hidden;
-                box-shadow:0 4px 10px rgba(0,0,0,.08);
-            ">
-
-                <div style="
-                    padding:20px;
-                    border-bottom:1px solid #e2e8f0;
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                ">
-
-                    <h2 style="margin:0;">
-                        🧺 Inventario Actual
-                    </h2>
-
-                    <span id="countH" style="
-                        background:#2563eb;
-                        color:white;
-                        padding:8px 14px;
-                        border-radius:999px;
-                        font-size:13px;
-                        font-weight:bold;
-                    ">
-                        0
-                    </span>
-
-                </div>
-
-                <div style="overflow:auto;">
-
-                    <table style="
-                        width:100%;
-                        border-collapse:collapse;
-                        min-width:700px;
-                    ">
-
-                        <thead style="
-                            background:#f8fafc;
-                        ">
-
-                            <tr>
-
-                                <th style="padding:15px; text-align:left;">
-                                    Prenda
-                                </th>
-
-                                <th style="padding:15px; text-align:left;">
-                                    Detalles
-                                </th>
-
-                                <th style="padding:15px; text-align:left;">
-                                    Ubicación
-                                </th>
-
-                                <th style="padding:15px; text-align:left;">
-                                    Acción
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="tablaHallazgos">
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
-
-            <!-- SOLICITUDES -->
-
-            <section style="
-                background:white;
-                border-radius:20px;
-                overflow:hidden;
-                box-shadow:0 4px 10px rgba(0,0,0,.08);
-            ">
-
-                <div style="
-                    padding:20px;
-                    border-bottom:1px solid #e2e8f0;
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                ">
-
-                    <h2 style="
-                        margin:0;
-                        color:#9333ea;
-                    ">
-                        ⏳ Personas Buscando
-                    </h2>
-
-                    <span id="countS" style="
-                        background:#9333ea;
-                        color:white;
-                        padding:8px 14px;
-                        border-radius:999px;
-                        font-size:13px;
-                        font-weight:bold;
-                    ">
-                        0
-                    </span>
-
-                </div>
-
-                <div style="overflow:auto;">
-
-                    <table style="
-                        width:100%;
-                        border-collapse:collapse;
-                        min-width:700px;
-                    ">
-
-                        <thead style="
-                            background:#f8fafc;
-                        ">
-
-                            <tr>
-
-                                <th style="padding:15px; text-align:left;">
-                                    Estudiante
-                                </th>
-
-                                <th style="padding:15px; text-align:left;">
-                                    Curso
-                                </th>
-
-                                <th style="padding:15px; text-align:left;">
-                                    Busca
-                                </th>
-
-                                <th style="padding:15px; text-align:left;">
-                                    Acción
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="tablaSolicitudes">
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
-
-        </main>
-
-    </div>
+<!-- ===================================== -->
+<!-- FILTRO -->
+<!-- ===================================== -->
+
+<section class="filtro-section">
+
+    <input
+        type="text"
+        id="inputBusqueda"
+        class="input-busqueda"
+        placeholder="Buscar prenda, estudiante, curso o ubicación..."
+        onkeyup="filtrarTablas()"
+    >
+
+</section>
+
+<!-- ===================================== -->
+<!-- GRID -->
+<!-- ===================================== -->
+
+<div class="grid-principal">
+
+    <!-- ================================= -->
+    <!-- PANEL IZQUIERDO -->
+    <!-- ================================= -->
+
+    <aside class="panel-lateral">
+<!-- ================================= -->
+<!-- REGISTRAR HALLAZGO -->
+<!-- ================================= -->
+
+<div class="card card-azul">
+
+    <h2 class="titulo-card titulo-azul">
+        📦 Registrar Hallazgo
+    </h2>
+
+    <form id="formHallazgo"
+          onsubmit="event.preventDefault(); guardarHallazgo();">
+
+        <div class="grupo-formulario">
+
+            <input
+                id="h_tipo"
+                list="tipos"
+                class="input-form"
+                placeholder="Tipo de prenda"
+                required
+            >
+
+            <datalist id="tipos">
+                <option value="Saco/Busito">
+                <option value="Chaqueta">
+                <option value="Sudadera">
+                <option value="Gorra">
+                <option value="Uniforme Diario">
+                <option value="Camisa">
+                <option value="Pantalón">
+            </datalist>
+
+            <input
+                id="h_color"
+                class="input-form"
+                placeholder="Color o marca"
+                required
+            >
+
+            <input
+                id="h_lugar"
+                class="input-form"
+                placeholder="Lugar encontrado"
+                required
+            >
+
+            <button
+                type="submit"
+                class="btn btn-azul">
+                🚀 Registrar Hallazgo
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+<!-- ================================= -->
+<!-- REGISTRAR SOLICITUD -->
+<!-- ================================= -->
+
+<div class="card card-morado">
+
+    <h2 class="titulo-card titulo-morado">
+        🙋‍♂️ Persona Buscando
+    </h2>
+
+    <p class="descripcion-card">
+        Registra estudiantes que estén buscando una prenda.
+    </p>
+
+    <form
+        id="formSolicitud"
+        onsubmit="event.preventDefault(); guardarSolicitud();"
+    >
+
+        <div class="grupo-formulario">
+
+            <input
+                id="s_nombre"
+                class="input-form"
+                placeholder="Nombre completo"
+                required
+            >
+
+            <input
+                id="s_curso"
+                class="input-form"
+                placeholder="Curso"
+                required
+            >
+
+            <input
+                id="s_prenda"
+                class="input-form"
+                placeholder="¿Qué perdió?"
+                required
+            >
+
+            <button
+                type="submit"
+                class="btn btn-morado"
+            >
+                ➕ Registrar Solicitud
+            </button>
+
+        </div>
+
+    </form>
 
 </div>
 
-<script>
+</aside>
 
-const API_URLS = {
+<!-- ================================= -->
+<!-- PANEL DERECHO -->
+<!-- ================================= -->
 
-    hallazgos: '/api/obtener-objetos/',
-    solicitudes: '/api/obtener-solicitudes/',
+<main class="panel-principal">
+    <!-- ================================= -->
+<!-- INVENTARIO -->
+<!-- ================================= -->
 
-    guardarH: '/api/guardar-objeto/',
-    guardarS: '/api/guardar-solicitud/',
+<section class="tabla-card">
 
-    eliminarObjeto: '/api/eliminar-objeto/',
-    eliminarSolicitud: '/api/eliminar-solicitud/'
-};
+    <div class="tabla-header">
 
-// =========================================
-// CARGAR DATOS
-// =========================================
+        <h2 class="tabla-titulo">
+            🧺 Inventario Actual
+        </h2>
 
-async function fetchDataTable() {
+        <span
+            id="countH"
+            class="contador contador-azul"
+        >
+            0
+        </span>
 
-    try {
+    </div>
 
-        const [resH, resS] = await Promise.all([
+    <div class="tabla-responsive">
 
-            fetch(API_URLS.hallazgos + '?t=' + Date.now()),
-            fetch(API_URLS.solicitudes + '?t=' + Date.now())
+        <table class="tabla-general">
 
-        ]);
+            <thead>
 
-        const hallazgos = await resH.json();
-        const solicitudes = await resS.json();
+                <tr>
 
-        renderHallazgos(hallazgos);
-        renderSolicitudes(solicitudes);
+                    <th>Prenda</th>
 
-        document.getElementById('countH').innerText = hallazgos.length;
-        document.getElementById('countS').innerText = solicitudes.length;
+                    <th>Detalles</th>
 
-    } catch(error) {
+                    <th>Ubicación</th>
 
-        console.error(error);
-    }
-}
+                    <th>Acción</th>
 
-// =========================================
-// RENDER HALLAZGOS
-// =========================================
+                </tr>
 
-function renderHallazgos(data) {
+            </thead>
 
-    const tabla = document.getElementById('tablaHallazgos');
+            <tbody id="tablaHallazgos">
 
-    if(!data.length){
+            </tbody>
 
-        tabla.innerHTML = `
-            <tr>
-                <td colspan="4" style="
-                    padding:40px;
-                    text-align:center;
-                    color:#94a3b8;
-                ">
-                    No hay objetos registrados
-                </td>
-            </tr>
-        `;
+        </table>
 
-        return;
-    }
+    </div>
 
-    tabla.innerHTML = '';
+</section>
+<!-- ================================= -->
+<!-- SOLICITUDES -->
+<!-- ================================= -->
 
-    data.forEach(h => {
+<section class="tabla-card">
 
-        tabla.innerHTML += `
+    <div class="tabla-header">
 
-            <tr style="
-                border-bottom:1px solid #e2e8f0;
-            ">
+        <h2 class="tabla-titulo titulo-morado">
+            ⏳ Personas Buscando
+        </h2>
 
-                <td style="padding:15px;">
-                    <strong>${h.tipo}</strong>
-                </td>
+        <span
+            id="countS"
+            class="contador contador-morado"
+        >
+            0
+        </span>
 
-                <td style="padding:15px;">
-                    ${h.descripcion}
-                </td>
+    </div>
 
-                <td style="padding:15px;">
-                    📍 ${h.nombre}
-                </td>
+    <div class="tabla-responsive">
 
-                <td style="padding:15px;">
+        <table class="tabla-general">
 
-                    <button
-                        onclick="resolverItem('${h.id}', 'hallazgo')"
-                        style="
-                            background:#10b981;
-                            color:white;
-                            border:none;
-                            padding:10px 15px;
-                            border-radius:10px;
-                            cursor:pointer;
-                            font-weight:bold;
-                        "
-                    >
-                        ✅ Entregar
-                    </button>
-
-                </td>
-
-            </tr>
-        `;
-    });
-}
-// =========================================
-// RENDER SOLICITUDES
-// =========================================
+            <thead>
 
-function renderSolicitudes(data) {
+                <tr>
 
-    const tabla = document.getElementById('tablaSolicitudes');
+                    <th>Estudiante</th>
 
-    if(!data.length){
+                    <th>Curso</th>
 
-        tabla.innerHTML = `
-            <tr>
-                <td colspan="4" style="
-                    padding:40px;
-                    text-align:center;
-                    color:#94a3b8;
-                ">
-                    No hay solicitudes activas
-                </td>
-            </tr>
-        `;
+                    <th>Busca</th>
 
-        return;
-    }
+                    <th>Acción</th>
 
-    tabla.innerHTML = '';
+                </tr>
 
-    data.forEach(s => {
+            </thead>
 
-        tabla.innerHTML += `
+            <tbody id="tablaSolicitudes">
 
-            <tr style="
-                border-bottom:1px solid #e2e8f0;
-            ">
+            </tbody>
 
-                <td style="padding:15px;">
-                    <strong>${s.nombre}</strong>
-                </td>
+        </table>
 
-                <td style="padding:15px;">
-                    ${s.curso}
-                </td>
+    </div>
 
-                <td style="padding:15px;">
-                    ${s.descripcion}
-                </td>
+</section>
 
-                <td style="padding:15px;">
+</main>
 
-                    <button
-                        onclick="resolverItem('${s.id}', 'solicitud')"
-                        style="
-                            background:#9333ea;
-                            color:white;
-                            border:none;
-                            padding:10px 15px;
-                            border-radius:10px;
-                            cursor:pointer;
-                            font-weight:bold;
-                        "
-                    >
-                        ❌ Cerrar
-                    </button>
+</div>
 
-                </td>
-
-            </tr>
-        `;
-    });
-}
-
-// =========================================
-// GUARDAR HALLAZGO
-// =========================================
-
-async function guardarHallazgo() {
-
-    const data = {
-
-    nombre: document.getElementById('h_lugar').value,
-    tipo: document.getElementById('h_tipo').value,
-    dif: document.getElementById('h_color').value
-};
-
-    try {
-
-        await fetch(API_URLS.guardarH, {
-
-            method:'POST',
-
-            headers:{
-                'Content-Type':'application/json',
-                'X-CSRFToken':'{{ csrf_token }}'
-            },
-
-            body: JSON.stringify(data)
-        });
-
-        document.getElementById('formHallazgo').reset();
-
-        fetchDataTable();
-
-    } catch(error){
-
-        console.error(error);
-    }
-}
-
-// =========================================
-// GUARDAR SOLICITUD
-// =========================================
-
-async function guardarSolicitud() {
-
-    const data = {
-
-    nombre: document.getElementById('s_nombre').value,
-    curso: document.getElementById('s_curso').value,
-    descripcion: document.getElementById('s_prenda').value
-};
-
-    try {
-
-        await fetch(API_URLS.guardarS, {
-
-            method:'POST',
-
-            headers:{
-                'Content-Type':'application/json',
-                'X-CSRFToken':'{{ csrf_token }}'
-            },
-
-            body: JSON.stringify(data)
-        });
-
-        document.getElementById('formSolicitud').reset();
-
-        fetchDataTable();
-
-    } catch(error){
-
-        console.error(error);
-    }
-}
-
-// =========================================
-// ELIMINAR
-// =========================================
-
-async function resolverItem(id, tipo) {
-
-    if(!confirm('¿Seguro que deseas eliminar este registro?')) return;
-
-    let url = '';
-
-    if(tipo === 'hallazgo'){
-
-        url = API_URLS.eliminarObjeto + id + '/';
-
-    } else {
-
-        url = API_URLS.eliminarSolicitud + id + '/';
-    }
-
-    try {
-
-        const response = await fetch(url, {
-
-            method:'DELETE',
-
-            headers:{
-                'X-CSRFToken':'{{ csrf_token }}'
-            }
-        });
-
-        if(response.ok){
-
-            fetchDataTable();
-
-        } else {
-
-            alert('No se pudo eliminar.');
-        }
-
-    } catch(error){
-
-        console.error(error);
-    }
-}
-
-// =========================================
-// FILTRO
-// =========================================
-
-function filtrarTablas() {
-
-    const texto = document
-        .getElementById('inputBusqueda')
-        .value
-        .toLowerCase();
-
-    const filas = document.querySelectorAll('tbody tr');
-
-    filas.forEach(fila => {
-
-        fila.style.display =
-            fila.innerText.toLowerCase().includes(texto)
-            ? ''
-            : 'none';
-    });
-}
-
-// =========================================
-// AUTO REFRESH
-// =========================================
-
-setInterval(fetchDataTable, 3000);
-
-// =========================================
-// INICIO
-// =========================================
-
-fetchDataTable();
-
-</script>
+</div>
+<script src="{% static 'js/objetos_perdidos.js' %}"></script>
 
 {% endblock %}
