@@ -2,7 +2,7 @@
    API DE ESTUDIANTES
 ========================================== */
 
-const API_ESTUDIANTE = "https://script.google.com/macros/s/AKfycbzKpXyD0WPJV580HoVoeJpBPCQ6wCfxo9rBOAyRhTaFZ3iZUnPRm8lnbJtbhKpSkXtZUQ/exec?action=get_all&nfc_id=";
+const API_ESTUDIANTE = "https://script.google.com/macros/s/AKfycbzKpXyD0WPJV580HoVoeJpBPCQ6wCfxo9rBOAyRhTaFZ3iZUnPRm8lnbJtbhKpSkXtZUQ/exec?action=get_all&nfc=";
 
 /* ==========================================
    CONSULTAR ESTUDIANTE POR ID NFC
@@ -22,66 +22,90 @@ async function consultarEstudiante(idTarjeta) {
         );
 
         if (!respuesta.ok) {
-            throw new Error("No se encontró el estudiante.");
+            throw new Error("No fue posible consultar la API.");
         }
 
         const datos = await respuesta.json();
 
-        // La API puede devolver un objeto o un arreglo
-        const estudiante = Array.isArray(datos) ? datos[0] : datos;
+        let estudiante = null;
+
+        //--------------------------------------------------------
+        // Si la API devuelve una lista completa buscamos el RFID
+        //--------------------------------------------------------
+        if (Array.isArray(datos)) {
+
+            estudiante = datos.find(e => {
+
+                const rfid = String(
+                    e["rfid serie"] ||
+                    e.rfid ||
+                    e.uid ||
+                    ""
+                ).trim().toUpperCase();
+
+                return rfid === String(idTarjeta)
+                    .trim()
+                    .toUpperCase();
+
+            });
+
+        } else {
+
+            estudiante = datos;
+
+        }
 
         if (!estudiante) {
-            alert("⚠️ Estudiante no encontrado.");
+
+            alert("⚠️ Tarjeta NFC no registrada.");
+
+            console.warn("No se encontró:", idTarjeta);
+
             return;
+
         }
 
         console.log("Alumno encontrado:", estudiante);
 
-        //------------------------------------------------------------------
+        //--------------------------------------------------------
         // NOMBRE
-        //------------------------------------------------------------------
+        //--------------------------------------------------------
 
         const nombre =
-            estudiante.nombre ||
             estudiante.estudiante ||
+            estudiante.nombre ||
             estudiante.Nombre ||
             "";
 
         document.getElementById("textoVoz").value = nombre;
 
-        //------------------------------------------------------------------
+        //--------------------------------------------------------
         // CURSO
-        //------------------------------------------------------------------
+        //--------------------------------------------------------
 
         let curso =
+            estudiante["id pestaña"] ||
             estudiante.curso ||
             estudiante.grado ||
             estudiante["curso asignado"] ||
-            estudiante["Curso"] ||
             "";
 
         curso = String(curso).trim().toUpperCase();
 
-        //------------------------------------------------------------------
-        // Reiniciar variables
-        //------------------------------------------------------------------
-
         gradoActual = "";
         letraActual = "";
 
-        //------------------------------------------------------------------
-        // Detectar automáticamente grado y letra
-        //------------------------------------------------------------------
+        //--------------------------------------------------------
+        // 11B
+        //--------------------------------------------------------
 
-        const match = curso.match(/^(\d+)\s*([A-Z])?$/);
+        const match = curso.match(/^(\d+)\s*([A-Z])$/);
 
         if (match) {
 
             gradoActual = match[1];
 
-            if (match[2]) {
-                letraActual = match[2];
-            }
+            letraActual = match[2];
 
         } else {
 
@@ -89,22 +113,23 @@ async function consultarEstudiante(idTarjeta) {
 
         }
 
+        console.log("Curso:", curso);
         console.log("Grado:", gradoActual);
         console.log("Letra:", letraActual);
 
-        //------------------------------------------------------------------
-        // Marcar botones automáticamente
-        //------------------------------------------------------------------
+        //--------------------------------------------------------
+        // BOTONES
+        //--------------------------------------------------------
 
         document
             .querySelectorAll("#gradosContenedor .btn-curso")
-            .forEach(b => {
+            .forEach(btn => {
 
-                b.classList.remove("activo");
+                btn.classList.remove("activo");
 
-                if (b.textContent.includes(gradoActual)) {
+                if (btn.textContent.includes(gradoActual)) {
 
-                    b.classList.add("activo");
+                    btn.classList.add("activo");
 
                 }
 
@@ -116,11 +141,13 @@ async function consultarEstudiante(idTarjeta) {
 
             document
                 .querySelectorAll("#letrasContenedor .btn-letra")
-                .forEach(b => {
+                .forEach(btn => {
 
-                    if (b.textContent.trim() === letraActual) {
+                    btn.classList.remove("activo");
 
-                        b.classList.add("activo");
+                    if (btn.textContent.trim() === letraActual) {
+
+                        btn.classList.add("activo");
 
                     }
 
@@ -135,10 +162,10 @@ async function consultarEstudiante(idTarjeta) {
 
         console.error(error);
 
-        alert("❌ No fue posible consultar el estudiante.");
-
         gradoActual = "";
         letraActual = "";
+
+        alert("❌ Error consultando el estudiante.");
 
     }
 
@@ -189,42 +216,96 @@ function cambiarVista(modulo) {
 // ==========================================================================
 // 2. ESCANEO NFC DEL CELULAR O TAG DEL ESTUDIANTE (PASO 1)
 // ==========================================================================
+// ==========================================================================
+// ESCANEAR NFC DEL ESTUDIANTE
+// ==========================================================================
 async function iniciarEscaneoNFCPersona() {
+
     const estadoTxt = document.getElementById("nfc-persona-estado");
-    const inputNombre = document.getElementById("textoVoz");
-    
-    if (!('NDEFReader' in window)) {
-        estadoTxt.innerText = "❌ NFC no soportado en este dispositivo/navegador.";
+
+    if (!("NDEFReader" in window)) {
+
+        estadoTxt.innerText = "❌ Este dispositivo no soporta Web NFC.";
         estadoTxt.style.color = "var(--danger)";
         return;
+
     }
 
     try {
+
         const ndef = new NDEFReader();
+
         await ndef.scan();
-        estadoTxt.innerText = "📡 Buscando... Acerca la etiqueta o celular del alumno.";
+
+        estadoTxt.innerText = "📡 Acerque el carnet del estudiante...";
         estadoTxt.style.color = "var(--warning)";
 
-       ndef.onreading = async event => {
+        ndef.onreading = async (event) => {
 
-    const idDigital = event.serialNumber;
+            try {
 
-    estadoTxt.innerText = "🔎 Consultando estudiante...";
-    estadoTxt.style.color = "var(--warning)";
+                //----------------------------------------------------------
+                // UID DEL NFC
+                //----------------------------------------------------------
 
-    await consultarEstudiante(idDigital);
+                const idDigital = String(event.serialNumber || "")
+                    .trim()
+                    .toUpperCase();
 
-    estadoTxt.innerText = "✅ Estudiante identificado";
-    estadoTxt.style.color = "var(--success)";
+                console.log("📡 UID leído:", idDigital);
 
-    console.log("ID NFC:", idDigital);
+                estadoTxt.innerText = "🔎 Consultando estudiante...";
+                estadoTxt.style.color = "var(--warning)";
 
-};
+                //----------------------------------------------------------
+                // CONSULTAR API
+                //----------------------------------------------------------
+
+                await consultarEstudiante(idDigital);
+
+                //----------------------------------------------------------
+                // SI TODO SALIÓ BIEN
+                //----------------------------------------------------------
+
+                if (gradoActual) {
+
+                    estadoTxt.innerText = "✅ Estudiante identificado";
+                    estadoTxt.style.color = "var(--success)";
+
+                } else {
+
+                    estadoTxt.innerText = "⚠️ Estudiante no encontrado";
+                    estadoTxt.style.color = "var(--danger)";
+
+                }
+
+            } catch (err) {
+
+                console.error(err);
+
+                estadoTxt.innerText = "❌ Error consultando estudiante";
+                estadoTxt.style.color = "var(--danger)";
+
+            }
+
+        };
+
+        ndef.onreadingerror = () => {
+
+            estadoTxt.innerText = "❌ No fue posible leer el NFC.";
+            estadoTxt.style.color = "var(--danger)";
+
+        };
 
     } catch (error) {
-        estadoTxt.innerText = "❌ Error al activar lector NFC.";
+
+        console.error(error);
+
+        estadoTxt.innerText = "❌ No fue posible iniciar el lector NFC.";
         estadoTxt.style.color = "var(--danger)";
+
     }
+
 }
 
 // ==========================================================================
@@ -420,64 +501,128 @@ function actualizarContadoresStock() {
     });
 }
 
+// ==========================================================================
+// REGISTRAR PRÉSTAMO
+// ==========================================================================
 async function registrarEnNube() {
+
     const nombreInput = document.getElementById("textoVoz").value.trim();
     const lugarInput = document.getElementById("lugarSelect").value;
     const idUnicoInput = document.getElementById("idObjetoSelect").value;
 
-    if (!nombreInput || !objetoActual || !idUnicoInput) {
-        alert("⚠️ Datos incompletos: Faltan campos obligatorios (Estudiante, Tipo de Objeto e ID del Balón).");
+    //------------------------------------------------------
+    // Validaciones
+    //------------------------------------------------------
+
+    if (!nombreInput) {
+        alert("⚠️ Debes identificar al estudiante.");
         return;
     }
 
-    // Verificamos que el estudiante tenga curso asignado
+    if (!objetoActual) {
+        alert("⚠️ Debes seleccionar el tipo de objeto.");
+        return;
+    }
+
+    if (!idUnicoInput) {
+        alert("⚠️ Debes seleccionar la unidad física.");
+        return;
+    }
+
     if (!gradoActual) {
-        alert("⚠️ No se encontró el curso del estudiante.");
+        alert("⚠️ No fue posible determinar el curso del estudiante.");
         return;
     }
 
     if (listaVetados.includes(nombreInput.toLowerCase())) {
-        alert("❌ El estudiante se encuentra vetado o suspendido en el sistema de bajas.");
+        alert("❌ El estudiante se encuentra vetado.");
         return;
     }
+
+    //------------------------------------------------------
+    // Construcción del curso
+    //------------------------------------------------------
+
+    let cursoFinal = String(gradoActual).trim();
+
+    if (
+        letraActual &&
+        !cursoFinal.toUpperCase().endsWith(letraActual.toUpperCase())
+    ) {
+        cursoFinal += letraActual.toUpperCase();
+    }
+
+    //------------------------------------------------------
+    // CSRF
+    //------------------------------------------------------
 
     const tokenCsrf =
         window.CSRF_TOKEN ||
         document.querySelector('[name=csrfmiddlewaretoken]')?.value;
 
+    //------------------------------------------------------
+    // Datos
+    //------------------------------------------------------
+
     const datos = {
         recibido_por: nombreInput,
-        curso: gradoActual,
+        curso: cursoFinal,
         balon: objetoActual,
         id_unico: idUnicoInput,
         lugar: lugarInput
     };
 
+    console.log("📤 Enviando:", datos);
+
     try {
+
         const res = await fetch(ENDPOINTS.guardarEntrega, {
+
             method: "POST",
+
             headers: {
+
                 "Content-Type": "application/json",
                 "X-CSRFToken": tokenCsrf
+
             },
+
             body: JSON.stringify(datos)
+
         });
 
-        if (res.ok) {
-            resetearFormulario();
-            await cargarDatos();
-            await cargarBalonesDesdeAPI();
-            alert("✅ Préstamo registrado correctamente.");
-        } else {
-            const error = await res.text();
-            console.error(error);
-            alert("❌ No se pudo registrar la renta.");
+        const texto = await res.text();
+
+        console.log("Respuesta servidor:", texto);
+
+        if (!res.ok) {
+
+            alert("❌ No se pudo registrar el préstamo.");
+
+            return;
+
         }
 
+        //------------------------------------------------------
+        // Actualizar interfaz
+        //------------------------------------------------------
+
+        resetearFormulario();
+
+        await cargarDatos();
+
+        await cargarBalonesDesdeAPI();
+
+        alert("✅ Préstamo registrado correctamente.");
+
     } catch (error) {
+
         console.error(error);
-        alert("❌ Error de red.");
+
+        alert("❌ Error de conexión con el servidor.");
+
     }
+
 }
 
 // ==========================================================================
@@ -662,63 +807,87 @@ function seleccionarObjeto(btn, obj) {
 }
 
 function seleccionarGrado(btn, grado) {
-    gradoActual = grado;
-    document.querySelectorAll("#gradosContenedor .btn-curso").forEach(b => b.classList.remove("activo"));
-    btn.classList.add("activo");
-    generarLetras(grado);
+
+    gradoActual = String(grado).trim();
+
+    document
+        .querySelectorAll("#gradosContenedor .btn-curso")
+        .forEach(b => b.classList.remove("activo"));
+
+    if (btn) {
+        btn.classList.add("activo");
+    }
+
+    generarLetras(Number(gradoActual));
+
 }
 
 function seleccionarLetra(btn, letra) {
-    letraActual = letra;
-    // Ahora busca y limpia específicamente los botones con la clase .btn-letra
-    document.querySelectorAll("#letrasContenedor .btn-letra").forEach(b => b.classList.remove("activo"));
-    btn.classList.add("activo");
+
+    letraActual = String(letra).trim().toUpperCase();
+
+    document
+        .querySelectorAll("#letrasContenedor .btn-letra")
+        .forEach(b => b.classList.remove("activo"));
+
+    if (btn) {
+        btn.classList.add("activo");
+    }
+
 }
-
 function generarLetras(grado) {
-    let letras = ["A", "B", "C", "D", "E"]; // Lista base por defecto
 
-    // Aplicamos las reglas específicas para cada grupo de grados
-    if ([3, 4, 5].includes(grado)) {
-        letras = ["A", "B", "C", "D"];       // Hasta la D para 3°, 4° y 5°
-    } 
-    else if ([6, 7, 8].includes(grado)) {
-        letras = ["A", "B", "C", "D", "E"];  // Hasta la E para 6°, 7° y 8°
-    } 
-    else if ([9, 10].includes(grado)) {
-        letras = ["A", "B", "C", "D"];       // Hasta la D para 9° y 10°
-    } 
+    grado = Number(grado);
+
+    let letras = [];
+
+    if ([3,4,5].includes(grado)) {
+
+        letras = ["A","B","C","D"];
+
+    }
+    else if ([6,7,8].includes(grado)) {
+
+        letras = ["A","B","C","D","E"];
+
+    }
+    else if ([9,10].includes(grado)) {
+
+        letras = ["A","B","C","D"];
+
+    }
     else if (grado === 11) {
-        letras = ["A", "B", "C"];            // Hasta la C para 11°
+
+        letras = ["A","B","C"];
+
     }
 
     let html = "";
-    
-    // El ciclo recorre exactamente el tamaño de la lista asignada sin romper nada
-    for (let i = 0; i < letras.length; i++) {
-        html += `<button class="btn-letra" onclick="seleccionarLetra(this, '${letras[i]}')">${letras[i]}</button>`;
-    }
-    
-    document.getElementById("letrasContenedor").innerHTML = html;
-    letraActual = "";
-}
 
+    letras.forEach(letra => {
+
+        const activa =
+            letraActual &&
+            letraActual.toUpperCase() === letra;
+
+        html += `
+            <button
+                class="btn-letra ${activa ? "activo" : ""}"
+                onclick="seleccionarLetra(this,'${letra}')">
+                ${letra}
+            </button>
+        `;
+
+    });
+
+    document.getElementById("letrasContenedor").innerHTML = html;
+
+}
 function obtenerPeriodoActual(fecha) {
-    const periodoData = [
-        { start: '08:00', end: '09:40', grades: [6,7,8], label: 'Seniors' },
-        { start: '10:00', end: '10:50', grades: [3,4,5], label: 'Teens' },
-        { start: '10:51', end: '11:45', grades: [9,10,11], label: 'Masters' },
-        { start: '11:46', end: '12:40', grades: [6,7,8], label: 'Seniors' },
-        { start: '12:41', end: '13:35', grades: [3,4,5], label: 'Teens' },
-        { start: '13:36', end: '14:15', grades: [9,10,11], label: 'Masters' }
-    ];
-    const minutos = fecha.getHours() * 60 + fecha.getMinutes();
-    for (const p of periodoData) {
-        const [hs, ms] = p.start.split(':').map(Number);
-        const [he, me] = p.end.split(':').map(Number);
-        if (minutos >= (hs * 60 + ms) && minutos < (he * 60 + me)) return p;
-    }
-    return null; // Aquí termina la función limpiamente
+    return {
+        grades: [3, 4, 5, 6, 7, 8, 9, 10, 11],
+        label: "Todos"
+    };
 }
 
 function cargarBotonesCursos() {
@@ -770,13 +939,65 @@ function obtenerSiguienteDescanso(f) {
     return next; 
 }
 
+// ==========================================================================
+// RESETEAR FORMULARIO
+// ==========================================================================
 function resetearFormulario() {
+
+    //------------------------------------------------------
+    // Campos
+    //------------------------------------------------------
+
     document.getElementById("textoVoz").value = "";
-    document.getElementById("nfc-persona-estado").innerText = "";
-    document.querySelectorAll(".btn-objeto, .btn-curso").forEach(b => b.classList.remove("activo"));
-    objetoActual = ""; gradoActual = ""; letraActual = "";
+
+    document.getElementById("lugarSelect").selectedIndex = 0;
+
+    //------------------------------------------------------
+    // Estado NFC
+    //------------------------------------------------------
+
+    const estado = document.getElementById("nfc-persona-estado");
+
+    estado.innerHTML = "";
+    estado.style.color = "";
+
+    //------------------------------------------------------
+    // Variables globales
+    //------------------------------------------------------
+
+    objetoActual = "";
+    gradoActual = "";
+    letraActual = "";
+
+    //------------------------------------------------------
+    // Botones activos
+    //------------------------------------------------------
+
+    document
+        .querySelectorAll(".btn-objeto")
+        .forEach(btn => btn.classList.remove("activo"));
+
+    document
+        .querySelectorAll("#gradosContenedor .btn-curso")
+        .forEach(btn => btn.classList.remove("activo"));
+
+    document
+        .querySelectorAll("#letrasContenedor .btn-letra")
+        .forEach(btn => btn.classList.remove("activo"));
+
+    //------------------------------------------------------
+    // Selector de unidades
+    //------------------------------------------------------
+
+    document.getElementById("idObjetoSelect").innerHTML =
+        '<option value="">-- Selecciona Unidad (ID + Marca) --</option>';
+
+    //------------------------------------------------------
+    // Letras
+    //------------------------------------------------------
+
     document.getElementById("letrasContenedor").innerHTML = "";
-    document.getElementById("idObjetoSelect").innerHTML = '<option value="">-- Selecciona Unidad (ID + Marca) --</option>';
+
 }
 
 // ==========================================================================
