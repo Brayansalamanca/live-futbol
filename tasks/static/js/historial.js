@@ -15,40 +15,42 @@ function obtenerCiclo(curso){
     if([9, 10, 11].includes(grado)) return "Masters";
     return "Sin ciclo";
 }
-
-// Construye la fila inyectando de forma persistente la copia del ID de la base de datos
 function crearFila(entrega){
     const fecha = new Date(entrega.fecha);
     const fechaFormateada = fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString();
 
     let emoji = "⚽";
     const objeto = entrega.objeto || "";
-    if(objeto.toLowerCase().includes("basket")) emoji = "🏀";
-    if(objeto.toLowerCase().includes("volley")) emoji = "🏐";
 
-    const estadoBadge = entrega.eliminado 
-    ? `<span style="background:#fee2e2;  padding:6px 12px; border-radius:999px; font-size:12px; font-weight:bold;">Respaldado en BD</span>`
-    : `<span style="background:#dcfce7;  padding:6px 12px; border-radius:999px; font-size:12px; font-weight:bold;">Activo</span>`;
+    if (objeto.toLowerCase().includes("basket")) emoji = "🏀";
+    if (objeto.toLowerCase().includes("volley")) emoji = "🏐";
+
+    const estadoBadge = entrega.eliminado
+        ? `<span style="background:#fee2e2; color:#991b1b; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:bold;">Respaldado en BD</span>`
+        : `<span style="background:#d50000; color:#fff; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:bold;">Activo</span>`;
 
     return `
         <tr style="border-bottom:1px solid #e2e8f0;">
-            <td style="padding:15px; font-family: monospace;  font-weight: bold;">
-                <td style="padding:15px; font-family: monospace; font-weight: bold;">
-    #${entrega.marca || 'S/N'}
-</td>
-            </td>
             <td style="padding:15px;">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width:40px; height:40px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px;">
+                    <div style="width:40px; height:40px; border-radius:10px; background:#f1f5f9; display:flex; justify-content:center; align-items:center; font-size:22px;">
                         ${emoji}
                     </div>
-                    <strong>${entrega.objeto}</strong>
+                    <div>
+                        <strong>${entrega.objeto}</strong><br>
+                        <small>#${entrega.marca || "S/N"}</small>
+                    </div>
                 </div>
             </td>
-            <td style="padding:15px;">${entrega.nombre}</strong></td>
+
             <td style="padding:15px;">${entrega.curso}</td>
-            <td style="padding:15px; ">${entrega.lugar || 'N/A'}</td>
-            <td style="padding:15px;  ">${fechaFormateada}</td>
+
+            <td style="padding:15px;">${entrega.nombre}</td>
+
+            <td style="padding:15px;">${entrega.lugar || "N/A"}</td>
+
+            <td style="padding:15px;">${fechaFormateada}</td>
+
             <td style="padding:15px;">${estadoBadge}</td>
         </tr>
     `;
