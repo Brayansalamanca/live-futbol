@@ -142,7 +142,6 @@ urlpatterns = [
 
 
     # --- 📅 MÓDULO INFORMACIÓN (Horarios y Profesores) ---
-    path('horarios/', login_required(views.horarios), name='horarios'),
     path('equipos/', login_required(views.equipos), name='equipos'),
 
     # --- 🔍 OBJETOS PERDIDOS (CONVIVENCIA V1 y V2) ---

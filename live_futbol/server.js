@@ -4,12 +4,12 @@ import compression from 'compression';
 
 const app = express();
 
-// Middleware para comprimir respuestas (más rápido)
+
 app.use(compression());
 
 // Proxy hacia tu servidor Django
 app.use('/', createProxyMiddleware({
-    target: 'http://localhost:8000', // Aquí corre tu Django
+    target: 'http://localhost:8000', 
     changeOrigin: true
 }));
 

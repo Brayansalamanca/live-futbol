@@ -126,11 +126,7 @@
             <a href="{% url 'logout' %}" class="logout-btn" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
                 <span class="icon" >🚪</span>
                 <span class="link-text">Cerrar Sesión</span>
-            </a>
-             <a href="{% url 'horarios' %}" class="{% if request.path == '/horarios/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" >📅</span>
-                <span class="link-text">Horarios</span>
-            </a>
+            
 
 
 
@@ -147,10 +143,7 @@
                 <span class="link-text">Inventario</span>
             </a>
 
-            <a href="{% url 'horarios' %}" class="{% if request.path == '/horarios/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" >📅</span>
-                <span class="link-text">Horarios</span>
-            </a>
+            
 
             <a href="{% url 'profesores' %}" class="{% if request.path == '/profesores/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
                 <span class="icon" >🏆</span>
@@ -218,10 +211,6 @@
                 <span class="link-text">Inicio</span>
             </a>
 
-            <a href="{% url 'horarios' %}" class="{% if request.path == '/horarios/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
-                <span class="icon" >📅</span>
-                <span class="link-text">Horarios</span>
-            </a>
 
             <a href="{% url 'equipos' %}" class="{% if request.path == '/equipos/' %}active{% endif %}" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 20px; text-decoration: none;">
                 <span class="icon" >🏆</span>
