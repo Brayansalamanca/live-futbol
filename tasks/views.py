@@ -693,13 +693,6 @@ def cambiar_password_inicial(request):
     )
 
 
-
-
-# --- CORRECCIÓN AQUÍ: SE SEPARÓ SIGNIN ---
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm
-from django.shortcuts import render, redirect
-
 def signin(request):
     if request.method == 'GET':
         return render(request, 'signin.html', {'form': AuthenticationForm()})

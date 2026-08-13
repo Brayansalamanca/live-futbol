@@ -30,7 +30,7 @@ async function cargar() {
 
     try {
 
-        const res = await fetch("{% url 'api_obtener_prendas' %}");
+        const res = await fetch(URL_OBTENER_PRENDAS);
 
         DATOS_PRENDAS = await res.json();
 

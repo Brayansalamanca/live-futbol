@@ -98,9 +98,13 @@
 <div id="visorImagen" onclick="cerrarVisor()" class="visor-modal">
     <img id="imgGrande" src="" class="img-ampliada">
 </div>
+<script>
+    const URL_OBTENER_PRENDAS = "{% url 'api_obtener_prendas' %}";
+</script>
+
+<script src="{% static 'js/prendas_renta.js' %}"></script>
 
 <link rel="stylesheet" href="{% static 'css/prendas_renta.css' %}">
 
-<script src="{% static 'js/prendas_renta.js' %}"></script>
 
 {% endblock %}

@@ -41,7 +41,7 @@ urlpatterns = [
     path('signin/', views.signin, name='signin'),
     path('logout/', views.signout, name='logout'),
     path('activar/<uidb64>/<token>/', views.activar, name='activar'),
-    path('restablecer_password/', login_required(views.signup), name='signup'),
+    path('restablecer_password', login_required(views.signup), name='signup'),
     path('condiciones/', views.condiciones, name='condiciones'),
     path('soporte/',login_required(views.soporte), name='soporte'),
     path('cambiar-password-inicial/',login_required(views.cambiar_password_inicial),name='cambiar_password_inicial'),
@@ -74,7 +74,7 @@ urlpatterns = [
 
     # --- 👕 MÓDULO ROPA ---
     path('formulario/', user_passes_test(es_administracion)(views.formulario), name='formulario'),
-    path('prendas-renta/', login_required(views.prendas_renta), name='prendas_renta'),
+    path('prendas_renta/', login_required(views.prendas_renta), name='prendas_renta'),
     path('api/guardar-prenda/', user_passes_test(es_coordinacion)(views.api_guardar_prenda), name='api_guardar_prenda'),
     path('api/apartar-prenda/<int:prenda_id>/', login_required(views.api_apartar_prenda), name='api_apartar_prenda'),
     path('liberar-reserva/<int:reserva_id>/', login_required(views.liberar_reserva), name='liberar_reserva'),
